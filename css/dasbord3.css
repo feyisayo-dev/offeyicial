@@ -1,0 +1,197 @@
+
+.navbar {
+  overflow: hidden;
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.navbar a {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.navbar a:hover {
+  background: #ddd;
+  color: black;
+}
+
+.main {
+  padding: 16px;
+  margin-top: 30px;
+  height: auto; /* Used in this example to enable scrolling */
+
+}
+container{
+		width:65%;
+		Background-color:#fff;
+		Float:Left;
+	
+	
+	
+	
+	
+}
+
+
+* {box-sizing: border-box}
+
+/* Set height of body and the document to 100% */
+body, html {
+  /*height: Auto;*/
+  margin: 0;
+  font-family: Arial;
+  background-color: #fff;
+}
+
+/* Style tab links */
+.tablink {
+  background-color: #555;
+  color: white;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  /padding: 14px 16px;
+  font-size: 17px;
+  width: 30%;
+
+}
+
+.Asider {
+  background-color: #555;
+  color: white;
+  float: right;
+  border: none;
+  outline: none;
+  padding: 14px 16px;
+  font-size: 17px;
+  width: 15%;
+  margin-right:2%;
+  height: 600px;
+}
+
+
+.tablink:hover {
+  background-color: #777;
+}
+
+/* Style the tab content (and add height:100% for full page content) */
+.tabcontent {
+  color: black;
+  display: none;
+
+  
+  /*height: auto;*/
+}
+
+#Home {background-color: White;}
+#News {background-color: white;}
+#Contact {background-color: white;}
+
+
+* {box-sizing: border-box}
+
+/* Add padding to containers */
+.container {
+  padding: 8px;
+  border: 1px solid red;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  height:100%;
+  valign: top;
+
+}
+table{
+
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+   
+}
+
+.container_2{
+  padding: 8px;
+  border: 1px solid red;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  height:100%;
+
+   
+}
+
+/* Full-width input fields */
+input[type=text], input[type=password], input[type=email], select, option,input[type=number],input [type=file] {
+  width: 100%;
+  padding: 5px;
+  margin: 5px 0 15px 0;
+  display: inline-block;
+  border: none;
+  background: transparent;
+  color: Black;
+
+  
+ 
+}
+
+input[type=text]:focus, input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+h3{
+  color: red;
+  outline: none;
+  
+}
+
+/* Overwrite default styles of hr */
+hr {
+  border: 1px solid #f1f1f1;
+  margin-bottom: 25px;
+}
+
+/* Set a style for the submit/register button */
+.registerbtn {
+  background-color: #111;
+  color: white;
+  padding: 16px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 30%;
+  opacity: 0.9;
+  Float: Right;
+}
+
+.registerbtn:hover {
+  opacity:1;
+}
+
+/* Add a blue text color to links */
+a {
+  color: dodgerblue;
+}
+
+/* Set a grey background color and center the text of the "sign in" section */
+.signin {
+  background-color: #f1f1f1;
+  text-align: center;
+}
+.block {
+  display: block;
+  width: 20%;
+  border: none;
+  background-color: #111;
+  padding: 12px 26px;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+  color: #fff;
+}

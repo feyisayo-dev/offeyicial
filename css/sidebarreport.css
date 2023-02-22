@@ -1,0 +1,228 @@
+body {
+  font-family: "Verdana", arial, time new roman;
+}
+
+
+.navbar {
+  overflow: hidden;
+  background-color: #d52b1e;
+  position: fixed;
+  top: 0;
+  width: 100%;
+
+  border-bottom: 6px solid #000;
+  border-top: 6px solid #000;
+}
+
+.navbar a {
+  float: left;
+  display: block;
+  color: #ffffff;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.navbar a:hover {
+  background: #111;
+  color: white;
+}
+
+
+
+
+.sidenav {
+  border-right: 6px solid #d52b1e;
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #6c6f70;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+
+
+  
+
+}
+
+.sidenav a, .dropdown-btn{
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 12px;
+  text-align: justify;
+  background: none;
+  display: block;
+  border: none;
+  color: #fff;
+  border-left: 6px solid #d52b1e;
+  border-bottom: 1px solid #d52b1e;
+
+  
+}
+hr{
+border: #ccc;	
+	
+}
+
+.sidenav a:hover, .dropdown-btn:hover {
+  color: #fff;
+  display: block;
+  background-color: #d52b1e;
+  border-radius: 2px;
+  display: block;
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 10px;
+  display: block;
+  transition: 0.3s;
+
+}
+.dropdown-container {
+  display: none;
+  background-color: #111;
+  padding-left: 8px;
+}
+
+/* Optional: Style the caret down icon ---- #262626-----*/
+.fa-caret-down {
+  float: right;
+  padding-right: 8px;
+}
+
+.active {
+  background-color: #990011FF;
+  color: white;
+  display: block;
+}
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 20px;
+  margin-left: 30px;
+}
+
+.main {
+  font-size: 10px; /* Increased text to enable scrolling */
+  transition: margin-left .5s;
+  padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+header {
+background-color: #d52b1e;
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: #fff;
+  height: 100px;
+    border-bottom: 6px solid #6c6f70;
+	margin-top:20px;
+  
+}
+input[type=text], input[type=password], input[type=email], select, option,input[type=number], textarea ,input[type=date] , input[type=tel]{
+
+  padding: 5px;
+  margin: 5px 0 5px 0;
+  display: inline-block;
+  border: none;
+  background: #ccc;
+  color: Black;
+  font-size: 12px;
+  Border-radius: 10px;
+  
+ 
+}
+
+
+table {
+  border-collapse: collapse;
+  top-margin: 0px;
+
+  
+}
+th, td {
+  text-align: left;
+  padding: 5px;
+
+}
+
+tr:nth-child(even) {
+  background-color: #fff;
+}
+
+th{
+	
+  background-color: #990011FF;	
+  color:white;
+    padding: 5px;
+  
+	
+}
+.block {
+  display: block;
+  width: 130px;
+  border: none;
+  background-color: #00A859;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  color: #fff;
+}
+.block:hover{
+	display: block;
+	border: none;
+    background-color: #990011FF;
+	color: #fff;
+	text-align: center;
+}
+
+
+.block2 {
+  display: block;
+  width: 130px;
+  border: none;
+  background-color: #3E4095;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  color: #fff;
+}
+.block2:hover{
+	display: block;
+	border: none;
+    background-color: #000;
+	color: #fff;
+	text-align: center;
+}
+
+//Legend {
+  background-color: #fff;
+  border: none;
+  color: #000;
+  padding: 20px;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 8px;
+  margin: 4px 2px;
+  border-radius: 100%;
+  border:2px solid  #990011FF;
+  
+}
+fieldset {
+	border:2px solid  #990011FF;
+}

@@ -1,0 +1,204 @@
+Customer ID	Customer Name	'MISCODE'	Branch Code	Account Officer
+021000455      	FATIMA BABATUNDE SAID                                              	MIS CODE	00002	001
+021000464      	YEMI ADEOYE                                                        	MIS CODE	00002	005
+021000465      	GBOYEGA SEGUN ADEOYE                                               	MIS CODE	00002	012
+021000466      	BISI RUTH YUSUF                                                    	MIS CODE	00003	001
+021000467      	CHARLES NKEREUWEM                                                  	MIS CODE	00002	005
+021000452      	HADIZA MUHAMMAD USMAN USMAN                                        	MIS CODE	00002	011
+021000468      	ABYD NIG LTD                                                       	MIS CODE	00003	001
+021000469      	YUMUFAY ENTERPRISES                                                	MIS CODE	00003	001
+021000471      	JABI EBIKE GISHIRI                                                 	MIS CODE	00001	001
+021000472      	AMI ARAOLU                                                         	MIS CODE	00002	005
+021000451      	CHIBUIKE REGINALD NWOSU DONE                                       	MIS CODE	00001	001
+021000459      	MUSA SHEHU YUSUF                                                   	MIS CODE	00003	001
+021000470      	CHINENYE JULIET OKORO                                              	MIS CODE	00003	012
+021000473      	IFIXIT DOT COM                                                     	MIS CODE	00002	005
+021000474      	SHERIFF AUDU IDI                                                   	MIS CODE	00001	001
+021000453      	MUSTAPHA AND SON NIG LTD                                           	MIS CODE	00002	011
+021000454      	SAHEED ADELUOLA YINKA EKEOLERE                                     	MIS CODE	00003	001
+021000461      	DOYIN ADEPOJU                                                      	MIS CODE	00002	011
+021000462      	NIGPRENEUR NIG LTD                                                 	MIS CODE	00002	005
+021000463      	MUSA SHEHU YUSUF OK                                                	MIS CODE	00003	001
+021000450      	OLARINDE ARAGA                                                     	MIS CODE	00002	002
+021000456      	FIRM BANK                                                          	MIS CODE	00001	001
+021000457      	ONONS ONONLENMEN OSINMEN                                           	MIS CODE	00002	013
+021000458      	KINGSLEY CHINEDU                                                   	MIS CODE	00003	005
+021000460      	UBA BANK                                                           	MIS CODE	00002	001
+021000477      	SAHEED ADELUOLA EKEOLERE                                           	MIS CODE	00003	001
+021000483      	UCHENNA KINGSLEY NJOKU                                             	MIS CODE	00002	012
+021000475      	HAMID JODA                                                         	MIS CODE	00001	001
+021000481      	CHINELO JANE OKADIGBO                                              	MIS CODE	00002	012
+021000478      	TEST-JASPER GASKOLI TEST                                           	MIS CODE	00002	002
+021000482      	TAJ BANK LTD                                                       	MIS CODE	00002	005
+021000476      	SHEHU IBRAHIM                                                      	MIS CODE	00003	013
+021000479      	AMIOLU ARADOLU                                                     	MIS CODE	00002	005
+021000480      	YORUBA HAUSA IBO                                                   	MIS CODE	00003	013
+021000486      	SHERIF IDI                                                         	MIS CODE	00003	013
+021000487      	LOUIS MARIAM ADAMU                                                 	MIS CODE	00002	005
+021000492      	ONYEMA REGINALD AHANAONU                                           	MIS CODE	00002	012
+021000501      	IB YUSUF INTERNATIONAL                                             	MIS CODE	00002	016
+021000507      	OLUDARE ARE DANIELS                                                	MIS CODE	00002	005
+021000488      	MYRA EIZA IVIE OCHU                                                	MIS CODE	00003	013
+021000499      	TOMSEY NIG LTD                                                     	MIS CODE	00002	005
+021000508      	SHOLA SALAWI                                                       	MIS CODE	00003	013
+021000509      	CHINENYE JULIET SERGE                                              	MIS CODE	00003	013
+021000510      	JOHNSON JERRY TOPE                                                 	MIS CODE	00003	013
+021000511      	SULE ISA                                                           	MIS CODE	00003	013
+021000493      	JOHNSON OBEYA                                                      	MIS CODE	00001	001
+021000495      	OLABISI YINKA YUSUF                                                	MIS CODE	00003	001
+021000497      	AMADA LINDA OKORO                                                  	MIS CODE	00003	001
+021000502      	GOLDSTONE                                                          	MIS CODE	00001	001
+021000512      	IBRAHIM IBRAHIM                                                    	MIS CODE	00003	013
+021000490      	H&H EVENTS                                                         	MIS CODE	00003	013
+021000500      	RASHTECH COMPUTERS LTD                                             	MIS CODE	00001	002
+021000503      	EKESON AND SONS                                                    	MIS CODE	00002	012
+021000513      	SULE ISA                                                           	MIS CODE	00003	013
+021000514      	ABASIYA AND CO                                                     	MIS CODE	00003	013
+021000484      	YUSUF ADEALE SANUSI                                                	MIS CODE	00003	001
+021000485      	BOLAJI TAOREED AJUMOBI                                             	MIS CODE	00003	001
+021000496      	JERRY GARNET ONALO PRINCE                                          	MIS CODE	00001	001
+021000504      	TESLEEM OLAJUWON ISA AKOSILE                                       	MIS CODE	00003	013
+021000505      	AJIBOLA SODIQ BAKARE                                               	MIS CODE	00003	013
+021000489      	GIBSON ONYENEKWU OJOBO                                             	MIS CODE	00003	002
+021000491      	ABBA KABIR YUSUF                                                   	MIS CODE	00003	011
+021000494      	AMATURRAHMAN IBRAHIM YUSUF ADAMU                                   	MIS CODE	00002	016
+021000498      	SOO LIMITED                                                        	MIS CODE	00003	013
+021000506      	AMAKA SERGE NJIMEFOR                                               	MIS CODE	00003	013
+021000520      	ENIOLA SAHEED                                                      	MIS CODE	00002	005
+021000522      	IBRAHIM YUSUF ADAMU                                                	MIS CODE	00002	016
+021000529      	MGBECHI VIOLET OKORO                                               	MIS CODE	00002	012
+021000541      	SAHEED EKEOLERE                                                    	MIS CODE	00003	016
+021000548      	OGBENI ONNONS SHAKIRU                                              	MIS CODE	00002	001
+021000549      	EMEA CHARLES NJOKU                                                 	MIS CODE	00002	012
+021000515      	JULIET SHAKIRU                                                     	MIS CODE	00003	013
+021000517      	WILLIAMS OBEYA                                                     	MIS CODE	00001	001
+021000524      	HASSAN YUSUF                                                       	MIS CODE	00002	016
+021000531      	SAKIRU DEKOLA SALAU                                                	MIS CODE	00002	013
+021000544      	CHIBUNDU HENRY NWANERI                                             	MIS CODE	00002	012
+021000552      	FATIMA AMINA YARADUA                                               	MIS CODE	00002	012
+021000526      	TEST TEST                                                          	MIS CODE	00003	013
+021000553      	EBUKA DANIEL NWANKWO                                               	MIS CODE	00002	012
+021000554      	UGOCHUKWU VICTOR KANU                                              	MIS CODE	00002	012
+021000555      	OKPE JOHNSON                                                       	MIS CODE	00002	001
+021000556      	ADELE WASIU BOLA                                                   	MIS CODE	00002	001
+021000557      	ADEOYE MAGNUS KOLAPO                                               	MIS CODE	00002	001
+021000518      	JERRY GARNET PRINCE ONALO                                          	MIS CODE	00003	001
+021000530      	BOUTEKAH SOFFIANE                                                  	MIS CODE	00002	013
+021000534      	MUSTY&DEKOLA INCORPORATED                                          	MIS CODE	00002	013
+021000535      	ADAM ALKALI                                                        	MIS CODE	00002	013
+021000536      	IBRAHIM ALKALI                                                     	MIS CODE	00002	013
+021000537      	HAFIZ BELLO                                                        	MIS CODE	00002	013
+021000538      	MUNIRAH BINJI                                                      	MIS CODE	00002	013
+021000540      	NKOLI MARIAN OGWA                                                  	MIS CODE	00002	012
+021000546      	SOJI RICHARD OLAGUNJU                                              	MIS CODE	00002	012
+021000547      	AMAKA REGINA OGWU                                                  	MIS CODE	00002	012
+021000550      	WALE ADELEKE WASIU                                                 	MIS CODE	00002	001
+021000551      	MUSA AKEEM YARADUA                                                 	MIS CODE	00002	012
+021000516      	CHIDINMA JULIET ABARA                                              	MIS CODE	00002	012
+021000521      	HAMID JODA                                                         	MIS CODE	00003	013
+021000523      	NJIMEFOR BILODEAU SERGE                                            	MIS CODE	00003	013
+021000525      	SAMIATU RASHEED                                                    	MIS CODE	00002	016
+021000528      	CHINENYE JULIET AHANAONU                                           	MIS CODE	00002	012
+021000532      	MARYAM AISHA EHICHEOYA                                             	MIS CODE	00002	013
+021000519      	OBEYA W WILLIAMS                                                   	MIS CODE	00001	001
+021000533      	JEREMIAH AND AISHA ONALO                                           	MIS CODE	00002	013
+021000539      	MUSA MUSA                                                          	MIS CODE	00002	013
+021000542      	BISOLA CLEMENTINA OLAGUNJU                                         	MIS CODE	00002	012
+021000543      	GODSWILL UCHE FREEBORN                                             	MIS CODE	00002	001
+021000545      	JOHNSON EBUN                                                       	MIS CODE	00002	001
+021000575      	OBEYA ITODO CECILIA                                                	MIS CODE	00002	001
+021000577      	MOSES OSAGIE                                                       	MIS CODE	00002	001
+021000583      	AISHA AMINU AYMAN                                                  	MIS CODE	00002	002
+021000586      	GWASKA NIG LTD                                                     	MIS CODE	00002	002
+021000591      	JITODO AND SONS                                                    	MIS CODE	00002	001
+021000596      	FIRST LAST NAME                                                    	MIS CODE	00001	011
+021000558      	IGWE CHIDI MATTTHEW                                                	MIS CODE	00002	001
+021000559      	OSHE OLA BABATUNDE                                                 	MIS CODE	00002	001
+021000600      	RETURN556                                                          	MIS CODE	00003	001
+021000601      	RETURN556                                                          	MIS CODE	00003	001
+021000602      	RETURN556                                                          	MIS CODE	00003	001
+021000603      	RETURN556                                                          	MIS CODE	00003	001
+021000560      	OGBONNA BRIGHT IGWE                                                	MIS CODE	00002	001
+021000561      	ABEL AYO WASIU                                                     	MIS CODE	00002	001
+021000562      	ONATE AUDU UKWUBILE                                                	MIS CODE	00002	001
+021000563      	ROLAND AMOS KELLY                                                  	MIS CODE	00002	001
+021000566      	AKU ANDZA PEACE                                                    	MIS CODE	00002	001
+021000567      	INNOSON AND SONS LTD                                               	MIS CODE	00002	012
+021000576      	AHMED DANGOTE USMAN                                                	MIS CODE	00003	013
+021000579      	OBEYA ITODO                                                        	MIS CODE	00002	001
+021000581      	ZAINAB SAHEED                                                      	MIS CODE	00003	013
+021000587      	ELSHAMS GLBAL CONCEPT                                              	MIS CODE	00003	018
+021000565      	SEVEN UP BOTTLING CO PLC                                           	MIS CODE	00002	012
+021000585      	INNO OKORO AND SONS                                                	MIS CODE	00002	012
+021000588      	OBEYA J AND CO                                                     	MIS CODE	00002	001
+021000589      	ABUIO NIG LTD                                                      	MIS CODE	00003	013
+021000592      	APOS GODSWILL                                                      	MIS CODE	00003	003
+021000594      	HAMZ556                                                            	MIS CODE	00002	001
+021000570      	ELIZABETH TAYLOR                                                   	MIS CODE	00003	013
+021000574      	NNAMDI GODIAN OKORO                                                	MIS CODE	00002	012
+021000578      	IBRAHIM ABUBAKAR                                                   	MIS CODE	00003	018
+021000580      	AISHA RILWAN BASHIR                                                	MIS CODE	00001	010
+021000593      	FEMI ADEBAYO                                                       	MIS CODE	00002	001
+021000595      	HAMZ556                                                            	MIS CODE	00003	001
+021000582      	TRACY OVIE                                                         	MIS CODE	00002	001
+021000584      	MUSTY NIG LTD                                                      	MIS CODE	00002	001
+021000590      	MANCHESTER UNITED                                                  	MIS CODE	00003	013
+021000597      	HAMZ556                                                            	MIS CODE	00003	001
+021000598      	RETURN556                                                          	MIS CODE	00003	001
+021000599      	RETURN556                                                          	MIS CODE	00003	001
+021000564      	JOE JOE                                                            	MIS CODE	00003	013
+021000568      	AUTOPAY TEST ACCOUNT                                               	MIS CODE	00002	012
+021000569      	BILODEAU NJI                                                       	MIS CODE	00003	013
+021000571      	OMOROSEGBE OSARO DENNIS                                            	MIS CODE	00003	013
+021000572      	RASHFORD DEGEA LINGARD                                             	MIS CODE	00003	013
+021000573      	BOND JAMES                                                         	MIS CODE	00003	013
+021000604      	RETURN556                                                          	MIS CODE	00003	001
+021000607      	VINCENT MADUWAYE                                                   	MIS CODE	00001	001
+021000635      	RETURN 1                                                           	MIS CODE	00003	001
+021000636      	RETURN 1                                                           	MIS CODE	00003	001
+021000637      	RETURN 1                                                           	MIS CODE	00003	001
+021000644      	NNEOMA OKORO                                                       	MIS CODE	00003	001
+021000605      	VINCENT MADUWAYE                                                   	MIS CODE	00001	001
+021000609      	RETURN 1                                                           	MIS CODE	00003	001
+021000610      	RETURN 1                                                           	MIS CODE	00003	001
+021000621      	RETURN 1                                                           	MIS CODE	00003	001
+021000622      	RETURN 1                                                           	MIS CODE	00003	001
+021000628      	RETURN 1                                                           	MIS CODE	00003	001
+021000606      	VINCENT MADUWAYE                                                   	MIS CODE	00001	001
+021000630      	RETURN 1                                                           	MIS CODE	00003	001
+021000631      	RETURN 1                                                           	MIS CODE	00003	001
+021000632      	IBRAHIM MUHAMMED                                                   	MIS CODE	00002	005
+021000634      	RETURN 1                                                           	MIS CODE	00003	001
+021000645      	NNEOMA OKORO                                                       	MIS CODE	00003	001
+021000614      	RETURN 1                                                           	MIS CODE	00003	001
+021000615      	RETURN 1                                                           	MIS CODE	00003	001
+021000616      	RETURN 1                                                           	MIS CODE	00003	001
+021000617      	RETURN 1                                                           	MIS CODE	00003	001
+021000618      	RETURN 1                                                           	MIS CODE	00003	001
+021000623      	RETURN 1                                                           	MIS CODE	00003	001
+021000619      	RETURN 1                                                           	MIS CODE	00003	001
+021000620      	RETURN 1                                                           	MIS CODE	00003	001
+021000624      	RETURN 1                                                           	MIS CODE	00003	001
+021000625      	RETURN 1                                                           	MIS CODE	00003	001
+021000626      	RETURN 1                                                           	MIS CODE	00003	001
+021000627      	TERITELLER LIMITED                                                 	MIS CODE	00002	005
+021000608      	RETURN 1                                                           	MIS CODE	00003	001
+021000611      	RETURN 1                                                           	MIS CODE	00003	001
+021000612      	RETURN 1                                                           	MIS CODE	00003	001
+021000613      	RETURN 1                                                           	MIS CODE	00003	001
+021000629      	OLARINDE AND OLUFUNKE ARAGA                                        	MIS CODE	00002	005
+021000633      	PRINT PROPERTIES DRIVER                                            	MIS CODE	00003	013
+021000638      	RETURN 1                                                           	MIS CODE	00003	001
+021000639      	RETURN 1                                                           	MIS CODE	00003	001
+021000640      	RETURN 1                                                           	MIS CODE	00003	001
+021000641      	RETURN 1                                                           	MIS CODE	00003	001
+021000642      	OCHU AND SONS                                                      	MIS CODE	00003	002
+021000643      	RETURN 1                                                           	MIS CODE	00003	001
+021000647      	BOLT LTD                                                           	MIS CODE	00003	013
+021000648      	NNEOMA ABOKII                                                      	MIS CODE	00003	001
+021000649      	FLORENCE AYENI                                                     	MIS CODE	00003	001
+021000650      	FLOWER AYENI                                                       	MIS CODE	00003	001
+021000651      	FLORENCE GODSWILL                                                  	MIS CODE	00003	001
+021000646      	NNEOMA ABOKI                                                       	MIS CODE	00003	001
+021000652      	FLORENCE GODSWILL                                                  	MIS CODE	00003	001
+Customer ID	Customer Name	'MISCODE'	Branch Code	Account Officer

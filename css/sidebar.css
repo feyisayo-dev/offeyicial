@@ -1,0 +1,212 @@
+body {
+  font-family: "Verdana", arial, time new roman;
+}
+
+
+.navbar {
+  overflow: hidden;
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.navbar a {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.navbar a:hover {
+  background: #ddd;
+  color: black;
+}
+
+
+
+
+.sidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+  border-right: 6px solid #990011FF
+
+}
+
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 16px;
+  text-align: justify;
+  color: #fff;
+  border-left: 6px solid #990011FF;
+
+  
+}
+hr{
+border: #ccc;	
+	
+}
+
+.sidenav a:hover {
+  color: #fff;
+  display: block;
+  background-color: #990011FF;
+  border-radius: 2px;
+
+}
+
+.active {
+  background-color: #990011FF;
+  color: white;
+  display: block;
+}
+
+.main {
+  margin-left: 160px; /* Same as the width of the sidenav */
+  font-size: 12px; /* Increased text to enable scrolling */
+  padding: 0px 10px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+header {
+background-color: red;
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: #fff;
+  height: 80px;
+  
+}
+input[type=text], input[type=password], input[type=email], select, option,input[type=number], textarea{
+
+  padding: 1px;
+  margin: 1px 0 1px 0;
+  display: inline-block;
+  border: none;
+  background: transparent;
+  color: Black;
+   font-size: 12px;
+  
+ 
+}
+
+
+table {
+  border-collapse: collapse;
+  top-margin: 0px;
+
+  
+}
+th, td {
+  text-align: left;
+  padding: 2px;
+
+
+}
+
+tr:nth-child(even) {
+  background-color: #Fff;
+}
+
+th{
+	
+  background-color: #990011FF;	
+  color:white;
+    padding: 5px;
+  
+	
+}
+.block {
+  display: block;
+  width: 100px;
+  border: none;
+  background-color: #00A859;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  color: #fff;
+}
+.block:hover{
+	display: block;
+	border: none;
+    background-color: #990011FF;
+	color: #fff;
+	text-align: center;
+}
+
+
+.block2 {
+  display: block;
+  width: 100px;
+  border: none;
+  background-color: #3E4095;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  color: #fff;
+}
+.block2:hover{
+	display: block;
+	border: none;
+    background-color: #000;
+	color: #fff;
+	text-align: center;
+}
+.accordion {
+  background-color: #222;
+  color: #fff;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+.active, .accordion:hover {
+  background-color: #990011FF; 
+}
+
+.panel {
+  padding: 0 18px;
+  display: none;
+  background-color: white;
+  overflow: hidden;
+}
+@media only screen and (max-width:800px) {
+  /* For tablets: */
+  .main {
+    width: 80%;
+    padding: 0;
+  }
+  .right {
+    width: 100%;
+  }
+}
+@media only screen and (max-width:500px) {
+  /* For mobile phones: */
+  .menu, .main, .right {
+    width: 100%;
+  }
+}

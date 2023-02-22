@@ -1,0 +1,288 @@
+body {
+  font-family: "Verdana", arial, time new roman;
+}
+
+
+.navbar {
+  overflow: hidden;
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.navbar a {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.navbar a:hover {
+  background: #ddd;
+  color: black;
+}
+
+
+
+
+.sidenav {
+  border-right: 6px solid #990011FF;
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #0638a8;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+
+
+  
+
+}
+
+.sidenav a, .dropdown-btn{
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 12px;
+  text-align: justify;
+  background: none;
+  display: block;
+  border: none;
+  color: #fff;
+  border-left: 6px solid #990011FF;
+
+  
+}
+hr{
+border: #ccc;	
+	
+}
+
+.sidenav a:hover, .dropdown-btn:hover {
+  color: #fff;
+  display: block;
+  background-color: #990011FF;
+  border-radius: 2px;
+    display: block;
+  
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 10px;
+  display: block;
+  transition: 0.3s;
+
+}
+.dropdown-container {
+  display: none;
+  background-color: #111;
+  padding-left: 8px;
+}
+
+/* Optional: Style the caret down icon ---- #262626-----*/
+.fa-caret-down {
+  float: right;
+  padding-right: 8px;
+}
+
+.active {
+  background-color: #990011FF;
+  color: white;
+  display: block;
+}
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+.main {
+  font-size: 10px; /* Increased text to enable scrolling */
+  transition: margin-left .5s;
+  padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+header {
+background-color: red;
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: #fff;
+  height: 80px;
+  
+}
+input[type=text], input[type=password], input[type=email], select, option,input[type=number], textarea ,input[type=date] , input[type=tel] datalist, input[list]{
+
+  padding: 10px;
+  margin: 5px 0 5px 0;
+  display: inline-block;
+  border: 1px Solid #2d6187;
+  background: #d2f5e3;
+  color: Black;
+  font-size: 14px;
+  Border-radius: 0px;
+  width:90%; 
+  resize: vertical;
+  
+ 
+}
+
+
+table {
+  border-collapse: collapse;
+  top-margin: 0px;
+
+  
+}
+th, td {
+  text-align: left;
+  padding: 5px;
+
+}
+
+tr:nth-child(even) {
+  background-color: #fff;
+}
+
+th{
+	
+  background-color: #990011FF;	
+  color:white;
+    padding: 5px;
+  
+	
+}
+.blocks {
+  display: block;
+  width: 130px;
+  border: none;
+  background-color: orange;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  color: #fff;
+}
+.blocks:hover{
+	display: block;
+	border: none;
+    background-color: #000;
+	color: #fff;
+	text-align: center;
+}
+
+
+.block2 {
+  display: block;
+  width: 130px;
+  border: none;
+  background-color: brown;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+  color: #fff;
+}
+.block2:hover{
+	display: block;
+	border: none;
+    background-color: #000;
+	color: #fff;
+	text-align: center;
+}
+
+.Legend {
+  background-color: #fff;
+  border: none;
+  color: #000;
+  padding: 20px;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 8px;
+  margin: 4px 2px;
+  border-radius: 100%;
+  border:2px solid  #990011FF;
+  
+}
+fieldset {
+	border:2px solid  #990011FF;
+}
+.button, .block  {
+  position: relative;
+  background-color: #4CAF50;
+  border: none;
+  font-size: 15px;
+  color: #FFFFFF;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+  transition-duration: 0.4s;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+.buttonr, .block2 {
+  position: relative;
+  background-color: #8c0000;
+  border: none;
+  font-size: 15px;
+  color: #FFFFFF;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+  transition-duration: 0.4s;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+.buttond, .blocks  {
+  position: relative;
+  background-color: #28527a;
+  border: none;
+  font-size: 15px;
+  color: #FFFFFF;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+  transition-duration: 0.4s;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+.button:after, .buttonr:after, .buttond:after, .block:after{
+  content: "";
+  background: #f1f1f1;
+  display: block;
+  position: absolute;
+  padding-top: 300%;
+  padding-left: 350%;
+  margin-left: -20px !important;
+  margin-top: -120%;
+  opacity: 0;
+  transition: all 0.8s;
+}
+.button:active:after, .buttonr:active:after, .buttond:active:after, .block:active:after {
+  padding: 0;
+  margin: 0;
+  opacity: 1;
+  transition: 0s
+}
+.button:hover, .buttond:hover, .buttonr:hover, .block:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
