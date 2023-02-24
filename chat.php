@@ -23,6 +23,8 @@ if (!isset($_SESSION['loggedin'])) {
         <link rel="stylesheet" href="css\all.min.css">
         <link rel="stylesheet" href="css\font\bootstrap-icons.css">
         <link rel="stylesheet" href="css\boostrap-icons">
+        <link rel="stylesheet" href="css\fontawesome.min-icons">
+
 
 
         <style>

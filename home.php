@@ -9,7 +9,7 @@
     <title>HOME</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-beta2/css/bootstrap.min.css" integrity="sha384-oi8o31xSQq8S0RpBcbviIyZF66lZF79dtW1nUSt2FU5ZBD3P2fI9X5Rzf5G1YPa" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
 
 
   <link rel="icon" href="img/offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
