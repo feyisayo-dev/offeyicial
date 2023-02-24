@@ -174,12 +174,7 @@
                 width: 100%;
             }
         }
-        
-        h2,
-        p {
-            /* color: white; */
-        }
-        
+                
         p {
             font-size: 30px;
         }
@@ -191,7 +186,7 @@
             margin: 10px auto;
             border: 10px solid #ccc;
             border-radius: 50%;
-            align: center;
+            align-items: center;
         }
     </style>
 </head>
