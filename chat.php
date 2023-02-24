@@ -23,7 +23,7 @@ if (!isset($_SESSION['loggedin'])) {
         <link rel="stylesheet" href="css\all.min.css">
         <link rel="stylesheet" href="css\font\bootstrap-icons.css">
         <link rel="stylesheet" href="css\boostrap-icons">
-        <link rel="stylesheet" href="css\fontawesome.min-icons">
+        <link rel="stylesheet" href="css\fontawesome.min.css">
 
 
 
@@ -170,6 +170,17 @@ if (!isset($_SESSION['loggedin'])) {
                 background: auto;
                 border: 4px;
             }
+            .image-input {
+          opacity: 0;
+          position: absolute;
+          pointer-events: none;
+        }
+
+        .custom-file-label {
+          cursor: pointer;
+          color :green;
+        }
+
         </style>
     </head>
 
@@ -245,16 +256,14 @@ $query = "select * FROM chats ORDER BY chatId DESC";
 $result = sqlsrv_query($conn, $query);
 
 while ($row = sqlsrv_fetch_array($result)) {
-    $UserId = $row['UserId'];
-    $recipientId = $row['recipientId'];
     $senderId = $row['senderId'];
     $message = $row['Sent'];
 
-    echo '<li class="' . ($senderId == $UserId ? 'Sent' : 'received') . '">';
+    echo '<li class="' . ($senderId == $UserId ? 'Sent' : 'recieved') . '">';
     echo '<p>' . $message . '</p>';
-    echo '<div class="message-sender">' . ($senderId == $UserId ? $Surname . ' ' . $First_Name : $recipientSurname . ' ' . $recipientFirstName) . '</div>';
     echo '</li>';
 }
+
 
 ?>
 
@@ -262,15 +271,27 @@ while ($row = sqlsrv_fetch_array($result)) {
         <br><br>
         <div class="form-group">
             <textarea class="form-control" id="message" rows="3"></textarea>
-            <div class="image-icon">
-                <!-- <i class="bi-file-image"></i> -->
-                <input type="file" class="image-input" accept="image/*" />
+            <div class="custom-file">
+              <input type="file" class="image-input" id="image" name="image" accept="image/*">
+              <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Image</label>
             </div>
             <button type="submit" class="submit">Send</button>
         </div>
 
         </div>
         <script src="js/jquery.min.js"></script>
+        <script>
+                  $('.custom-file-label').on('click', function() {
+        $(this).siblings('.image-input').trigger('click');
+      });
+
+      $('.image-input').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
+      });
+
+    </script> 
+        </script>
 
         <script>
             $(document).ready(function() {

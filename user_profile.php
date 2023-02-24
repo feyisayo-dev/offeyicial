@@ -207,6 +207,13 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                         /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); */
                         grid-gap: 20px;
                     }
+                    .title{
+                        color: white;
+                        text-transform: uppercase;
+                        font-family: arial; 
+                        background-color:#6c757d;
+                        width: 50%;
+                    }
                 </style>
             </head>
 
@@ -281,7 +288,7 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                             <h3 style="text-align: center; color:green; text-transform: uppercase;" >Posts</h3>
                             <div class="posts">
 	      <div class="post">
-		  <h3 style="text-transform: uppercase; font-family: arial; background-color:green;"><?php echo   $title;?></h3>
+		  <h3 class="title"><?php echo   $title;?></h3>
 		  <!-- <div class="grid-container">
             <div class="grid-item">
                 <img src="<?php echo $image; ?>">
