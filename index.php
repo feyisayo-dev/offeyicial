@@ -97,6 +97,10 @@ margin-left: 10px;
     padding: 10px;
     
 }
+iframe{
+    width: 390px;
+    height: 390px;
+}
 .navbar-nav a {
             font-size: 15px;
             text-transform: uppercase;

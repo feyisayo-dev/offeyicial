@@ -9,7 +9,7 @@ if (!isset($_SESSION['loggedin'])) {
 <?php
 // echo $recipientId=$_GET["UserIdx"];
 // echo $UserId = $_GET['UserId'];
-session_start();
+// session_start();
 
 
 ?>
