@@ -98,7 +98,7 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                 <link rel="stylesheet" href="css/all.min.css" />
                 <link href="css/bootstrap.min.css" rel="stylesheet">
                 <link rel="stylesheet" href="css\font\bootstrap-icons.css">
-  <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+                <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
 
                 <style>
                     .user-profile {
