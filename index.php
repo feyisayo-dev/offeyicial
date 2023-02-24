@@ -150,7 +150,7 @@ iframe{
                                 <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="logout.php"></i>Logout</a>
+                                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i></a>
                             </li>
 
         </div>
