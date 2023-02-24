@@ -194,14 +194,14 @@ $UserId = $_SESSION['UserId'];
                     <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                 </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link"onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'">Search</a>
+				<a class="nav-link custom-link"onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-search"></i>Search</a>
                 </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'">Profile</a>
+				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-person"></i>Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
-                </li>
+                                <a class="nav-link custom-link" onclick="window.location.href='index.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+                            </li>
 
         </div>
     </nav>

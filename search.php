@@ -8,7 +8,7 @@ $UserId = $_SESSION['UserId'];
 <html>
     <head>
         <title>
-            Search
+        Search
         </title>
         <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -116,10 +116,13 @@ $(document).ready(function(){
                     <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                 </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link"onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'">Add a Post</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='index.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+                            </li>
+                <li class="nav-item">
+				<a class="nav-link custom-link"onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-plus-square"></i>Add a Post</a>
                 </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'">Profile</a>
+				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-person"></i>Profile</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>

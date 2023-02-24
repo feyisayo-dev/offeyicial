@@ -201,7 +201,7 @@ echo $Surname . " " . $First_Name;
 ?>
 
 
-                <a href="user_profile.php?UserId=<?php echo $_SESSION['UserId']; ?>">Profile</a>
+                <a href="user_profile.php?UserId=<?php echo $_SESSION['UserId']; ?>"><i class="bi bi-person"></i>Profile</a>
 
 
         </nav>

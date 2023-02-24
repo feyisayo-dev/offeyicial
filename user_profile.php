@@ -223,13 +223,13 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                                 <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='index.php?UserId=<?php echo $UserId; ?>'"></i>NEWS-FEED</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='index.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'">Add a Post</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-plus-square"></i>Add a Post</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'">Search Chat</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-search"></i>Search Chat</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
