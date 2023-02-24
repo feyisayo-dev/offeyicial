@@ -4,7 +4,7 @@
 <head>
     <title>Offeyicial</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/all.min.css" />
     <script src="js/jquery.min.js"></script>
     <script src="country-states.js"></script>
     <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />

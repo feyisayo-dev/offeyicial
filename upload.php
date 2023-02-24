@@ -20,6 +20,7 @@ $UserId = $_SESSION['UserId'];
         </title>
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css\font\bootstrap-icons.css">
   <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
   <script src="js/jquery.min.js"></script>
   <script src="country-states.js"></script>
@@ -92,7 +93,7 @@ $UserId = $_SESSION['UserId'];
       .custom-body label {
         font-size: 1.2rem;
         font-weight: 600;
-        color: white;
+        color:white;
       }
 
       .custom-body input,
@@ -176,9 +177,18 @@ $UserId = $_SESSION['UserId'];
             color: #000;
         }
         .custom-link {
-  text-decoration: none;
-  cursor: pointer;
-}
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .custom-file-input {
+          opacity: 0;
+          position: absolute;
+          pointer-events: none;
+        }
+
+        .custom-file-label {
+          cursor: pointer;
+        }
 
         </style>
     </head>
@@ -218,20 +228,31 @@ $UserId = $_SESSION['UserId'];
                 <label for="content">Content:</label>
                 <textarea id="content" name="content"></textarea>
             </div>
-            <div class="form-group">
-                <label for="image">Image:</label>
-                <input type="file" id="image" name="image" accept="image/*">
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="image" name="image" accept="image/*">
+              <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Image</label>
             </div>
-            <div class="form-group">
-  <label for="video">Video:</label>
-  <input type="file" id="video" name="video" accept="video/*">
-</div>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
+              <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
+            </div>
 
             <input type="submit" value="Add Post" class="submit">
             <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'">
         </div>
     </body>
-    <script src="js/jquery.min.js"></script>  
+    <script src="js/jquery.min.js"></script> 
+    <script>
+      $('.custom-file-label').on('click', function() {
+        $(this).siblings('.custom-file-input').trigger('click');
+      });
+
+      $('.custom-file-input').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
+      });
+
+    </script> 
 
 <script>
 $(document).ready(function(){
