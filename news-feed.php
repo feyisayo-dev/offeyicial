@@ -27,9 +27,12 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
   } else {
       $time_ago = $interval->s . " seconds ago";
   }
+  echo '<div class= "post">';
   echo '<div class="news-feed-post">';
+  echo '<div class="post-header">';
   echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
   echo '<p class="post-author">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>';
+  echo '</div>';
   echo '<h2 class="post-title">' . $row['title'] . '</h2>';
   echo '<p class="post-content">' . $row['content'] . '</p>';
   if (!empty($row['image'])) {
@@ -41,6 +44,12 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
   echo '<p class="post-date">' . $time_ago . '</p>';
   echo '</div>';
+  echo '<div class="post-footer">';
+  echo '<button>' . 'Like' . '</button>';
+  echo '<button>' . 'Comment' . '</button>';
+  echo '<button>' . 'Share' . '</button>';
+echo '</div>';
+echo '</div>';
   
 }
 

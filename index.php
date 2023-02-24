@@ -15,92 +15,126 @@ include ('db.php');
 <head>
   <title>News Feed</title>
   <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css\font\bootstrap-icons.css">
+
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
   <style>
-.news-feed-container {
-width: 80%;
-margin: 50px auto;
-background: #fafafa;
-border-radius: 10px;
-box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.post {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 10px;
+  border: 1px solid #ddd;
+  padding: 10px;
 }
 
-.news-feed-item {
-display: flex;
-flex-direction: column;
-align-items: center;
-margin: 30px 0;
-padding: 30px;
-background: #fff;
-border-radius: 10px;
-box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.post-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
 }
 
 .UserPassport {
-width: 50px;
-height: 50px;
-border-radius: 50%;
-margin-bottom: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 .post-author {
-font-family: "Montserrat", sans-serif;
-font-size: 20px;
-font-weight: bold;
-color: #333;
-margin-bottom: 20px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #1877f2;
 }
 
-.news-title {
-font-size: 24px;
-font-weight: bold;
-color: #333;
-margin-bottom: 20px;
-text-align: center;
+.post-title {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1c1e21;
+  margin: 10px 0;
 }
 
-.news-date {
-font-style: italic;
-color: #777;
-margin-bottom: 20px;
-text-align: center;
+.post-content {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #1c1e21;
+  line-height: 1.5;
+  margin-bottom: 10px;
 }
 
-.news-content {
-line-height: 1.5;
-color: #333;
-margin-bottom: 20px;
-text-align: center;
-}
-.UserPassport {
-width: 50px;
-height: 50px;
-border-radius: 50%;
-display: inline-block;
-vertical-align: top;
+.post-image, .post-video, iframe {
+  width: 100%;
+  max-width: 500px;
+  margin: 10px 0;
+  height: 500px;
 }
 
-.post-author {
-font-family: montserrat;
-color: green;
-font-size: 30px;
-display: inline-block;
-vertical-align: top;
-margin-left: 10px;
+.post-date {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  color: #90949c;
+  margin-top: 10px;
 }
-.post-video ,.post-image{
-    width: 400px;
-    height: 400px;
-    padding: 10px;
-    
+
+.post-footer {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 10px;
+  align-items: center;
 }
-iframe{
-    width: 390px;
-    height: 390px;
+
+.post-footer button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: transparent;
+  border: none;
+  color: #606770;
+  cursor: pointer;
+  font-size: 14px;
 }
+
+.post-footer button:hover {
+  text-decoration: underline;
+}
+
+.post-footer button:focus {
+  outline: none;
+}
+
+.post-footer button svg {
+  height: 16px;
+  width: 16px;
+  fill: #606770;
+}
+
+.post-footer button .count {
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.post-footer button.like svg {
+  fill: #1877f2;
+}
+
+.post-footer button.like .count {
+  color: #1877f2;
+}
+
+.post-footer button.comment svg {
+  fill: #606770;
+}
+
+.post-footer button.share svg {
+  fill: #606770;
+}
+
 .navbar-nav a {
             font-size: 15px;
             text-transform: uppercase;
@@ -150,7 +184,7 @@ iframe{
                                 <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i></a>
+                                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
                             </li>
 
         </div>
