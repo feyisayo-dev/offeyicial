@@ -81,28 +81,48 @@ if (!isset($_SESSION['loggedin'])) {
                 align-items: flex-start;
                 margin-bottom: 10px;
             }
-            
-            .Sent {
-                /* float: right; */
-                background-color: #33cabb;
-                color: white;
-                padding: 10px;
-                border-radius: 10px;
-                margin-top: 10px;
-                margin-right: 20px;
-                max-width: 60%;
-            }
-            
-            .recieved {
-                /* float: left; */
-                background-color: #e5e5e5;
-                color: black;
-                padding: 10px;
-                border-radius: 10px;
-                margin-top: 10px;
-                margin-left: 20px;
-                max-width: 60%;
-            }
+            .chatbox {
+        background-color: #f2f2f2;
+        height: calc(100vh - 200px);
+        overflow-y: scroll;
+        padding: 10px;
+    }
+    .Sent {
+        float: right;
+        background-color: #dcf8c6;
+        color: #444;
+        padding: 8px;
+        border-radius: 10px;
+        margin-top: 10px;
+        margin-left: auto;
+        max-width: 75%;
+        word-wrap: break-word;
+        clear: both;
+    }
+    .received {
+        float: left;
+        background-color: white;
+        color: #444;
+        padding: 8px;
+        border-radius: 10px;
+        margin-top: 10px;
+        margin-right: auto;
+        max-width: 75%;
+        word-wrap: break-word;
+        clear: both;
+    }
+    .image {
+        text-align: center;
+    }
+    .image img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+    .message {
+        margin-bottom: 5px;
+    }
             
             .chat-input {
                 display: flex;
@@ -149,7 +169,7 @@ if (!isset($_SESSION['loggedin'])) {
             }
             
             textarea {
-                width: 60%;
+                width: 100%;
                 height: 30px;
                 padding: 5px;
                 font-size: 16px;
@@ -248,26 +268,32 @@ if(sqlsrv_execute($stmt)){
     echo $recipientSurname . " " . $recipientFirstName;
 
 }
+    echo '</div>';
+    ?>
+    <div class="chatbox">
+    <?php
+        include 'db.php';
 
-include 'db.php';
+        $query = "SELECT * FROM chats ORDER BY chatId ASC";
+        $result = sqlsrv_query($conn, $query);
 
-$query = "select * FROM chats ORDER BY chatId DESC";
-$result = sqlsrv_query($conn, $query);
+        while ($row = sqlsrv_fetch_array($result)) {
+            $senderId = $row['senderId'];
+            $message = $row['Sent'];
+            $sent_image = $row['sentimage'];
 
-while ($row = sqlsrv_fetch_array($result)) {
-    $senderId = $row['senderId'];
-    $message = $row['Sent'];
-
-    echo '<li class="' . ($senderId == $UserId ? 'Sent' : 'recieved') . '">';
-    echo '<p>' . $message . '</p>';
-    echo '</li>';
-}
-
-
-?>
-
-        </div>
-        <br><br>
+            echo '<div class="' . ($senderId == $UserId ? 'Sent' : 'received') . '">';
+            echo '<div class="message">';
+            echo $message;
+            echo '</div>';
+            if (!empty($sent_image)) {
+                echo '<div class="image"><img src="' . $sent_image . '"></div>';
+            }
+            echo '</div>';
+        }
+    ?>
+</div>
+       <br><br>
         <div class="form-group">
             <textarea class="form-control" id="message" rows="3"></textarea>
             <div class="custom-file">
