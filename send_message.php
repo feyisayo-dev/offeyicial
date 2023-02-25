@@ -16,6 +16,8 @@ if (isset($_POST['message']) && !empty($_POST['message'])) {
 } else {
     $message = null;
 }
+$datetime = new DateTime();
+    $date_posted = $datetime->format('Y-m-d H:i:s');
 
 
 $sql = "SELECT COUNT(chatId) FROM chats";
@@ -59,8 +61,9 @@ $query = "INSERT INTO chats ([UserId]
     ,[Sent]
     ,[sentimage]
     ,[chatId]
-    ,[senderId]) 
-    VALUES ('$UserId', '$recipientId', '$message', '$sent_image', '$chatId', '$UserId')";
+    ,[senderId]
+    ,[time_sent]) 
+    VALUES ('$UserId', '$recipientId', '$message', '$sent_image', '$chatId', '$UserId', '$date_posted')";
 
 if (sqlsrv_query($conn, $query)) {
     echo "Message sent.";

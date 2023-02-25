@@ -53,6 +53,7 @@ if (!isset($_SESSION['loggedin'])) {
             
             .chat-header {
                 text-align: center;
+                /* display: flex; */
                 background-color: #04AA6D;
                 color: white;
                 padding: 10px;
@@ -63,7 +64,7 @@ if (!isset($_SESSION['loggedin'])) {
                 border-radius: 50%;
                 width: 50px;
                 height: 50px;
-                justify-items: left;
+                margin-right: 10px;
             }
             
             .chat-header h1 {
@@ -205,6 +206,36 @@ if (!isset($_SESSION['loggedin'])) {
           cursor: pointer;
           color :green;
         }
+        .icon {
+  position: relative;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -20px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: black;
+}
+
 
         </style>
     </head>
@@ -274,7 +305,8 @@ if(sqlsrv_execute($stmt)){
         $First_Name = $row['First_Name'];
     }
     echo '<img class="recipientPassport" src="UserPassport/' . $recipientPassport. '">';
-    echo $recipientSurname . " " . $recipientFirstName;
+    echo '<span class="icon">'. $recipientSurname .' '. $recipientFirstName .'</span>';
+
 
 }
     echo '</div>';
@@ -283,7 +315,7 @@ if(sqlsrv_execute($stmt)){
     <?php
         include 'db.php';
 
-        $query = "SELECT * FROM chats ORDER BY chatId ASC";
+        $query = "SELECT * FROM chats ORDER BY time_sent ASC";
         $result = sqlsrv_query($conn, $query);
 
         while ($row = sqlsrv_fetch_array($result)) {
@@ -325,6 +357,20 @@ if(sqlsrv_execute($stmt)){
       });
 
     </script> 
+        <script>
+            $(document).ready(function() {
+                // Update chatbox every 0.5 seconds
+                setInterval(function() {
+                    $.ajax({
+                        url: 'getMessages.php',
+                        type: 'GET',
+                        success: function(data) {
+                            $('.chatbox').html(data);
+                        }
+                    });
+                }, 500);
+            });
+
         </script>
 
         <script>
@@ -349,10 +395,12 @@ if(sqlsrv_execute($stmt)){
                         contentType: false,
                         success: function(response) {
                             console.log(response);
+                            $('#message').val('');
                         }
                     });
                 });
             });
+
         </script>
 
 

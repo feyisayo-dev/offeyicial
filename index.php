@@ -191,6 +191,7 @@ include ('db.php');
     </nav>
     <br><br>
 <div class="news-feed-container">
+<br>
   <?php include 'news-feed.php'; ?>
 </div>
 
