@@ -45,9 +45,9 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
   echo '<p class="post-date">' . $time_ago . '</p>';
   echo '</div>';
   echo '<div class="post-footer">';
-  echo '<button>' . 'Like' . '</button>';
-  echo '<button>' . 'Comment' . '</button>';
-  echo '<button>' . 'Share' . '</button>';
+  echo '<button>' . '<i class="bi bi-hand-thumbs-up"></i>' . 'Like' . '</button>';
+  echo '<button>' . '<i class="bi bi-chat-dots"></i>' . 'Comment' . '</button>';
+  echo '<button>' . '<i class="bi bi-share"></i>' . 'Share' . '</button>';
 echo '</div>';
 echo '</div>';
   

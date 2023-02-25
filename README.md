@@ -15,3 +15,8 @@ i fixed the error of not seeing the icons
 and now everything looks finer and also made the news feed look a little bit finer
 i will take care of the javascript of like share comment later
 i need to read for school.
+
+25/02/2023
+Taken care of chat.php and it works fine
+just need to take care of the JQuery script that brings the message real time
+and i think it is time i take care of like share and comment.

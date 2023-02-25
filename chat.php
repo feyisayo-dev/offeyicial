@@ -59,6 +59,12 @@ if (!isset($_SESSION['loggedin'])) {
                 border-top-left-radius: 10px;
                 border-top-right-radius: 10px;
             }
+            .recipientPassport{
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                justify-items: left;
+            }
             
             .chat-header h1 {
                 margin: 0;
@@ -246,12 +252,14 @@ include('db.php');
 $recipientId = $_GET['UserIdx'];
 
 // Get the name of the user you are talking to
-$sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$recipientId'";
+$sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
 $stmt = sqlsrv_prepare($conn, $sql);
 if(sqlsrv_execute($stmt)){
     while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
         $recipientSurname = $row['Surname'];
         $recipientFirstName = $row['First_Name'];
+        $recipientPassport = $row['Passport'];
+
     }
 }
 
@@ -265,6 +273,7 @@ if(sqlsrv_execute($stmt)){
         $Surname = $row['Surname'];
         $First_Name = $row['First_Name'];
     }
+    echo '<img class="recipientPassport" src="UserPassport/' . $recipientPassport. '">';
     echo $recipientSurname . " " . $recipientFirstName;
 
 }
