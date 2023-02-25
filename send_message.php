@@ -1,35 +1,35 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 include 'db.php';
 if (isset($_POST['UserId']) && isset($_POST['recipientId'])) {
     $UserId = $_POST['UserId'];
     $recipientId = $_POST['recipientId'];
     // rest of the code that uses these variables
-  } else {
+} else {
     echo "Error: UserId or recipientId parameter is missing from URL";
-  }
- 
-  
-$message = $_POST['message'];
+}
+
+if (isset($_POST['message']) && !empty($_POST['message'])) {
+    $message = $_POST['message'];
+} else {
+    $message = null;
+}
 
 
-
-$sql = "SELECT UserId FROM User_Profile WHERE UserId = $UserId OR UserId = $recipientId";
+$sql = "SELECT COUNT(chatId) FROM chats";
 $stmt = sqlsrv_query($conn, $sql);
 
-$tsql = "SELECT COUNT(chatId) FROM chats";
-$tstmt = sqlsrv_query($conn, $tsql);
-
-if ($stmt === false || $tstmt === false) {
+if ($stmt === false || $stmt === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 
-$UserCounter = sqlsrv_fetch_array($tstmt, SQLSRV_FETCH_NUMERIC)[0];
+$UserCounter = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC)[0];
 $num = $UserCounter + 1;
 $num_padded = sprintf("%05d", $num);
 
-$chatId = 'CHATOFF' . $UserId . $recipientId . $num_padded;
-
+$chatId = 'CHAT' . $UserId . $recipientId . $num_padded;
 
 // File Upload
 if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
@@ -53,20 +53,20 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
     $sent_image = null;
 }
 
-
 // Insert data into the database
-$query = "insert INTO chats ([UserId]
-,[recipientId]
-,[Sent]
-,[sentimage]
-,[chatId]
-,[senderId])
+$query = "INSERT INTO chats ([UserId]
+    ,[recipientId]
+    ,[Sent]
+    ,[sentimage]
+    ,[chatId]
+    ,[senderId]) 
     VALUES ('$UserId', '$recipientId', '$message', '$sent_image', '$chatId', '$UserId')";
 
 if (sqlsrv_query($conn, $query)) {
-  echo "Message sent.";
+    echo "Message sent.";
 } else {
-  echo "Error: " . sqlsrv_errors();
+    echo "Error: " . sqlsrv_errors();
 }
+
 
 ?>
