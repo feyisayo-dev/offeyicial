@@ -167,7 +167,6 @@
                             Welcome to Offeyicial! We are a new brand that is focused on providing a safe and secure chat room experience for our users. Our chat room is powered by end-to-end encryption, so you can rest assured that your conversations are secure and private. We
                             strive to provide an enjoyable and user-friendly experience for all of our customers. With Offeyicial, you can be sure that your conversations are secure and protected from any malicious activities.
                         </p>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#aboutModal"> Read More</button>
                         <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
@@ -196,6 +195,8 @@
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#aboutModal"> Read More</button>
+                        
 
                     </div>
                 </div>
