@@ -1,7 +1,7 @@
 <?php
     // Connect to the database
     include ('db.php'); 
-    $result = sqlsrv_query($conn, "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted 
+    $result = sqlsrv_query($conn, "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, posts.Likes, posts.Comments, posts.Shares 
 FROM posts 
 JOIN User_Profile ON User_Profile.UserId = posts.UserId 
 ORDER BY posts.date_posted DESC");
@@ -9,9 +9,11 @@ ORDER BY posts.date_posted DESC");
 
 
 while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-  $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
+    $date_posted = new DateTime($row['date_posted']);
+    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+    
   $current_date = new DateTime();
-  $date_postedx = new DateTime($date_posted);
+  $date_postedx = new DateTime($formatted_date);
   $interval = $current_date->diff($date_postedx);
 
   if ($interval->y) {
@@ -27,6 +29,11 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
   } else {
       $time_ago = $interval->s . " seconds ago";
   }
+   // Store Likes, Comments, and Shares values in variables
+  $num_likes = $row['Likes'];
+  $num_comments = $row['Comments'];
+  $num_shares = $row['Shares'];
+
   echo '<div class= "post">';
   echo '<div class="news-feed-post">';
   echo '<div class="post-header">';
@@ -41,14 +48,14 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
   if (!empty($row['video'])) {
       echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
   }
-  $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
+//   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
   echo '<p class="post-date">' . $time_ago . '</p>';
   echo '</div>';
   echo '<div class="post-footer">';
-  echo '<button>' . '<i class="bi bi-hand-thumbs-up"></i>' . 'Like' . '</button>';
-  echo '<button>' . '<i class="bi bi-chat-dots"></i>' . 'Comment' . '</button>';
-  echo '<button>' . '<i class="bi bi-share"></i>' . 'Share' . '</button>';
-echo '</div>';
+  echo '<button class="like-button" data-postid="' . $row['PostId'] . '">' . '<i class="bi bi-hand-thumbs-up"></i>' . 'Like <span class="num-likes">' . $row['Likes'] . '</span></button>';
+  echo '<button class="comment-button" data-postid="' . $row['PostId'] . '">' . '<i class="bi bi-chat-dots"></i>' . 'Comment <span class="num-comments">' . $row['Comments'] . '</span></button>';
+  echo '<button class="share-button" data-postid="' . $row['PostId'] . '">' . '<i class="bi bi-share"></i>' . 'Share</button>';
+  echo '</div>';
 echo '</div>';
   
 }

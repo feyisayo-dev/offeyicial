@@ -65,10 +65,10 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
     $content=$row['content'];
     $video=$row['video'];
     $image=$row['image'];
-    $date_posted=$row['date_posted'];
-    $date_postedy = date_format($date_posted, 'Y-m-d H:i:s');
+    $date_posted = new DateTime($row['date_posted']);
+    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
     $current_date = new DateTime();
-    $date_postedx = new DateTime($date_postedy);
+    $date_postedx = new DateTime($formatted_date);
     $interval = $current_date->diff($date_postedx);
     
     if ($interval->y) {
@@ -98,7 +98,7 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                 <link rel="stylesheet" href="css/all.min.css" />
                 <link href="css/bootstrap.min.css" rel="stylesheet">
                 <link rel="stylesheet" href="css\font\bootstrap-icons.css">
-                <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+                <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
 
                 <style>
                     .user-profile {
@@ -207,13 +207,18 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                         /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); */
                         grid-gap: 20px;
                     }
-                    .title{
+                    /* .title{
                         color: white;
                         text-transform: uppercase;
                         font-family: arial; 
                         background-color:#6c757d;
-                        width: 50%;
+                        width: 550px;
                     }
+                    .posts img{
+                        width: 550px;
+                        height: 550px;
+                        border-radius: 10px;                      
+                    } */
                 </style>
             </head>
 
@@ -283,47 +288,36 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                             </p>
                         </div>
                     </div>
+                    <div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="text-center text-uppercase text-success">Posts</h3>
+            <div class="posts">
+                <div class="post">
+                    <h3 class="title"><?php echo $title; ?></h3>
                     <div class="row">
-                        <div class="col-12">
-                            <h3 style="text-align: center; color:green; text-transform: uppercase;" >Posts</h3>
-                            <div class="posts">
-	      <div class="post">
-		  <h3 class="title"><?php echo   $title;?></h3>
-		  <!-- <div class="grid-container">
-            <div class="grid-item">
-                <img src="<?php echo $image; ?>">
-            </div>
-            <div class="grid-item">
-                <video controls>
-                <source src="<?php echo $video; ?>" type="video/mp4">
-                </video>
-            </div>
-            </div> -->
-
-
-            <?php if (!empty($image)): ?>
-                <div class="grid-item">
-                  <img src="<?php echo $image; ?>">
-                </div>
-              <?php endif; ?>
-              
-              <?php if (!empty($video)): ?>
-                <div class="grid-item">
-                  <video controls>
-                    <source src="<?php echo $video; ?>" type="video/mp4">
-                  </video>
-                </div>
-              <?php endif; ?>
-              
-
-		  <p><?php echo   $content;?></p>
-		  <p><?php echo   $time_ago;?></p>
-		  </div>
-
+                        <?php if (!empty($image)): ?>
+                            <div class="col-md-6">
+                                <img src="<?php echo $image; ?>" class="img-fluid">
                             </div>
-                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($video)): ?>
+                            <div class="col-md-6">
+                                <video controls class="w-100">
+                                    <source src="<?php echo $video; ?>" type="video/mp4">
+                                </video>
+                            </div>
+                        <?php endif; ?>
                     </div>
+                    <p><?php echo $content; ?></p>
+                    <p><?php echo $time_ago; ?></p>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
                 <?php
                 if(isset($_POST['button'])){
 

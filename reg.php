@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/all.min.css" />
     <script src="js/jquery.min.js"></script>
     <script src="country-states.js"></script>
-    <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+    <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
 
 
     <style>

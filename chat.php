@@ -18,7 +18,7 @@ if (!isset($_SESSION['loggedin'])) {
 
     <head>
         <title>Chat App</title>
-        <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+        <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
         <link rel="stylesheet" href="css\all.min.css">
         <link rel="stylesheet" href="css\font\bootstrap-icons.css">
         <link rel="stylesheet" href="css\boostrap-icons">

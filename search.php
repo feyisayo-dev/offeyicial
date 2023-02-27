@@ -13,7 +13,7 @@ $UserId = $_SESSION['UserId'];
         <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <script src="country-states.js"></script>
-  <link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+  <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
   <script src="js/jquery.min.js"></script>
 <script>
 $(document).ready(function(){

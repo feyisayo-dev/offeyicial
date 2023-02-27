@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta name="description"/>
-<link rel="icon" href="img\offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+<link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
 <link rel="stylesheet" href="css/normalize.css">
 <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
 <link href="css/all.min.css" rel="stylesheet">

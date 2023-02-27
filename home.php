@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
 
 
-  <link rel="icon" href="img/offeyicial.jpeg" type="image/jpeg" sizes="32x32" />
+  <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
 
     <style>
         * {

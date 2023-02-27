@@ -20,3 +20,5 @@ i need to read for school.
 Taken care of chat.php and it works fine
 just need to take care of the JQuery script that brings the message real time
 and i think it is time i take care of like share and comment.
+
+Just took care of real time

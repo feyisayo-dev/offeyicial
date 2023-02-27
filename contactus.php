@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/all.min.css" />
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css\font\bootstrap-icons.css">
+    <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -272,21 +274,20 @@
                 </div>
                 <div class="col-lg-6">
                     <h2>Contact us</h2>
-                    <form>
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" id="name" placeholder="Enter your name">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter your email">
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea class="form-control" id="message" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+                    <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" id="name" placeholder="Enter your name">
+</div>
+<div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" class="form-control" id="email" placeholder="Enter your email">
+</div>
+<div class="form-group">
+    <label for="message">Message</label>
+    <textarea class="form-control" id="message" rows="3"></textarea>
+</div>
+<button type="button" id="submit" class="btn btn-primary">Submit</button>
+
                 </div>
             </div>
             <div class="row my-5">
@@ -316,5 +317,40 @@
         </section>
     </div>
 </body>
+<script src="js/jquery.min.js"></script>
+
+<script>
+    $('#submit').click(function (e) {
+        e.preventDefault();
+        let message = $('#message').val();
+        let email = $('#email').val();
+        let name = $('#name').val();
+
+        if (message != "" && email != "" && name != "") {
+
+            $.ajax({
+                url: "contactusSubmit.php",
+                type: "POST",
+                async: false,
+                data: {
+                    "submit": 1,
+                    "message": message,
+                    "email": email,
+                    "name": name,
+                },
+                success: function(response) {
+                    console.log(response);
+                    $('#message').val('');
+                    $('#name').val('');
+                    $('#email').val('');
+                }
+            });
+
+        } else {
+            alert("Field Missing");
+        }
+    });
+</script>
+
 
 </html>
