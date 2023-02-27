@@ -157,7 +157,7 @@
                            You want to know us more? Good.
                         </p>
                         <ul>
-                            <li><i class="ri-check-double-line"></i> End-to-End encryption,</li>
+                            <li><i class="ri-check-double-line"></i> End-to-End encryption</li>
                             <li><i class="ri-check-double-line"></i> Enjoyable and User-friendly experience </li>
                             <li><i class="ri-check-double-line"></i> Quality and User-friendly Service</li>
                         </ul>
