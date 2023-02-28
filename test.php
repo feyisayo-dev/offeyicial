@@ -25,9 +25,6 @@
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
-    <!-- jQuery -->
-    <script src="js/jquery.min.js"></script>
-
     <!-- Popper.js -->
     <script src="js/popper.min.js"></script>
 
@@ -50,14 +47,12 @@
 
             <nav id="navbar" class="navbar">
                 <ul>
-                    <li><a class="nav-link scrollto active" href="#home">Home</a></li>
-                    <li><a class="nav-link scrollto" href="login.php">Login</a></li>
-                    <li><a class="nav-link scrollto" href="reg.php">Register</a></li>
-                    <li><a class="nav-link   scrollto" href="#portfolio">Portfolio</a></li>
-                    <li><a class="nav-link scrollto" href="#team">Team</a></li>
-                    <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down"></i></a>
+                    <li><a class="nav-link scrollto active" href="#home"><i class="bi bi-house-door"></i>Home</a></li>
+                    <li><a class="nav-link scrollto" href="login.php"><i class="bi bi-person-fill"></i>Login</a></li>
+                    <li><a class="nav-link scrollto" href="reg.php"><i class="bi bi-person-plus"></i>Register</a></li>
+                    <li class="dropdown"><a href="#"><span>More</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
-                            <li><a href="#">Drop Down 1</a></li>
+                        <li><a class="nav-link   scrollto" href="#portfolio"><i class="bi bi-grid-3x3-gap"></i> Portfolio</a></li>
                             <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-right"></i></a>
                                 <ul>
                                     <li><a href="#">Deep Drop Down 1</a></li>
@@ -67,13 +62,13 @@
                                     <li><a href="#">Deep Drop Down 5</a></li>
                                 </ul>
                             </li>
-                            <li><a href="#">Drop Down 2</a></li>
+                            <li><a class="nav-link scrollto" href="#team"><i class="bi bi-people"></i>Team</a></li>
                             <li><a href="#">Drop Down 3</a></li>
                             <li><a href="#">Drop Down 4</a></li>
                         </ul>
                     </li>
-                    <li><a class="nav-link scrollto" href="#contactus">Contact</a></li>
-                    <li><a class="getstarted scrollto" href="#about">Get Started</a></li>
+                    <li><a class="nav-link scrollto" href="#contact"><i class="bi bi-telephone"></i>Contact</a></li>
+                    <li><a class="getstarted scrollto" href="#about"><i class="bi bi-play-btn"></i>Get Started</a></li>
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav>
@@ -92,8 +87,7 @@
                     <h1>WELCOME TO THE OFFEYICIAL</h1>
                     <h2>Experience the safest chatting community</h2>
                     <div class="d-flex justify-content-center justify-content-lg-start">
-                        <a href="#about" class="btn-get-started scrollto">Get Started</a>
-                        <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="glightbox btn-watch-video"><i class="bi bi-play-circle"></i><span>Watch Video</span></a>
+                        <a href="login.php" class="btn-get-started scrollto">Get Started</a>
                     </div>
                 </div>
                 <div class="col-lg-6 order-1 order-lg-2 ccclogo2" data-aos="zoom-in" data-aos-delay="200">
@@ -167,36 +161,11 @@
                             Welcome to Offeyicial! We are a new brand that is focused on providing a safe and secure chat room experience for our users. Our chat room is powered by end-to-end encryption, so you can rest assured that your conversations are secure and private. We
                             strive to provide an enjoyable and user-friendly experience for all of our customers. With Offeyicial, you can be sure that your conversations are secure and protected from any malicious activities.
                         </p>
-                        <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">About Us</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>
-                                            At Offeyicial, we're passionate about providing you with the best social media experience. Our goal is to connect you with like-minded individuals, provide you with engaging content, and keep you informed about the latest trends and news in the social
-                                            media world. Our team is dedicated to ensuring that you have a safe, fun, and enjoyable experience on our platform.
-                                        </p>
-                                        <p>
-                                            Whether you're looking to connect with friends and family, network with professionals, or discover new interests and hobbies, Offeyicial is the place for you. We believe that social media has the power to bring people together and create meaningful connections,
-                                            and we're committed to making that a reality for all of our users.
-                                        </p>
-                                        <p>
-                                            Thank you for choosing Offeyicial as your social media platform of choice. We look forward to helping you connect with the world and make lasting connections!
-                                        </p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#aboutModal"> Read More</button>
-                        
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Read More
+                        </button>
+
 
                     </div>
                 </div>
@@ -800,6 +769,33 @@
 
     <!-- Template Main JS File -->
     <script src="js/main.js"></script>
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">About Us</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                <p>
+                                    At Offeyicial, we're passionate about providing you with the best social media experience. Our goal is to connect you with like-minded individuals, provide you with engaging content, and keep you informed about the latest trends and news in the social
+                                    media world. Our team is dedicated to ensuring that you have a safe, fun, and enjoyable experience on our platform.
+                                </p>
+                                <p>
+                                    Whether you're looking to connect with friends and family, network with professionals, or discover new interests and hobbies, Offeyicial is the place for you. We believe that social media has the power to bring people together and create meaningful connections,
+                                    and we're committed to making that a reality for all of our users.
+                                </p>
+                                <p>
+                                    Thank you for choosing Offeyicial as your social media platform of choice. We look forward to helping you connect with the world and make lasting connections!
+                                </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
 
 </body>
 <script src="js/jquery.min.js"></script>

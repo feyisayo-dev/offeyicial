@@ -6,18 +6,24 @@ if (!isset($_SESSION['loggedin'])) {
 }
 ?>
 <?php
-// echo $recipientId=$_GET["UserIdx"];
-// echo $UserId = $_GET['UserId'];
-// session_start();
-
-
+include('db.php');
+$UserId = $_SESSION['UserId'];
+      // Get the surname and first name of the user with the UserId from the database
+      $rsql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+      $rstmt = sqlsrv_prepare($conn, $rsql);
+      if(sqlsrv_execute($rstmt)){
+        while($row = sqlsrv_fetch_array($rstmt, SQLSRV_FETCH_ASSOC)){
+          $Surname = $row['Surname'];
+          $First_Name = $row['First_Name'];
+        }
+      }
 ?>
 
     <!DOCTYPE html>
     <html>
 
     <head>
-        <title>Chat App</title>
+        <title>Chat~<?php echo $Surname . " " . $First_Name; ?></title>
         <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
         <link rel="stylesheet" href="css\all.min.css">
         <link rel="stylesheet" href="css\font\bootstrap-icons.css">
@@ -28,20 +34,40 @@ if (!isset($_SESSION['loggedin'])) {
 
         <style>
             nav {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                height: 50px;
-                background-color: #04AA6D;
-                color: white;
-                padding: 0 20px;
-            }
-            
-            nav a {
-                color: white;
-                text-decoration: none;
-                margin: 0 10px;
-            }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav a {
+  color: #212529;
+  text-decoration: none;
+  margin-left: 20px;
+  font-size: 16px;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+nav i {
+  margin-right: 5px;
+}
+
+nav .profile {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  font-size: 14px;
+}
+
+nav .profile-name {
+  margin-left: 10px;
+}
+
             
             .chat-container {
                 width: 80%;
@@ -235,6 +261,45 @@ if (!isset($_SESSION['loggedin'])) {
   border-radius: 50%;
   background-color: black;
 }
+.navbar form {
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.searchtext {
+  background-color: #f2f2f2;
+  border: none;
+  padding: 8px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 10px;
+}
+
+/* searchdropdown */
+.search-container {
+  position: relative;
+}
+
+#user_table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  position: absolute;
+  z-index: 9999;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+}
+
+#user_table li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#user_table li:hover {
+  background-color: #f2f2f2;
+}
 
 
         </style>
@@ -242,36 +307,41 @@ if (!isset($_SESSION['loggedin'])) {
 
     <body>
 
-        <nav>
-            <a href="home.php">Home</a>
-            <?php
-// session_start();
+    <nav>
+  <a href="home.php">Home</a>
+  <div class="profile">
+    <?php
+      // session_start();
 
-// Connect to the database
-include('db.php');
+      // Connect to the database
+      include('db.php');
 
-$UserId = $_SESSION['UserId'];
+      $UserId = $_SESSION['UserId'];
 
-// Get the surname and first name of the user with the UserId from the database
-$sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
-$stmt = sqlsrv_prepare($conn, $sql);
-if(sqlsrv_execute($stmt)){
-  while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
-    $Surname = $row['Surname'];
-    $First_Name = $row['First_Name'];
-  }
-}
+      // Get the surname and first name of the user with the UserId from the database
+      $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+      $stmt = sqlsrv_prepare($conn, $sql);
+      if(sqlsrv_execute($stmt)){
+        while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
+          $Surname = $row['Surname'];
+          $First_Name = $row['First_Name'];
+        }
+      }
+    ?>  
+<div class="search-container">
+    <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+    <div id="user_table">
+        <!-- <ul>
+            <li></li>
+        </ul> -->
+    </div>
+</div>
 
-// Display the user's surname and first name on the page
-echo $Surname . " " . $First_Name;
 
-?>
+    <a href="user_profile.php?UserId=<?php echo $_SESSION['UserId']; ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
+  </div>
+</nav>
 
-
-                <a href="user_profile.php?UserId=<?php echo $_SESSION['UserId']; ?>"><i class="bi bi-person"></i>Profile</a>
-
-
-        </nav>
 
         <div class="chat-container">
             <div class="chat-header">
@@ -402,7 +472,54 @@ if(sqlsrv_execute($stmt)){
             });
 
         </script>
+        <script>
+$(document).ready(function(){
+  $("#search").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    if (value === "") {
+      // Clear the table if the search box is empty
+    //   $('#user_table').val('');
 
+      $("#user_table").html("");
+    } else {
+      // Run the search function if the search box is not empty
+      $("#user_table tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    }
+  });
+});
+
+</script>
+<script>
+const searchBox = document.getElementById('search');
+const resultsDiv = document.getElementById('user_table');
+
+searchBox.addEventListener('input', function() {
+  const searchTerm = this.value;
+
+  // Clear the results if the search box is empty
+  if (!searchTerm.trim()) {
+    resultsDiv.innerHTML = '';
+    return;
+  }
+
+  // Your search function here
+  $("#search").on("keyup", function() {
+    var search_query = $(this).val();
+    $.ajax({
+      url: "searchbackend.php",
+      method: "POST",
+      data: {search_query:search_query},
+      success: function(data){
+        // Update the table with the returned results
+        $("#user_table").html(data);
+      }
+    });
+  });
+});
+
+</script>
 
     </body>
 

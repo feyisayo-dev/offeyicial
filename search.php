@@ -10,7 +10,6 @@ $UserId = $_SESSION['UserId'];
         <title>
         Search
         </title>
-        <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />

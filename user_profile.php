@@ -94,7 +94,7 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
 
             <head>
                 <meta charset="UTF-8">
-                <title>Profile - Offeyicial</title>
+                <title>Profile ~<?php echo $Surname . " " . $First_Name; ?></title>
                 <link rel="stylesheet" href="css/all.min.css" />
                 <link href="css/bootstrap.min.css" rel="stylesheet">
                 <link rel="stylesheet" href="css\font\bootstrap-icons.css">
@@ -198,27 +198,84 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                         cursor: pointer;
                     }
                     
-                    /* h3 {
-                        text-align: center;
-                        text-transform: uppercase;
-                    } */
+                    @media (max-width: 768px) {
+                        .navbar-collapse {
+                        position: fixed;
+                        top: 56px;
+                        bottom: 0;
+                        left: 100%;
+                        z-index: 1;
+                        width: 100%;
+                        padding-right: 1rem;
+                        padding-left: 1rem;
+                        overflow-y: auto;
+                        visibility: hidden;
+                        background-color: #fff;
+                        transition: visibility 0s linear 0.33s, left 0.33s ease-in-out;
+                        }
+
+                        .navbar-collapse.show {
+                        left: 0;
+                        visibility: visible;
+                        transition-delay: 0s;
+                        }
+
+                        .navbar-toggler {
+                        border-color: transparent;
+                        }
+
+                        .navbar-toggler:focus {
+                        outline: none;
+                        }
+
+                        .navbar-toggler-icon {
+                        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+                        }
+                        }
                     .grid-container {
                         display: grid;
                         /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); */
                         grid-gap: 20px;
                     }
-                    /* .title{
-                        color: white;
-                        text-transform: uppercase;
-                        font-family: arial; 
-                        background-color:#6c757d;
-                        width: 550px;
-                    }
-                    .posts img{
-                        width: 550px;
-                        height: 550px;
-                        border-radius: 10px;                      
-                    } */
+                    .searchtext {
+  background-color: #f2f2f2;
+  border: none;
+  padding: 8px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 10px;
+}
+
+/* searchdropdown */
+.search-container {
+  position: relative;
+}
+
+#user_table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  position: absolute;
+  z-index: 9999;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+
+}
+
+#user_table li {
+  padding: 8px 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#user_table li:hover {
+  background-color: #f2f2f2;
+  text-decoration: none;
+
+}
+
                 </style>
             </head>
 
@@ -241,15 +298,18 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                                 <a class="nav-link custom-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-plus-square"></i>Add a Post</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-search"></i>Search Chat</a>
+                            <div class="search-container">
+                                <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+                                <div id="user_table">
                             </li>
+
                             <li class="nav-item">
                                 <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
                             </li>
-
+                        </ul>
                     </div>
                 </nav>
 
@@ -392,5 +452,47 @@ If ($smc===false){
 
 ?>
             </body>
+        <script src="js/jquery.min.js"></script>
+
+            <script>
+$(document).ready(function(){
+  $("#search").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#user_table tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+<script>
+const searchBox = document.getElementById('search');
+const resultsDiv = document.getElementById('user_table');
+
+searchBox.addEventListener('input', function() {
+  const searchTerm = this.value;
+
+  // Clear the results if the search box is empty
+  if (!searchTerm.trim()) {
+    resultsDiv.innerHTML = '';
+    return;
+  }
+
+  // Your search function here
+  $("#search").on("keyup", function() {
+    var search_query = $(this).val();
+    $.ajax({
+      url: "searchbackend.php",
+      method: "POST",
+      data: {search_query:search_query},
+      success: function(data){
+        // Update the table with the returned results
+        $("#user_table").html(data);
+      }
+    });
+  });
+});
+
+</script>
+
 
             </html>

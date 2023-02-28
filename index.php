@@ -178,7 +178,9 @@ include ('db.php');
                                 <a class="nav-link custom-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-plus-square"></i>Add a Post</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-search"></i>Search Chat</a>
+                            <div class="search-container">
+                                <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+                                <div id="user_table">
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
@@ -328,4 +330,53 @@ $(document).on('click', '.comment-button', function() {
         });
 
         </script>
+        <script>
+$(document).ready(function(){
+  $("#search").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    if (value === "") {
+      // Clear the table if the search box is empty
+    //   $('#user_table').val('');
+
+      $("#user_table").html("");
+    } else {
+      // Run the search function if the search box is not empty
+      $("#user_table tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    }
+  });
+});
+
+</script>
+<script>
+const searchBox = document.getElementById('search');
+const resultsDiv = document.getElementById('user_table');
+
+searchBox.addEventListener('input', function() {
+  const searchTerm = this.value;
+
+  // Clear the results if the search box is empty
+  if (!searchTerm.trim()) {
+    resultsDiv.innerHTML = '';
+    return;
+  }
+
+  // Your search function here
+  $("#search").on("keyup", function() {
+    var search_query = $(this).val();
+    $.ajax({
+      url: "searchbackend.php",
+      method: "POST",
+      data: {search_query:search_query},
+      success: function(data){
+        // Update the table with the returned results
+        $("#user_table").html(data);
+      }
+    });
+  });
+});
+
+</script>
+
 </html>

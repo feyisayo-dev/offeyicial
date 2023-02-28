@@ -288,6 +288,8 @@ $(document).ready(function(){
                   $('#content').val('');
                   $('#image').val('');
                   $('#video').val('');
+                  window.location.href = "index.php?UserId=<?php echo $_SESSION['UserId']; ?>";
+
 
               }
           }

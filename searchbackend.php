@@ -15,30 +15,26 @@ $stmt = sqlsrv_query($conn, $tsql);
 if($stmt === false) {
   die(print_r(sqlsrv_errors(), true));
 }
-
+if ($search_term == "") {
+  echo "";
+  }else{
+  
 // Fetch and display search results
 while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
 
- $FirstName= $row['First_Name'];
- $Surname=$row['Surname'] ;
- $UserIdx=$row['UserId'] ;
- $UserId=$_SESSION['UserId'];
+  $FirstName= $row['First_Name'];
+  $Surname=$row['Surname'] ;
+  $UserIdx=$row['UserId'] ;
+  $UserId=$_SESSION['UserId'];
 
- ?>
- <tr>
-  <td>
-    <a href="chat.php?UserIdx=<?php echo $UserIdx; ?>&UserId=<?php echo $UserId; ?>"><?php echo $FirstName;?></a>
- </td>
-  <td>
- <a href="chat.php?UserIdx=<?php echo $UserIdx; ?>&UserId=<?php echo $UserId; ?>"><?php echo $Surname;?></a>
-  </td>
- 
- </tr>
- 
-
-  <?php
-  //  echo "<td><a href='chat.php?UserId=echo $row['Surname']</a></td>";
-  
+  // Create a list item for each search result
+  echo "<li><a href='chat.php?UserIdx=".$UserIdx."&UserId=".$UserId."'>".$FirstName." ".$Surname."</a></li>";
 }
+
+// Close the unordered list
+echo "</ul>";
+  }
+
+
 
 ?>
