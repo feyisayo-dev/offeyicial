@@ -1,5 +1,15 @@
 <?php
+session_start();
+$UserId=$_SESSION["UserId"];
+
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+    header("Location: user_profile.php?UserId=$UserId");
+    exit();
+}
 ?>
+
+<li><a class="nav-link scrollto" href="login.php"><i class="bi bi-person-fill"></i>Login</a></li>
+
 <html>
 <head>
 <meta name="description"/>
@@ -621,23 +631,22 @@
                 "psw": psw
             },
             success: function(data) {
-    var jsonData = JSON.parse(data);
-    if (jsonData.status == "success") {
-      var UserId = jsonData.UserId;
-      window.location.href = "user_profile.php?UserId="+UserId;
-    } else {
-        alert("Invalid login credentials");
-    }
-  }
-
-
-
+                var jsonData = JSON.parse(data);
+                if (jsonData.status == "success") {
+                    var UserId = jsonData.UserId;
+                    // check if the user is already logged in
+                    if (window.location.pathname != '/offeyicialchatroom/user_profile.php') {
+                        window.location.href = "user_profile.php?UserId="+UserId;
+                    }
+                } else {
+                    alert("Invalid login credentials");
+                }
+            }
         });
     } else {
         alert("Please fill in all fields");
     }
 });
-
 
 </script>
 

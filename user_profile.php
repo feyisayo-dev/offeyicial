@@ -6,6 +6,7 @@ if (!isset($_SESSION['loggedin'])) {
 }
 ?>
 
+
     <!-- rest of your HTML code -->
 
     <?php
@@ -275,6 +276,22 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
   text-decoration: none;
 
 }
+@media (min-width: 768px) {
+  /* adjust layout for larger screens */
+  .user-profile {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    
+                    .profile-pic img {
+                        width: 250px;
+                        height: 250px;
+                        border-radius: 90%;
+                        margin-top: 20px;
+                    }
+
+}
 
                 </style>
             </head>
@@ -304,8 +321,9 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
+                                <a class="nav-link" href="home.php#contact"><i class="bi bi-telephone"></i>Contact us</a>
                             </li>
+
                             <li class="nav-item">
                                 <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
                             </li>

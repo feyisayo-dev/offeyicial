@@ -189,6 +189,44 @@ $UserId = $_SESSION['UserId'];
         .custom-file-label {
           cursor: pointer;
         }
+        .searchtext {
+  background-color: #f2f2f2;
+  border: none;
+  padding: 8px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 10px;
+}
+
+/* searchdropdown */
+.search-container {
+  position: relative;
+}
+
+#user_table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  position: absolute;
+  z-index: 9999;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+
+}
+
+#user_table li {
+  padding: 8px 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#user_table li:hover {
+  background-color: #f2f2f2;
+  text-decoration: none;
+
+}
 
         </style>
     </head>
@@ -204,8 +242,10 @@ $UserId = $_SESSION['UserId'];
                     <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                 </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link"onclick="window.location.href='search.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-search"></i>Search</a>
-                </li>
+                            <div class="search-container">
+                                <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+                                <div id="user_table">
+                            </li>
                 <li class="nav-item">
 				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-person"></i>Profile</a>
                 </li>
@@ -301,5 +341,46 @@ $(document).ready(function(){
 
 
 </script>
+
+<script>
+$(document).ready(function(){
+  $("#search").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#user_table tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+<script>
+const searchBox = document.getElementById('search');
+const resultsDiv = document.getElementById('user_table');
+
+searchBox.addEventListener('input', function() {
+  const searchTerm = this.value;
+
+  // Clear the results if the search box is empty
+  if (!searchTerm.trim()) {
+    resultsDiv.innerHTML = '';
+    return;
+  }
+
+  // Your search function here
+  $("#search").on("keyup", function() {
+    var search_query = $(this).val();
+    $.ajax({
+      url: "searchbackend.php",
+      method: "POST",
+      data: {search_query:search_query},
+      success: function(data){
+        // Update the table with the returned results
+        $("#user_table").html(data);
+      }
+    });
+  });
+});
+
+</script>
+
 
 </html>
