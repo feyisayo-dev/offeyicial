@@ -18,8 +18,17 @@ if (isset($_POST['postId']) && isset($_POST['comment'])) {
         die(print_r(sqlsrv_errors(), true));
     }
 
+    // Update number of comments for the post
+    $query = "UPDATE post SET comment = comment + 1 WHERE PostId = ?";
+    $params = array($postId);
+    $stmt = sqlsrv_query($conn, $query, $params);
+
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
+
     // Get updated comment count
-    $query = "SELECT COUNT(*) as num_comments FROM comments WHERE PostId = ?";
+    $query = "SELECT comment FROM post WHERE PostId = ?";
     $params = array($postId);
     $stmt = sqlsrv_query($conn, $query, $params);
 
@@ -58,5 +67,4 @@ if (isset($_POST['postId']) && isset($_POST['comment'])) {
     );
     echo json_encode($response);
 }
-
 ?>

@@ -157,6 +157,44 @@ include ('db.php');
         .navbar-light .navbar-nav .navbar-link {
             color: #000;
         }
+        .searchtext {
+  background-color: #f2f2f2;
+  border: none;
+  padding: 8px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 10px;
+}
+
+/* searchdropdown */
+.search-container {
+  position: relative;
+}
+
+#user_table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  position: absolute;
+  z-index: 9999;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+
+}
+
+#user_table li {
+  padding: 8px 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#user_table li:hover {
+  background-color: #f2f2f2;
+  text-decoration: none;
+
+}
   </style>
 </head>
 <body>
@@ -313,34 +351,36 @@ $('.like-button').click(function() {
 });
 </script>
 <script>
-
-// Comment button
+  // COMMENT SECTION
 $(document).on('click', '.comment-button', function() {
   var postId = $(this).data('postid');
   var commentBox = $(this).siblings('.comment-box');
+  
   if (commentBox.length) {
     commentBox.toggle();
   } else {
     commentBox = $('<div class="comment-box"><textarea></textarea><button class="submit-comment">Submit</button></div>');
     $(this).parent().append(commentBox);
   }
+  
   commentBox.find('.submit-comment').off('click').on('click', function() {
     var commentText = commentBox.find('textarea').val();
     $.ajax({
       url: 'comment_post.php',
       method: 'POST',
-      data: { post_id: postId, comment_text: commentText },
+      data: { postId: postId, comment: commentText },
+      dataType: 'json',
       success: function(data) {
         commentBox.find('textarea').val('');
         var numComments = commentBox.siblings('.comment-button').find('.num-comments');
-        numComments.text(parseInt(numComments.text()) + 1);
-        commentBox.before('<div class="comment">' + commentText + '</div>');
+        numComments.text(data.num_comments);
+        var commentSection = $(data.comment_section);
+        commentBox.before(commentSection);
       }
     });
   });
 });
-
-        </script>
+</script>
         <script>
           var UserId = <?php echo json_encode($UserId); ?>; 
           // Share button
