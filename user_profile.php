@@ -10,7 +10,7 @@ if (!isset($_SESSION['loggedin'])) {
     <!-- rest of your HTML code -->
 
     <?php
-    $UserId=$_GET["UserId"];
+    $UserId=$_SESSION["UserId"];
     include ('db.php');
 
     $fetchUserInfo="Select [Surname]
@@ -50,7 +50,7 @@ if (sqlsrv_fetch($FetchStatement)===false) {
 
 ?>
 <?php
-$UserId=$_GET["UserId"];
+$UserId=$_SESSION["UserId"];
 include ('db.php');
 
 $fetchPostsinfo = "SELECT [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$UserId' ORDER BY date_posted DESC";
@@ -309,10 +309,10 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                                 <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='index.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='index.php'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-plus-square"></i>Add a Post</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='upload.php'"><i class="bi bi-plus-square"></i>Add a Post</a>
                             </li>
                             <li class="nav-item">
                             <div class="search-container">
@@ -335,7 +335,7 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                     <br><br><br>
                     <div class="row">
                         <div class="col-md-4 profile-pic">
-                            <img src="UserPassport/<?php echo $Passport; ?>" class="button" alt="Profile Picture">
+                            <img src="<?php echo $GetPassport; ?>" class="button" alt="Profile Picture">
                             <P>Enhance your online persona</P>
                             <form action="" method="POST" enctype="multipart/form-data">
                                 <input type="file" name="Fileupload" id="upload1" placeholder="Choose file path" style="float: left;background-color:orange;" required />
@@ -372,7 +372,10 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
             <h3 class="text-center text-uppercase text-success">Posts</h3>
             <div class="posts">
                 <div class="post">
+                <?php if (!empty($image)): ?>
                     <h3 class="title"><?php echo $title; ?></h3>
+                        <?php endif; ?>
+                    
                     <div class="row">
                         <?php if (!empty($image)): ?>
                             <div class="col-md-6">
@@ -388,8 +391,12 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
                             </div>
                         <?php endif; ?>
                     </div>
-                    <p><?php echo $content; ?></p>
-                    <p><?php echo $time_ago; ?></p>
+                    <?php if (!empty($image)): ?>
+                        <p><?php echo $content; ?></p>
+                        <?php endif; ?>
+                        <?php if (!empty($image)): ?>
+                            <p><?php echo $time_ago; ?></p>
+                        <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -455,7 +462,7 @@ If ($smc===false){
 
                               // $msg = $picture;
                               
-                              $URL="user_profile.php?UserId=$UserId";
+                              $URL="user_profile.php";
                               echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
                               echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
                               // 	--------------------------------------------------------------------

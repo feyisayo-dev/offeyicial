@@ -247,10 +247,10 @@ $UserId = $_SESSION['UserId'];
                                 <div id="user_table">
                             </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-person"></i>Profile</a>
+				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php'"><i class="bi bi-person"></i>Profile</a>
                 </li>
                 <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='index.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='index.php'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
                             </li>
 
         </div>
@@ -278,7 +278,7 @@ $UserId = $_SESSION['UserId'];
             </div>
 
             <input type="submit" value="Add Post" class="submit">
-            <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'">
+            <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php'">
         </div>
     </body>
     <script src="js/jquery.min.js"></script> 
@@ -321,6 +321,7 @@ $(document).ready(function(){
               if(response === "success"){
                   console.log("Post added successfully");
                   alert("Post added successfully");
+                  window.location.href = "index.php";
               }else{
                   console.log("Error adding post: " + response);
                   alert("Error adding post: " + response);
@@ -328,7 +329,6 @@ $(document).ready(function(){
                   $('#content').val('');
                   $('#image').val('');
                   $('#video').val('');
-                  window.location.href = "index.php?UserId=<?php echo $_SESSION['UserId']; ?>";
 
 
               }

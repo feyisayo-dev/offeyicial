@@ -28,7 +28,7 @@ while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
   $UserId=$_SESSION['UserId'];
 
   // Create a list item for each search result
-  echo "<li><a href='chat.php?UserIdx=".$UserIdx."&UserId=".$UserId."'>".$FirstName." ".$Surname."</a></li>";
+  echo "<li><a href='chat.php?UserIdx=".$UserIdx."'>".$FirstName." ".$Surname."</a></li>";
 }
 
 // Close the unordered list

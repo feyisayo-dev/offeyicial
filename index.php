@@ -6,7 +6,7 @@ if (!isset($_SESSION['loggedin'])) {
 }
 ?>
 <?php
-$UserId=$_GET["UserId"];
+$UserId=$_SESSION["UserId"];
 include ('db.php');
 
 ?>
@@ -210,10 +210,10 @@ include ('db.php');
                                 <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-person"></i>Profile</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='user_profile.php'"><i class="bi bi-person"></i>Profile</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId; ?>'"><i class="bi bi-plus-square"></i>Add a Post</a>
+                                <a class="nav-link custom-link" onclick="window.location.href='upload.php'"><i class="bi bi-plus-square"></i>Add a Post</a>
                             </li>
                             <li class="nav-item">
                             <div class="search-container">
