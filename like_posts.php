@@ -2,46 +2,41 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-include 'db.php';
+require_once 'db.php';
+
+if (!isset($_SESSION['UserId'])) {
+    http_response_code(401);
+    exit();
+}
+
+$PostId = $_POST['PostId'];
 $UserId = $_SESSION['UserId'];
 
-if (isset($_POST['postId']) && isset($_POST['action'])) {
-    $postId = $_POST['postId'];
-    $action = $_POST['action'];
+// Check if the user has already liked the post
+$stmt = $pdo->prepare('SELECT COUNT(Likes) FROM posts WHERE PostId = ? AND UserId = ?');
+$stmt->execute([$PostId, $UserId]);
+$numLikes = $stmt->fetchColumn();
 
-    if ($action === 'like') {
-        $query = "UPDATE posts SET Likes = Likes + 1 WHERE PostId = ?";
-    } else if ($action === 'unlike') {
-        $query = "UPDATE posts SET Likes = Likes - 1 WHERE PostId = ?";
-    }
-    
-    $params = array($postId);
-    $stmt = sqlsrv_prepare($conn, $query, $params);
-    
-    if ($stmt === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
-    
-    if(sqlsrv_execute($stmt) === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
-    
-    // Get updated like count
-    $query = "SELECT Likes FROM posts WHERE PostId = ?";
-    $params = array($postId);
-    $stmt = sqlsrv_query($conn, $query, $params);
+if ($numLikes == 0) {
+    // User has not liked the post, so increment the Likes count and add a new like record
+    $stmt = $pdo->prepare('UPDATE posts SET Likes = Likes + 1 WHERE PostId = ?');
+    $stmt->execute([$PostId]);
 
-    if ($stmt === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
+    $stmt = $pdo->prepare('INSERT INTO Likes (PostId, UserId) VALUES (?, ?)');
+    $stmt->execute([$PostId, $UserId]);
 
-    $likes = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC)[0];
+    $newLikes = $stmt->rowCount();
+} else {
+    // User has already liked the post, so decrement the Likes count and remove the like record
+    $stmt = $pdo->prepare('UPDATE posts SET Likes = Likes - 1 WHERE PostId = ?');
+    $stmt->execute([$PostId]);
 
-    // Return updated like count and show comment section
-    $response = array(
-        'likes' => $likes,
-        'comment_section' => '<div class="comment-section">Comment section here</div>'
-    );
-    echo json_encode($response);
+    $stmt = $pdo->prepare('DELETE FROM Likes WHERE PostId = ? AND UserId = ?');
+    $stmt->execute([$PostId, $UserId]);
+
+    $newLikes = $stmt->rowCount() * -1;
 }
+
+// Return the new like count
+echo json_encode(['Likes' => $newLikes]);
 ?>

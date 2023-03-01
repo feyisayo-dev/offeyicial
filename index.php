@@ -230,7 +230,7 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
   $num_comments = $row['Comments'];
   $num_shares = $row['Shares'];
 
-  echo '<div class= "post">';
+  echo '<div class="post" id="post-'.$row['PostId'].'">';
   echo '<div class="news-feed-post">';
   echo '<div class="post-header">';
   echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
@@ -261,6 +261,20 @@ echo '</div>';
 
 </body>
 <script>
+  // Get postId from URL parameter
+var urlParams = new URLSearchParams(window.location.search);
+var postId = urlParams.get('postId');
+
+// Scroll to post with matching id
+if (postId) {
+  var postElement = document.getElementById('post-' + postId);
+  if (postElement) {
+    postElement.scrollIntoView();
+  }
+}
+
+</script>
+<script>
             $(document).ready(function() {
                 // Update newsfeed every 20 seconds
                 setInterval(function() {
@@ -277,22 +291,28 @@ echo '</div>';
         </script>
         <script>
 // Like button
-$(document).on('click', '.like-button', function() {
-  var postId = $(this).data('postid');
-  var numLikes = $(this).find('.num-likes');
-  $.ajax({
-    url: 'like_posts.php',
-    method: 'POST',
-    data: { post_id: postId },
-    success: function(data) {
-      if (data === 'liked') {
-        numLikes.text(parseInt(numLikes.text()) + 1);
-      } else {
-        numLikes.text(parseInt(numLikes.text()) - 1);
-      }
-    }
-  });
+$('.like-button').click(function() {
+    let postId = $(this).data('postid');
+
+    $.ajax({
+        url: 'like_posts.php',
+        type: 'POST',
+        data: { PostId: postId },
+        dataType: 'json',
+        success: function(data) {
+            let numLikes = parseInt($('.num-likes', this).text()) + data.Likes;
+
+            $('.num-likes', this).text(numLikes);
+            if (data.Likes > 0) {
+                $('i', this).removeClass('bi-hand-thumbs-down').addClass('bi-hand-thumbs-up');
+            } else {
+                $('i', this).removeClass('bi-hand-thumbs-up').addClass('bi-hand-thumbs-down');
+            }
+        }
+    });
 });
+</script>
+<script>
 
 // Comment button
 $(document).on('click', '.comment-button', function() {
@@ -322,6 +342,7 @@ $(document).on('click', '.comment-button', function() {
 
         </script>
         <script>
+          var UserId = <?php echo json_encode($UserId); ?>; 
           // Share button
         $(document).on('click', '.share-button', function() {
           var postId = $(this).data('postid');

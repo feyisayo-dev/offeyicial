@@ -8,8 +8,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
 }
 ?>
 
-<li><a class="nav-link scrollto" href="login.php"><i class="bi bi-person-fill"></i>Login</a></li>
-
 <html>
 <head>
 <meta name="description"/>
