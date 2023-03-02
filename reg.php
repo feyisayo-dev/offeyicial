@@ -8,6 +8,7 @@ session_start();
     <title>Offeyicial</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/all.min.css" />
+    <link rel="stylesheet" href="css\font\bootstrap-icons.css">
     <script src="js/jquery.min.js"></script>
     <script src="country-states.js"></script>
     <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
@@ -612,10 +613,10 @@ session_start();
                     <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="login.php">Login</a>
+                    <a class="nav-link" href="login.php"><i class="bi bi-person-fill"></i>Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="reg.php">Register</a>
+                    <a class="nav-link" href="donate.php">Donate</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>

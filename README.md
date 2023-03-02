@@ -22,3 +22,12 @@ just need to take care of the JQuery script that brings the message real time
 and i think it is time i take care of like share and comment.
 
 Just took care of real time
+2/03/2023
+Just found out that that real-time doesnt work for videos
+it reloads the page multiple times and very annoying 
+the video just keeps restarting
+also takes too many caches
+And stack overflow
+those guys are annoying
+keep downvoting your question when you really need help
+like ??????????

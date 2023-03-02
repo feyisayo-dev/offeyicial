@@ -54,22 +54,70 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
 } else {
     $sent_image = null;
 }
+//video upload
+if(isset($_FILES['video']) && !empty($_FILES['video']['name'])){
+    $video = $_FILES['video'];
+    $video_name = $video['name'];
+    $video_tmp = $video['tmp_name'];
+    $video_size = $video['size'];
+    $video_error = $video['error'];
 
-// Insert data into the database
+    $video_ext = explode('.', $video_name);
+    $video_ext = strtolower(end($video_ext));
+
+    $allowed_ext = array('mp4', 'avi', 'wmv');
+
+    if(in_array($video_ext, $allowed_ext)) {
+        if($video_error === 0) {
+            if($video_size <= 209715200) { // max video size is 200MB
+                $video_name_new = uniqid('', true) . '.' . $video_ext;
+                $video_destination = 'sentVidoes/' .$video_name_new;
+                $UserId = $_SESSION['UserId'];
+                if(move_uploaded_file($video_tmp, $video_destination)) {
+                    $sql = "Insert into chats([UserId]
+                    ,[recipientId]
+                    ,[Sent]
+                    ,[sentvideo]
+                    ,[chatId]
+                    ,[senderId]
+                    ,[time_sent]) 
+                    VALUES ('$UserId', '$recipientId', '$message','$video_destination', '$chatId', '$UserId', '$date_posted')";
+                $result = sqlsrv_query($conn, $sql);
+                if($result) {
+                    echo "success";
+                } else {
+                    echo "Error adding post with video.";
+                }
+            } else {
+                echo "Error uploading video.";
+            }
+        } else {
+            echo "Video size too large.";
+        }
+    }
+    } else {
+        echo "Error with video.";
+    }
+}else{
+    // Insert data into the database
 $query = "INSERT INTO chats ([UserId]
-    ,[recipientId]
-    ,[Sent]
-    ,[sentimage]
-    ,[chatId]
-    ,[senderId]
-    ,[time_sent]) 
-    VALUES ('$UserId', '$recipientId', '$message', '$sent_image', '$chatId', '$UserId', '$date_posted')";
+,[recipientId]
+,[Sent]
+,[sentimage]
+,[chatId]
+,[senderId]
+,[time_sent]) 
+VALUES ('$UserId', '$recipientId', '$message', '$sent_image', '$chatId', '$UserId', '$date_posted')";
 
 if (sqlsrv_query($conn, $query)) {
-    echo "Message sent.";
+echo "Message sent.";
 } else {
-    echo "Error: " . sqlsrv_errors();
+echo "Error: " . sqlsrv_errors();
 }
+
+
+}
+
 
 
 ?>

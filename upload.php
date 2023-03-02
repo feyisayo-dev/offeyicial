@@ -283,10 +283,6 @@ $UserId = $_SESSION['UserId'];
     </body>
     <script src="js/jquery.min.js"></script> 
     <script>
-      $('.custom-file-label').on('click', function() {
-        $(this).siblings('.custom-file-input').trigger('click');
-      });
-
       $('.custom-file-input').on('change', function() {
         var fileName = $(this).val().split('\\').pop();
         $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);

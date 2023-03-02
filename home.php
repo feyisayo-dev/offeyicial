@@ -1,6 +1,5 @@
-
-
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -54,7 +53,7 @@
                     <li><a class="nav-link scrollto" href="reg.php"><i class="bi bi-person-plus"></i>Register</a></li>
                     <li class="dropdown"><a href="#"><span>More</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
-                        <li><a class="nav-link   scrollto" href="#portfolio"><i class="bi bi-grid-3x3-gap"></i> Portfolio</a></li>
+                            <li><a class="nav-link   scrollto" href="#portfolio"><i class="bi bi-grid-3x3-gap"></i> Portfolio</a></li>
                             <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-right"></i></a>
                                 <ul>
                                     <li><a href="#">Deep Drop Down 1</a></li>
@@ -150,7 +149,7 @@
                 <div class="row content">
                     <div class="col-lg-6">
                         <p>
-                           You want to know us more? Good.
+                            You want to know us more? Good.
                         </p>
                         <ul>
                             <li><i class="ri-check-double-line"></i> End-to-End encryption</li>
@@ -677,7 +676,8 @@
                                 <label for="name">Message</label>
                                 <textarea class="form-control" name="message" id="message" rows="10" required></textarea>
                             </div>
-                            <div class="text-center"><button type="submit">Send Message</button></div>
+                            <br>
+                            <div id="submit" class="text-center"><button type="submit">Send Message</button></div>
                         </div>
                     </div>
 
@@ -770,40 +770,40 @@
 
     <!-- Template Main JS File -->
     <script src="js/main.js"></script>
-                        <!-- Modal -->
-                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">About Us</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                <p>
-                                    At Offeyicial, we're passionate about providing you with the best social media experience. Our goal is to connect you with like-minded individuals, provide you with engaging content, and keep you informed about the latest trends and news in the social
-                                    media world. Our team is dedicated to ensuring that you have a safe, fun, and enjoyable experience on our platform.
-                                </p>
-                                <p>
-                                    Whether you're looking to connect with friends and family, network with professionals, or discover new interests and hobbies, Offeyicial is the place for you. We believe that social media has the power to bring people together and create meaningful connections,
-                                    and we're committed to making that a reality for all of our users.
-                                </p>
-                                <p>
-                                    Thank you for choosing Offeyicial as your social media platform of choice. We look forward to helping you connect with the world and make lasting connections!
-                                </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">About Us</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        At Offeyicial, we're passionate about providing you with the best social media experience. Our goal is to connect you with like-minded individuals, provide you with engaging content, and keep you informed about the latest trends and news in the social
+                        media world. Our team is dedicated to ensuring that you have a safe, fun, and enjoyable experience on our platform.
+                    </p>
+                    <p>
+                        Whether you're looking to connect with friends and family, network with professionals, or discover new interests and hobbies, Offeyicial is the place for you. We believe that social media has the power to bring people together and create meaningful connections,
+                        and we're committed to making that a reality for all of our users.
+                    </p>
+                    <p>
+                        Thank you for choosing Offeyicial as your social media platform of choice. We look forward to helping you connect with the world and make lasting connections!
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 <script src="js/jquery.min.js"></script>
 
 <script>
-    $('#submit').click(function(e) {
-        e.preventDefault();
+    $('#submit').click(function() {
+        // e.preventDefault();
         let message = $('#message').val();
         let email = $('#email').val();
         let name = $('#name').val();

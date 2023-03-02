@@ -555,10 +555,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                     <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="login.php">Login</a>
+                    <a class="nav-link" href="donate.php">Donate</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="reg.php">Register</a>
+                    <a class="nav-link" href="reg.php"><i class="bi bi-person-plus"></i>Register</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>

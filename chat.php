@@ -300,6 +300,33 @@ nav .profile-name {
 #user_table li:hover {
   background-color: #f2f2f2;
 }
+.custom-file-input {
+          opacity: 0;
+          position: absolute;
+          pointer-events: none;
+        }
+
+        .custom-file-label {
+          cursor: pointer;
+        }
+        .chatbox::-webkit-scrollbar-track {
+  background-color: #f5f5f5;
+}
+/* Define the scrollbar width and color */
+.chatbox::-webkit-scrollbar {
+  width: 8px;
+  background-color: #f5f5f5;
+}
+
+/* Define the scrollbar thumb color */
+.chatbox::-webkit-scrollbar-thumb {
+  background-color: #888;
+}
+
+/* On hover, darken the scrollbar thumb color */
+.chatbox::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
 
 
         </style>
@@ -385,8 +412,8 @@ if(sqlsrv_execute($stmt)){
     <?php
         include 'db.php';
 
-        $query = "SELECT * FROM chats WHERE UserId = ? AND recipientId = ? ORDER BY time_sent ASC";
-        $params = array($UserId, $recipientId);
+        $query = "SELECT * FROM chats WHERE (UserId = ? AND recipientId = ?) OR (UserId = ? AND recipientId = ?) ORDER BY time_sent ASC";
+        $params = array($UserId, $recipientId, $recipientId, $UserId);
         $stmt = sqlsrv_query($conn, $query, $params);
         if ($stmt === false) {
             die(print_r(sqlsrv_errors(), true));
@@ -396,8 +423,8 @@ if(sqlsrv_execute($stmt)){
             // process each row of the result set
             $senderId = $row['senderId'];
             $message = $row['Sent'];
-            $sent_image = $row['sentimage'];
-
+            $sent_image = $row['sentimage'];  
+            $sent_video = $row['sentvideo'];
             echo '<div class="' . ($senderId == $UserId ? 'Sent' : 'received') . '">';
             echo '<div class="message">';
             echo $message;
@@ -405,9 +432,11 @@ if(sqlsrv_execute($stmt)){
             if (!empty($sent_image)) {
                 echo '<div class="image"><img src="' . $sent_image . '"></div>';
             }
+            if (!empty($sent_video)) {
+                echo '<div class="video"><iframe src="' . $sent_video . '"></iframe></div>';
+            }
             echo '</div>';
         }
-        
     ?>
 </div>
        <br><br>
@@ -417,37 +446,72 @@ if(sqlsrv_execute($stmt)){
               <input type="file" class="image-input" id="image" name="image" accept="image/*">
               <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Image</label>
             </div>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
+              <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
+            </div>
+
             <button type="submit" class="submit">Send</button>
         </div>
 
         </div>
         <script src="js/jquery.min.js"></script>
         <script>
-                  $('.custom-file-label').on('click', function() {
-        $(this).siblings('.image-input').trigger('click');
+      $('.image-input').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).siblings('.image-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
       });
 
-      $('.image-input').on('change', function() {
+    </script> 
+    <script>
+      $('.custom-file-input').on('change', function() {
         var fileName = $(this).val().split('\\').pop();
         $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
       });
 
-    </script> 
-        <script>
-            $(document).ready(function() {
-                // Update chatbox every 0.5 seconds
-                setInterval(function() {
-                    $.ajax({
-                        url: 'getMessages.php',
-                        type: 'GET',
-                        success: function(data) {
-                            $('.chatbox').html(data);
-                        }
-                    });
-                }, 500);
-            });
+    </script>
+<script>
+function checkForNewMessages() {
+  var lastMessageTime = $('.chatbox .message:last').data('timestamp'); // Get the timestamp of the last message in the chatbox
+  $.ajax({
+    url: 'checkForNewMessages.php',
+    type: 'GET',
+    data: { 
+      UserId: '<?php echo $UserId; ?>', 
+      UserIdx: '<?php echo $recipientId; ?>',
+      lastMessageTime: lastMessageTime // Pass the timestamp of the last message as a parameter
+    },
+    dataType: 'json',
+    success: function(data) {
+      if (data.length > 0) {
+        for (var i = 0; i < data.length; i++) {
+          var message = data[i];
+          var senderId = message.senderId;
+          var messageText = message.Sent;
+          var sentImage = message.sentimage;
+          var sentVideo = message.sentvideo;
+          var messageHtml = '<div class="' + (senderId == '<?php echo $UserId; ?>' ? 'Sent' : 'received') + '">' +
+            '<div class="message" data-timestamp="' + message.time_sent + '">' + messageText + '</div>';
+          if (sentImage != '') {
+            messageHtml += '<div class="image"><img src="' + sentImage + '"></div>';
+          }
+          if (sentVideo != '') {
+            messageHtml += '<div class="video"><iframe src="' + sentVideo + '"></iframe></div>';
+          }
+          messageHtml += '</div>';
+          $('.chatbox').append(messageHtml);
+        }
+        $('.chatbox').scrollTop($('.chatbox')[0].scrollHeight);
+      }
+    }
+  });
+}
 
-        </script>
+setInterval(checkForNewMessages, 5000); // Call the function every 5 seconds
+</script>
+
+
+
 
         <script>
             $(document).ready(function() {
@@ -456,12 +520,15 @@ if(sqlsrv_execute($stmt)){
                     var image = $('.image-input').prop('files')[0];
                     var UserId = '<?php echo $UserId; ?>';
                     var recipientId = '<?php echo $recipientId; ?>';
+                    var video = $('#video').prop('files')[0];
 
                     var formData = new FormData();
                     formData.append('message', message);
                     formData.append('image', image);
                     formData.append('UserId', UserId);
                     formData.append('recipientId', recipientId);
+                    formData.append('video', video);
+
 
                     $.ajax({
                         url: 'send_message.php',
@@ -472,6 +539,7 @@ if(sqlsrv_execute($stmt)){
                         success: function(response) {
                             console.log(response);
                             $('#message').val('');
+                            // window.location.reload('.chatbox');
                         }
                     });
                 });
@@ -526,6 +594,14 @@ searchBox.addEventListener('input', function() {
 });
 
 </script>
+<script>
+window.onload = function() {
+  var chatbox = document.querySelector(".chatbox");
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+</script>
+
 
     </body>
 
