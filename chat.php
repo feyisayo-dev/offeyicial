@@ -365,7 +365,7 @@ nav .profile-name {
 </div>
 
 
-    <a href="user_profile.php" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
+    <a href="user_profile.php?UserId=<?php echo $UserId ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
   </div>
 </nav>
 

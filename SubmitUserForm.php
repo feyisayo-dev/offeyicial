@@ -80,17 +80,24 @@ if (isset($_POST['Submit'])){
 
 ?>
 <?php 
-    // include('db.php');
-    // $CountryId = $_POST['CountryId'];
-    // $query = "select StateId, FROM States WHERE CountryId = '$CountryId'";
-    // $result = sqlsrv_query($conn, $query);
-    // $output = '<option value="">Select State</option>';
-    // while($row = sqlsrv_fetch_array($result))
-    // {
-    //     $output .= '<option value="'.$row["StateId"].'">'.$row["StateName"].'</option>';
-    // }
-    // echo $output;
-?>
+if(isset($_POST['addbio'])){
+	include('db.php');
+	$bio = $_POST['bio'];
+	$UserId = $_POST['UserId'];
+
+	$query = "UPDATE User_Profile SET bio='$bio' where UserId= '$UserId'";
+	$smc = sqlsrv_query($conn,$query);
+	
+	if ($smc===false){
+		echo "Error";
+		die(print_r(sqlsrv_errors(), true));  
+	} else {
+		echo "Updated successfully";
+	}
+}
+?> 
+
+
 
 
 <?php

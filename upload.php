@@ -247,7 +247,7 @@ $UserId = $_SESSION['UserId'];
                                 <div id="user_table">
                             </li>
                 <li class="nav-item">
-				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php'"><i class="bi bi-person"></i>Profile</a>
+				<a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i>Profile</a>
                 </li>
                 <li class="nav-item">
                                 <a class="nav-link custom-link" onclick="window.location.href='index.php'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
@@ -278,7 +278,7 @@ $UserId = $_SESSION['UserId'];
             </div>
 
             <input type="submit" value="Add Post" class="submit">
-            <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php'">
+            <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'">
         </div>
     </body>
     <script src="js/jquery.min.js"></script> 

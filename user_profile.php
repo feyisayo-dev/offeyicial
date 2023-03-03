@@ -1,59 +1,59 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-  header('Location: login.php');
-  exit();
-}
-?>
 
-
-    <!-- rest of your HTML code -->
-
-    <?php
+if (isset($_SESSION['UserId'])) {
+    // Get the user ID of the profile owner from the URL
+    $profileOwnerId = $_GET['UserId'];
     $UserId=$_SESSION["UserId"];
     include ('db.php');
+    // echo $profileOwnerId;
+    // echo $UserId;
+    // Check if the user viewing the profile is the same as the profile owner
+    $isProfileOwner = ($UserId == $profileOwnerId);
 
-    $fetchUserInfo="Select [Surname]
-    ,[First_Name]
-    ,[gender]
-    ,[email]
-    ,[Password]
-    ,[phone]
-    ,[dob]
-    ,[countryId]
-    ,[stateId]
-    ,[Passport] from User_Profile where UserId='$UserId'";
-$FetchStatement=sqlsrv_query($conn,$fetchUserInfo);
-if( $FetchStatement === false ) {
-     die( print_r( sqlsrv_errors(), true));
+    // Query the database to get the user's profile information
+    // ...
+    $stmt = sqlsrv_prepare($conn, "SELECT [UserId], [Surname], [First_Name], [gender], [email], [Password], [phone], [dob], [countryId], [stateId], [Passport], [bio] FROM User_Profile WHERE UserId = ?", array(&$profileOwnerId));
+
+if (!$stmt) {
+    die(print_r(sqlsrv_errors(), true)); // handle the error
 }
 
-if (sqlsrv_fetch($FetchStatement)===false) {
-    die( print_r( sqlsrv_errors(), true));
-}else{
-    $Surname=sqlsrv_get_field($FetchStatement,0);
-    $First_Name=sqlsrv_get_field($FetchStatement,1);
-    $gender=sqlsrv_get_field($FetchStatement,2);
-    $email=sqlsrv_get_field($FetchStatement,3);
-    $Password=sqlsrv_get_field($FetchStatement,4);
-    $phone=sqlsrv_get_field($FetchStatement,5);
-    $dob=sqlsrv_get_field($FetchStatement,6);
-    $countryId=sqlsrv_get_field($FetchStatement,7);
-    $stateId=sqlsrv_get_field($FetchStatement,8);
-    $Passport=sqlsrv_get_field($FetchStatement,9);
+// execute the prepared statement
+$FetchStatement = sqlsrv_execute($stmt);
+
+// handle the result set
+if ($FetchStatement === false) {
+    die(print_r(sqlsrv_errors(), true)); // handle the error
+}
+
+// fetch the data from the result set
+$record = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+$Surname = $record['Surname'];
+$First_Name = $record['First_Name'];
+$gender = $record['gender'];
+$email = $record['email'];
+$Password = $record['Password'];
+$phone = $record['phone'];
+$dob = $record['dob'];
+$countryId = $record['countryId'];
+$stateId = $record['stateId'];
+$Passport = $record['Passport'];
+$bio = $record['bio'];
+
     if (empty( $Passport)) {
       $GetPassport="UserPassport/DefaultImage.png";
      }else{
      $GetPassport="UserPassport/".$Passport;
      }
-}
+     if (empty($bio)) {
+        $getbio = "Not yet set";
+    } else {
+        $getbio = $bio;
+    }
+    
 
-?>
-<?php
-$UserId=$_SESSION["UserId"];
-include ('db.php');
-
-$fetchPostsinfo = "SELECT [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$UserId' ORDER BY date_posted DESC";
+$fetchPostsinfo = "SELECT [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
 
 $fetchPosts=sqlsrv_query($conn,$fetchPostsinfo);
 if( $fetchPosts === false ) {
@@ -88,322 +88,288 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
     
     // rest of the code to display post information
 }
-?>
 
-            <!DOCTYPE html>
-            <html>
+    // Display the profile information
 
-            <head>
-                <meta charset="UTF-8">
-                <title>Profile ~<?php echo $Surname . " " . $First_Name; ?></title>
-                <link rel="stylesheet" href="css/all.min.css" />
-                <link href="css/bootstrap.min.css" rel="stylesheet">
-                <link rel="stylesheet" href="css\font\bootstrap-icons.css">
-                <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
+    // If $isProfileOwner is true, display all the information
 
-                <style>
-                    .user-profile {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                    }
-                    
-                    .profile-pic img {
-                        width: 250px;
-                        height: 250px;
-                        border-radius: 90%;
-                        margin-top: 20px;
-                    }
-                    
-                    .user-details {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        margin-top: 20px;
-                        text-align: center;
-                    }
-                    
-                    .user-details h2 {
-                        font-size: 24px;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .user-details p {
-                        font-size: 18px;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .user-details-item {
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .user-details-item span {
-                        font-weight: bold;
-                        margin-right: 10px;
-                    }
-                    
-                    .user-posts {
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        margin-top: 20px;
-                        text-align: center;
-                    }
-                    
-                    .user-posts h2 {
-                        font-size: 24px;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .user-posts-item {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        margin-right: 20px;
-                    }
-                    
-                    .user-posts-item img {
-                        width: 150px;
-                        height: 150px;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .navbar-nav a {
-                        font-size: 15px;
-                        text-transform: uppercase;
-                        font-weight: 500;
-                    }
-                    
-                    .navbar-light .navbar-brand {
-                        color: #000;
-                        font-size: 25px;
-                        text-transform: uppercase;
-                        font-weight: 700;
-                        letter-spacing: 2px;
-                    }
-                    
-                    .navbar-light .navbar-brand:focus,
-                    .navbar-light .navbar-brand:hover {
-                        color: #000;
-                    }
-                    
-                    .navbar-light .navbar-nav .navbar-link {
-                        color: #000;
-                    }
-                    
-                    .custom-link {
-                        text-decoration: none;
-                        cursor: pointer;
-                    }
-                    
-                    @media (max-width: 768px) {
-                        .navbar-collapse {
-                        position: fixed;
-                        top: 56px;
-                        bottom: 0;
-                        left: 100%;
-                        z-index: 1;
-                        width: 100%;
-                        padding-right: 1rem;
-                        padding-left: 1rem;
-                        overflow-y: auto;
-                        visibility: hidden;
-                        background-color: #fff;
-                        transition: visibility 0s linear 0.33s, left 0.33s ease-in-out;
-                        }
 
-                        .navbar-collapse.show {
-                        left: 0;
-                        visibility: visible;
-                        transition-delay: 0s;
-                        }
+// Check if user ID is equal to profile owner ID
+if ($UserId == $isProfileOwner) {
+    echo '<title>Profile ~ '.$Surname.' '.$First_Name.'</title>
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/font/bootstrap-icons.css">
+    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
+    <link href="css/aos.css" rel="stylesheet">
+    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/remixicon/remixicon.css" rel="stylesheet">
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">';
+    echo '<script src="js/popper.min.js"></script>
+            <script src="js/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+';    
+    echo '<link rel="stylesheet" href="profile.css">';
+    echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-                        .navbar-toggler {
-                        border-color: transparent;
-                        }
+    <div class="collapse navbar-collapse" id="navmenu">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link custom-link" onclick="window.location.href=\'index.php\'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link custom-link" onclick="window.location.href=\'upload.php\'"><i class="bi bi-plus-square"></i>Add a Post</a>
+            </li>
+            <li class="nav-item">
+                <div class="search-container">
+                    <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+                    <div id="user_table">
+                </div>
+            </li>
 
-                        .navbar-toggler:focus {
-                        outline: none;
-                        }
+            <li class="nav-item">
+                <a class="nav-link" href="home.php#contact"><i class="bi bi-telephone"></i>Contact us</a>
+            </li>
 
-                        .navbar-toggler-icon {
-                        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-                        }
-                        }
-                    .grid-container {
-                        display: grid;
-                        /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); */
-                        grid-gap: 20px;
-                    }
-                    .searchtext {
-  background-color: #f2f2f2;
-  border: none;
-  padding: 8px;
-  font-size: 16px;
-  width: 200px;
-  border-radius: 10px;
-}
+            <li class="nav-item">
+                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>';
 
-/* searchdropdown */
-.search-container {
-  position: relative;
-}
-
-#user_table {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  position: absolute;
-  z-index: 9999;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-top: none;
-
-}
-
-#user_table li {
-  padding: 8px 12px;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-#user_table li:hover {
-  background-color: #f2f2f2;
-  text-decoration: none;
-
-}
-@media (min-width: 768px) {
-  /* adjust layout for larger screens */
-  .user-profile {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                    }
-                    
-                    .profile-pic img {
-                        width: 250px;
-                        height: 250px;
-                        border-radius: 90%;
-                        margin-top: 20px;
-                    }
-
-}
-
-                </style>
-            </head>
-
-            <body>
-                <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-                    <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-                    <div class="collapse navbar-collapse" id="navmenu">
-                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='index.php'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link custom-link" onclick="window.location.href='upload.php'"><i class="bi bi-plus-square"></i>Add a Post</a>
-                            </li>
-                            <li class="nav-item">
-                            <div class="search-container">
-                                <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
-                                <div id="user_table">
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="home.php#contact"><i class="bi bi-telephone"></i>Contact us</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-
-                <div class="container-fluid profile-section">
-                    <br><br><br>
-                    <div class="row">
-                        <div class="col-md-4 profile-pic">
-                            <img src="<?php echo $GetPassport; ?>" class="button" alt="Profile Picture">
-                            <P>Enhance your online persona</P>
-                            <form action="" method="POST" enctype="multipart/form-data">
-                                <input type="file" name="Fileupload" id="upload1" placeholder="Choose file path" style="float: left;background-color:orange;" required />
-
-                                <button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">
-
-                            <i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>
-                                <hr>
-                        </div>
-                        <div class="col-md-8 profile-info">
-                            <h2>
-                                <?php echo $Surname .'  ' . $First_Name;?>
-                            </h2>
-                            <p>Email:
-                                <?php echo  $email;  ?>
-                            </p>
-                            <p>Phone Number:
-                                <?php echo $phone;?>
-                            </p>
-                            <p>Gender:
-                                <?php echo $gender; ?>
-                            </p>
-                            <p>Date of Birth:
-                                <?php echo   $dob;?>
-                            </p>
-                            <p>Location ID:
-                                <?php echo $countryId .'  ' . $stateId;?>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="container">
+    // Display all information
+    echo '<div class="container-fluid profile-section">';
+    echo '<br><br><br>';
+   echo '<div class="row">';
+    echo '<div class="col-md-4 profile-pic">';
+    echo '<img src="'.$GetPassport.'" class="button" alt="Profile Picture">';
+        echo '<P>Enhance your online persona</P>';
+        echo '<form action="" method="POST" enctype="multipart/form-data">';
+            echo '<input type="file" name="Fileupload" id="upload1" placeholder="Choose file path" style="float: left;background-color:orange;" required />';
+            echo '<button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">';
+        echo '<i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>';
+            echo '<hr>';
+    echo '</div>';
+    echo '<div class="col-md-8 profile-info">';
+        echo '<h2>' .$Surname .'  ' . $First_Name. '</h2>';
+        echo '<p>Email: '.$email.'</p>';
+        echo '<p>Phone Number: '.$phone.'</p>';
+        echo '<p>Gender: '.$gender.'</p>';
+        echo '<p>Date of Birth: '.$dob.'</p>';
+        echo '<p>Location ID: '.$countryId.' '.$stateId.'</p>';  
+        echo '<p>Bio: '.$getbio.'</p>';        
+        echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">
+        Set Bio
+      </button>';     
+    echo '</div>';
+echo '</div>';
+echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
             <div class="posts">
-                <div class="post">
-                <?php if (!empty($image)): ?>
-                    <h3 class="title"><?php echo $title; ?></h3>
-                        <?php endif; ?>
-                    
-                    <div class="row">
-                        <?php if (!empty($image)): ?>
-                            <div class="col-md-6">
-                                <img src="<?php echo $image; ?>" class="img-fluid">
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($video)): ?>
-                            <div class="col-md-6">
+                <div class="post">';
+                if (!empty($image)) {
+                    echo '<h3 class="title">' . $title . '</h3>';
+                }
+                echo '<div class="row">';
+                if (!empty($image)) {
+                    echo '<div class="col-md-6">
+                                <img src="' . $image . '" class="img-fluid">
+                            </div>';
+                }
+                if (!empty($video)) {
+                    echo '<div class="col-md-6">
                                 <video controls class="w-100">
-                                    <source src="<?php echo $video; ?>" type="video/mp4">
+                                    <source src="' . $video . '" type="video/mp4">
                                 </video>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <?php if (!empty($image)): ?>
-                        <p><?php echo $content; ?></p>
-                        <?php endif; ?>
-                        <?php if (!empty($image)): ?>
-                            <p><?php echo $time_ago; ?></p>
-                        <?php endif; ?>
-                </div>
+                            </div>';
+                }
+                echo '</div>';
+                if (!empty($image)) {
+                    echo '<p>' . $content . '</p>';
+                }
+                if (!empty($image)) {
+                    echo '<p>' . $time_ago . '</p>';
+                }
+            echo '</div>
             </div>
         </div>
     </div>
-</div>
+</div>';
 
-                <?php
+    // If $isProfileOwner is false, only display some of the information
+    // ...
+} else {
+    echo '<title>Profile ~ '.$Surname.' '.$First_Name.'</title>
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/font/bootstrap-icons.css">
+    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />';    
+    echo '<link rel="stylesheet" href="profile.css">';
+    echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navmenu">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link custom-link" onclick="window.location.href=\'index.php\'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link custom-link" onclick="window.location.href=\'upload.php\'"><i class="bi bi-plus-square"></i>Add a Post</a>
+            </li>
+            <li class="nav-item">
+                <div class="search-container">
+                    <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+                    <div id="user_table">
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="home.php#contact"><i class="bi bi-telephone"></i>Contact us</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>';
+
+    // Display all information
+    echo '<div class="container-fluid profile-section">';
+    echo '<br><br><br>';
+   echo '<div class="row">';
+    echo '<div class="col-md-4 profile-pic">';
+    echo '<img src="'.$GetPassport.'" class="button" alt="Profile Picture">';
+        echo '<P>Enhance your online persona</P>';
+        echo '<form action="" method="POST" enctype="multipart/form-data">';
+            echo '<input type="file" name="Fileupload" id="upload1" placeholder="Choose file path" style="float: left;background-color:orange;" required />';
+            echo '<button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">';
+        echo '<i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>';
+            echo '<hr>';
+    echo '</div>';
+    echo '<div class="col-md-8 profile-info">';
+        echo '<h2>' .$Surname .'  ' . $First_Name. '</h2>';
+
+        echo '<p>Gender: '.$gender.'</p>';
+        echo '<p>Bio: '.$getbio.'</p>';        
+
+    echo '</div>';
+echo '</div>';
+echo '<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="text-center text-uppercase text-success">Posts</h3>
+            <div class="posts">
+                <div class="post">';
+                if (!empty($image)) {
+                    echo '<h3 class="title">' . $title . '</h3>';
+                }
+                echo '<div class="row">';
+                if (!empty($image)) {
+                    echo '<div class="col-md-6">
+                                <img src="' . $image . '" class="img-fluid">
+                            </div>';
+                }
+                if (!empty($video)) {
+                    echo '<div class="col-md-6">
+                                <video controls class="w-100">
+                                    <source src="' . $video . '" type="video/mp4">
+                                </video>
+                            </div>';
+                }
+                echo '</div>';
+                if (!empty($image)) {
+                    echo '<p>' . $content . '</p>';
+                }
+                if (!empty($image)) {
+                    echo '<p>' . $time_ago . '</p>';
+                }
+            echo '</div>
+            </div>
+        </div>
+    </div>
+</div>';
+}
+echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-labelledby="setBioModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="setBioModalLabel">Set Bio</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="bioTextArea" rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="saveBio()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>';
+echo '<script>
+function saveBio() {
+  var bio = document.getElementById("bioTextArea").value;
+  var UserId = "' . $_GET["UserId"] . '";
+
+  // Do something with the bio, e.g. send it to the server using AJAX
+  if (bio != "") {
+    $.ajax({
+      url: "SubmitUserForm.php",
+      type: "POST",
+      async: false,
+      data: {
+        "addbio": 1,
+        "bio": bio,
+        "UserId": UserId,
+
+      },
+      success: function (data) {
+        alert(data)
+        $("#bioTextArea").val("");
+        // Reload the frame with class "col-md-8 profile-info"
+        $(".col-md-8.profile-info").load(location.href + " .col-md-8.profile-info>*","");
+      }
+    });
+  } else {
+    alert("Field Missing");
+  }
+  console.log(bio);
+  // Close the modal
+  $("#setBioModal").modal("hide");
+}
+</script>';
+
+
+
+
+} else {
+    // User is not logged in, redirect to the login page
+    header('Location: login.php');
+    exit;
+}
+?>
+<?php
                 if(isset($_POST['button'])){
 
 $FirstPassportName=basename($_FILES["Fileupload"]["name"]);
@@ -462,7 +428,7 @@ If ($smc===false){
 
                               // $msg = $picture;
                               
-                              $URL="user_profile.php";
+                              $URL="user_profile.php?UserId=<?php echo $UserId ?>";
                               echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
                               echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
                               // 	--------------------------------------------------------------------
@@ -476,48 +442,3 @@ If ($smc===false){
 }
 
 ?>
-            </body>
-        <script src="js/jquery.min.js"></script>
-
-            <script>
-$(document).ready(function(){
-  $("#search").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#user_table tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
-  });
-});
-</script>
-<script>
-const searchBox = document.getElementById('search');
-const resultsDiv = document.getElementById('user_table');
-
-searchBox.addEventListener('input', function() {
-  const searchTerm = this.value;
-
-  // Clear the results if the search box is empty
-  if (!searchTerm.trim()) {
-    resultsDiv.innerHTML = '';
-    return;
-  }
-
-  // Your search function here
-  $("#search").on("keyup", function() {
-    var search_query = $(this).val();
-    $.ajax({
-      url: "searchbackend.php",
-      method: "POST",
-      data: {search_query:search_query},
-      success: function(data){
-        // Update the table with the returned results
-        $("#user_table").html(data);
-      }
-    });
-  });
-});
-
-</script>
-
-
-            </html>

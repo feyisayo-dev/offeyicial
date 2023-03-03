@@ -830,7 +830,7 @@ session_start();
                     alert(data)
                     alert("Registration Successful");
                     if (data != '') {
-                        window.location.href = "user_profile.php";
+                        window.location.href = "user_profile.php?UserId=" +data;
                     }
 
                 }
