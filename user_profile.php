@@ -88,7 +88,18 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
     
     // rest of the code to display post information
 }
+    // Get the count of followers and following for the profile owner and recipient
+    $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE recipientId = ?";
+    $params = array($profileOwnerId);
+    $stmt = sqlsrv_query($conn, $sql, $params);
+    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    $followers = $row['num_followers'];
 
+    $sql = "SELECT COUNT(*) as num_following FROM follows WHERE UserId = ?";
+    $params = array($profileOwnerId);
+    $stmt = sqlsrv_query($conn, $sql, $params);
+    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    $following = $row['num_following'];
     // Display the profile information
 
     // If $isProfileOwner is true, display all the information
@@ -107,14 +118,13 @@ if ($UserId == $isProfileOwner) {
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">';
     echo '<script src="js/popper.min.js"></script>
-            <script src="js/jquery.min.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 ';    
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -150,17 +160,21 @@ if ($UserId == $isProfileOwner) {
     // Display all information
     echo '<div class="container-fluid profile-section">';
     echo '<br><br><br>';
-   echo '<div class="row">';
+    echo '<div class="row">';
     echo '<div class="col-md-4 profile-pic">';
     echo '<img src="'.$GetPassport.'" class="button" alt="Profile Picture">';
         echo '<P>Enhance your online persona</P>';
         echo '<form action="" method="POST" enctype="multipart/form-data">';
-            echo '<input type="file" name="Fileupload" id="upload1" placeholder="Choose file path" style="float: left;background-color:orange;" required />';
+            echo '<label for="upload1" class="custom-file-upload">
+            <i class="fa fa-cloud-upload"></i> Choose File
+          </label>
+          <input type="file"class="custom-file-input" name="Fileupload" id="upload1" required />
+          ';
             echo '<button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">';
         echo '<i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>';
             echo '<hr>';
     echo '</div>';
-    echo '<div class="col-md-8 profile-info">';
+    echo '<div class="col-md-4 profile-info">';
         echo '<h2>' .$Surname .'  ' . $First_Name. '</h2>';
         echo '<p>Email: '.$email.'</p>';
         echo '<p>Phone Number: '.$phone.'</p>';
@@ -172,7 +186,12 @@ if ($UserId == $isProfileOwner) {
         Set Bio
       </button>';     
     echo '</div>';
+    echo '<div class="col-md-4">';
+    echo '<p>Following: '.$following.'</p>';
+    echo '<p>Followers: '.$followers.'</p>';
+    echo '</div>';
 echo '</div>';
+
 echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -219,7 +238,7 @@ echo '<div class="container">
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -258,19 +277,19 @@ echo '<div class="container">
    echo '<div class="row">';
     echo '<div class="col-md-4 profile-pic">';
     echo '<img src="'.$GetPassport.'" class="button" alt="Profile Picture">';
-        echo '<P>Enhance your online persona</P>';
-        echo '<form action="" method="POST" enctype="multipart/form-data">';
-            echo '<input type="file" name="Fileupload" id="upload1" placeholder="Choose file path" style="float: left;background-color:orange;" required />';
-            echo '<button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">';
-        echo '<i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>';
-            echo '<hr>';
+        echo '<hr>';
     echo '</div>';
-    echo '<div class="col-md-8 profile-info">';
+    echo '<div class="col-md-4 profile-info">';
         echo '<h2>' .$Surname .'  ' . $First_Name. '</h2>';
 
         echo '<p>Gender: '.$gender.'</p>';
-        echo '<p>Bio: '.$getbio.'</p>';        
+        echo '<p>Bio: '.$getbio.'</p>';    
+        echo '<button id="followBtn" class="follow">Follow</button>';    
 
+    echo '</div>';
+    echo '<div class="col-md-4">';
+    echo '<p>Following: '.$following.'</p>';
+    echo '<p>Followers: '.$followers.'</p>';
     echo '</div>';
 echo '</div>';
 echo '<div class="container">
@@ -327,6 +346,15 @@ echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-
     </div>
   </div>
 </div>';
+echo '<script src="js/jquery.min.js"></script>';
+echo '<script>
+  $(".custom-file-input").on("change", function() {
+    // Get the selected file name
+    var fileName = $(this).val().split("\\").pop();
+    // Update the label text
+    $(this).next(".custom-file-input").html("<i class="bi bi-check-circle-fill"></i> " + fileName);
+  });
+</script>';
 echo '<script>
 function saveBio() {
   var bio = document.getElementById("bioTextArea").value;
@@ -403,6 +431,39 @@ $(document).ready(function() {
   });
 });
 </script>';
+echo '<script>
+$(document).ready(function() {
+    var profileOwnerId = "' . $profileOwnerId . '";
+    var recipientId = "' . $UserId . '";
+    var followBtn = $("#followBtn");
+
+    $(".follow").click(function() {
+        // alert("Button is working!");
+        $.ajax({
+            url: "follow.php",
+            type: "POST",
+            data: {
+                follow: 1,
+                profileOwnerId: profileOwnerId,
+                recipientId: recipientId
+            },
+            success: function(response) {
+                alert("Followed");
+
+                if (response == "followed") {
+                    followBtn.removeClass("btn-primary").addClass("btn-secondary").text("Unfollow");
+                } else {
+                    followBtn.removeClass("btn-secondary").addClass("btn-primary").text("Follow");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+    });
+});
+</script>';
+
 
 
 
@@ -472,7 +533,7 @@ If ($smc===false){
 
                               // $msg = $picture;
                               
-                              $URL="user_profile.php?UserId=<?php echo $UserId ?>";
+                              $URL="user_profile.php?UserId=" .$UserId ;
                               echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
                               echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
                               // 	--------------------------------------------------------------------

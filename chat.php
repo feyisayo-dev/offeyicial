@@ -27,8 +27,16 @@ $UserId = $_SESSION['UserId'];
         <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
         <link rel="stylesheet" href="css\all.min.css">
         <link rel="stylesheet" href="css\font\bootstrap-icons.css">
-        <link rel="stylesheet" href="css\boostrap-icons">
         <link rel="stylesheet" href="css\fontawesome.min.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/aos.css" rel="stylesheet">
+    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/remixicon/remixicon.css" rel="stylesheet">
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <script src="js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
 
 
 
@@ -327,6 +335,12 @@ nav .profile-name {
 .chatbox::-webkit-scrollbar-thumb:hover {
   background-color: #555;
 }
+/* #videoPlayer {
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+} */
+
 
 
         </style>
@@ -433,9 +447,13 @@ if(sqlsrv_execute($stmt)){
                 echo '<div class="image"><img src="' . $sent_image . '"></div>';
             }
             if (!empty($sent_video)) {
-                echo '<div class="video"><iframe src="' . $sent_video . '"></iframe></div>';
+                echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal" onclick="playVideo(\''. $sent_video .'\')">
+                    <i class="bi bi-play-btn"></i> Watch Video
+                </button>';
             }
-            echo '</div>';
+            
+          echo '</div>';
+          
         }
     ?>
 </div>
@@ -455,6 +473,22 @@ if(sqlsrv_execute($stmt)){
         </div>
 
         </div>
+        <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="videoModalLabel">Video</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <video  id="videoPlayer" width="640" height="360" controls>
+  <source src="<?php echo $sent_video; ?>" type="video/mp4">
+</video>
+
+      </div>
+    </div>
+  </div>
+</div>
         <script src="js/jquery.min.js"></script>
         <script>
       $('.image-input').on('change', function() {
@@ -466,11 +500,47 @@ if(sqlsrv_execute($stmt)){
     <script>
       $('.custom-file-input').on('change', function() {
         var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
+        $(this).siblings('.custom-file-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
       });
 
     </script>
 <script>
+function playVideo(videoUrl) {
+  // Get the video element
+  var videoPlayer = document.getElementById("videoPlayer");
+
+  // Set the video source
+  videoPlayer.src = videoUrl;
+
+  // Play the video
+  videoPlayer.play();
+
+  // Show the modal
+  $("#videoModal").modal("show");
+}
+
+// Stop the video when the modal is closed
+$("#videoModal").on("hidden.bs.modal", function () {
+  var videoPlayer = document.getElementById("videoPlayer");
+  videoPlayer.pause();
+});
+</script>
+
+        <script>
+setInterval(function(){
+  // use AJAX to call getMessages.php and update the chat window
+  $.ajax({
+    url: 'checkForNewMessages.php',
+    type: 'POST',
+    data: {UserId: '<?php echo $UserId; ?>', recipientId: '<?php echo $recipientId; ?>'},
+    success: function(response) {
+      $('#chat-window').html(response);
+    }
+  });
+}, 500);
+
+    </script>
+<!-- <script>
 function checkForNewMessages() {
   var lastMessageTime = $('.chatbox .message:last').data('timestamp'); // Get the timestamp of the last message in the chatbox
   $.ajax({
@@ -508,7 +578,7 @@ function checkForNewMessages() {
 }
 
 setInterval(checkForNewMessages, 5000); // Call the function every 5 seconds
-</script>
+</script> -->
 
 
 
