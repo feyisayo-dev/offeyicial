@@ -539,7 +539,8 @@ setInterval(checkForNewMessages, 5000); // Call the function every 5 seconds
                         success: function(response) {
                             console.log(response);
                             $('#message').val('');
-                            // window.location.reload('.chatbox');
+                            $(".chatbox").load(location.href + " .chatbox>*","");
+
                         }
                     });
                 });

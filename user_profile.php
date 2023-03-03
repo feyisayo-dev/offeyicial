@@ -359,6 +359,50 @@ function saveBio() {
   $("#setBioModal").modal("hide");
 }
 </script>';
+echo ' <script>
+$(document).ready(function(){
+  $("#search").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    if (value === "") {
+      // Clear the table if the search box is empty
+      $("#user_table").html("");
+    } else {
+      // Run the search function if the search box is not empty
+      $("#user_table tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    }
+  });
+});
+
+</script>';
+echo '<script>
+$(document).ready(function() {
+  const searchBox = $("#search");
+  const resultsDiv = $("#user_table");
+
+  searchBox.on("input", function() {
+    const searchTerm = this.value.trim();
+
+    // Clear the results if the search box is empty
+    if (!searchTerm) {
+      resultsDiv.html("");
+      return;
+    }
+
+    // Send a request to the server to get the search results
+    $.ajax({
+      url: "searchbackend.php",
+      method: "POST",
+      data: { search_query: searchTerm },
+      success: function(data) {
+        // Update the table with the returned results
+        resultsDiv.html(data);
+      }
+    });
+  });
+});
+</script>';
 
 
 
