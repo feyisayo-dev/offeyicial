@@ -223,18 +223,21 @@
   }
   
   .follow.following {
-    background-color: blue;
-  }
-  
-  .follow.unfollow {
     background-color: red;
   }
   
+  .follow.unfollow {
+    background-color: blue;
+  }
+  
 .message{
-    border: 10px;
-    box-shadow: 2px 2px 2px solid blue;
-    background-color: green;
-    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    color: green;
+    cursor: pointer;
+    text-align: center;
 }
 .custom-file-upload {
     display: inline-block;
