@@ -101,16 +101,17 @@ if(isset($_POST['addbio'])){
 
 
 <?php
-if(isset($_POST['Update'])){
+if(isset($_POST['edit'])){
 	include ('db.php');
+	$UserId = $_POST['UserId'];
 	$Surname = ($_POST['Surname']);
 	$First_Name = ($_POST['First_Name']);
 	$gender = ($_POST['gender']);
 	$email = ($_POST['email']);
 	$phone = ($_POST['phone']);
 	$dob = ($_POST['dob']);
-	$countryId = ($_POST['countryId']);
-	$stateId = ($_POST['stateId']);
+	$countryId = ($_POST['country']);
+	$stateId = ($_POST['state']);
 	$Update ="Update User_Profile SET 
 	Surname='".$Surname."',
 	First_Name='".$First_Name."',
@@ -119,7 +120,7 @@ if(isset($_POST['Update'])){
 	phone='".$phone."',
 	dob='".$dob."',
 	countryId='".$countryId."',
-	stateId='".$stateId."' where ltrim(UserId)='$UserId'";
+	stateId='".$stateId."' where UserId='$UserId'";
 	$UpdateStmt=sqlsrv_query($conn,$Update);
 
 	if( $UpdateStmt===false){  
@@ -127,8 +128,7 @@ if(isset($_POST['Update'])){
 		die( print_r( sqlsrv_errors(), true)); 
 
 			}else{
-				session_start();
-                echo $_SESSION['UserId']=$UserId;
+				echo "success";
 			} 
 
 }

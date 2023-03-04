@@ -89,18 +89,23 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
     // rest of the code to display post information
 }
     // Get the count of followers and following for the profile owner and recipient
-    $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE recipientId = ?";
+    $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE UserId = ?";
     $params = array($profileOwnerId);
     $stmt = sqlsrv_query($conn, $sql, $params);
     $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
     $followers = $row['num_followers'];
 
-    $sql = "SELECT COUNT(*) as num_following FROM follows WHERE UserId = ?";
+    $sql = "SELECT COUNT(*) as num_following FROM follows WHERE recipientId = ?";
     $params = array($profileOwnerId);
     $stmt = sqlsrv_query($conn, $sql, $params);
     $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
     $following = $row['num_following'];
     // Display the profile information
+
+    $sql = "SELECT * FROM follows WHERE UserId = ? AND recipientId = ?";
+$params = array($UserId, $profileOwnerId);
+$stmt = sqlsrv_query($conn, $sql, $params);
+$isFollowing = sqlsrv_has_rows($stmt);
 
     // If $isProfileOwner is true, display all the information
 
@@ -121,6 +126,8 @@ if ($UserId == $isProfileOwner) {
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 ';    
+echo '    <script src="country-states.js"></script>
+';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
@@ -181,10 +188,16 @@ if ($UserId == $isProfileOwner) {
         echo '<p>Gender: '.$gender.'</p>';
         echo '<p>Date of Birth: '.$dob.'</p>';
         echo '<p>Location ID: '.$countryId.' '.$stateId.'</p>';  
-        echo '<p>Bio: '.$getbio.'</p>';        
-        echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">
-        Set Bio
-      </button>';     
+        echo '<p>Bio: '.$getbio.'</p>';    
+        echo '<div class="row">';
+        echo '<div class="col-md-4">';   
+        echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">Set Bio</button>';
+        echo '</div>';
+        echo '<div class="col-md-4">'; 
+        echo '<button type="button" style="background-color:red;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editprofile">Edit profile</button>';
+        echo '</div>';
+        echo '</div>';
+     
     echo '</div>';
     echo '<div class="col-md-4">
     <div class="row">
@@ -292,7 +305,8 @@ echo '<div class="container">
 
         echo '<p>Gender: '.$gender.'</p>';
         echo '<p>Bio: '.$getbio.'</p>';    
-        echo '<button id="followBtn" class="follow unfollow">Follow</button>';
+        echo '<button id="followBtn" class="follow unfollow">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
+
     echo '<div class="col-md-4">
     <div class="row">
       <div class="col-md-6">
@@ -352,7 +366,7 @@ echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-
         </button>
       </div>
       <div class="modal-body">
-        <textarea class="form-control" id="bioTextArea" rows="3"></textarea>
+        <textarea class="form-control" id="bioTextArea" rows="3"> '.$getbio.' </textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -361,11 +375,145 @@ echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-
     </div>
   </div>
 </div>';
+echo '<div class="modal fade" id="editprofile" tabindex="-1" role="dialog" aria-labelledby="editprofileLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editprofileLabel">Edit Profile</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <fieldset>
+      <legend>Personal Information</legend>
+      <div class="form-group">
+        <label for="Surname">Surname:</label>
+        <textarea style="height: 30px;" type="text" class="form-control" id="Surname" placeholder="Surname" name="Surname">'.$Surname.'</textarea>
+      </div>
+      <div class="form-group">
+        <label for="First Name">First Name:</label>
+        <textarea style="height: 30px;" type="text" class="form-control" id="First_Name" placeholder="First Name" name="First_Name">'.$First_Name.'</textarea>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <textarea style="height: 30px;" type="email" class="form-control" id="email" placeholder="Email" name="email">'.$email.'</textarea>
+      </div>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Contact Information</legend>
+      <div class="form-group">
+        <label for="Phone">Phone:</label>
+        <textarea style="height: 30px;" type="text" class="form-control" id="phone" placeholder="Phone" name="phone">'.$phone.'</textarea>
+      </div>
+      <div class="form-inline">
+        <div class="form-group">
+          <label for="gender">Gender:</label>
+          <select name="gender" id="gender" name="gender" class="form-control">
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Others">I prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dob">DOB:</label>
+          <input style="height: 30px;" type="date" class="form-control" id="dob" placeholder="dob" name="dob">'.$dob.'
+              </div>
+          </div>
+          </fieldset>
+  
+          <fieldset>
+      <legend>Location Information</legend>
+          <div class="form-group">
+              <div class="form-inline">
+                  <div class="form-group">
+                      <label for="Country">Country:</label>
+                      <select name="country" class="countries form-control" id="countryId">
+                          <option value="">Select Country</option>
+                      </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="State">State:</label>
+                      <select name="state" class="states form-control" id="stateId">
+                          <option value="">Select State</option>
+                      </select>
+                  </div>
+              </div>
+          </div>
+          <div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="editpro()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>';
 echo '<script src="js/jquery.min.js"></script>';
+echo '<script>
+//Script to load
+// user country code for selected option
+let user_country_code = "$countryId";
+
+(function () {
+
+    let country_list = country_and_states["country"];
+    let states_list = country_and_states["states"];
+
+    // creating country name drop-down
+    let option = "";
+    option += "<option>select country</option>";
+    for (let country_code in country_list) {
+        // set selected option user country
+        let selected = (country_code == user_country_code) ? " selected" : "";
+        option += "<option value=\"" + country_code + "\"" + selected + ">" + country_list[country_code] + "</option>";
+    }
+    document.getElementById("countryId").innerHTML = option;
+
+    // creating states name drop-down
+    let text_box = "<input type=\"text\" class=\"input-text\" id=\"state\">";
+    let state_code_id = document.getElementById("stateId");
+
+    function create_states_dropdown() {
+        // get selected country code
+        let country_code = document.getElementById("countryId").value;
+        let states = states_list[country_code];
+        // invalid country code or no states add textbox
+        if (!states) {
+            state_code_id.innerHTML = text_box;
+            return;
+        }
+        let option = "";
+        if (states.length > 0) {
+            option = "<select id=\"state\">\n";
+            for (let i = 0; i < states.length; i++) {
+                option += "<option value=\"" + states[i].code + "\">" + states[i].name + "</option>";
+            }
+            option += "</select>";
+        } else {
+            // create input textbox if no states
+            option = text_box
+        }
+        state_code_id.innerHTML = option;
+    }
+
+    // country select change event
+    const country_select = document.getElementById("countryId");
+    country_select.addEventListener("change", create_states_dropdown);
+
+    create_states_dropdown();
+})();
+// end of Country and State loading
+</script>';
+
+
+
 echo '<script>
 $(".custom-file-input").on("change", function() {
   // Get the selected file name
-  var fileName = $(this).val().split("\\").pop();
+  var fileName = $(this).val().split("\\\").pop();
   // Update the label text
   $(this).next(".custom-file-label").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
 });
@@ -392,7 +540,7 @@ function saveBio() {
         alert(data)
         $("#bioTextArea").val("");
         // Reload the frame with class "col-md-8 profile-info"
-        $(".col-md-8.profile-info").load(location.href + " .col-md-8.profile-info>*","");
+        $(".col-md-4.profile-info").load(location.href + " .col-md-4.profile-info>*","");
       }
     });
   } else {
@@ -403,6 +551,51 @@ function saveBio() {
   $("#setBioModal").modal("hide");
 }
 </script>';
+echo '<script>
+function editpro() {
+    var UserId = "' . $_GET["UserId"] . '";
+
+    var Surname = $("#Surname").val();
+    var First_Name = $("#First_Name").val();
+    var email = $("#email").val();
+    var phone = $("#phone").val();
+    var gender = $("#gender").val();
+    var dob = $("#dob").val();
+    var country = $("#countryId").val();
+    var state = $("#stateId").val();
+
+    if (Surname === "" || First_Name === "" || email === "" || phone === "" || gender === "" || dob === "" || country === "" || state === "") {
+        alert("Please fill in all the required fields.");
+        return false;
+    }
+
+    $.ajax({
+        url: "SubmitUserForm.php", 
+        type: "POST",
+        data: {
+            edit: 1,
+            UserId: UserId,
+            Surname: Surname,
+            First_Name: First_Name,
+            email: email,
+            phone: phone,
+            gender: gender,
+            dob: dob,
+            country: country,
+            state: state
+        },
+        success: function(data) {
+            alert(data);
+            location.reload();
+        },
+        error: function(xhr, status, error) {
+            // handle error response here
+            alert(data);
+        }
+    });
+}
+</script>';
+
 echo ' <script>
 $(document).ready(function(){
   $("#search").on("keyup", function() {

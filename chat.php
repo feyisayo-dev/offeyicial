@@ -244,6 +244,8 @@ nav .profile-name {
   position: relative;
   font-size: 20px;
   font-weight: bold;
+  text-decoration: none;
+  color: white;
 }
 
 .icon::before {
@@ -416,7 +418,7 @@ if(sqlsrv_execute($stmt)){
         $First_Name = $row['First_Name'];
     }
     echo '<img class="recipientPassport" src="UserPassport/' . $recipientPassport. '">';
-    echo '<span class="icon">'. $recipientSurname .' '. $recipientFirstName .'</span>';
+    echo '<a class="icon" href="user_profile.php?UserId='.$recipientId.'">'. $recipientSurname .' '. $recipientFirstName .'</a>';
 
 
 }
