@@ -168,7 +168,7 @@ if ($UserId == $isProfileOwner) {
             echo '<label for="upload1" class="custom-file-upload">
             <i class="fa fa-cloud-upload"></i> Choose File
           </label>
-          <input type="file"class="custom-file-input" name="Fileupload" id="upload1" required />
+          <input type="file" class="custom-file-input" name="Fileupload" id="upload1" required />
           ';
             echo '<button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">';
         echo '<i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>';
@@ -186,10 +186,18 @@ if ($UserId == $isProfileOwner) {
         Set Bio
       </button>';     
     echo '</div>';
-    echo '<div class="col-md-4">';
-    echo '<p>Following: '.$following.'</p>';
-    echo '<p>Followers: '.$followers.'</p>';
-    echo '</div>';
+    echo '<div class="col-md-4">
+    <div class="row">
+      <div class="col-md-6">
+        <p style="margin-bottom: 0;">'.$following.'</p>
+        <p style="font-size: 0.8rem;">Following</p>
+      </div>
+      <div class="col-md-6">
+        <p style="margin-bottom: 0;">'.$followers.'</p>
+        <p style="font-size: 0.8rem;">Followers</p>
+      </div>
+    </div>
+  </div>';
 echo '</div>';
 
 echo '<div class="container">
@@ -284,13 +292,20 @@ echo '<div class="container">
 
         echo '<p>Gender: '.$gender.'</p>';
         echo '<p>Bio: '.$getbio.'</p>';    
-        echo '<button id="followBtn" class="follow">Follow</button>';    
-
-    echo '</div>';
-    echo '<div class="col-md-4">';
-    echo '<p>Following: '.$following.'</p>';
-    echo '<p>Followers: '.$followers.'</p>';
-    echo '</div>';
+        echo '<button id="followBtn" class="follow unfollow">Follow</button>';
+    echo '<div class="col-md-4">
+    <div class="row">
+      <div class="col-md-6">
+        <p style="margin-bottom: 0;">'.$following.'</p>
+        <p style="font-size: 0.8rem;">Following</p>
+      </div>
+      <div class="col-md-6">
+        <p style="margin-bottom: 0;">'.$followers.'</p>
+        <p style="font-size: 0.8rem;">Followers</p>
+      </div>
+    </div>
+  </div>
+  ';
 echo '</div>';
 echo '<div class="container">
     <div class="row">
@@ -348,13 +363,14 @@ echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-
 </div>';
 echo '<script src="js/jquery.min.js"></script>';
 echo '<script>
-  $(".custom-file-input").on("change", function() {
-    // Get the selected file name
-    var fileName = $(this).val().split("\\").pop();
-    // Update the label text
-    $(this).next(".custom-file-input").html("<i class="bi bi-check-circle-fill"></i> " + fileName);
-  });
-</script>';
+$(".custom-file-input").on("change", function() {
+  // Get the selected file name
+  var fileName = $(this).val().split("\\").pop();
+  // Update the label text
+  $(this).next(".custom-file-label").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
+});
+</script>
+';
 echo '<script>
 function saveBio() {
   var bio = document.getElementById("bioTextArea").value;
@@ -444,17 +460,19 @@ $(document).ready(function() {
             type: "POST",
             data: {
                 follow: 1,
+                unfollow: 1,
                 profileOwnerId: profileOwnerId,
                 recipientId: recipientId
             },
             success: function(response) {
-                alert("Followed");
+                alert(response);
 
                 if (response == "followed") {
                     followBtn.removeClass("btn-primary").addClass("btn-secondary").text("Unfollow");
-                } else {
+                } else if (response == "unfollowed") {
                     followBtn.removeClass("btn-secondary").addClass("btn-primary").text("Follow");
                 }
+                        
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
