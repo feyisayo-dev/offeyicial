@@ -216,6 +216,19 @@
     border: 10px;
     box-shadow: 2px 2px 2px solid blue;
     background-color: blue;
+    color: white;
+}
+.unfollow{
+    border: 10px;
+    box-shadow: 2px 2px 2px solid blue;
+    background-color: red;
+    color: white;
+}
+.message{
+    border: 10px;
+    box-shadow: 2px 2px 2px solid blue;
+    background-color: green;
+    color: white;
 }
 .custom-file-upload {
     display: inline-block;

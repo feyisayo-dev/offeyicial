@@ -103,7 +103,7 @@ while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
     // Display the profile information
 
     $sql = "SELECT * FROM follows WHERE UserId = ? AND recipientId = ?";
-$params = array($UserId, $profileOwnerId);
+$params = array($profileOwnerId, $UserId);
 $stmt = sqlsrv_query($conn, $sql, $params);
 $isFollowing = sqlsrv_has_rows($stmt);
 
@@ -126,8 +126,7 @@ if ($UserId == $isProfileOwner) {
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 ';    
-echo '    <script src="country-states.js"></script>
-';
+echo '<script src="country-states.js"></script>';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
@@ -257,6 +256,7 @@ echo '<div class="container">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
     <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />';    
     echo '<link rel="stylesheet" href="profile.css">';
+echo '<script src="country-states.js"></script>';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -301,12 +301,21 @@ echo '<div class="container">
         echo '<hr>';
     echo '</div>';
     echo '<div class="col-md-4 profile-info">';
-        echo '<h2>' .$Surname .'  ' . $First_Name. '</h2>';
-
-        echo '<p>Gender: '.$gender.'</p>';
-        echo '<p>Bio: '.$getbio.'</p>';    
-        echo '<button id="followBtn" class="follow unfollow">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
-
+    echo '<h2>' .$Surname .'  ' . $First_Name. '</h2>';
+    
+    echo '<p>Gender: '.$gender.'</p>';
+    echo '<p>Bio: '.$getbio.'</p>'; 
+    echo '<div class="row">';  
+    echo '<div class="col-md-3">';
+    echo '<button id="followBtn" class="follow unfollow">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
+    echo '</div>';
+    echo '<div class="col-md-3">';
+    echo '<button class="message" onclick="location.href=\'chat.php?UserIdx='.$profileOwnerId.'\'">Message</button>';
+    echo '</div>';
+    echo '</div>';
+    
+    echo '</div>'; // close profile-info div
+    
     echo '<div class="col-md-4">
     <div class="row">
       <div class="col-md-6">
@@ -318,8 +327,8 @@ echo '<div class="container">
         <p style="font-size: 0.8rem;">Followers</p>
       </div>
     </div>
-  </div>
-  ';
+    </div>
+    ';
 echo '</div>';
 echo '<div class="container">
     <div class="row">
