@@ -307,7 +307,7 @@ echo '<script src="country-states.js"></script>';
     echo '<p>Bio: '.$getbio.'</p>'; 
     echo '<div class="row">';  
     echo '<div class="col-md-3">';
-    echo '<button id="followBtn" class="follow unfollow">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
+    echo '<button id="followBtn" class="follow ' . ($isFollowing ? 'following' : 'unfollow') . '">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
     echo '</div>';
     echo '<div class="col-md-3">';
     echo '<button class="message" onclick="location.href=\'chat.php?UserIdx='.$profileOwnerId.'\'">Message</button>';

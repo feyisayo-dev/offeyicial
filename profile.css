@@ -212,18 +212,24 @@
     background-color: #f2f2f2;
     border: none;
 }
-.follow{
-    border: 10px;
-    box-shadow: 2px 2px 2px solid blue;
+.follow {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .follow.following {
     background-color: blue;
-    color: white;
-}
-.unfollow{
-    border: 10px;
-    box-shadow: 2px 2px 2px solid blue;
+  }
+  
+  .follow.unfollow {
     background-color: red;
-    color: white;
-}
+  }
+  
 .message{
     border: 10px;
     box-shadow: 2px 2px 2px solid blue;
