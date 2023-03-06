@@ -10,12 +10,28 @@ $UserId=$_SESSION["UserId"];
 include ('db.php');
 
 ?>
+<?php
+include('db.php');
+  
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>News Feed</title>
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css\font\bootstrap-icons.css">
+  <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/font/bootstrap-icons.css">
+    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
+    <link href="css/aos.css" rel="stylesheet">
+    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/remixicon/remixicon.css" rel="stylesheet">
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <script src="js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
@@ -38,14 +54,14 @@ include ('db.php');
   align-items: center;
 }
 
-.UserPassport {
+.UserPassport{
   width: 50px;
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
 }
 
-.post-author {
+.post-author{
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 24px;
   font-weight: bold;
@@ -195,6 +211,45 @@ include ('db.php');
   text-decoration: none;
 
 }
+.allcoments {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+  max-height: 200px; /* adjust height as needed */
+  overflow-y: auto;
+}
+
+.commentauthor {
+  display: inline-block;
+  vertical-align: top; /* This ensures the image and name are aligned at the top */
+  margin-right: 10px; /* Add some space between the image and name */
+}
+
+.commentpassport {
+  width: 30px; /* Adjust the width of the image as needed */
+  height: 30px; /* Adjust the height of the image as needed */
+  border-radius: 50%;
+}
+
+
+.post-name {
+  margin: 0;
+  font-weight: bold;
+}
+
+.seecomments {
+  flex: 1;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+#commentInput{
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 2px blue;
+}
+
   </style>
 </head>
 <body>
@@ -235,66 +290,134 @@ include ('db.php');
 <?php
     // Connect to the database
     include ('db.php'); 
-    $result = sqlsrv_query($conn, "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, posts.Likes, posts.Comments, posts.Shares 
-FROM posts 
-JOIN User_Profile ON User_Profile.UserId = posts.UserId 
-ORDER BY posts.date_posted DESC");
+    $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
+    FROM posts 
+    JOIN User_Profile ON User_Profile.UserId = posts.UserId 
+    LEFT JOIN likes ON likes.PostId = posts.PostId
+    GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
+    ORDER BY posts.date_posted DESC";
+$params = array($UserId);
+$result = sqlsrv_query($conn, $query, $params);
 
-
-
-while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-    $date_posted = new DateTime($row['date_posted']);
-    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-    
-  $current_date = new DateTime();
-  $date_postedx = new DateTime($formatted_date);
-  $interval = $current_date->diff($date_postedx);
-
-  if ($interval->y) {
-      $time_ago = $interval->y . " years ago";
-  } else if ($interval->m) {
-      $time_ago = $interval->m . " months ago";
-  } else if ($interval->d) {
-      $time_ago = $interval->d . " days ago";
-  } else if ($interval->h) {
-      $time_ago = $interval->h . " hours ago";
-  } else if ($interval->i) {
-      $time_ago = $interval->i . " minutes ago";
-  } else {
-      $time_ago = $interval->s . " seconds ago";
-  }
-   // Store Likes, Comments, and Shares values in variables
-  $num_likes = $row['Likes'];
-  $num_comments = $row['Comments'];
-  $num_shares = $row['Shares'];
-
-  echo '<div class="post" id="post-'.$row['PostId'].'">';
-  echo '<div class="news-feed-post">';
-  echo '<div class="post-header">';
-  echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-  echo '<p class="post-author">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>';
-  echo '</div>';
-  echo '<h2 class="post-title">' . $row['title'] . '</h2>';
-  echo '<p class="post-content">' . $row['content'] . '</p>';
-  if (!empty($row['image'])) {
-      echo '<img class="post-image" src="' . $row['image'] . '">';
-  }
-  if (!empty($row['video'])) {
-      echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
-  }
-//   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
-  echo '<p class="post-date">' . $time_ago . '</p>';
-  echo '</div>';
-  echo '<div class="post-footer">';
-  echo '<button class="like-button" data-postid="' . $row['PostId'] . '">' . '<i class="bi bi-hand-thumbs-up"></i>' . 'Like <span class="num-likes">' . $row['Likes'] . '</span></button>';
-  echo '<button class="comment-button" data-postid="' . $row['PostId'] . '">' . '<i class="bi bi-chat-dots"></i>' . 'Comment <span class="num-comments">' . $row['Comments'] . '</span></button>';
-  echo '<button class="share-button" data-postid="' . $row['PostId'] . '">' . '<i class="bi bi-share"></i>' . 'Share</button>';
-  echo '</div>';
-echo '</div>';
-  
+if ($result === false) {
+echo "Error executing query: " . sqlsrv_errors()[0]['message'];
+exit;
 }
 
+while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+// Your code to display the posts
+$date_posted = new DateTime($row['date_posted']);
+$formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+$postId = $row['PostId'];
+$likes = $row['num_likes'];
+$islikeing = $row['is_liking'];
+$current_date = new DateTime();
+$date_postedx = new DateTime($formatted_date);
+$interval = $current_date->diff($date_postedx);
+
+if ($interval->y) {
+  $time_ago = $interval->y . " years ago";
+} else if ($interval->m) {
+  $time_ago = $interval->m . " months ago";
+} else if ($interval->d) {
+  $time_ago = $interval->d . " days ago";
+} else if ($interval->h) {
+  $time_ago = $interval->h . " hours ago";
+} else if ($interval->i) {
+  $time_ago = $interval->i . " minutes ago";
+} else {
+  $time_ago = $interval->s . " seconds ago";
+}
+// Store Likes, Comments, and Shares values in variables
+echo '<section>';
+echo '<div class="post">';
+echo '<div class="news-feed-post"  id="'.$postId.'">';
+echo '<div class="post-header">';
+echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
+echo '<p class="post-author">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>';
+echo '</div>';
+echo '<h2 class="post-title">' . $row['title'] . '</h2>';
+echo '<p class="post-content">' . $row['content'] . '</p>';
+if (!empty($row['image'])) {
+  echo '<img class="post-image" src="' . $row['image'] . '">';
+}
+if (!empty($row['video'])) {
+  echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
+}
+    //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
+      echo '<p class="post-date">' . $time_ago . '</p>';
+      echo '</div>';
+      echo '<div class="footer">
+      <button type="button" class="btn btn-primary like ' . ($islikeing ? 'likeing' : 'unlike') . '" data-postid="' . $postId . '">
+          <span class="like-count">' . $likes . '</span>
+          ' . ($islikeing ? 'Unlike' : 'Like') . '
+          <span class="emoji">&#x2764;</span>
+      </button>
+      <button type="button" class="btn btn-primary share-button" data-postid="' . $postId . '">
+          <i class="bi bi-share"></i> Share
+      </button>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal" data-postid="'.$postId.'">
+      <i class="bi bi-chat-dots"></i> Comment
+  </button>  
+  </div>';
+    echo '</section>';
+    }
 ?>
+
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="commentModalLabel">Comment</h5>
+      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="comments">
+    <?php
+include('db.php');
+
+$query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, comments.PostId, comments.UserId, comments.comment, comments.date_posted
+FROM comments
+JOIN User_Profile ON User_Profile.UserId = comments.UserId
+WHERE comments.PostId =   ".$postId. "
+ORDER BY comments.date_posted DESC";
+
+$stmt = sqlsrv_query($conn, $query);
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+if (sqlsrv_has_rows($stmt)) {
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+        $PostId = $row['PostId'];
+        $comment = $row['comment'];
+
+        echo '<div class=allcoments>
+            <div class=commentauthor>
+                <img class="commentpassport" src="UserPassport/' . $row['Passport'] . '">
+                <p class="post-name">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>
+            </div>
+            <div class="seecomments">"' . $comment . '"</div>
+        </div>';
+    }
+} else {
+    echo 'No comments yet.';
+}
+?>
+
+    </div>
+    <div class="modal-body">
+      <textarea class="form-control"name="commentText" placeholder="Type your comment here" id="commentInput" rows="3"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-primary" onclick="submitComment()">Comment</button>
+    </div>
+  </div>
+</div>
+</div>
+
 </div>
 
 </body>
@@ -313,6 +436,46 @@ if (postId) {
 
 </script>
 <script>
+$(document).ready(function() {
+    var UserId = "<?php echo $_SESSION['UserId']; ?>";
+
+    $(".like").click(function() {
+        var likeBtn = $(this);
+        var islikeing = likeBtn.hasClass('likeing');
+        var postId = likeBtn.data('postid');
+        // alert(postId);
+
+        $.ajax({
+          url: "like_posts.php",
+          type: "POST",
+          data: {
+              like: 1,
+              postId: postId,
+              UserId: UserId,
+              islikeing: islikeing ? 0 : 1
+          },
+            success: function(response) {
+                if (response === 'liked') {
+                    likeBtn.addClass('likeing');
+                } else if (response === 'unliked') {
+                    likeBtn.removeClass('likeing');
+                }
+
+                var likeCount = likeBtn.parent().find('.like-count');
+                if (likeCount.length) {
+                    likeCount.text(response.numLikes);
+                }
+                $("#" + postId).load(location.href + " #" + postId + " > *");
+
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+    });
+});
+</script>
+<!-- <script>
             $(document).ready(function() {
                 // Update newsfeed every 20 seconds
                 setInterval(function() {
@@ -320,37 +483,15 @@ if (postId) {
                         url: 'news-feed.php',
                         type: 'GET',
                         success: function(data) {
-                            $('.post').html(data);
+                            $('.news-feed-post').html(data);
                         }
                     });
-                }, 20000);
+                }, 2000);
             });
 
-        </script>
-        <script>
-// Like button
-$('.like-button').click(function() {
-    let postId = $(this).data('postid');
+        </script> -->
 
-    $.ajax({
-        url: 'like_posts.php',
-        type: 'POST',
-        data: { PostId: postId },
-        dataType: 'json',
-        success: function(data) {
-            let numLikes = parseInt($('.num-likes', this).text()) + data.Likes;
-
-            $('.num-likes', this).text(numLikes);
-            if (data.Likes > 0) {
-                $('i', this).removeClass('bi-hand-thumbs-down').addClass('bi-hand-thumbs-up');
-            } else {
-                $('i', this).removeClass('bi-hand-thumbs-up').addClass('bi-hand-thumbs-down');
-            }
-        }
-    });
-});
-</script>
-<script>
+<!-- <script>
   // COMMENT SECTION
 $(document).on('click', '.comment-button', function() {
   var postId = $(this).data('postid');
@@ -380,13 +521,13 @@ $(document).on('click', '.comment-button', function() {
     });
   });
 });
-</script>
+</script> -->
         <script>
           var UserId = <?php echo json_encode($UserId); ?>; 
           // Share button
         $(document).on('click', '.share-button', function() {
           var postId = $(this).data('postid');
-          var shareUrl = 'http://localhost:8080/offeyicialchatroom/index.php?UserId=' + UserId + '&postId=' + postId;
+          var shareUrl = 'http://localhost:8080/offeyicialchatroom/index.php?postId=' + postId;
           prompt('Copy this link to share:', shareUrl);
         });
 

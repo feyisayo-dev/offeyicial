@@ -31,3 +31,7 @@ And stack overflow
 those guys are annoying
 keep downvoting your question when you really need help
 like ??????????
+5/03/23
+I am done with what I know
+oh I forgot about newsfeed
+Who will help me
