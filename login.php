@@ -1,12 +1,13 @@
 <?php
 session_start();
-$UserId=$_SESSION["UserId"];
 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    header("Location: user_profile.php?UserId=<?php echo $UserId ?>");
+    $UserId = $_SESSION["UserId"];
+    header("Location: user_profile.php?UserId=" . $UserId);
     exit();
 }
 ?>
+
 
 <html>
 <head>
