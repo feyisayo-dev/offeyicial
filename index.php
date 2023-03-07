@@ -249,6 +249,19 @@ include('db.php');
   border-radius: 10px;
   box-shadow: 2px 2px 2px blue;
 }
+.notification {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.notification.hidden {
+  opacity: 0;
+}
+
 
   </style>
 </head>
@@ -358,6 +371,8 @@ if (!empty($row['video'])) {
       </button>
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal" data-postid="'.$postId.'">
       <i class="bi bi-chat-dots"></i> Comment
+    <input type="hidden" id="postId" value="'.$postId.'">
+
   </button>  
   </div>';
     echo '</section>';
@@ -374,41 +389,10 @@ if (!empty($row['video'])) {
       </button>
     </div>
     <div class="comments">
-    <?php
-include('db.php');
-
-$query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, comments.PostId, comments.UserId, comments.comment, comments.date_posted
-FROM comments
-JOIN User_Profile ON User_Profile.UserId = comments.UserId
-WHERE comments.PostId =   ".$postId. "
-ORDER BY comments.date_posted DESC";
-
-$stmt = sqlsrv_query($conn, $query);
-if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
-
-if (sqlsrv_has_rows($stmt)) {
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $PostId = $row['PostId'];
-        $comment = $row['comment'];
-
-        echo '<div class=allcoments>
-            <div class=commentauthor>
-                <img class="commentpassport" src="UserPassport/' . $row['Passport'] . '">
-                <p class="post-name">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>
-            </div>
-            <div class="seecomments">"' . $comment . '"</div>
-        </div>';
-    }
-} else {
-    echo 'No comments yet.';
-}
-?>
 
     </div>
     <div class="modal-body">
-      <textarea class="form-control"name="commentText" placeholder="Type your comment here" id="commentInput" rows="3"></textarea>
+    <textarea class="form-control"name="commentText" placeholder="Type your comment here" id="commentInput" rows="3"></textarea>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -421,6 +405,25 @@ if (sqlsrv_has_rows($stmt)) {
 </div>
 
 </body>
+<script>
+   $(document).ready(function() {
+  $('#commentModal').on('show.bs.modal', function(event) {
+    var button = $(event.relatedTarget);
+    var postId = button.data('postid');
+    var modal = $(this);
+
+    $.ajax({
+      type: "POST",
+      url: "getCommentBox.php",
+      data: {postId: postId},
+      success: function(response) {
+        modal.find('.comments').html(response);
+      }
+    });
+  });
+});
+
+</script>
 <script>
   // Get postId from URL parameter
 var urlParams = new URLSearchParams(window.location.search);
@@ -475,7 +478,7 @@ $(document).ready(function() {
     });
 });
 </script>
-<!-- <script>
+<script>
             $(document).ready(function() {
                 // Update newsfeed every 20 seconds
                 setInterval(function() {
@@ -483,45 +486,48 @@ $(document).ready(function() {
                         url: 'news-feed.php',
                         type: 'GET',
                         success: function(data) {
-                            $('.news-feed-post').html(data);
+                            $('.news-feed-container').html(data);
                         }
                     });
-                }, 2000);
+                }, 20000);
             });
 
-        </script> -->
+        </script>
 
-<!-- <script>
+        <script>
   // COMMENT SECTION
-$(document).on('click', '.comment-button', function() {
-  var postId = $(this).data('postid');
-  var commentBox = $(this).siblings('.comment-box');
-  
-  if (commentBox.length) {
-    commentBox.toggle();
-  } else {
-    commentBox = $('<div class="comment-box"><textarea></textarea><button class="submit-comment">Submit</button></div>');
-    $(this).parent().append(commentBox);
-  }
-  
-  commentBox.find('.submit-comment').off('click').on('click', function() {
-    var commentText = commentBox.find('textarea').val();
-    $.ajax({
-      url: 'comment_post.php',
-      method: 'POST',
-      data: { postId: postId, comment: commentText },
-      dataType: 'json',
-      success: function(data) {
-        commentBox.find('textarea').val('');
-        var numComments = commentBox.siblings('.comment-button').find('.num-comments');
-        numComments.text(data.num_comments);
-        var commentSection = $(data.comment_section);
-        commentBox.before(commentSection);
-      }
-    });
-  });
-});
-</script> -->
+  function submitComment() {
+    var comment = $("#commentInput").val();
+    var UserId = "<?php echo $UserId ?>";
+    var postId = $("#postId").val(); // Retrieve the post ID from the hidden input field
+
+    // Do something with the comment, e.g. send it to the server using AJAX
+    if (comment != "") {
+        $.ajax({
+            url: "comment_post.php",
+            type: "POST",
+            async: false,
+            data: {
+                "addcoment": 1,
+                "postId": postId,
+                "comment": comment,
+                "UserId": UserId,
+            },
+            success: function (data) {
+                alert(data)
+                $("#commentInput").val("");
+            }
+        });
+    } else {
+        alert("Field Missing");
+    }
+
+    // Close the modal
+    $("#commentModal").modal("hide");
+}
+
+</script>
+
         <script>
           var UserId = <?php echo json_encode($UserId); ?>; 
           // Share button
