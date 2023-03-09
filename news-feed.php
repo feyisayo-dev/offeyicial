@@ -47,7 +47,7 @@ echo '<div class="post">';
 echo '<div class="news-feed-post">';
 echo '<div class="post-header">';
 echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-echo '<p class="post-author">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>';
+echo '<a href="user_profile.php?UserId='.$row['UserId'].'" style="text-decoration: none;"><p class="post-author">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p></a>';
 echo '</div>';
 echo '<h2 class="post-title">' . $row['title'] . '</h2>';
 echo '<p class="post-content">' . $row['content'] . '</p>';
