@@ -263,6 +263,26 @@ include('db.php');
 .notification.hidden {
   opacity: 0;
 }
+#scrollToTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    background-color: #555;
+    color: white;
+    cursor: pointer;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #444;
+}
+
 
 
   </style>
@@ -380,6 +400,7 @@ if (!empty($row['video'])) {
     echo '</section>';
     }
 ?>
+<button id="scrollToTopBtn"><i class="fas fa-arrow-up"></i></button>
 
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
 <div class="modal-dialog" role="document">
@@ -460,6 +481,7 @@ $(document).ready(function() {
               islikeing: islikeing ? 0 : 1
           },
             success: function(response) {
+              alert(response);
                 if (response === 'liked') {
                     likeBtn.addClass('likeing');
                 } else if (response === 'unliked') {
@@ -470,7 +492,7 @@ $(document).ready(function() {
                 if (likeCount.length) {
                     likeCount.text(response.numLikes);
                 }
-                $("#" + postId).load(location.href + " #" + postId + " > *");
+                $("#" + postId + " .footer").load(location.href + " #" + postId + " .footer > *");
 
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -481,20 +503,41 @@ $(document).ready(function() {
 });
 </script>
 <script>
-            $(document).ready(function() {
-                // Update newsfeed every 20 seconds
-                setInterval(function() {
-                    $.ajax({
-                        url: 'news-feed.php',
-                        type: 'GET',
-                        success: function(data) {
-                            $('.news-feed-container').html(data);
-                        }
-                    });
-                }, 20000);
-            });
+$(document).ready(function() {
+    // Set up variables
+    var lastScrollTop = 0;
+    var newsfeedLoaded = true;
 
-        </script>
+    // Check if user has scrolled to the top of the page
+    $(window).scroll(function(event){
+        var st = $(this).scrollTop();
+        if (st == 0 && st < lastScrollTop && newsfeedLoaded) {
+            // Set newsfeedLoaded to false to prevent multiple AJAX requests
+            newsfeedLoaded = false;
+
+            // Call AJAX function to reload news feed
+            reloadNewsFeed();
+        }
+        lastScrollTop = st;
+    });
+
+    // Function to reload news feed
+    function reloadNewsFeed() {
+        // Call AJAX function to reload news feed
+        $.ajax({
+            url: 'news-feed.php',
+            type: 'GET',
+            success: function(data) {
+                $('.news-feed-container').html(data);
+
+                // Set newsfeedLoaded back to true
+                newsfeedLoaded = true;
+            }
+        });
+    }
+});
+</script>
+
 
         <script>
   // COMMENT SECTION
@@ -588,5 +631,23 @@ searchBox.addEventListener('input', function() {
 });
 
 </script>
+<script>
+  $(document).ready(function() {
+    // Show or hide the button depending on the scroll position
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 100) {
+            $('#scrollToTopBtn').fadeIn();
+        } else {
+            $('#scrollToTopBtn').fadeOut();
+        }
+    });
 
+    // Scroll to top when the button is clicked
+    $('#scrollToTopBtn').click(function() {
+        $('html, body').animate({scrollTop : 0},10);
+        return false;
+    });
+});
+
+</script>
 </html>

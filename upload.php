@@ -292,11 +292,17 @@ $UserId = $_SESSION['UserId'];
 
 <script>
 $(document).ready(function(){
-    $('.submit').click(function(){
+  $('.submit').click(function(){
         var title = $('#title').val();
         var content = $('#content').val();
         var image = $('#image').prop('files')[0];
         var video = $('#video').prop('files')[0];
+        
+        // Check if title or content is empty
+        if (title === '' || content === '') {
+            alert('Title and content are required.');
+            return;
+        }
 
         var form_data = new FormData();
         form_data.append('title', title);

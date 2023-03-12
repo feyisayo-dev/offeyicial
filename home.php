@@ -48,7 +48,7 @@
 
             <nav id="navbar" class="navbar">
                 <ul>
-                    <li><a class="nav-link scrollto active" href="#home"><i class="bi bi-house-door"></i>Home</a></li>
+                    <li><a class="nav-link scrollto active" href="home.php"><i class="bi bi-house-door"></i>Home</a></li>
                     <li><a class="nav-link scrollto" href="login.php"><i class="bi bi-person-fill"></i>Login</a></li>
                     <li><a class="nav-link scrollto" href="reg.php"><i class="bi bi-person-plus"></i>Register</a></li>
                     <li class="dropdown"><a href="#"><span>More</span> <i class="bi bi-chevron-down"></i></a>
@@ -446,7 +446,7 @@
 
                     <div class="col-lg-6">
                         <div class="member d-flex align-items-start" data-aos="zoom-in" data-aos-delay="100">
-                            <div class="pic"><img src="img/17.jpeg" class="img-fluid" alt=""></div>
+                            <div class="pic"><img src="img/offeyicial.png" class="img-fluid" alt=""></div>
                             <div class="member-info">
                                 <h4>Offeyicial</h4>
                                 <span>Chief Executive Officer</span>
@@ -463,7 +463,7 @@
 
                     <div class="col-lg-6 mt-4 mt-lg-0">
                         <div class="member d-flex align-items-start" data-aos="zoom-in" data-aos-delay="200">
-                            <div class="pic"><img src="img/19.jpeg" class="img-fluid" alt=""></div>
+                            <div class="pic"><img src="img/offeyicial.png" class="img-fluid" alt=""></div>
                             <div class="member-info">
                                 <h4>Offeyicial</h4>
                                 <span>Advertising Manager</span>
@@ -480,9 +480,9 @@
 
                     <div class="col-lg-6 mt-4">
                         <div class="member d-flex align-items-start" data-aos="zoom-in" data-aos-delay="300">
-                            <div class="pic"><img src="img/20.jpeg" class="img-fluid" alt=""></div>
+                            <div class="pic"><img src="img/offeyicial.png" class="img-fluid" alt=""></div>
                             <div class="member-info">
-                                <h4>Offeyicial/h4>
+                                <h4>Offeyicial</h4>
                                     <span>CTO</span>
                                     <p>Also here</p>
                                     <div class="social">
@@ -497,7 +497,7 @@
 
                     <div class="col-lg-6 mt-4">
                         <div class="member d-flex align-items-start" data-aos="zoom-in" data-aos-delay="400">
-                            <div class="pic"><img src="img/21.jpeg" class="img-fluid" alt=""></div>
+                            <div class="pic"><img src="img/offeyicial.png" class="img-fluid" alt=""></div>
                             <div class="member-info">
                                 <h4>Offeyicial</h4>
                                 <span>Project Manager</span>

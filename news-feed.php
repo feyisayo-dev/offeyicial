@@ -75,5 +75,7 @@ if (!empty($row['video'])) {
   </div>';
     echo '</section>';
     }
-
+echo'
+<button id="scrollToTopBtn"><i class="fas fa-arrow-up"></i></button>
+';
 ?>
