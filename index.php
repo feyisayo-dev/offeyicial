@@ -38,119 +38,187 @@ include('db.php');
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
   <style>
-.post {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto auto;
-  gap: 10px;
-  border: 1px solid #ddd;
-  padding: 10px;
-}
-
-.post-header {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 10px;
+section {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
-.UserPassport{
+.post {
+  width: 100%;
+  margin: 0 auto;
+  max-width: 600px;
+  background-color: white;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+.post-author{
+  font-size: 20px;
+  color: black;
+  font: Arial, Helvetica;
+}
+
+.post-header img {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
 }
 
-.post-author {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 24px;
-  font-weight: bold;
-  color: #1877f2;
-  text-decoration: none !important;
-}
-
-
 .post-title {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  color: #1c1e21;
-  margin: 10px 0;
+  margin: 10px;
 }
 
 .post-content {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  color: #1c1e21;
-  line-height: 1.5;
-  margin-bottom: 10px;
+  margin: 10px;
 }
 
-.post-image, .post-video, iframe {
+.post-image {
   width: 100%;
-  max-width: 500px;
-  margin: 10px 0;
-  height: 500px;
+  height: auto;
+}
+
+.post-video {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+}
+
+.post-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .post-date {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: 10px;
+  color: #999;
   font-size: 12px;
-  color: #90949c;
-  margin-top: 10px;
 }
 
-.post-footer {
-  display: grid;
-  grid-template-columns: repeat(3, auto);
-  gap: 10px;
+.footer {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ddd;
 }
 
-.post-footer button {
+.footer button {
   display: flex;
   align-items: center;
-  gap: 5px;
-  background-color: transparent;
+  background: transparent;
   border: none;
-  color: #606770;
-  cursor: pointer;
   font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: all 0.3s;
 }
 
-.post-footer button:hover {
-  text-decoration: underline;
+.footer button:hover {
+  background-color: #ddd;
 }
 
-.post-footer button:focus {
-  outline: none;
+.footer button .like-count {
+  margin-right: 5px;
+  font-weight: bold;
 }
 
-.post-footer button svg {
-  height: 16px;
-  width: 16px;
-  fill: #606770;
+.footer button .emoji {
+  margin-left: 5px;
 }
 
-.post-footer button .count {
-  font-weight: 600;
-  margin-left: 2px;
+.likeing {
+  color: #e74c3c;
 }
 
-.post-footer button.like svg {
-  fill: #1877f2;
+.unlike {
+  color: #666;
 }
 
-.post-footer button.like .count {
-  color: #1877f2;
+.share-button {
+  display: flex;
+  align-items: center;
 }
 
-.post-footer button.comment svg {
-  fill: #606770;
+.share-button i {
+  margin-right: 5px;
 }
 
-.post-footer button.share svg {
-  fill: #606770;
+.comment-button {
+  display: flex;
+  align-items: center;
+}
+
+.comment-button i {
+  margin-right: 5px;
+}
+@media (max-width: 767px) {
+  body {
+    width: 100%;
+  }
+  /* Reduce font sizes */
+  .post-title {
+    font-size: 24px;
+  }
+  .post-author {
+    font-size: 14px;
+  }
+  .post-content {
+    font-size: 16px;
+  }
+  .post-date {
+    font-size: 12px;
+  }
+  
+  /* Center post image and video */
+  .post-image,
+  .post-video {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+  }
+  
+  /* Adjust padding and margins */
+  .post-header {
+    padding: 10px;
+  }
+  .post {
+    margin-bottom: 20px;
+  }
+  
+  /* Reduce button sizes */
+  .btn {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  /* Hide UserPassport image */
+  .UserPassport {
+    display: none;
+  }
+  
+  /* Adjust spacing between elements */
+  .post-header {
+    margin-bottom: 10px;
+  }
+  .post-date {
+    margin-top: 10px;
+  }
 }
 
 .navbar-nav a {
@@ -175,6 +243,64 @@ include('db.php');
         .navbar-light .navbar-nav .navbar-link {
             color: #000;
         }
+        @media (max-width: 767px) {
+/* Set the height of the navbar to 100% */
+.navbar {
+height: 100%;
+}
+
+/* Set the height of the collapsed navbar to 100vh */
+.navbar-collapse {
+height: 100vh;
+}
+
+/* Set the position of the collapsed navbar to fixed */
+.navbar-collapse.show {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+z-index: 9999;
+overflow-y: scroll;
+}
+
+/* Set the padding of the navbar items */
+.navbar-nav {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+
+/* Set the font size and padding of the navbar items */
+.navbar-nav .nav-link {
+font-size: 18px;
+padding: 10px;
+}
+
+/* Set the color of the navbar items */
+.navbar-nav .nav-link.custom-link {
+color: #fff;
+background-color: #28a745;
+border-radius: 5px;
+padding: 8px 15px;
+}
+
+/* Set the position of the search bar */
+.search-container {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+/* Set the width of the search bar */
+.searchtext {
+width: 100%;
+padding: 10px;
+border-radius: 5px;
+border: none;
+}
+}
         .searchtext {
   background-color: #f2f2f2;
   border: none;
@@ -290,7 +416,7 @@ include('db.php');
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -369,7 +495,7 @@ echo '<div class="post">';
 echo '<div class="news-feed-post"  id="'.$postId.'">';
 echo '<div class="post-header">';
 echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-echo '<a href="user_profile.php?UserId='.$row['UserId'].'" style="text-decoration: none;"><p class="post-author">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p></a>';
+echo '<a href="user_profile.php?UserId='.$row['UserId'].'" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
 echo '</div>';
 echo '<h2 class="post-title">' . $row['title'] . '</h2>';
 echo '<p class="post-content">' . $row['content'] . '</p>';
