@@ -6,7 +6,7 @@ echo '<button id="likeBtn" class="like ' . ($islikeing ? 'likeing' : 'unlike') .
 echo '<script>
 $(document).ready(function() {
     var UserId = $_SESSION['UserId'];
-    var likeBtn = $("#likeBtn");
+    var likeBtn = $( "#likeBtn" );
     var postId = $_GET['postId']
 
     $(".like").click(function() {

@@ -43,9 +43,9 @@
     <header id="header" class="fixed-top ">
         <div class="container d-flex align-items-center">
 
-            <h1 class="logo me-auto"><img src="img/offeyicial.jpeg" alt="" class="img-fluid">&NonBreakingSpace;<a href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a></h1>
+            <!-- <h1 class="logo me-auto"><img src="img/offeyicial.jpeg" alt="" class="img-fluid">&NonBreakingSpace;<a href="home.php"><span class="text-success"> Offeyicial </span></a></h1> -->
             <!-- Uncomment below if you prefer to use an image logo -->
-
+            <a href="home.php" class="logo me-auto"><img src="img/offeyicial.jpeg" alt="" class="img-fluid"><span class="text-success"> Offeyicial </span></a>
             <nav id="navbar" class="navbar">
                 <ul>
                     <li><a class="nav-link scrollto active" href="home.php"><i class="bi bi-house-door"></i>Home</a></li>
@@ -81,7 +81,16 @@
 
     <!-- ======= Hero Section ======= -->
     <section id="hero" class="d-flex align-items-center">
-
+    <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
+        <ol class="carousel-indicators">
+            <li data-bs-target="#myCarousel" data-bs-slide-to="0" class="active"></li>
+            <li data-bs-target="#myCarousel" data-bs-slide-to="1"></li>
+            <li data-bs-target="#myCarousel" data-bs-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner">
+        <div class="carousel-item active">
+    <img src="img/7.jpeg" class="d-block w-100" alt="First slide">
+    <div class="carousel-caption d-none d-md-block">
         <div class="container">
             <div class="row">
                 <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
@@ -96,8 +105,60 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-    </section>
+            <div class="carousel-item">
+                <img src="img/8.jpeg" class="d-block w-100" alt="Second slide">
+                <div class="carousel-caption d-none d-md-block">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
+                    <h1>We wish you the best User-Friendly experience</h1>
+                    <h2>Welcome to a new growing community</h2>
+                    <div class="d-flex justify-content-center justify-content-lg-start">
+                        <a href="login.php" class="btn-get-started scrollto">Login</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-1 order-lg-2 ccclogo2" data-aos="zoom-in" data-aos-delay="200">
+                    <img src="img/offeyicial.png" class="img-fluid animated" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+            </div>
+            <div class="carousel-item">
+                <img src="img/9.jpeg" class="d-block w-100" alt="Third slide">
+                <div class="carousel-caption d-none d-md-block">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
+                    <h1>WELCOME TO THE OFFEYICIAL</h1>
+                    <h2>Experience the safest chatting community</h2>
+                    <div class="d-flex justify-content-center justify-content-lg-start">
+                        <a href="login.php" class="btn-get-started scrollto">Register</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-1 order-lg-2 ccclogo2" data-aos="zoom-in" data-aos-delay="200">
+                    <img src="img/offeyicial.png" class="img-fluid animated" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+            </div>
+        </div>
+        <a class="carousel-control-prev" href="#myCarousel" role="button" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#myCarousel" role="button" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </a>
+    </div>
+</section>
+
+
     <!-- End Hero -->
 
     <main id="main">
@@ -307,11 +368,11 @@
 
                 <div class="row">
                     <div class="col-lg-9 text-center text-lg-start">
-                        <h3>Call To Action</h3>
-                        <p> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                        <h3>Join the Board</h3>
+                        <p> You have good skills and would like to join the leading team.</p>
                     </div>
                     <div class="col-lg-3 cta-btn-container text-center">
-                        <a class="cta-btn align-middle" href="#">Call To Action</a>
+                        <a class="cta-btn align-middle" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#jointeam">Join Team</a>
                     </div>
                 </div>
 
@@ -721,7 +782,7 @@
                     <div class="col-lg-3 col-md-6 footer-links">
                         <h4>Useful Links</h4>
                         <ul>
-                            <li><i class="bx bx-chevron-right"></i> <a href="#">Home</a></li>
+                            <li><i class="bx bx-chevron-right"></i> <a href="home.php">Home</a></li>
                             <li><i class="bx bx-chevron-right"></i> <a href="reg.php">Register</a></li>
                             <li><i class="bx bx-chevron-right"></i> <a href="login.php">Login</a></li>
                             <li><i class="bx bx-chevron-right"></i> <a href="#">Terms of service</a></li>
@@ -798,8 +859,59 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="jointeam" tabindex="-1" aria-labelledby="jointeamLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="jointeamLabel">Joining the team</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        At Offeyicial, we are looking for talents small or big everything counts.
+                        <br>
+                        You can learn and teach eachother with love and I beleive we will achive great.
+                        <br>
+                        But before you join we will just like to state a few rules.
+                    </p>
+                    <p>
+                        Don't be scared the rules are not tough, it is just to check for some requirements
+                        <br>
+                        You will be sent to the contact us page and make usure to put your title as JOINING THE TEAM
+                        <br>
+                        <strong><strong>NOTE:</strong></strong>
+                        <br>
+                        <strong>YOU APPLYING DOES NOT MEAN YOU WILL GET TO BE ON THE TEAM.</strong>
+                        <br>
+                        <strong>SOMETIMES YOUR QUALIFICATIONS MAY NOT GET YOU ON THE TEAM DUE TO CHARACTER.</strong>
+                        <br>
+                        <strong>NO MATTER THE END ALWAYS BE HAPPY TO TRY AGAIN.</strong>
+
+                    </p>
+                    <p>
+                        <strong>Good Luck</strong>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 <script src="js/jquery.min.js"></script>
+<script>
+    // Get a reference to the Close button
+    const closeModalButton = document.querySelector('#close-modal');
+
+    // Add an event listener to the Close button
+    closeModalButton.addEventListener('click', function() {
+        // Set the hash of the URL to #contact
+        location.hash = '#contact';
+    });
+</script>
 
 <script>
     $('#submit').click(function() {

@@ -129,7 +129,7 @@ if ($UserId == $isProfileOwner) {
 echo '<script src="country-states.js"></script>';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
+    <a class="navbar-brand" href="home.php"><span class="text-success"> Offeyicial </span></a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -218,7 +218,7 @@ echo '<div class="container">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
             <div class="posts">
                 <div class="post">';
-                if (!empty($image)) {
+                if (!empty($title)) {
                     echo '<h3 class="title">' . $title . '</h3>';
                 }
                 echo '<div class="row">';
@@ -235,10 +235,10 @@ echo '<div class="container">
                             </div>';
                 }
                 echo '</div>';
-                if (!empty($image)) {
+                if (!empty($content)) {
                     echo '<p>' . $content . '</p>';
                 }
-                if (!empty($image)) {
+                if (!empty($time_ago)) {
                     echo '<p>' . $time_ago . '</p>';
                 }
             echo '</div>
@@ -258,7 +258,10 @@ echo '<div class="container">
     echo '<link rel="stylesheet" href="profile.css">';
 echo '<script src="country-states.js"></script>';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="home.php">Offeyicial<span class="text-success"> Chat Room </span></a>
+    <a class="navbar-brand" href="home.php">
+    <img src="img/offeyicial.png">
+    <span class="text-success"> Offeyicial </span>
+</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -336,7 +339,7 @@ echo '<div class="container">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
             <div class="posts">
                 <div class="post">';
-                if (!empty($image)) {
+                if (!empty($title)) {
                     echo '<h3 class="title">' . $title . '</h3>';
                 }
                 echo '<div class="row">';
@@ -353,10 +356,10 @@ echo '<div class="container">
                             </div>';
                 }
                 echo '</div>';
-                if (!empty($image)) {
+                if (!empty($content)) {
                     echo '<p>' . $content . '</p>';
                 }
-                if (!empty($image)) {
+                if (!empty($time_ago)) {
                     echo '<p>' . $time_ago . '</p>';
                 }
             echo '</div>
