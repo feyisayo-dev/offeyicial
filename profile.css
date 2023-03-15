@@ -589,3 +589,61 @@ text-align: right;
     font-size: 1rem;
     }
     } */
+    @media (max-width: 767px) {
+      /* Set the height of the navbar to 100% */
+      .navbar {
+      height: 100%;
+      }
+      
+      /* Set the height of the collapsed navbar to 100vh */
+      .navbar-collapse {
+      height: 100vh;
+      }
+      
+      /* Set the position of the collapsed navbar to fixed */
+      .navbar-collapse.show {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+      overflow-y: scroll;
+      }
+      
+      /* Set the padding of the navbar items */
+      .navbar-nav {
+      padding-top: 30px;
+      padding-bottom: 30px;
+      }
+      
+      /* Set the font size and padding of the navbar items */
+      .navbar-nav .nav-link {
+      font-size: 18px;
+      padding: 10px;
+      }
+      
+      /* Set the color of the navbar items */
+      .navbar-nav .nav-link.custom-link {
+      color: #fff;
+      background-color: #28a745;
+      border-radius: 5px;
+      padding: 8px 15px;
+      }
+      
+/* Set the position of the search bar */
+.search-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  }
+  
+  /* Set the width of the search bar */
+  .searchtext {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  }
+    }      

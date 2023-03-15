@@ -254,7 +254,14 @@ echo '<div class="container">
     <link rel="stylesheet" href="css/all.min.css" />
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
-    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />';    
+    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
+    <link href="css/aos.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css\font\bootstrap-icons.css">
+    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/remixicon/remixicon.css" rel="stylesheet">
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">';    
     echo '<link rel="stylesheet" href="profile.css">';
 echo '<script src="country-states.js"></script>';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -309,10 +316,10 @@ echo '<script src="country-states.js"></script>';
     echo '<p>Gender: '.$gender.'</p>';
     echo '<p>Bio: '.$getbio.'</p>'; 
     echo '<div class="row">';  
-    echo '<div class="col-md-3">';
+    echo '<div class="col-md-5">';
     echo '<button id="followBtn" class="follow ' . ($isFollowing ? 'following' : 'unfollow') . '">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
     echo '</div>';
-    echo '<div class="col-md-3">';
+    echo '<div class="col-md-5">';
     echo '<button class="message" onclick="location.href=\'chat.php?UserIdx='.$profileOwnerId.'\'">Message</button>';
     echo '</div>';
     echo '</div>';

@@ -390,19 +390,19 @@ border: none;
   opacity: 0;
 }
 #scrollToTopBtn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 30px;
-    z-index: 99;
-    font-size: 18px;
-    border: none;
-    outline: none;
-    background-color: #555;
-    color: white;
-    cursor: pointer;
-    padding: 15px;
-    border-radius: 4px;
+  display: none;
+position: fixed;
+bottom: 30px;
+right: 30px;
+z-index: 99;
+font-size: 18px;
+border: none;
+outline: none;
+background-color: #555;
+color: white;
+cursor: pointer;
+padding: 15px;
+border-radius: 50%;
 }
 
 #scrollToTopBtn:hover {
@@ -526,7 +526,7 @@ if (!empty($row['video'])) {
     echo '</section>';
     }
 ?>
-<button id="scrollToTopBtn"><i class="fas fa-arrow-up"></i></button>
+<button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
 
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
 <div class="modal-dialog" role="document">
