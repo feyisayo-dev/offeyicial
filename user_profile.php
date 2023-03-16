@@ -53,41 +53,14 @@ $bio = $record['bio'];
     }
     
 
-$fetchPostsinfo = "SELECT [UserId], [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
+$fetchPostsinfo = "SELECT TOP 100 PERCENT [UserId], [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
 
 $fetchPosts=sqlsrv_query($conn,$fetchPostsinfo);
 if( $fetchPosts === false ) {
      die( print_r( sqlsrv_errors(), true));
 }
 
-while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
-    $PostId=$row['PostId'];
-    $title=$row['title'];
-    $content=$row['content'];
-    $video=$row['video'];
-    $image=$row['image'];
-    $date_posted = new DateTime($row['date_posted']);
-    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-    $current_date = new DateTime();
-    $date_postedx = new DateTime($formatted_date);
-    $interval = $current_date->diff($date_postedx);
-    
-    if ($interval->y) {
-        $time_ago = $interval->y . " years ago";
-    } else if ($interval->m) {
-        $time_ago = $interval->m . " months ago";
-    } else if ($interval->d) {
-        $time_ago = $interval->d . " days ago";
-    } else if ($interval->h) {
-        $time_ago = $interval->h . " hours ago";
-    } else if ($interval->i) {
-        $time_ago = $interval->i . " minutes ago";
-    } else {
-        $time_ago = $interval->s . " seconds ago";
-    }
-    
-    // rest of the code to display post information
-}
+
     // Get the count of followers and following for the profile owner and recipient
     $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE UserId = ?";
     $params = array($profileOwnerId);
@@ -216,36 +189,64 @@ echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
-            <div class="posts">
-                <div class="post">';
-                if (!empty($title)) {
-                    echo '<h3 class="title">' . $title . '</h3>';
-                }
-                echo '<div class="row">';
-                if (!empty($image)) {
-                    echo '<div class="col-md-6">
-                                <img src="' . $image . '" class="img-fluid">
-                            </div>';
-                }
-                if (!empty($video)) {
-                    echo '<div class="col-md-6">
-                                <video controls class="w-100">
-                                    <source src="' . $video . '" type="video/mp4">
-                                </video>
-                            </div>';
-                }
-                echo '</div>';
-                if (!empty($content)) {
-                    echo '<p>' . $content . '</p>';
-                }
-                if (!empty($time_ago)) {
-                    echo '<p>' . $time_ago . '</p>';
-                }
-            echo '</div>
-            </div>
+            <div class="posts">';
+while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
+    $PostId=$row['PostId'];
+    $title=$row['title'];
+    $content=$row['content'];
+    $video=$row['video'];
+    $image=$row['image'];
+    $date_posted = new DateTime($row['date_posted']);
+    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+    $current_date = new DateTime();
+    $date_postedx = new DateTime($formatted_date);
+    $interval = $current_date->diff($date_postedx);
+
+    if ($interval->y) {
+        $time_ago = $interval->y . " years ago";
+    } else if ($interval->m) {
+        $time_ago = $interval->m . " months ago";
+    } else if ($interval->d) {
+        $time_ago = $interval->d . " days ago";
+    } else if ($interval->h) {
+        $time_ago = $interval->h . " hours ago";
+    } else if ($interval->i) {
+        $time_ago = $interval->i . " minutes ago";
+    } else {
+        $time_ago = $interval->s . " seconds ago";
+    }
+    
+    echo '<div class="post">';
+    if (!empty($title)) {
+        echo '<h3 class="title">' . $title . '</h3>';
+    }
+    echo '<div class="row">';
+    if (!empty($image)) {
+        echo '<div class="col-md-6">
+                    <img src="' . $image . '" class="img-fluid">
+                </div>';
+    }
+    if (!empty($video)) {
+        echo '<div class="col-md-6">
+                    <video controls class="w-100">
+                        <source src="' . $video . '" type="video/mp4">
+                    </video>
+                </div>';
+    }
+    echo '</div>';
+    if (!empty($content)) {
+        echo '<p>' . $content . '</p>';
+    }
+    if (!empty($time_ago)) {
+        echo '<p>' . $time_ago . '</p>';
+    }
+    echo '</div>';
+}
+echo '</div>
         </div>
     </div>
 </div>';
+
 
     // If $isProfileOwner is false, only display some of the information
     // ...
@@ -339,39 +340,64 @@ echo '<script src="country-states.js"></script>';
     </div>
     </div>
     ';
-echo '</div>';
-// echo $PostId;
-echo '<div class="container">
+    echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
-            <div class="posts">
-                <div class="post">';
-                if (!empty($title)) {
-                    echo '<h3 class="title">' . $title . '</h3>';
-                }
-                echo '<div class="row">';
-                if (!empty($image)) {
-                    echo '<div class="col-md-6">
-                                <img src="' . $image . '" class="img-fluid">
-                            </div>';
-                }
-                if (!empty($video)) {
-                    echo '<div class="col-md-6">
-                                <video controls class="w-100">
-                                    <source src="' . $video . '" type="video/mp4">
-                                </video>
-                            </div>';
-                }
-                echo '</div>';
-                if (!empty($content)) {
-                    echo '<p>' . $content . '</p>';
-                }
-                if (!empty($time_ago)) {
-                    echo '<p>' . $time_ago . '</p>';
-                }
-            echo '</div>
-            </div>
+            <div class="posts">';
+while($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
+    $PostId=$row['PostId'];
+    $title=$row['title'];
+    $content=$row['content'];
+    $video=$row['video'];
+    $image=$row['image'];
+    $date_posted = new DateTime($row['date_posted']);
+    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+    $current_date = new DateTime();
+    $date_postedx = new DateTime($formatted_date);
+    $interval = $current_date->diff($date_postedx);
+
+    if ($interval->y) {
+        $time_ago = $interval->y . " years ago";
+    } else if ($interval->m) {
+        $time_ago = $interval->m . " months ago";
+    } else if ($interval->d) {
+        $time_ago = $interval->d . " days ago";
+    } else if ($interval->h) {
+        $time_ago = $interval->h . " hours ago";
+    } else if ($interval->i) {
+        $time_ago = $interval->i . " minutes ago";
+    } else {
+        $time_ago = $interval->s . " seconds ago";
+    }
+    
+    echo '<div class="post">';
+    if (!empty($title)) {
+        echo '<h3 class="title">' . $title . '</h3>';
+    }
+    echo '<div class="row">';
+    if (!empty($image)) {
+        echo '<div class="col-md-6">
+                    <img src="' . $image . '" class="img-fluid">
+                </div>';
+    }
+    if (!empty($video)) {
+        echo '<div class="col-md-6">
+                    <video controls class="w-100">
+                        <source src="' . $video . '" type="video/mp4">
+                    </video>
+                </div>';
+    }
+    echo '</div>';
+    if (!empty($content)) {
+        echo '<p>' . $content . '</p>';
+    }
+    if (!empty($time_ago)) {
+        echo '<p>' . $time_ago . '</p>';
+    }
+    echo '</div>';
+}
+echo '</div>
         </div>
     </div>
 </div>';
