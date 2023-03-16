@@ -818,7 +818,8 @@
     <!-- End Footer -->
 
     <div id="preloader"></div>
-    <a href="#about" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<a id="back-to-top" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
 
     <!-- Vendor JS Files -->
     <script src="js/aos.js"></script>
@@ -828,9 +829,20 @@
     <script src="js/swiper-bundle.min.js"></script>
     <script src="js/noframework.waypoints.js"></script>
     <script src="js/validate.js"></script>
+    <script src="js/jquery.min.js"></script> 
+
 
     <!-- Template Main JS File -->
     <script src="js/main.js"></script>
+    <script>
+$(document).ready(function() {
+  $('#back-to-top').click(function() {
+    $('html, body').animate({scrollTop: 0}, 10);
+  });
+});
+
+    </script>
+
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
