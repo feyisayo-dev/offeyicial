@@ -53,7 +53,7 @@ $bio = $record['bio'];
     }
     
 
-$fetchPostsinfo = "SELECT [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
+$fetchPostsinfo = "SELECT [UserId], [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
 
 $fetchPosts=sqlsrv_query($conn,$fetchPostsinfo);
 if( $fetchPosts === false ) {
@@ -196,7 +196,7 @@ echo '<script src="country-states.js"></script>';
         echo '<button type="button" style="background-color:red;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editprofile">Edit profile</button>';
         echo '</div>';
         echo '</div>';
-     
+    
     echo '</div>';
     echo '<div class="col-md-4">
     <div class="row">
@@ -340,6 +340,7 @@ echo '<script src="country-states.js"></script>';
     </div>
     ';
 echo '</div>';
+// echo $PostId;
 echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
