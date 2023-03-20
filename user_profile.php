@@ -143,14 +143,17 @@ echo '<script src="country-states.js"></script>';
     echo '<div class="col-md-4 profile-pic">';
     echo '<img src="'.$GetPassport.'" class="button" alt="Profile Picture">';
         echo '<P>Enhance your online persona</P>';
-        echo '<form action="" method="POST" enctype="multipart/form-data">';
-            echo '<label for="upload1" class="custom-file-upload">
-            <i class="fa fa-cloud-upload"></i> Choose File
-          </label>
-          <input type="file" class="custom-file-input" name="Fileupload" id="upload1" required />
-          ';
-            echo '<button type="submit" name="button" id="button" style="background-color:#006600; border-radius:5px;">';
-        echo '<i class="fa fa-plus" style="color:#FFFFFF; size:40px">&nbsp;Upload</i> </button>';
+        echo '<form action="" method="POST" enctype="multipart/form-data">
+        <label for="upload1" class="custom-file-upload">
+          <i class="fa fa-cloud-upload"></i> Choose File
+        </label>
+        <input type="file" class="custom-file-input" name="Fileupload" id="upload1" required />
+        <button type="submit" name="button" id="button" >
+        <i class="bi bi-cloud-arrow-up"></i>
+</button>
+
+      </form>
+      ';
             echo '<hr>';
     echo '</div>';
     echo '<div class="col-md-4 profile-info">';
@@ -558,11 +561,10 @@ let user_country_code = "$countryId";
 
 echo '<script>
 $(".custom-file-input").on("change", function() {
-  // Get the selected file name
-  var fileName = $(this).val().split("\\\").pop();
-  // Update the label text
-  $(this).next(".custom-file-label").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
+  var fileName = $(this).val().split("////").pop();
+  $(this).siblings(".custom-file-upload").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
 });
+
 </script>
 ';
 echo '<script>

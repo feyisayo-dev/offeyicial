@@ -630,37 +630,18 @@ $(document).ready(function() {
 </script>
 <script>
 $(document).ready(function() {
-    // Set up variables
-    var lastScrollTop = 0;
-    var newsfeedLoaded = true;
+  // Set the time after which the refresh button will appear (in milliseconds)
+  var refreshTime = 120000; // 2 minutes
 
-    // Check if user has scrolled to the top of the page
-    $(window).scroll(function(event){
-        var st = $(this).scrollTop();
-        if (st == 0 && st < lastScrollTop && newsfeedLoaded) {
-            // Set newsfeedLoaded to false to prevent multiple AJAX requests
-            newsfeedLoaded = false;
+  setTimeout(function() {
+    // Add refresh button to the top of the page
+    $('body').prepend('<button class="refresh-button">Refresh</button>');
+  }, refreshTime);
 
-            // Call AJAX function to reload news feed
-            reloadNewsFeed();
-        }
-        lastScrollTop = st;
-    });
-
-    // Function to reload news feed
-    function reloadNewsFeed() {
-        // Call AJAX function to reload news feed
-        $.ajax({
-            url: 'news-feed.php',
-            type: 'GET',
-            success: function(data) {
-                $('.news-feed-container').html(data);
-
-                // Set newsfeedLoaded back to true
-                newsfeedLoaded = true;
-            }
-        });
-    }
+  // Refresh button click event
+  $('body').on('click', '.refresh-button', function() {
+    location.reload();
+  });
 });
 </script>
 

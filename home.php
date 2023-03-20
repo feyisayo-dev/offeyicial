@@ -45,7 +45,7 @@
 
             <!-- <h1 class="logo me-auto"><img src="img/offeyicial.jpeg" alt="" class="img-fluid">&NonBreakingSpace;<a href="home.php"><span class="text-success"> Offeyicial </span></a></h1> -->
             <!-- Uncomment below if you prefer to use an image logo -->
-            <a href="home.php" class="logo me-auto"><img src="img/offeyicial.jpeg" alt="" class="img-fluid"><span class="text-success"> Offeyicial </span></a>
+            <a href="home.php" class="logo me-auto"><img src="img/offeyicial.png" alt="" class="img-fluid"><span class="text-success"> Offeyicial </span></a>
             <nav id="navbar" class="navbar">
                 <ul>
                     <li><a class="nav-link scrollto active" href="home.php"><i class="bi bi-house-door"></i>Home</a></li>

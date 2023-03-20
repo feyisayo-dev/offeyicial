@@ -7,7 +7,7 @@ if (!isset($_SESSION['loggedin'])) {
 ?>
 <?php
 include('db.php');
-$UserId = $_SESSION['UserId'];
+$UserId = $_SESSION ['UserId'];
       // Get the surname and first name of the user with the UserId from the database
       $rsql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
       $rstmt = sqlsrv_prepare($conn, $rsql);
@@ -344,6 +344,189 @@ nav .profile-name {
 } */
 
 
+/* Style the search box */
+.search-box {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.search-box input[type="text"] {
+  padding: 6px;
+  border: none;
+  width: 100%;
+  font-size: 16px;
+}
+
+.search-box button {
+  border: none;
+  background-color: #ddd;
+  color: black;
+  font-size: 16px;
+  padding: 6px 10px;
+}
+
+.search-box button:hover {
+  background-color: #ccc;
+}
+
+/* Chat button */
+button[data-bs-target="#sidebar"] {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background-color: #04AA6D;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+button[data-bs-target="#sidebar"]:hover {
+  background-color: #128C7E;
+  transform: scale(1.05);
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar */
+.offcanvas {
+  position: fixed;
+  bottom: 0;
+  right: -350px;
+  z-index: 9998;
+  width: 350px;
+  height: 100vh;
+  padding: 0;
+  background-color: #fff;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.offcanvas.show {
+  right: 0;
+}
+
+.offcanvas-header {
+  padding: 15px;
+  background-color: #04AA6D;
+  color: #fff;
+}
+
+.offcanvas-title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.offcanvas-body {
+  padding: 15px;
+}
+
+.offcanvas-body ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.offcanvas-body ul li {
+  margin-bottom: 10px;
+}
+
+.offcanvas-body ul li a {
+  display: block;
+  color: #333;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.offcanvas-body ul li a:hover {
+  background-color: #f7f7f7;
+  color: #04AA6D;
+}
+li a {
+  display: flex;
+  align-items: center;
+}
+
+.passport {
+  margin-right: 10px;
+}
+
+.passport img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.name {
+  flex: 1;
+}
+
+.name span {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Modal styles */
+.modal {
+  display: none; /* Hide the modal by default */
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+  margin: 10% auto;
+  width: 80%;
+  max-width: 500px;
+}
+
+.modal img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+/* Show the modal when the passport image is clicked */
+.passport img:hover {
+  cursor: pointer;
+}
+
+.modal.show {
+  display: block;
+}
+nav .logo {
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo img {
+  height: 30px;
+  margin-right: 10px;
+}
+
+
 
         </style>
     </head>
@@ -351,7 +534,9 @@ nav .profile-name {
     <body>
 
     <nav>
-  <a href="home.php">Home</a>
+
+  <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
+  
   <div class="profile">
     <?php
       // session_start();
@@ -386,6 +571,8 @@ nav .profile-name {
 </nav>
 
 
+
+
         <div class="chat-container">
             <div class="chat-header">
                 <h1>
@@ -402,7 +589,12 @@ if(sqlsrv_execute($stmt)){
     while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
         $recipientSurname = $row['Surname'];
         $recipientFirstName = $row['First_Name'];
-        $recipientPassport = $row['Passport'];
+        $Passport = $row['Passport'];
+        if (empty( $Passport)) {
+          $recipientPassport="DefaultImage.png";
+         }else{
+         $recipientPassport="UserPassport/".$Passport;
+         }
 
     }
 }
@@ -417,7 +609,7 @@ if(sqlsrv_execute($stmt)){
         $Surname = $row['Surname'];
         $First_Name = $row['First_Name'];
     }
-    echo '<img class="recipientPassport" src="UserPassport/' . $recipientPassport. '">';
+    echo '<img class="recipientPassport" src="' . $recipientPassport. '">';
     echo '<a class="icon" href="user_profile.php?UserId='.$recipientId.'">'. $recipientSurname .' '. $recipientFirstName .'</a>';
 
 
@@ -491,6 +683,71 @@ if(sqlsrv_execute($stmt)){
     </div>
   </div>
 </div>
+<div class="footer">
+<?php
+
+// Retrieve all the chats of the current user
+$sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId'";
+$stmt = sqlsrv_query($conn, $sql);
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+// Display the chats in a list on the sidebar
+echo '<!-- Button to open the sidebar -->
+<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+    <i class="bi bi-chat"></i> Chats
+</button>
+
+<!-- Sidebar -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+        <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-unstyled">';
+
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $recipientId = $row['recipientId'];
+
+    // Get the name of the recipient
+    $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+    $stmt2 = sqlsrv_query($conn, $sql2);
+    if ($stmt2 === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
+    
+    $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+    $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+    $Passport = $row2['Passport'];
+    if (empty( $Passport)) {
+      $passportImage="UserPassport/DefaultImage.png";
+     }else{
+     $passportImage="UserPassport/".$Passport;
+     }
+    
+    // Display the recipient name and passport image in the list
+    echo '<li>';
+    echo '<div class="passport">';
+    echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
+    echo '<img src="'. $passportImage . '" alt="' . $recipientName . '">';
+    echo '</a>';
+    echo '</div>';
+    echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+    echo '</li>';
+    
+    
+}
+
+echo '</ul>
+    </div>
+</div>';
+
+?>
+</div>
+
+
         <script src="js/jquery.min.js"></script>
         <script>
       $('.image-input').on('change', function() {
@@ -539,48 +796,10 @@ setInterval(function(){
       $('#chat-window').html(response);
     }
   });
-}, 500);
+}, 1000);
 
     </script>
-<!-- <script>
-function checkForNewMessages() {
-  var lastMessageTime = $('.chatbox .message:last').data('timestamp'); // Get the timestamp of the last message in the chatbox
-  $.ajax({
-    url: 'checkForNewMessages.php',
-    type: 'GET',
-    data: { 
-      UserId: '<?php echo $UserId; ?>', 
-      UserIdx: '<?php echo $recipientId; ?>',
-      lastMessageTime: lastMessageTime // Pass the timestamp of the last message as a parameter
-    },
-    dataType: 'json',
-    success: function(data) {
-      if (data.length > 0) {
-        for (var i = 0; i < data.length; i++) {
-          var message = data[i];
-          var senderId = message.senderId;
-          var messageText = message.Sent;
-          var sentImage = message.sentimage;
-          var sentVideo = message.sentvideo;
-          var messageHtml = '<div class="' + (senderId == '<?php echo $UserId; ?>' ? 'Sent' : 'received') + '">' +
-            '<div class="message" data-timestamp="' + message.time_sent + '">' + messageText + '</div>';
-          if (sentImage != '') {
-            messageHtml += '<div class="image"><img src="' + sentImage + '"></div>';
-          }
-          if (sentVideo != '') {
-            messageHtml += '<div class="video"><iframe src="' + sentVideo + '"></iframe></div>';
-          }
-          messageHtml += '</div>';
-          $('.chatbox').append(messageHtml);
-        }
-        $('.chatbox').scrollTop($('.chatbox')[0].scrollHeight);
-      }
-    }
-  });
-}
 
-setInterval(checkForNewMessages, 5000); // Call the function every 5 seconds
-</script> -->
 
 
 
@@ -675,6 +894,36 @@ window.onload = function() {
 
 </script>
 
+<!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <?php
+          // Fetch the passport image
+          $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
+          $stmt = sqlsrv_query($conn, $sql);
+          if ($stmt === false) {
+              die(print_r(sqlsrv_errors(), true));
+          }
+
+          $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+          $passportImage = $row['Passport'] ? "UserPassport/" . $row['Passport'] : "UserPassport/DefaultImage.png";
+        ?>
+        <img id="modalImg" src="<?php echo $passportImage ?>">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
     </body>
 
