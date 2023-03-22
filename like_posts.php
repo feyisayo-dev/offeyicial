@@ -33,6 +33,8 @@ if(isset($_POST['like'])){
             echo "liked";
         }
     }
+}else{
+    echo "error liking this post";
 }
 
 ?>

@@ -32,67 +32,90 @@ include('db.php');
     <script src="js/popper.min.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <script src="js/owl.carousel.min.js"></script>
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
   <style>
-section {
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Constant sidebar */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: #f0f2f5;
 }
 
+/* News feed */
+.news-feed {
+  margin-left: 250px; /* Make room for sidebar */
+}
+
+/* News feed post */
 .post {
-  width: 100%;
-  margin: 0 auto;
-  max-width: 600px;
-  background-color: white;
-  border: 1px solid #ddd;
+  background-color: #fff;
+  border: 1px solid #dddfe2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  padding: 20px;
   margin-bottom: 20px;
 }
 
+/* Post header */
 .post-header {
   display: flex;
   align-items: center;
-  padding: 10px;
-}
-.post-author{
-  font-size: 20px;
-  color: black;
-  font: Arial, Helvetica;
 }
 
-.post-header img {
+.UserPassport {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
 }
 
-.post-title {
-  font-size: 20px;
+.post-author {
+  margin: 0;
+  font-size: 27px;
+  color: black;
+  /* font-weight: bold; */
+}
+
+
+/* Post author */
+/* .post-author {
+  margin: 0;
   font-weight: bold;
-  margin: 10px;
+  margin-right: 10px;
+} */
+
+/* Post title */
+.post-title {
+  margin-top: 0;
 }
 
+/* Post content */
 .post-content {
-  margin: 10px;
+  margin-bottom: 10px;
 }
 
+/* Post image */
 .post-image {
-  width: 100%;
-  height: auto;
+  max-width: 100%;
+  margin-bottom: 10px;
 }
 
+/* Post video */
 .post-video {
   position: relative;
-  width: 100%;
-  height: 0;
   padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  margin-bottom: 10px;
 }
 
 .post-video iframe {
@@ -103,61 +126,82 @@ section {
   height: 100%;
 }
 
+/* Post date */
 .post-date {
-  margin: 10px;
+  margin: 0;
+  font-size: 14px;
   color: #999;
-  font-size: 12px;
 }
 
+/* Footer */
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-top: 1px solid #ddd;
+  margin-top: 10px;
 }
 
-.footer button {
-  display: flex;
+/* Like button */
+.like {
+  display: inline-flex;
   align-items: center;
-  background: transparent;
-  border: none;
-  font-size: 14px;
-  color: #666;
+  padding: 8px 16px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #dddfe2;
+  border-radius: 999px;
   cursor: pointer;
-  padding: 5px 10px;
-  transition: all 0.3s;
+  transition: background-color 0.3s ease;
 }
 
-.footer button:hover {
-  background-color: #ddd;
+.like:hover {
+  background-color: #f0f2f5;
 }
 
-.footer button .like-count {
-  margin-right: 5px;
-  font-weight: bold;
+.like.likeing {
+  background-color: #1877f2;
+  color: #fff;
+  border-color: #1877f2;
 }
 
-.footer button .emoji {
-  margin-left: 5px;
+.like.likeing:hover {
+  background-color: #166fe5;
+  border-color: #166fe5;
 }
 
-.likeing {
-  color: #e74c3c;
-}
-
-.unlike {
-  color: #666;
-}
-
+/* Share button */
 .share-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  padding: 8px 16px;
+  background-color: #fff;
+  background-color: #0d6efd;;
+  border: 1px solid #dddfe2;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.share-button:hover {
+  background-color: #f0f2f5;
 }
 
 .share-button i {
   margin-right: 5px;
 }
+
+/* Chat sidebar */
+.offcanvas-header {
+  padding: 0.5rem;
+  background-color: #f0f2f5;
+  border-bottom: 1px solid #dddfe2;
+}
+
+.offcanvas-title {
+  margin-bottom: 0;
+  font-size: 1.5rem;
+}
+
 
 .comment-button {
   display: flex;
@@ -173,7 +217,7 @@ section {
   }
   /* Reduce font sizes */
   .post-title {
-    font-size: 24px;
+    font-size: 20px;
   }
   .post-author {
     font-size: 14px;
@@ -398,19 +442,172 @@ z-index: 99;
 font-size: 18px;
 border: none;
 outline: none;
-background-color: #555;
+background-color: #04AA6D;
 color: white;
 cursor: pointer;
-padding: 15px;
+padding: 10px;
 border-radius: 50%;
 }
 
 #scrollToTopBtn:hover {
-    background-color: #444;
+    background-color: #0d6efd;
+}
+
+/* Sidebar */
+.offcanvas-body {
+  padding: 15px;
+}
+
+.offcanvas-body ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.offcanvas-body ul li {
+  margin-bottom: 10px;
+}
+
+.offcanvas-body ul li a {
+  display: block;
+  color: #333;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.offcanvas-body ul li a:hover {
+  background-color: #f7f7f7;
+  color: #04AA6D;
+}
+li a {
+  display: flex;
+  align-items: center;
+}
+
+.passport {
+  margin-right: 10px;
+}
+
+.passport img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.name {
+  flex: 1;
+}
+
+.name span {
+  font-size: 16px;
+  font-weight: bold;
 }
 
 
 
+/* Show the modal when the passport image is clicked */
+.passport img:hover {
+  cursor: pointer;
+}
+
+nav .logo {
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo img {
+  height: 30px;
+  margin-right: 10px;
+}
+
+.passport, .name {
+  display: inline-block;
+  vertical-align: middle;
+}
+/* Chat button */
+button[data-bs-target="#sidebar"] {
+  position: fixed;
+  bottom: 20px;
+  /* right: 20px; */
+  z-index: 9999;
+  background-color: #04AA6D;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+button[data-bs-target="#sidebar"]:hover {
+  background-color: #128C7E;
+  transform: scale(1.05);
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+}
+.allcoments {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+  max-height: 200px; /* adjust height as needed */
+  overflow-y: auto;
+}
+
+.commentauthor {
+  display: inline-block;
+  vertical-align: top; /* This ensures the image and name are aligned at the top */
+  margin-right: 10px; /* Add some space between the image and name */
+}
+
+.commentpassport {
+  width: 30px; /* Adjust the width of the image as needed */
+  height: 30px; /* Adjust the height of the image as needed */
+  border-radius: 50%;
+}
+
+
+.post-name {
+  margin: 0;
+  font-weight: bold;
+}
+
+.seecomments {
+  flex: 1;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+#commentInput{
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 2px blue;
+}
+.notification {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.notification.hidden {
+  opacity: 0;
+}
   </style>
 </head>
 <body>
@@ -446,6 +643,7 @@ border-radius: 50%;
         </div>
     </nav>
     <br><br>
+
 <div class="news-feed-container">
 <br>
 <?php
@@ -499,20 +697,25 @@ echo '<a href="user_profile.php?UserId='.$row['UserId'].'" style="text-decoratio
 echo '</div>';
 echo '<h2 class="post-title">' . $row['title'] . '</h2>';
 echo '<p class="post-content">' . $row['content'] . '</p>';
-if (!empty($row['image'])) {
+if (!empty($row['image']) && !empty($row['video'])) {
+  echo '<div class="post-carousel">';
   echo '<img class="post-image" src="' . $row['image'] . '">';
-}
-if (!empty($row['video'])) {
+  echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
+  echo '</div>';
+} else if (!empty($row['image'])) {
+  echo '<img class="post-image" src="' . $row['image'] . '">';
+} else if (!empty($row['video'])) {
   echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
 }
+
     //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
       echo '<p class="post-date">' . $time_ago . '</p>';
       echo '</div>';
       echo '<div class="footer">
       <button type="button" class="btn btn-primary like ' . ($islikeing ? 'likeing' : 'unlike') . '" data-postid="' . $postId . '">
           <span class="like-count">' . $likes . '</span>
-          ' . ($islikeing ? 'Unlike' : 'Like') . '
           <span class="emoji">&#x2764;</span>
+          ' . ($islikeing ? 'Unlike' : 'Like') . '
       </button>
       <button type="button" class="btn btn-primary share-button" data-postid="' . $postId . '">
           <i class="bi bi-share"></i> Share
@@ -527,6 +730,69 @@ if (!empty($row['video'])) {
     }
 ?>
 <button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
+<?php
+
+// Retrieve all the chats of the current user
+$sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+$stmt = sqlsrv_query($conn, $sql);
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+// Display the chats in a list on the sidebar
+echo '<!-- Button to open the sidebar -->
+<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+    <i class="bi bi-chat"></i> Chats
+</button>
+
+<!-- Sidebar -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+        <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-unstyled">';
+
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $recipientId = $row['recipientId'];
+
+    // Get the name of the recipient
+    $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+
+    $stmt2 = sqlsrv_query($conn, $sql2);
+    if ($stmt2 === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
+    
+    $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+    $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+    $Passport = $row2['Passport'];
+    if (empty( $Passport)) {
+      $passportImage="UserPassport/DefaultImage.png";
+     }else{
+     $passportImage="UserPassport/".$Passport;
+     }
+    
+    // Display the recipient name and passport image in the list
+    echo '<li>';
+    echo '<div class="passport">';
+    echo '<a>';
+    echo '<img src="'. $passportImage . '" alt="' . $recipientName . '">';
+    echo '</a>';
+    echo '</div>';
+    echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+    echo '</li>';
+    
+    
+}
+
+echo '</ul>
+    </div>
+</div>';
+
+?>
+</div>
 
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
 <div class="modal-dialog" role="document">
@@ -554,6 +820,8 @@ if (!empty($row['video'])) {
 </div>
 
 </body>
+<script src="js/jquery.min.js"></script> 
+
 <script>
    $(document).ready(function() {
   $('#commentModal').on('show.bs.modal', function(event) {

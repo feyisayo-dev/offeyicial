@@ -350,6 +350,7 @@ nav .profile-name {
   margin-bottom: 20px;
 }
 
+
 .search-box input[type="text"] {
   padding: 6px;
   border: none;
@@ -526,7 +527,10 @@ nav .logo {
   margin-right: 10px;
 }
 
-
+.passport, .name {
+  display: inline-block;
+  vertical-align: middle;
+}
 
         </style>
     </head>
@@ -591,7 +595,7 @@ if(sqlsrv_execute($stmt)){
         $recipientFirstName = $row['First_Name'];
         $Passport = $row['Passport'];
         if (empty( $Passport)) {
-          $recipientPassport="DefaultImage.png";
+          $recipientPassport="UserPassport/DefaultImage.png";
          }else{
          $recipientPassport="UserPassport/".$Passport;
          }
@@ -905,18 +909,30 @@ window.onload = function() {
         </button>
       </div>
       <div class="modal-body">
-        <?php
-          // Fetch the passport image
-          $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
-          $stmt = sqlsrv_query($conn, $sql);
-          if ($stmt === false) {
-              die(print_r(sqlsrv_errors(), true));
-          }
+      <?php
+      include('db.php');
 
-          $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-          $passportImage = $row['Passport'] ? "UserPassport/" . $row['Passport'] : "UserPassport/DefaultImage.png";
-        ?>
-        <img id="modalImg" src="<?php echo $passportImage ?>">
+      // Get the UserId of the user you are talking to
+      $recipientId = $_GET['UserIdx'];
+  // Fetch the passport image
+  $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
+  $stmt = sqlsrv_query($conn, $sql);
+  if ($stmt === false) {
+      die(print_r(sqlsrv_errors(), true));
+  }
+
+  $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+  $Passport = $row['Passport'];
+  if (empty($Passport)) {
+    $passportImage = "UserPassport/DefaultImage.png";
+  } else {
+    $passportImage = "UserPassport/" . $Passport;
+  }
+  echo '<img id="modalImg" src="' . $passportImage . '">';
+
+
+?>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

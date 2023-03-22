@@ -102,7 +102,7 @@ if ($UserId == $isProfileOwner) {
 echo '<script src="country-states.js"></script>';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="home.php"><span class="text-success"> Offeyicial </span></a>
+    <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -249,8 +249,68 @@ echo '</div>
         </div>
     </div>
 </div>';
+echo '<div class="footer">';
 
 
+// Retrieve all the chats of the current user
+$sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId'";
+$stmt = sqlsrv_query($conn, $sql);
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+// Display the chats in a list on the sidebar
+echo '<!-- Button to open the sidebar -->
+<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+    <i class="bi bi-chat"></i> Chats
+</button>
+
+<!-- Sidebar -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+        <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-unstyled">';
+
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $recipientId = $row['recipientId'];
+
+    // Get the name of the recipient
+    $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+    $stmt2 = sqlsrv_query($conn, $sql2);
+    if ($stmt2 === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
+    
+    $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+    $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+    $Passport = $row2['Passport'];
+    if (empty( $Passport)) {
+      $passportImage="UserPassport/DefaultImage.png";
+     }else{
+     $passportImage="UserPassport/".$Passport;
+     }
+    
+    // Display the recipient name and passport image in the list
+    echo '<li>';
+    echo '<div class="passport">';
+    echo '<a>';
+    echo '<img src="'. $passportImage . '" alt="' . $recipientName . '">';
+    echo '</a>';
+    echo '</div>';
+    echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+    echo '</li>';
+    
+    
+}
+
+echo '</ul>
+    </div>
+</div>';
+
+echo '</div>';
     // If $isProfileOwner is false, only display some of the information
     // ...
 } else {
@@ -269,10 +329,7 @@ echo '</div>
     echo '<link rel="stylesheet" href="profile.css">';
 echo '<script src="country-states.js"></script>';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="home.php">
-    <img src="img/offeyicial.png">
-    <span class="text-success"> Offeyicial </span>
-</a>
+    <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
