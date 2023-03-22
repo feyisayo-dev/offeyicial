@@ -1,174 +1,116 @@
-$sql = "SELECT * FROM likes WHERE UserId = ? AND postId = ?";
-$params = array($UserId, $postId);
-$stmt = sqlsrv_query($conn, $sql, $params);
-$islikeing = sqlsrv_has_rows($stmt);
-echo '<button id="likeBtn" class="like ' . ($islikeing ? 'likeing' : 'unlike') . '">' . ($islikeing ? 'Unlike' : 'like') . '</button>';
-echo '<script>
-$(document).ready(function() {
-    var UserId = $_SESSION['UserId'];
-    var likeBtn = $( "#likeBtn" );
-    var postId = $_GET['postId']
+if(isset($_FILES['image']) && !empty($_FILES['image']['name']) || isset($_FILES['video']) && !empty($_FILES['video']['name'])){
 
-    $(".like").click(function() {
-        // alert("Button is working!");
-        $.ajax({
-            url: "like.php",
-            type: "POST",
-            data: {
-                like: 1,
-                unlike: 1,
-                UserId: UserId,
-                postId: postId,
-            },
-            success: function(response) {
-                alert(response);
+if(isset($_FILES['image']) && !empty($_FILES['image']['name'])){
 
-                if (response == "liked") {
-                    likeBtn.removeClass("btn-primary").addClass("btn-secondary").text("Unlike");
-                } else if (response == "unliked") {
-                    likeBtn.removeClass("btn-secondary").addClass("btn-primary").text("like");
+    // Code for handling image upload and insertion into database
+    $image = $_FILES['image'];
+      $image_name = $image['name'];
+      $image_tmp = $image['tmp_name'];
+      $image_size = $image['size'];
+      $image_error = $image['error'];
+
+      $image_ext = explode('.', $image_name);
+      $image_ext = strtolower(end($image_ext));
+
+      $allowed_ext = array('jpg', 'jpeg', 'png');
+
+      if(in_array($image_ext, $allowed_ext)) {
+          if($image_error === 0) {
+              if($image_size <= 2097152) {
+                  $image_name_new = uniqid('', true) . '.' . $image_ext;
+                  $image_destination = 'uploads/' .$image_name_new;
+                  $UserId = $_SESSION['UserId'];
+                  if(move_uploaded_file($image_tmp, $image_destination)) {
+                      $sql = "Insert into posts([UserId], 
+                      [PostId], 
+                      [title], 
+                      [content], 
+                      [image], 
+                      [date_posted])
+                      values ('$UserId','$PostId','$title', '$content', '$image_destination', '$date_posted')";
+                  $result = sqlsrv_query($conn, $sql);
+                  if($result) {
+                      echo "success";
+                  } else {
+                      echo "Error adding post with image.";
+                  }
+              } else {
+                  echo "Error uploading image.";
+              }
+          } else {
+              echo "Image size too large.";
+          }
+      } else {
+          echo "Error with image.";
+      }
+    }
+
+}
+
+if(isset($_FILES['video']) && !empty($_FILES['video']['name'])){
+
+    // Code for handling video upload and insertion into database
+    $video = $_FILES['video'];
+        $video_name = $video['name'];
+        $video_tmp = $video['tmp_name'];
+        $video_size = $video['size'];
+        $video_error = $video['error'];
+
+        $video_ext = explode('.', $video_name);
+        $video_ext = strtolower(end($video_ext));
+
+        $allowed_ext = array('mp4', 'avi', 'wmv');
+
+        if(in_array($video_ext, $allowed_ext)) {
+            if($video_error === 0) {
+                if($video_size <= 209715200) { // max video size is 200MB
+                    $video_name_new = uniqid('', true) . '.' . $video_ext;
+                    $video_destination = 'uploads/' .$video_name_new;
+                    $UserId = $_SESSION['UserId'];
+                    if(move_uploaded_file($video_tmp, $video_destination)) {
+                        $sql = "Insert into posts([UserId]
+                        ,[PostId]
+                        ,[title]
+                        ,[content]
+                        ,[video]
+                        ,[date_posted])
+                        values ('$UserId','$PostId','$title', '$content', '$video_destination', '$date_posted')";
+                    $result = sqlsrv_query($conn, $sql);
+                    if($result) {
+                        echo "success";
+                    } else {
+                        echo "Error adding post with video.";
+                    }
+                } else {
+                    echo "Error uploading video.";
                 }
-                        
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log(errorThrown);
+            } else {
+                echo "Video size too large.";
             }
-        });
-    });
-});
-</script>';
-<?php
-
-$query = "SELECT User_Pofile.Surname, User_Profile.First_Name, User_Profile.Passport, comments.PostId, comments.UserId, comments.comment
- from comments
- join User_Profile on User_Profile.UserId = comments.UserId
- order by desc";
-
-$query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
-    FROM posts 
-    JOIN User_Profile ON User_Profile.UserId = posts.UserId 
-    LEFT JOIN likes ON likes.PostId = posts.PostId
-    GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
-    ORDER BY posts.date_posted DESC";
-
-
-if(isset($_POST['like'])){
-    require('db.php');
-    $UserId = $_POST['UserId'];
-    $postId = $_POST['postId'];
-
-    // Check if the user has already liked the recipient
-    $sql = "SELECT * FROM likes WHERE UserId = ? AND postId = ?";
-    $params = array($UserId, $postId);
-    $stmt = sqlsrv_query($conn, $sql, $params);
-    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-
-    if($row) {
-        // User has already liked the recipient, so unfollow them
-        $sql = "DELETE FROM likes WHERE UserId = ? AND postId = ?";
-        $params = array($UserId, $postId);
-        $stmt = sqlsrv_query($conn, $sql, $params);
-
-        if($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
         } else {
-            echo "unliked";
+            echo "Error with video.";
         }
-    } else {
-        // User has not liked the recipient, so follow them
-        $sql = "INSERT INTO likes (UserId, postId) VALUES (?, ?)";
-        $params = array($UserId, $postId);
-        $stmt = sqlsrv_query($conn, $sql, $params);
 
-        if($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
-        } else {
-            echo "liked";
-        }
-    }
 }
 
-?>
+} else {
 
+// Code for handling case where neither image nor video is uploaded
 
+$sql = "Insert into posts([UserId]
+,[PostId]
+,[title]
+,[content]
+,[date_posted])
+values ('$UserId','$PostId','$title', '$content', '$date_posted')";
+$result = sqlsrv_query($conn, $sql);
 
-<script>
-function showCommentBox() {
-    // Your AJAX function for showing the comment box goes here
-    var postId = <?php echo json_encode($postId); ?>;
-    $.ajax({
-        url: "getCommentBox.php",
-        type: "POST",
-        data: { postId: postId },
-        success: function(data) {
-            // Display the comment box
-            $("#commentBox").html(data);
-        },
-        error: function(xhr, status, error) {
-            // Handle the error response here
-            alert("Error: " + error);
-        }
-    });
-}
-</script>
-<script>
-    function submitComment() {
-    var postId = <?php echo json_encode($postId); ?>;
-    var comment = $("#commentInput").val();
-    
-    $.ajax({
-        url: "submitComment.php",
-        type: "POST",
-        data: {
-            postId: postId,
-            comment: comment
-        },
-        success: function(data) {
-            alert(data);
-            // refresh comments section
-            $("#commentsSection").load("getComment.php?postId=" + postId);
-            // clear comment input
-            $("#commentInput").val("");
-        },
-        error: function(xhr, status, error) {
-            alert("Error: " + error);
-        }
-    });
+if($result) {
+    echo "success";
+} else {
+    echo "Error adding post.";
 }
 
-</script>
-
-
-<script>
-function share() {
-  // Get the post ID from the URL parameter
-  var postId = <?php echo $_GET['postId']; ?>;
-  
-  // Your AJAX function for sharing goes here
-  $.ajax({
-    url: 'SharePost.php',
-    type: 'POST',
-    data: {
-      postId: postId
-    },
-    success: function(data) {
-      // Handle the success response here
-      alert('Post shared!');
-    },
-    error: function(xhr, status, error) {
-      // Handle the error response here
-      alert('Error sharing post: ' + error);
-    }
-  });
-  
-  // Generate the share link and prompt the user to copy it
-  var shareUrl = 'http://localhost:8080/offeyicialchatroom/index.php?postId=' + postId;
-  prompt('Copy this link to share:', shareUrl);
 }
 
-
-function comment() {
-    // Your AJAX function for commenting goes here
-}
-</script>
-     $query = "SELECT * from comments where PostId= ? order by desc";
+sqlsrv_close($conn);
