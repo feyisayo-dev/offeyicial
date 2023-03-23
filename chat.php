@@ -7,542 +7,603 @@ if (!isset($_SESSION['loggedin'])) {
 ?>
 <?php
 include('db.php');
-$UserId = $_SESSION ['UserId'];
-      // Get the surname and first name of the user with the UserId from the database
-      $rsql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
-      $rstmt = sqlsrv_prepare($conn, $rsql);
-      if(sqlsrv_execute($rstmt)){
-        while($row = sqlsrv_fetch_array($rstmt, SQLSRV_FETCH_ASSOC)){
-          $Surname = $row['Surname'];
-          $First_Name = $row['First_Name'];
-        }
-      }
+$UserId = $_SESSION['UserId'];
+// Get the surname and first name of the user with the UserId from the database
+$rsql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+$rstmt = sqlsrv_prepare($conn, $rsql);
+if (sqlsrv_execute($rstmt)) {
+  while ($row = sqlsrv_fetch_array($rstmt, SQLSRV_FETCH_ASSOC)) {
+    $Surname = $row['Surname'];
+    $First_Name = $row['First_Name'];
+  }
+}
 ?>
 
-    <!DOCTYPE html>
-    <html>
+<!DOCTYPE html>
+<html>
 
-    <head>
-        <title>Chat~<?php echo $Surname . " " . $First_Name; ?></title>
-        <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
-        <link rel="stylesheet" href="css\all.min.css">
-        <link rel="stylesheet" href="css\font\bootstrap-icons.css">
-        <link rel="stylesheet" href="css\fontawesome.min.css">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/aos.css" rel="stylesheet">
-    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
-    <link href="css/remixicon/remixicon.css" rel="stylesheet">
-    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
-    <script src="js/popper.min.js"></script>
-    <!-- Bootstrap core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
+<head>
+  <title>Chat~<?php echo $Surname . " " . $First_Name; ?></title>
+  <link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
+  <link rel="stylesheet" href="css\all.min.css">
+  <link rel="stylesheet" href="css\font\bootstrap-icons.css">
+  <link rel="stylesheet" href="css\fontawesome.min.css">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/aos.css" rel="stylesheet">
+  <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="css/remixicon/remixicon.css" rel="stylesheet">
+  <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <script src="js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/twemoji.min.js"></script>
 
 
 
-        <style>
-            nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-nav a {
-  color: #212529;
-  text-decoration: none;
-  margin-left: 20px;
-  font-size: 16px;
-}
-
-nav a:hover {
-  text-decoration: underline;
-}
-
-nav i {
-  margin-right: 5px;
-}
-
-nav .profile {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  font-size: 14px;
-}
-
-nav .profile-name {
-  margin-left: 10px;
-}
-
-            
-            .chat-container {
-                width: 80%;
-                margin: 50px auto;
-                background-color: #f2f2f2;
-                border-radius: 10px;
-                padding: 20px;
-            }
-            
-            .chat-header {
-                text-align: center;
-                /* display: flex; */
-                background-color: #04AA6D;
-                color: white;
-                padding: 10px;
-                border-top-left-radius: 10px;
-                border-top-right-radius: 10px;
-            }
-            .recipientPassport{
-                border-radius: 50%;
-                width: 50px;
-                height: 50px;
-                margin-right: 10px;
-            }
-            
-            .chat-header h1 {
-                margin: 0;
-            }
-            
-            .chat-messages {
-                height: 300px;
-                overflow-y: scroll;
-                padding: 20px;
-            }
-            
-            .chat-messages ul {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .chat-messages li {
-                display: flex;
-                align-items: flex-start;
-                margin-bottom: 10px;
-            }
-            .chatbox {
-        background-color: #f2f2f2;
-        height: calc(100vh - 200px);
-        overflow-y: scroll;
-        padding: 10px;
+  <style>
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background-color: #f8f9fa;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    nav a {
+      color: #212529;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 16px;
+    }
+
+    nav a:hover {
+      color: green;
+    }
+
+    nav i {
+      margin-right: 5px;
+    }
+
+    nav .profile {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      font-size: 14px;
+    }
+
+    nav .profile-name {
+      margin-left: 10px;
+    }
+
+
+
+    .chat-container {
+      width: 80%;
+      margin: 50px auto;
+      background-color: #f2f2f2;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .chat-header {
+      text-align: center;
+      /* display: flex; */
+      background-color: #04AA6D;
+      color: white;
+      padding: 10px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .recipientPassport {
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    .chat-header h1 {
+      margin: 0;
+    }
+
+    .chat-messages {
+      height: 300px;
+      overflow-y: scroll;
+      padding: 20px;
+    }
+
+    .chat-messages ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .chat-messages li {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .chatbox {
+      background-color: #f2f2f2;
+      height: calc(100vh - 200px);
+      overflow-y: scroll;
+      padding: 10px;
+    }
+
     .Sent {
-        float: right;
-        background-color: #dcf8c6;
-        color: #444;
-        padding: 8px;
-        border-radius: 10px;
-        margin-top: 10px;
-        margin-left: auto;
-        max-width: 75%;
-        word-wrap: break-word;
-        clear: both;
+      float: right;
+      background-color: #dcf8c6;
+      color: #444;
+      padding: 8px;
+      border-radius: 10px;
+      margin-top: 10px;
+      margin-left: auto;
+      max-width: 75%;
+      word-wrap: break-word;
+      clear: both;
     }
+
     .received {
-        float: left;
-        background-color: white;
-        color: #444;
-        padding: 8px;
-        border-radius: 10px;
-        margin-top: 10px;
-        margin-right: auto;
-        max-width: 75%;
-        word-wrap: break-word;
-        clear: both;
+      float: left;
+      background-color: white;
+      color: #444;
+      padding: 8px;
+      border-radius: 10px;
+      margin-top: 10px;
+      margin-right: auto;
+      max-width: 75%;
+      word-wrap: break-word;
+      clear: both;
     }
+
     .image {
-        text-align: center;
+      text-align: center;
     }
+
     .image img {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 10px;
-        margin-top: 10px;
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      margin-top: 10px;
     }
+
     .message {
-        margin-bottom: 5px;
+      margin-bottom: 5px;
     }
-            
-            .chat-input {
-                display: flex;
-                padding: 20px;
-                background-color: #f2f2f2;
-                border-bottom-left-radius: 10px;
-                border-bottom-right-radius: 10px;
-            }
-            
-            .chat-input input[type="text"] {
-                flex: 1;
-                padding: 12px 20px;
-                margin: 8px 0;
-                box-sizing: border-box;
-                border: 2px solid #ccc;
-                border-radius: 10px;
-                box-shadow: 2px 2px 2px blue;
-            }
-            
-            button[type="submit"] {
-                padding: 12px 20px;
-                background-color: #04AA6D;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                margin-left: 10px;
-            }
-            
-            .image-icon {
-                display: inline-block;
-                cursor: pointer;
-            }
-            
-            /* .image-icon i {
+
+    .chat-input {
+      display: flex;
+      padding: 20px;
+      background-color: #f2f2f2;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    .chat-input input[type="text"] {
+      flex: 1;
+      padding: 12px 20px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 2px 2px 2px blue;
+    }
+
+    button[type="submit"] {
+      padding: 12px 20px;
+      background-color: #04AA6D;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+    }
+
+    .image-icon {
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    /* .image-icon i {
                 font-size: 25px;
                 color: gray;
             } */
-            
-            .image-input {
-                /* display: none; */
-                width: 180px;
-                background-color: #04AA6D;
-                color: white;
-            }
-            
-            textarea {
-                width: 100%;
-                height: 30px;
-                padding: 5px;
-                font-size: 16px;
-                font-family: montserrat;
-                resize: none;
-                border-radius: 10px;
-                box-shadow: 2px 2px 2px #04AA6D;
-            }
-            
-            .message-sender {
-                font-size: 12px;
-                color: black;
-            }
-            
-            .chats {
-                height: auto;
-                background: auto;
-                border: 4px;
-            }
-            .image-input {
-          opacity: 0;
-          position: absolute;
-          pointer-events: none;
-        }
 
-        .custom-file-label {
-          cursor: pointer;
-          color :green;
-        }
-        .icon {
-  position: relative;
-  font-size: 20px;
-  font-weight: bold;
-  text-decoration: none;
-  color: white;
-}
+    .image-input {
+      /* display: none; */
+      width: 180px;
+      background-color: #04AA6D;
+      color: white;
+    }
 
-.icon::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -20px;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: black;
-}
+    textarea {
+      width: 100%;
+      height: 30px;
+      padding: 5px;
+      font-size: 16px;
+      font-family: montserrat;
+      resize: none;
+      border-radius: 10px;
+      box-shadow: 2px 2px 2px #04AA6D;
+    }
 
-.icon::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: -20px;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: black;
-}
-.navbar form {
-  display: inline-block;
-  margin-left: 20px;
-}
+    .message-sender {
+      font-size: 12px;
+      color: black;
+    }
 
-.searchtext {
-  background-color: #f2f2f2;
-  border: none;
-  padding: 8px;
-  font-size: 16px;
-  width: 200px;
-  border-radius: 10px;
-}
+    .chats {
+      height: auto;
+      background: auto;
+      border: 4px;
+    }
 
-/* searchdropdown */
-.search-container {
-  position: relative;
-}
+    .image-input {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
 
-#user_table {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  position: absolute;
-  z-index: 9999;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-top: none;
-}
+    .custom-file-label {
+      cursor: pointer;
+      color: green;
+    }
 
-#user_table li {
-  padding: 8px 12px;
-  cursor: pointer;
-}
+    .icon {
+      position: relative;
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+    }
 
-#user_table li:hover {
-  background-color: #f2f2f2;
-}
-.custom-file-input {
-          opacity: 0;
-          position: absolute;
-          pointer-events: none;
-        }
+    .icon::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -20px;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: black;
+    }
 
-        .custom-file-label {
-          cursor: pointer;
-        }
-        .chatbox::-webkit-scrollbar-track {
-  background-color: #f5f5f5;
-}
-/* Define the scrollbar width and color */
-.chatbox::-webkit-scrollbar {
-  width: 8px;
-  background-color: #f5f5f5;
-}
+    .icon::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -20px;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: black;
+    }
 
-/* Define the scrollbar thumb color */
-.chatbox::-webkit-scrollbar-thumb {
-  background-color: #888;
-}
+    .navbar form {
+      display: inline-block;
+      margin-left: 20px;
+    }
 
-/* On hover, darken the scrollbar thumb color */
-.chatbox::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
-}
-/* #videoPlayer {
+    .searchtext {
+      background-color: #f2f2f2;
+      border: none;
+      padding: 8px;
+      font-size: 16px;
+      width: 200px;
+      border-radius: 10px;
+    }
+
+    /* searchdropdown */
+    .search-container {
+      position: relative;
+    }
+
+    #user_table {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      position: absolute;
+      z-index: 9999;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-top: none;
+    }
+
+    #user_table li {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    #user_table li:hover {
+      background-color: #f2f2f2;
+    }
+
+    .custom-file-input {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .custom-file-label {
+      cursor: pointer;
+    }
+
+    .chatbox::-webkit-scrollbar-track {
+      background-color: #f5f5f5;
+    }
+
+    /* Define the scrollbar width and color */
+    .chatbox::-webkit-scrollbar {
+      width: 8px;
+      background-color: #f5f5f5;
+    }
+
+    /* Define the scrollbar thumb color */
+    .chatbox::-webkit-scrollbar-thumb {
+      background-color: #888;
+    }
+
+    /* On hover, darken the scrollbar thumb color */
+    .chatbox::-webkit-scrollbar-thumb:hover {
+      background-color: #555;
+    }
+
+    /* #videoPlayer {
   max-width: 100%;
   max-height: 100%;
   margin: auto;
 } */
 
 
-/* Style the search box */
-.search-box {
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
+    /* Style the search box */
+    .search-box {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
 
 
-.search-box input[type="text"] {
-  padding: 6px;
-  border: none;
-  width: 100%;
-  font-size: 16px;
-}
+    .search-box input[type="text"] {
+      padding: 6px;
+      border: none;
+      width: 100%;
+      font-size: 16px;
+    }
 
-.search-box button {
-  border: none;
-  background-color: #ddd;
-  color: black;
-  font-size: 16px;
-  padding: 6px 10px;
-}
+    .search-box button {
+      border: none;
+      background-color: #ddd;
+      color: black;
+      font-size: 16px;
+      padding: 6px 10px;
+    }
 
-.search-box button:hover {
-  background-color: #ccc;
-}
+    .search-box button:hover {
+      background-color: #ccc;
+    }
 
-/* Chat button */
-button[data-bs-target="#sidebar"] {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-  background-color: #04AA6D;
-  color: #fff;
-  border: none;
-  border-radius: 50px;
-  padding: 15px 20px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease-in-out;
-}
+    /* Chat button */
+    button[data-bs-target="#sidebar"] {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      background-color: #04AA6D;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 15px 20px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease-in-out;
+    }
 
-button[data-bs-target="#sidebar"]:hover {
-  background-color: #128C7E;
-  transform: scale(1.05);
-  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
-}
+    button[data-bs-target="#sidebar"]:hover {
+      background-color: #128C7E;
+      transform: scale(1.05);
+      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+    }
 
-/* Sidebar */
-.offcanvas {
-  position: fixed;
-  bottom: 0;
-  right: -350px;
-  z-index: 9998;
-  width: 350px;
-  height: 100vh;
-  padding: 0;
-  background-color: #fff;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-}
+    /* Sidebar */
+    .offcanvas {
+      position: fixed;
+      bottom: 0;
+      right: -350px;
+      z-index: 9998;
+      width: 350px;
+      height: 100vh;
+      padding: 0;
+      background-color: #fff;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease-in-out;
+    }
 
-.offcanvas.show {
-  right: 0;
-}
+    .offcanvas.show {
+      right: 0;
+    }
 
-.offcanvas-header {
-  padding: 15px;
-  background-color: #04AA6D;
-  color: #fff;
-}
+    .offcanvas-header {
+      padding: 15px;
+      background-color: #04AA6D;
+      color: #fff;
+    }
 
-.offcanvas-title {
-  margin: 0;
-  font-size: 1.5rem;
-}
+    .offcanvas-title {
+      margin: 0;
+      font-size: 1.5rem;
+    }
 
-.offcanvas-body {
-  padding: 15px;
-}
+    .offcanvas-body {
+      padding: 15px;
+    }
 
-.offcanvas-body ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
+    .offcanvas-body ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
 
-.offcanvas-body ul li {
-  margin-bottom: 10px;
-}
+    .offcanvas-body ul li {
+      margin-bottom: 10px;
+    }
 
-.offcanvas-body ul li a {
-  display: block;
-  color: #333;
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  transition: all 0.2s ease-in-out;
-}
+    .offcanvas-body ul li a {
+      display: block;
+      color: #333;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      transition: all 0.2s ease-in-out;
+    }
 
-.offcanvas-body ul li a:hover {
-  background-color: #f7f7f7;
-  color: #04AA6D;
-}
-li a {
-  display: flex;
-  align-items: center;
-}
+    .offcanvas-body ul li a:hover {
+      background-color: #f7f7f7;
+      color: #04AA6D;
+    }
 
-.passport {
-  margin-right: 10px;
-}
+    li a {
+      display: flex;
+      align-items: center;
+    }
 
-.passport img {
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
-  border-radius: 50%;
-}
+    .passport {
+      margin-right: 10px;
+    }
 
-.name {
-  flex: 1;
-}
+    .passport img {
+      width: 30px;
+      height: 30px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
 
-.name span {
-  font-size: 16px;
-  font-weight: bold;
-}
+    .name {
+      flex: 1;
+    }
 
-/* Modal styles */
-.modal {
-  display: none; /* Hide the modal by default */
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.8);
-}
+    .name span {
+      font-size: 16px;
+      font-weight: bold;
+    }
 
-.modal-content {
-  margin: 10% auto;
-  width: 80%;
-  max-width: 500px;
-}
+    /* Modal styles */
+    .modal {
+      display: none;
+      /* Hide the modal by default */
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
 
-.modal img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  border-radius: 5px;
-}
+    .modal-content {
+      margin: 10% auto;
+      width: 80%;
+      max-width: 500px;
+    }
 
-/* Show the modal when the passport image is clicked */
-.passport img:hover {
-  cursor: pointer;
-}
+    .modal img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 5px;
+    }
 
-.modal.show {
-  display: block;
-}
-nav .logo {
-    font-size: 30px;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
+    /* Show the modal when the passport image is clicked */
+    .passport img:hover {
+      cursor: pointer;
+    }
 
-.logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-}
+    .modal.show {
+      display: block;
+    }
 
-.logo img {
-  height: 30px;
-  margin-right: 10px;
-}
+    nav .logo {
+      font-size: 30px;
+      margin: 0;
+      padding: 0;
+      line-height: 1;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
 
-.passport, .name {
-  display: inline-block;
-  vertical-align: middle;
-}
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
 
-        </style>
-    </head>
+    .logo img {
+      height: 30px;
+      margin-right: 10px;
+    }
 
-    <body>
+    .passport,
+    .name {
+      display: inline-block;
+      vertical-align: middle;
+    }
 
-    <nav>
+    .emoji {
+      color: green;
+      background-color: transparent;
+      border: none;
+    }
 
-  <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
-  
-  <div class="profile">
-    <?php
+    .emoji:hover {
+      background-color: transparent;
+      border: none;
+      color: white;
+    }
+
+    .emoji-picker {
+      position: relative;
+    }
+
+    .emoji-table-container {
+      position: absolute;
+      top: -200px;
+      /* adjust this value to suit your needs */
+      z-index: 1;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .emoji-picker,
+    .custom-file {
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    .textsubmit{
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+
+    <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
+
+    <div class="profile">
+      <?php
       // session_start();
 
       // Connect to the database
@@ -553,152 +614,203 @@ nav .logo {
       // Get the surname and first name of the user with the UserId from the database
       $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
       $stmt = sqlsrv_prepare($conn, $sql);
-      if(sqlsrv_execute($stmt)){
-        while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
+      if (sqlsrv_execute($stmt)) {
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
           $Surname = $row['Surname'];
           $First_Name = $row['First_Name'];
         }
       }
-    ?>  
-<div class="search-container">
-    <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
-    <div id="user_table">
-        <!-- <ul>
+      ?>
+      <div class="search-container">
+        <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+        <div id="user_table">
+          <!-- <ul>
             <li></li>
         </ul> -->
+        </div>
+      </div>
+
+
+      <a href="user_profile.php?UserId=<?php echo $UserId ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
     </div>
-</div>
-
-
-    <a href="user_profile.php?UserId=<?php echo $UserId ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
-  </div>
-</nav>
+  </nav>
 
 
 
 
-        <div class="chat-container">
-            <div class="chat-header">
-                <h1>
-                <?php
-include('db.php');
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>
+        <?php
+        include('db.php');
 
-// Get the UserId of the user you are talking to
-$recipientId = $_GET['UserIdx'];
+        // Get the UserId of the user you are talking to
+        $recipientId = $_GET['UserIdx'];
 
-// Get the name of the user you are talking to
-$sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-$stmt = sqlsrv_prepare($conn, $sql);
-if(sqlsrv_execute($stmt)){
-    while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
-        $recipientSurname = $row['Surname'];
-        $recipientFirstName = $row['First_Name'];
-        $Passport = $row['Passport'];
-        if (empty( $Passport)) {
-          $recipientPassport="UserPassport/DefaultImage.png";
-         }else{
-         $recipientPassport="UserPassport/".$Passport;
-         }
-
-    }
-}
-
-$UserId = $_SESSION['UserId'];
-
-// Get the surname and first name of the user with the UserId from the database
-$sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
-$stmt = sqlsrv_prepare($conn, $sql);
-if(sqlsrv_execute($stmt)){
-    while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){
-        $Surname = $row['Surname'];
-        $First_Name = $row['First_Name'];
-    }
-    echo '<img class="recipientPassport" src="' . $recipientPassport. '">';
-    echo '<a class="icon" href="user_profile.php?UserId='.$recipientId.'">'. $recipientSurname .' '. $recipientFirstName .'</a>';
-
-
-}
-    echo '</div>';
-    ?>
-    <div class="chatbox">
-    <?php
-        include 'db.php';
-
-        $query = "SELECT * FROM chats WHERE (UserId = ? AND recipientId = ?) OR (UserId = ? AND recipientId = ?) ORDER BY time_sent ASC";
-        $params = array($UserId, $recipientId, $recipientId, $UserId);
-        $stmt = sqlsrv_query($conn, $query, $params);
-        if ($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
+        // Get the name of the user you are talking to
+        $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+        $stmt = sqlsrv_prepare($conn, $sql);
+        if (sqlsrv_execute($stmt)) {
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $recipientSurname = $row['Surname'];
+            $recipientFirstName = $row['First_Name'];
+            $Passport = $row['Passport'];
+            if (empty($Passport)) {
+              $recipientPassport = "UserPassport/DefaultImage.png";
+            } else {
+              $recipientPassport = "UserPassport/" . $Passport;
+            }
+          }
         }
-        
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+
+        $UserId = $_SESSION['UserId'];
+
+        // Get the surname and first name of the user with the UserId from the database
+        $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+        $stmt = sqlsrv_prepare($conn, $sql);
+        if (sqlsrv_execute($stmt)) {
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $Surname = $row['Surname'];
+            $First_Name = $row['First_Name'];
+          }
+          echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
+          echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
+        }
+        echo '</div>';
+        ?>
+        <div class="chatbox">
+          <?php
+          include 'db.php';
+
+          $query = "SELECT * FROM chats WHERE (UserId = ? AND recipientId = ?) OR (UserId = ? AND recipientId = ?) ORDER BY time_sent ASC";
+          $params = array($UserId, $recipientId, $recipientId, $UserId);
+          $stmt = sqlsrv_query($conn, $query, $params);
+          if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+          }
+
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             // process each row of the result set
             $senderId = $row['senderId'];
             $message = $row['Sent'];
-            $sent_image = $row['sentimage'];  
+            $sent_image = $row['sentimage'];
             $sent_video = $row['sentvideo'];
             echo '<div class="' . ($senderId == $UserId ? 'Sent' : 'received') . '">';
             echo '<div class="message">';
             echo $message;
             echo '</div>';
             if (!empty($sent_image)) {
-                echo '<div class="image"><img src="' . $sent_image . '"></div>';
+              echo '<div class="image"><img src="' . $sent_image . '"></div>';
             }
             if (!empty($sent_video)) {
-                echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal" onclick="playVideo(\''. $sent_video .'\')">
+              echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal" onclick="playVideo(\'' . $sent_video . '\')">
                     <i class="bi bi-play-btn"></i> Watch Video
                 </button>';
             }
-            
-          echo '</div>';
-          
-        }
-    ?>
-</div>
-       <br><br>
+
+            echo '</div>';
+          }
+          ?>
+        </div>
+        <br><br>
         <div class="form-group">
-            <textarea class="form-control" id="message" rows="3"></textarea>
-            <div class="custom-file">
-              <input type="file" class="image-input" id="image" name="image" accept="image/*">
-              <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Image</label>
+          <div class="row">
+            <div class="foot">
+              <div class="emoji-picker">
+                <!-- emoji table code goes here -->
+                <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
+                  <i class="fas fa-smile"></i>
+                </button>
+                <div class="emoji-table-container" style="display:none">
+                  <table>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F600;')">😀</td>
+                      <td onclick="insertEmoji('&#x1F601;')">😁</td>
+                      <td onclick="insertEmoji('&#x1F602;')">😂</td>
+                      <td onclick="insertEmoji('&#x1F603;')">😃</td>
+                      <td onclick="insertEmoji('&#x1F604;')">😄</td>
+                      <td onclick="insertEmoji('&#x1F605;')">😅</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F606;')">😆</td>
+                      <td onclick="insertEmoji('&#x1F607;')">😇</td>
+                      <td onclick="insertEmoji('&#x1F608;')">😈</td>
+                      <td onclick="insertEmoji('&#x1F609;')">😉</td>
+                      <td onclick="insertEmoji('&#x1F610;')">😐</td>
+                      <td onclick="insertEmoji('&#x1F611;')">😑</td>
+                    </tr>
+                    <!-- Add more rows and columns for additional emojis -->
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                      <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                      <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                      <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                      <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                      <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                      <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                      <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                      <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                      <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                      <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                      <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                      <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                      <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                      <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                      <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="image-input" id="image" name="image" accept="image/*">
+                <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
+                <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
+              </div>
+              <div class="d-flex" style="align-items:center">
+              <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
+              <button type="submit" class="submit">Send</button>
+              </div>
             </div>
-            <div class="custom-file">
-              <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
-              <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
-            </div>
-
-            <button type="submit" class="submit">Send</button>
+          </div>
         </div>
 
-        </div>
         <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="videoModalLabel">Video</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-      <video  id="videoPlayer" width="640" height="360" controls>
-  <source src="<?php echo $sent_video; ?>" type="video/mp4">
-</video>
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="videoModalLabel">Video</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <video id="videoPlayer" width="640" height="360" controls>
+                  <source src="<?php echo $sent_video; ?>" type="video/mp4">
+                </video>
 
-      </div>
-    </div>
-  </div>
-</div>
-<div class="footer">
-<?php
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <?php
 
-// Retrieve all the chats of the current user
-$sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId'";
-$stmt = sqlsrv_query($conn, $sql);
-if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
+          // Retrieve all the chats of the current user
+          $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+          $stmt = sqlsrv_query($conn, $sql);
+          if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+          }
 
-// Display the chats in a list on the sidebar
-echo '<!-- Button to open the sidebar -->
+          // Display the chats in a list on the sidebar
+          echo '<!-- Button to open the sidebar -->
 <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
     <i class="bi bi-chat"></i> Chats
 </button>
@@ -712,235 +824,244 @@ echo '<!-- Button to open the sidebar -->
     <div class="offcanvas-body">
         <ul class="list-unstyled">';
 
-while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-    $recipientId = $row['recipientId'];
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $recipientId = $row['recipientId'];
 
-    // Get the name of the recipient
-    $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-    $stmt2 = sqlsrv_query($conn, $sql2);
-    if ($stmt2 === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
-    
-    $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-    $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-    $Passport = $row2['Passport'];
-    if (empty( $Passport)) {
-      $passportImage="UserPassport/DefaultImage.png";
-     }else{
-     $passportImage="UserPassport/".$Passport;
-     }
-    
-    // Display the recipient name and passport image in the list
-    echo '<li>';
-    echo '<div class="passport">';
-    echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
-    echo '<img src="'. $passportImage . '" alt="' . $recipientName . '">';
-    echo '</a>';
-    echo '</div>';
-    echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-    echo '</li>';
-    
-    
-}
+            // Get the name of the recipient
+            $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+            $stmt2 = sqlsrv_query($conn, $sql2);
+            if ($stmt2 === false) {
+              die(print_r(sqlsrv_errors(), true));
+            }
 
-echo '</ul>
+            $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+            $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+            $Passport = $row2['Passport'];
+            if (empty($Passport)) {
+              $passportImage = "UserPassport/DefaultImage.png";
+            } else {
+              $passportImage = "UserPassport/" . $Passport;
+            }
+
+            // Display the recipient name and passport image in the list
+            echo '<li>';
+            echo '<div class="passport">';
+            echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
+            echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+            echo '</a>';
+            echo '</div>';
+            echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+            echo '</li>';
+          }
+
+          echo '</ul>
     </div>
 </div>';
 
-?>
-</div>
+          ?>
+        </div>
 
 
         <script src="js/jquery.min.js"></script>
         <script>
-      $('.image-input').on('change', function() {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.image-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
-      });
-
-    </script> 
-    <script>
-      $('.custom-file-input').on('change', function() {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
-      });
-
-    </script>
-<script>
-function playVideo(videoUrl) {
-  // Get the video element
-  var videoPlayer = document.getElementById("videoPlayer");
-
-  // Set the video source
-  videoPlayer.src = videoUrl;
-
-  // Play the video
-  videoPlayer.play();
-
-  // Show the modal
-  $("#videoModal").modal("show");
-}
-
-// Stop the video when the modal is closed
-$("#videoModal").on("hidden.bs.modal", function () {
-  var videoPlayer = document.getElementById("videoPlayer");
-  videoPlayer.pause();
-});
-</script>
-
-        <script>
-setInterval(function(){
-  // use AJAX to call getMessages.php and update the chat window
-  $.ajax({
-    url: 'checkForNewMessages.php',
-    type: 'POST',
-    data: {UserId: '<?php echo $UserId; ?>', recipientId: '<?php echo $recipientId; ?>'},
-    success: function(response) {
-      $('#chat-window').html(response);
-    }
-  });
-}, 1000);
-
-    </script>
-
-
-
-
-
-        <script>
-            $(document).ready(function() {
-                $('.submit').click(function() {
-                    var message = $('#message').val();
-                    var image = $('.image-input').prop('files')[0];
-                    var UserId = '<?php echo $UserId; ?>';
-                    var recipientId = '<?php echo $recipientId; ?>';
-                    var video = $('#video').prop('files')[0];
-
-                    var formData = new FormData();
-                    formData.append('message', message);
-                    formData.append('image', image);
-                    formData.append('UserId', UserId);
-                    formData.append('recipientId', recipientId);
-                    formData.append('video', video);
-
-
-                    $.ajax({
-                        url: 'send_message.php',
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            console.log(response);
-                            $('#message').val('');
-                            $(".chatbox").load(location.href + " .chatbox>*","");
-
-                        }
-                    });
-                });
-            });
-
+          $('.image-input').on('change', function() {
+            var fileName = $(this).val().split('\\').pop();
+            $(this).siblings('.image-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
+          });
         </script>
         <script>
-$(document).ready(function(){
-  $("#search").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    if (value === "") {
-      // Clear the table if the search box is empty
-    //   $('#user_table').val('');
+          $('.custom-file-input').on('change', function() {
+            var fileName = $(this).val().split('\\').pop();
+            $(this).siblings('.custom-file-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
+          });
+        </script>
+        <script>
+          function playVideo(videoUrl) {
+            // Get the video element
+            var videoPlayer = document.getElementById("videoPlayer");
 
-      $("#user_table").html("");
-    } else {
-      // Run the search function if the search box is not empty
-      $("#user_table tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
-    }
-  });
-});
+            // Set the video source
+            videoPlayer.src = videoUrl;
 
-</script>
-<script>
-const searchBox = document.getElementById('search');
-const resultsDiv = document.getElementById('user_table');
+            // Play the video
+            videoPlayer.play();
 
-searchBox.addEventListener('input', function() {
-  const searchTerm = this.value;
+            // Show the modal
+            $("#videoModal").modal("show");
+          }
 
-  // Clear the results if the search box is empty
-  if (!searchTerm.trim()) {
-    resultsDiv.innerHTML = '';
-    return;
-  }
+          // Stop the video when the modal is closed
+          $("#videoModal").on("hidden.bs.modal", function() {
+            var videoPlayer = document.getElementById("videoPlayer");
+            videoPlayer.pause();
+          });
+        </script>
 
-  // Your search function here
-  $("#search").on("keyup", function() {
-    var search_query = $(this).val();
-    $.ajax({
-      url: "searchbackend.php",
-      method: "POST",
-      data: {search_query:search_query},
-      success: function(data){
-        // Update the table with the returned results
-        $("#user_table").html(data);
-      }
-    });
-  });
-});
+        <script>
+          setInterval(function() {
+            // use AJAX to call getMessages.php and update the chat window
+            $.ajax({
+              url: 'checkForNewMessages.php',
+              type: 'POST',
+              data: {
+                UserId: '<?php echo $UserId; ?>',
+                recipientId: '<?php echo $recipientId; ?>'
+              },
+              success: function(response) {
+                $('#chat-window').html(response);
+              }
+            });
+          }, 1000);
+        </script>
 
-</script>
-<script>
-window.onload = function() {
-  var chatbox = document.querySelector(".chatbox");
-  chatbox.scrollTop = chatbox.scrollHeight;
-}
+        <script>
+          function insertEmoji(emoji) {
+            var textarea = document.querySelector("#message");
+            textarea.value += emoji;
+          }
+        </script>
+        <script>
+          function toggleEmojiPicker() {
+            var container = document.querySelector(".emoji-table-container");
+            if (container.style.display === "none") {
+              container.style.display = "block";
+            } else {
+              container.style.display = "none";
+            }
+          }
+        </script>
 
-</script>
+        <script>
+          $(document).ready(function() {
+            $('.submit').click(function() {
+              var message = $('#message').val();
+              var image = $('.image-input').prop('files')[0];
+              var UserId = '<?php echo $UserId; ?>';
+              var recipientId = '<?php echo $recipientId; ?>';
+              var video = $('#video').prop('files')[0];
 
-<!-- Modal -->
-<!-- Modal -->
-<div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-      <?php
-      include('db.php');
-
-      // Get the UserId of the user you are talking to
-      $recipientId = $_GET['UserIdx'];
-  // Fetch the passport image
-  $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
-  $stmt = sqlsrv_query($conn, $sql);
-  if ($stmt === false) {
-      die(print_r(sqlsrv_errors(), true));
-  }
-
-  $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-  $Passport = $row['Passport'];
-  if (empty($Passport)) {
-    $passportImage = "UserPassport/DefaultImage.png";
-  } else {
-    $passportImage = "UserPassport/" . $Passport;
-  }
-  echo '<img id="modalImg" src="' . $passportImage . '">';
+              var formData = new FormData();
+              formData.append('message', message);
+              formData.append('image', image);
+              formData.append('UserId', UserId);
+              formData.append('recipientId', recipientId);
+              formData.append('video', video);
 
 
-?>
+              $.ajax({
+                url: 'send_message.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                  console.log(response);
+                  $('#message').val('');
+                  $(".chatbox").load(location.href + " .chatbox>*", "");
 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+                }
+              });
+            });
+          });
+        </script>
+        <script>
+          $(document).ready(function() {
+            $("#search").on("keyup", function() {
+              var value = $(this).val().toLowerCase();
+              if (value === "") {
+                // Clear the table if the search box is empty
+                //   $('#user_table').val('');
 
-    </body>
+                $("#user_table").html("");
+              } else {
+                // Run the search function if the search box is not empty
+                $("#user_table tr").filter(function() {
+                  $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+              }
+            });
+          });
+        </script>
+        <script>
+          const searchBox = document.getElementById('search');
+          const resultsDiv = document.getElementById('user_table');
 
-    </html>
+          searchBox.addEventListener('input', function() {
+            const searchTerm = this.value;
+
+            // Clear the results if the search box is empty
+            if (!searchTerm.trim()) {
+              resultsDiv.innerHTML = '';
+              return;
+            }
+
+            // Your search function here
+            $("#search").on("keyup", function() {
+              var search_query = $(this).val();
+              $.ajax({
+                url: "searchbackend.php",
+                method: "POST",
+                data: {
+                  search_query: search_query
+                },
+                success: function(data) {
+                  // Update the table with the returned results
+                  $("#user_table").html(data);
+                }
+              });
+            });
+          });
+        </script>
+        <script>
+          window.onload = function() {
+            var chatbox = document.querySelector(".chatbox");
+            chatbox.scrollTop = chatbox.scrollHeight;
+          }
+        </script>
+
+        <!-- Modal -->
+        <!-- Modal -->
+        <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <?php
+                include('db.php');
+
+                // Get the UserId of the user you are talking to
+                $recipientId = $_GET['UserIdx'];
+                // Fetch the passport image
+                $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
+                $stmt = sqlsrv_query($conn, $sql);
+                if ($stmt === false) {
+                  die(print_r(sqlsrv_errors(), true));
+                }
+
+                $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+                $Passport = $row['Passport'];
+                if (empty($Passport)) {
+                  $passportImage = "UserPassport/DefaultImage.png";
+                } else {
+                  $passportImage = "UserPassport/" . $Passport;
+                }
+                echo '<img id="modalImg" src="' . $passportImage . '">';
+
+
+                ?>
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+</body>
+
+</html>
