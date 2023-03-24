@@ -43,6 +43,10 @@ if (sqlsrv_execute($rstmt)) {
 
 
   <style>
+    body {
+      background-color: #f2f2f2;
+    }
+
     nav {
       display: flex;
       align-items: center;
@@ -81,21 +85,19 @@ if (sqlsrv_execute($rstmt)) {
 
 
     .chat-container {
-      width: 80%;
-      margin: 50px auto;
+      width: 100%;
+      /* margin: 50px auto; */
       background-color: #f2f2f2;
       border-radius: 10px;
-      padding: 20px;
+      /* padding: 20px; */
     }
 
     .chat-header {
-      text-align: center;
-      /* display: flex; */
+      text-align: left;
+      /* height: 70px; */
       background-color: #04AA6D;
       color: white;
-      padding: 10px;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
+      padding: 6px;
     }
 
     .recipientPassport {
@@ -260,30 +262,6 @@ if (sqlsrv_execute($rstmt)) {
       color: white;
     }
 
-    .icon::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: -20px;
-      transform: translateY(-50%);
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: black;
-    }
-
-    .icon::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: -20px;
-      transform: translateY(-50%);
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: black;
-    }
-
     .navbar form {
       display: inline-block;
       margin-left: 20px;
@@ -347,11 +325,13 @@ if (sqlsrv_execute($rstmt)) {
     /* Define the scrollbar thumb color */
     .chatbox::-webkit-scrollbar-thumb {
       background-color: #888;
+      border-radius: 10px;
     }
+
 
     /* On hover, darken the scrollbar thumb color */
     .chatbox::-webkit-scrollbar-thumb:hover {
-      background-color: #555;
+      background-color: green;
     }
 
     /* #videoPlayer {
@@ -389,9 +369,9 @@ if (sqlsrv_execute($rstmt)) {
 
     /* Chat button */
     button[data-bs-target="#sidebar"] {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
+      position: absolute;
+      top: 50px;
+      right: 30px;
       z-index: 9999;
       background-color: #04AA6D;
       color: #fff;
@@ -400,7 +380,12 @@ if (sqlsrv_execute($rstmt)) {
       padding: 15px 20px;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.2s ease-in-out;
+      width: 100px;
+      /* set a fixed width */
+      height: 50px;
+      /* set a fixed height */
     }
+
 
     button[data-bs-target="#sidebar"]:hover {
       background-color: #128C7E;
@@ -589,9 +574,43 @@ if (sqlsrv_execute($rstmt)) {
       vertical-align: middle;
       margin-right: 10px;
     }
-    .textsubmit{
+
+    .textsubmit {
       display: inline-block;
       vertical-align: middle;
+    }
+
+    .video-container {
+      position: relative;
+      width: 400px;
+      height: 400px;
+    }
+
+    #videoplayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #buttonplay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    #buttonplay.clicked {
+      display: none;
+    }
+
+    .form-group {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      padding-top: 30px;
     }
   </style>
 </head>
@@ -679,38 +698,7 @@ if (sqlsrv_execute($rstmt)) {
         echo '</div>';
         ?>
         <div class="chatbox">
-          <?php
-          include 'db.php';
 
-          $query = "SELECT * FROM chats WHERE (UserId = ? AND recipientId = ?) OR (UserId = ? AND recipientId = ?) ORDER BY time_sent ASC";
-          $params = array($UserId, $recipientId, $recipientId, $UserId);
-          $stmt = sqlsrv_query($conn, $query, $params);
-          if ($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
-          }
-
-          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            // process each row of the result set
-            $senderId = $row['senderId'];
-            $message = $row['Sent'];
-            $sent_image = $row['sentimage'];
-            $sent_video = $row['sentvideo'];
-            echo '<div class="' . ($senderId == $UserId ? 'Sent' : 'received') . '">';
-            echo '<div class="message">';
-            echo $message;
-            echo '</div>';
-            if (!empty($sent_image)) {
-              echo '<div class="image"><img src="' . $sent_image . '"></div>';
-            }
-            if (!empty($sent_video)) {
-              echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal" onclick="playVideo(\'' . $sent_video . '\')">
-                    <i class="bi bi-play-btn"></i> Watch Video
-                </button>';
-            }
-
-            echo '</div>';
-          }
-          ?>
         </div>
         <br><br>
         <div class="form-group">
@@ -776,29 +764,13 @@ if (sqlsrv_execute($rstmt)) {
                 <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
               </div>
               <div class="d-flex" style="align-items:center">
-              <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
-              <button type="submit" class="submit">Send</button>
+                <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
+                <button type="submit" class="submit"><i class="bi bi-send"></i></button>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="videoModalLabel">Video</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <video id="videoPlayer" width="640" height="360" controls>
-                  <source src="<?php echo $sent_video; ?>" type="video/mp4">
-                </video>
-
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="footer">
           <?php
 
@@ -811,7 +783,7 @@ if (sqlsrv_execute($rstmt)) {
 
           // Display the chats in a list on the sidebar
           echo '<!-- Button to open the sidebar -->
-<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+<button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
     <i class="bi bi-chat"></i> Chats
 </button>
 
@@ -876,43 +848,73 @@ if (sqlsrv_execute($rstmt)) {
           });
         </script>
         <script>
-          function playVideo(videoUrl) {
-            // Get the video element
-            var videoPlayer = document.getElementById("videoPlayer");
+          var sidebarToggle = document.getElementById('sidebar-toggle');
 
-            // Set the video source
-            videoPlayer.src = videoUrl;
+          sidebarToggle.addEventListener('mousedown', function(e) {
+            // get the current position of the button
+            var posX = e.clientX - sidebarToggle.offsetLeft;
+            var posY = e.clientY - sidebarToggle.offsetTop;
 
-            // Play the video
-            videoPlayer.play();
+            // make the button draggable
+            document.addEventListener('mousemove', moveButton);
 
-            // Show the modal
-            $("#videoModal").modal("show");
-          }
+            function moveButton(e) {
+              sidebarToggle.style.left = (e.clientX - posX) + 'px';
+              sidebarToggle.style.top = (e.clientY - posY) + 'px';
+            }
 
-          // Stop the video when the modal is closed
-          $("#videoModal").on("hidden.bs.modal", function() {
-            var videoPlayer = document.getElementById("videoPlayer");
-            videoPlayer.pause();
+            // stop dragging the button when the mouse button is released
+            document.addEventListener('mouseup', function() {
+              document.removeEventListener('mousemove', moveButton);
+            });
           });
         </script>
 
         <script>
-          setInterval(function() {
-            // use AJAX to call getMessages.php and update the chat window
-            $.ajax({
-              url: 'checkForNewMessages.php',
-              type: 'POST',
-              data: {
-                UserId: '<?php echo $UserId; ?>',
-                recipientId: '<?php echo $recipientId; ?>'
-              },
-              success: function(response) {
-                $('#chat-window').html(response);
+          var lastTimestamp = Date.now();
+
+          function checkForNewMessages() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+              if (this.readyState == 4 && this.status == 200) {
+                var response = JSON.parse(this.responseText);
+                if (response.length > 0) {
+                  lastTimestamp = response[response.length - 1].time_sent;
+                  var chatbox = document.querySelector('.chatbox');
+                  response.forEach(function(message) {
+                    var div = document.createElement('div');
+                    div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
+                    div.innerHTML = '<div class="message">' + message.message + '</div>';
+                    if (message.sent_image) {
+                      div.innerHTML += '<div class="image"><img src="' + message.sent_image + '"></div>';
+                    }
+                    if (message.sent_video) {
+                      div.innerHTML += '<div class="video-container"><div id="videoplayer"><video width="400" height="400" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
+                      // Add event listener to play the video when the "Watch Video" button is clicked
+                      var videoPlayer = div.querySelector('video');
+                      var playButton = div.querySelector('#buttonplay');
+                      playButton.addEventListener('click', function() {
+                        videoPlayer.style.display = 'block';
+                        videoPlayer.play();
+                        playButton.style.display = 'none';
+                      });
+                    }
+                    chatbox.appendChild(div);
+                  });
+                }
               }
-            });
-          }, 1000);
+            };
+            xhttp.open('POST', 'checkForNewMessages.php', true);
+            xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            var UserId = '<?php echo $UserId; ?>';
+            var recipientId = '<?php echo $_GET['UserIdx']; ?>';
+            var data = 'UserId=' + UserId + '&recipientId=' + recipientId + '&timestamp=' + lastTimestamp;
+            xhttp.send(data);
+          }
+
+          setInterval(checkForNewMessages, 500); // Call the function every 1 second
         </script>
+
 
         <script>
           function insertEmoji(emoji) {
@@ -933,11 +935,13 @@ if (sqlsrv_execute($rstmt)) {
 
         <script>
           $(document).ready(function() {
+            // $recipientId = $_GET['UserIdx'];
+
             $('.submit').click(function() {
               var message = $('#message').val();
               var image = $('.image-input').prop('files')[0];
               var UserId = '<?php echo $UserId; ?>';
-              var recipientId = '<?php echo $recipientId; ?>';
+              var recipientId = '<?php echo $_GET['UserIdx']; ?>';
               var video = $('#video').prop('files')[0];
 
               var formData = new FormData();
@@ -957,7 +961,7 @@ if (sqlsrv_execute($rstmt)) {
                 success: function(response) {
                   console.log(response);
                   $('#message').val('');
-                  $(".chatbox").load(location.href + " .chatbox>*", "");
+                  // $(".chatbox").load(location.href + " .chatbox>*", "");
 
                 }
               });
