@@ -230,11 +230,31 @@ if (isset($_SESSION['UserId'])) {
                 </div>';
             }
             if (!empty($video)) {
-                echo '<div class="col-md-6">
-                    <video controls class="w-100">
-                        <source src="' . $video . '" type="video/mp4">
-                    </video>
-                </div>';
+                echo '<div class="video-container">
+                <video id="myVideo" class="w-100">
+                  <source src="' . $row["video"] . '" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+                <div class="video-controls">
+                  <button id="rewindButton" onclick="rewind()">Rewind 10 seconds</button>
+                  <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
+                  <button onclick="togglePlayPause()">
+                    <span id="playPauseButton">Play</span>
+                  </button>                        
+                  <div class="volume-control">
+                    <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"> 
+                  </div>
+                  <div class="time-control">
+                    <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
+                    <div class="time-display">
+                      <div id="currentTimeDisplay">0:00</div>
+                      <div id="durationDisplay">0:00</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+                    ';
             }
             echo '</div>';
             if (!empty($content)) {
@@ -435,16 +455,36 @@ if (isset($_SESSION['UserId'])) {
             }
             echo '<div class="row">';
             if (!empty($image)) {
-                echo '<div class="col-md-6">
+                echo '<div class="col-md-9">
                     <img src="' . $image . '" class="img-fluid">
                 </div>';
             }
             if (!empty($video)) {
-                echo '<div class="col-md-6">
-                    <video controls class="w-100">
-                        <source src="' . $video . '" type="video/mp4">
-                    </video>
-                </div>';
+                echo '<div class="video-container">
+                <video id="myVideo" class="w-100">
+                  <source src="' . $row["video"] . '" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+                <div class="video-controls">
+                  <button id="rewindButton" onclick="rewind()">Rewind 10 seconds</button>
+                  <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
+                  <button onclick="togglePlayPause()">
+                    <span id="playPauseButton">Play</span>
+                  </button>                        
+                  <div class="volume-control">
+                    <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"> 
+                  </div>
+                  <div class="time-control">
+                    <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
+                    <div class="time-display">
+                      <div id="currentTimeDisplay">0:00</div>
+                      <div id="durationDisplay">0:00</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+                    ';
             }
             echo '</div>';
             if (!empty($content)) {
@@ -553,6 +593,7 @@ if (isset($_SESSION['UserId'])) {
         <button type="button" class="btn btn-primary" onclick="editpro()">Save changes</button>
       </div>
     </div>
+  </div>
   </div>
 </div>';
     echo '<script src="js/jquery.min.js"></script>';
@@ -777,6 +818,111 @@ $(document).ready(function() {
     });
 });
 </script>';
+    echo '<script>
+    // Get the video element
+const myVideo = document.getElementById("myVideo");
+
+// Get the controls
+const playPauseButton = document.getElementById("playPauseButton");
+const rewindButton = document.getElementById("rewindButton");
+const fastForwardButton = document.getElementById("fastForwardButton");
+const volumeRange = document.getElementById("volumeRange");
+const timeRange = document.getElementById("timeRange");
+const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+
+// Update the current time display
+// function updateCurrentTimeDisplay() {
+//   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
+// }
+
+// Format time in minutes and seconds
+// function formatTime(time) {
+//   const minutes = Math.floor(time / 60);
+//   const seconds = Math.floor(time % 60);
+//   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+// }
+
+// Toggle play/pause
+function togglePlayPause() {
+    // console.log("Toggle play/pause button clicked");
+    if (myVideo.paused) {
+      myVideo.play();
+      playPauseButton.textContent = "Pause";
+    } else {
+      myVideo.pause();
+      playPauseButton.textContent = "Play";
+    }
+}
+
+  
+// Rewind 10 seconds
+function rewind() {
+  myVideo.currentTime -= 10;
+}
+
+// Fast forward 10 seconds
+function fastForward() {
+  myVideo.currentTime += 10;
+}
+
+// Set volume
+function setVolume() {
+  myVideo.volume = volumeRange.value;
+}
+
+// Set current time
+function setCurrentTime() {
+  myVideo.currentTime = timeRange.value;
+  updateCurrentTimeDisplay();
+}
+
+// Update the time range input on time update
+myVideo.ontimeupdate = function() {
+  timeRange.value = myVideo.currentTime;
+  updateCurrentTimeDisplay();
+};
+
+// Get the video and time range input elements
+// const myVideo = document.getElementById("myVideo");
+// const timeRange = document.getElementById("timeRange");
+
+// Set the max value of the time range input on metadata load
+myVideo.onloadedmetadata = function() {
+  timeRange.max = myVideo.duration;
+  updateCurrentTimeDisplay();
+  updateDurationDisplay();
+};
+
+// Update the current time display element when the time updates
+myVideo.ontimeupdate = function() {
+  updateCurrentTimeDisplay();
+};
+
+// Update the current time display element
+function updateCurrentTimeDisplay() {
+  const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+  const currentTime = myVideo.currentTime;
+  currentTimeDisplay.textContent = formatTime(currentTime);
+}
+
+// Update the duration display element
+function updateDurationDisplay() {
+  const durationDisplay = document.getElementById("durationDisplay");
+  const duration = myVideo.duration;
+  durationDisplay.textContent = formatTime(duration);
+}
+
+// Format the time in the format of "h:m:ss"
+function formatTime(time) {
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+  return formattedTime;
+}
+
+
+  </script>
+  ';
 } else {
     // User is not logged in, redirect to the login page
     header('Location: login.php');

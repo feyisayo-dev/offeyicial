@@ -107,7 +107,8 @@ include('db.php');
 
     /* Post image */
     .post-image {
-      max-width: 100%;
+      width: 100%;
+      max-height: 600px;
       margin-bottom: 10px;
     }
 
@@ -120,13 +121,82 @@ include('db.php');
       margin-bottom: 10px;
     }
 
-    .post-video iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
+    .video-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  height: 0;
+  overflow: hidden;
+}
+
+.video-container video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.video-controls button {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Volume control */
+.volume-control {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.volume-control input[type="range"] {
+  width: 100px;
+  height: 10px;
+  margin-left: 10px;
+}
+
+/* Time control */
+.time-control {
+  display: flex;
+  align-items: center;
+}
+
+.time-control input[type="range"] {
+  flex-grow: 1;
+  height: 4px;
+}
+
+.time-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 10px;
+  width: 100px;
+  font-size: 12px;
+}
+
+#currentTimeDisplay,
+#durationDisplay {
+  text-align: right;
+  min-width: 30px;
+  color: white;
+}
+
 
     /* Post date */
     .post-date {
@@ -641,16 +711,19 @@ include('db.php');
     .notification.hidden {
       opacity: 0;
     }
+
     .emoji {
       color: black;
       background-color: white;
       border: none;
+      background-color: transparent;
     }
 
     .emoji:hover {
       background-color: green;
       border: none;
     }
+
     .emoji:focus {
       background-color: green;
       border: none;
@@ -662,7 +735,7 @@ include('db.php');
 
     .emoji-table-container {
       position: absolute;
-      top: -200px;
+      top: -150px;
       /* adjust this value to suit your needs */
       z-index: 1;
       background-color: #fff;
@@ -765,12 +838,62 @@ include('db.php');
       if (!empty($row['image']) && !empty($row['video'])) {
         echo '<div class="post-carousel">';
         echo '<img class="post-image" src="' . $row['image'] . '">';
-        echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
+        echo '<div class="post-video">
+        <div class="video-container">
+  <video id="myVideo" class="w-100">
+    <source src="' . $row["video"] . '" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <div class="video-controls">
+    <button id="rewindButton" onclick="rewind()">Rewind 10 seconds</button>
+    <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
+    <button onclick="togglePlayPause()">
+      <span id="playPauseButton">Play</span>
+    </button>                        
+    <div class="volume-control">
+      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"> 
+    </div>
+    <div class="time-control">
+      <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
+      <div class="time-display">
+        <div id="currentTimeDisplay">0:00</div>
+        <div id="durationDisplay">0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </div>';
         echo '</div>';
       } else if (!empty($row['image'])) {
         echo '<img class="post-image" src="' . $row['image'] . '">';
       } else if (!empty($row['video'])) {
-        echo '<div class="post-video"><iframe src="' . $row['video'] . '"></iframe></div>';
+        echo '<div class="post-video">
+        <div class="video-container">
+  <video id="myVideo" class="w-100">
+    <source src="' . $row["video"] . '" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <div class="video-controls">
+    <button id="rewindButton" onclick="rewind()">Rewind 10 seconds</button>
+    <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
+    <button onclick="togglePlayPause()">
+      <span id="playPauseButton">Play</span>
+    </button>                        
+    <div class="volume-control">
+      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"> 
+    </div>
+    <div class="time-control">
+      <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
+      <div class="time-display">
+        <div id="currentTimeDisplay">0:00</div>
+        <div id="durationDisplay">0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>';
       }
       echo '<p class="post-content">' . $row['content'] . '</p>';
       //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
@@ -875,7 +998,7 @@ include('db.php');
               <i class="fas fa-smile"></i>
             </button>
             <div class="emoji-table-container" style="display:none">
-            <table>
+              <table>
                 <tr>
                   <td onclick="insertEmoji('&#x1F600;')">😀</td>
                   <td onclick="insertEmoji('&#x1F601;')">😁</td>
@@ -894,27 +1017,28 @@ include('db.php');
                 </tr>
                 <!-- Add more rows and columns for additional emojis -->
                 <tr>
-                <td onclick="insertEmoji('&#x1F60A;')">😊</td>
-                <td onclick="insertEmoji('&#x1F60B;')">😋</td>
-                <td onclick="insertEmoji('&#x1F60C;')">😌</td>
-                <td onclick="insertEmoji('&#x1F60D;')">😍</td>
-                <td onclick="insertEmoji('&#x1F60E;')">😎</td>
-                <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                  <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                  <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                  <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                  <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                  <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                  <td onclick="insertEmoji('&#x1F60F;')">😏</td>
                 </tr>
                 <tr>
-                <td onclick="insertEmoji('&#x1F612;')">😒</td>
-                <td onclick="insertEmoji('&#x1F613;')">😓</td>
-                <td onclick="insertEmoji('&#x1F616;')">😖</td>
-                <td onclick="insertEmoji('&#x1F615;')">😕</td>
-                <td onclick="insertEmoji('&#x1F617;')">😗</td>
-                <td onclick="insertEmoji('&#x1F618;')">😘</td>
-                </tr>                <tr>
-                <td onclick="insertEmoji('&#x1F619;')">😙</td>
-                <td onclick="insertEmoji('&#x1F61A;')">😚</td>
-                <td onclick="insertEmoji('&#x1F61B;')">😛</td>
-                <td onclick="insertEmoji('&#x1F61C;')">😜</td>
-                <td onclick="insertEmoji('&#x1F61D;')">😝</td>
-                <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                  <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                  <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                  <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                  <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                  <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                  <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                </tr>
+                <tr>
+                  <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                  <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                  <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                  <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                  <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                  <td onclick="insertEmoji('&#x1F61E;')">😞</td>
                 </tr>
               </table>
             </div>
@@ -1026,7 +1150,7 @@ include('db.php');
 </script>
 <script>
   function insertEmoji(emoji) {
-    var textarea = document.querySelector("#message");
+    var textarea = document.querySelector("#commentInput");
     textarea.value += emoji;
   }
 </script>
@@ -1151,5 +1275,108 @@ include('db.php');
     });
   });
 </script>
+<script>
+    // Get the video element
+const myVideo = document.getElementById("myVideo");
 
+// Get the controls
+const playPauseButton = document.getElementById("playPauseButton");
+const rewindButton = document.getElementById("rewindButton");
+const fastForwardButton = document.getElementById("fastForwardButton");
+const volumeRange = document.getElementById("volumeRange");
+const timeRange = document.getElementById("timeRange");
+const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+
+// Update the current time display
+// function updateCurrentTimeDisplay() {
+//   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
+// }
+
+// Format time in minutes and seconds
+// function formatTime(time) {
+//   const minutes = Math.floor(time / 60);
+//   const seconds = Math.floor(time % 60);
+//   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+// }
+
+// Toggle play/pause
+function togglePlayPause() {
+    // console.log("Toggle play/pause button clicked");
+    if (myVideo.paused) {
+      myVideo.play();
+      playPauseButton.textContent = "Pause";
+    } else {
+      myVideo.pause();
+      playPauseButton.textContent = "Play";
+    }
+}
+
+  
+// Rewind 10 seconds
+function rewind() {
+  myVideo.currentTime -= 10;
+}
+
+// Fast forward 10 seconds
+function fastForward() {
+  myVideo.currentTime += 10;
+}
+
+// Set volume
+function setVolume() {
+  myVideo.volume = volumeRange.value;
+}
+
+// Set current time
+function setCurrentTime() {
+  myVideo.currentTime = timeRange.value;
+  updateCurrentTimeDisplay();
+}
+
+// Update the time range input on time update
+myVideo.ontimeupdate = function() {
+  timeRange.value = myVideo.currentTime;
+  updateCurrentTimeDisplay();
+};
+
+// Get the video and time range input elements
+// const myVideo = document.getElementById("myVideo");
+// const timeRange = document.getElementById("timeRange");
+
+// Set the max value of the time range input on metadata load
+myVideo.onloadedmetadata = function() {
+  timeRange.max = myVideo.duration;
+  updateCurrentTimeDisplay();
+  updateDurationDisplay();
+};
+
+// Update the current time display element when the time updates
+myVideo.ontimeupdate = function() {
+  updateCurrentTimeDisplay();
+};
+
+// Update the current time display element
+function updateCurrentTimeDisplay() {
+  const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+  const currentTime = myVideo.currentTime;
+  currentTimeDisplay.textContent = formatTime(currentTime);
+}
+
+// Update the duration display element
+function updateDurationDisplay() {
+  const durationDisplay = document.getElementById("durationDisplay");
+  const duration = myVideo.duration;
+  durationDisplay.textContent = formatTime(duration);
+}
+
+// Format the time in the format of "h:m:ss"
+function formatTime(time) {
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+  return formattedTime;
+}
+
+
+</script>
 </html>

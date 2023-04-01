@@ -302,7 +302,7 @@ if (sqlsrv_execute($rstmt)) {
       background-color: #f2f2f2;
     }
 
-    .custom-file-input {
+    .video-input {
       opacity: 0;
       position: absolute;
       pointer-events: none;
@@ -341,31 +341,6 @@ if (sqlsrv_execute($rstmt)) {
 } */
 
 
-    /* Style the search box */
-    .search-box {
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
-
-
-    .search-box input[type="text"] {
-      padding: 6px;
-      border: none;
-      width: 100%;
-      font-size: 16px;
-    }
-
-    .search-box button {
-      border: none;
-      background-color: #ddd;
-      color: black;
-      font-size: 16px;
-      padding: 6px 10px;
-    }
-
-    .search-box button:hover {
-      background-color: #ccc;
-    }
 
     /* Chat button */
     button[data-bs-target="#sidebar"] {
@@ -594,6 +569,10 @@ if (sqlsrv_execute($rstmt)) {
       height: 100%;
     }
 
+    .iframe {
+      display: none;
+    }
+
     #buttonplay {
       position: absolute;
       top: 50%;
@@ -611,6 +590,151 @@ if (sqlsrv_execute($rstmt)) {
       bottom: 10px;
       width: 100%;
       padding-top: 30px;
+    }
+
+    .preview img {
+      max-width: 100%;
+      /* max-height: 200px; */
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* The Modal (background) */
+    .modal {
+      display: none;
+      /* Hidden by default */
+      position: fixed;
+      /* Stay in place */
+      z-index: 1;
+      /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%;
+      /* Full width */
+      height: 100%;
+      /* Full height */
+      overflow: auto;
+      /* Enable scroll if needed */
+      background-color: rgba(0, 0, 0, 0.4);
+      /* Black w/ opacity */
+    }
+
+    /* Modal Content/Box */
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      /* Could be more or less, depending on screen size */
+    }
+
+    /* Close Button */
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Style the preview image or video */
+    #image-preview,
+    #video-preview {
+      max-width: 100%;
+      max-height: 100%;
+      /* display: none; */
+    }
+
+    @media only screen and (max-width: 767px) {
+      .message {
+        font-size: 25px;
+        margin-bottom: 5px;
+      }
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      /* 16:9 */
+      height: 0;
+      overflow: hidden;
+    }
+
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .video-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .video-controls button {
+      background-color: transparent;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* Volume control */
+    .volume-control {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+
+    .volume-control input[type="range"] {
+      width: 100px;
+      height: 10px;
+      margin-left: 10px;
+    }
+
+    /* Time control */
+    .time-control {
+      display: flex;
+      align-items: center;
+    }
+
+    .time-control input[type="range"] {
+      flex-grow: 1;
+      height: 4px;
+    }
+
+    .time-display {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-left: 10px;
+      width: 100px;
+      font-size: 12px;
+    }
+
+    #currentTimeDisplay,
+    #durationDisplay {
+      text-align: right;
+      min-width: 30px;
+      color: white;
+
     }
   </style>
 </head>
@@ -700,7 +824,20 @@ if (sqlsrv_execute($rstmt)) {
         <div class="chatbox">
 
         </div>
+        <div class="preview">
+          <div id="image-modal" class="modal">
+            <span class="close">&times;</span>
+            <img id="image-preview" src="#" alt="Image Preview">
+          </div>
+          <div id="video-modal" class="modal">
+            <span class="close">&times;</span>
+            <video id="video-preview" src="#"></video>
+          </div>
+        </div>
+
         <br><br>
+
+
         <div class="form-group">
           <div class="row">
             <div class="foot">
@@ -756,13 +893,15 @@ if (sqlsrv_execute($rstmt)) {
                 </div>
               </div>
               <div class="custom-file">
-                <input type="file" class="image-input" id="image" name="image" accept="image/*">
+                <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
                 <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
               </div>
               <div class="custom-file">
-                <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
+                <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
                 <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
               </div>
+
+
               <div class="d-flex" style="align-items:center">
                 <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
                 <button type="submit" class="submit"><i class="bi bi-send"></i></button>
@@ -770,7 +909,6 @@ if (sqlsrv_execute($rstmt)) {
             </div>
           </div>
         </div>
-
         <div class="footer">
           <?php
 
@@ -784,8 +922,7 @@ if (sqlsrv_execute($rstmt)) {
           // Display the chats in a list on the sidebar
           echo '<!-- Button to open the sidebar -->
 <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-    <i class="bi bi-chat"></i> Chats
-</button>
+    <i class="bi bi-chat"></i></button>
 
 <!-- Sidebar -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
@@ -836,18 +973,6 @@ if (sqlsrv_execute($rstmt)) {
 
         <script src="js/jquery.min.js"></script>
         <script>
-          $('.image-input').on('change', function() {
-            var fileName = $(this).val().split('\\').pop();
-            $(this).siblings('.image-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
-          });
-        </script>
-        <script>
-          $('.custom-file-input').on('change', function() {
-            var fileName = $(this).val().split('\\').pop();
-            $(this).siblings('.custom-file-input').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
-          });
-        </script>
-        <script>
           var sidebarToggle = document.getElementById('sidebar-toggle');
 
           sidebarToggle.addEventListener('mousedown', function(e) {
@@ -889,7 +1014,7 @@ if (sqlsrv_execute($rstmt)) {
                       div.innerHTML += '<div class="image"><img src="' + message.sent_image + '"></div>';
                     }
                     if (message.sent_video) {
-                      div.innerHTML += '<div class="video-container"><div id="videoplayer"><video width="400" height="400" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
+                      div.innerHTML += '<div class="video-container"><div id="videoplayer"><video id="myVideo" class="w-100"><source src="' + message.sent_video + '" type="video/mp4">Your browser does not support the video tag.</video><div class="video-controls"><button id="rewindButton" onclick="rewind()">-10s</button><button id="fastForwardButton" onclick="fastForward()">+10s</button><button onclick="togglePlayPause()"><span id="playPauseButton">Play</span></button><div class="volume-control"><input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"></div><div class="time-control"><input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()"><div class="time-display"><div id="currentTimeDisplay">0:00</div><div id="durationDisplay">0:00</div></div></div></div><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div></div>';
                       // Add event listener to play the video when the "Watch Video" button is clicked
                       var videoPlayer = div.querySelector('video');
                       var playButton = div.querySelector('#buttonplay');
@@ -901,6 +1026,7 @@ if (sqlsrv_execute($rstmt)) {
                     }
                     chatbox.appendChild(div);
                   });
+                  chatbox.scrollTop = chatbox.scrollHeight; // Scroll to bottom
                 }
               }
             };
@@ -934,9 +1060,78 @@ if (sqlsrv_execute($rstmt)) {
         </script>
 
         <script>
-          $(document).ready(function() {
-            // $recipientId = $_GET['UserIdx'];
+          function previewImage() {
+            console.log('previewImage() called');
+            var imagePreview = document.querySelector('#image-preview');
+            var videoPreview = document.querySelector('#video-preview');
+            var imageInput = document.querySelector('.image-input');
+            var videoInput = document.querySelector('.video-input');
 
+            // Reset the video preview and hide the image preview when no file is selected
+            if (!imageInput.files[0]) {
+              videoPreview.style.display = 'none';
+              imagePreview.style.display = 'none';
+              return;
+            }
+
+            // Show the preview of the image file
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              imagePreview.setAttribute('src', e.target.result);
+              imagePreview.style.display = 'block';
+              videoPreview.style.display = 'none';
+            };
+            reader.readAsDataURL(imageInput.files[0]);
+          }
+
+          function previewVideo() {
+            console.log('previewVideo() called');
+            var imagePreview = document.querySelector('#image-preview');
+            var videoPreview = document.querySelector('#video-preview');
+            var imageInput = document.querySelector('.image-input');
+            var videoInput = document.querySelector('.video-input');
+            var videoModal = document.querySelector('#video-modal');
+
+            // Reset the image preview and hide the video preview when no file is selected
+            if (!videoInput.files[0]) {
+              videoPreview.style.display = 'none';
+              imagePreview.style.display = 'none';
+              return;
+            }
+
+            // Show the modal
+            videoModal.style.display = "block";
+
+            // Show the preview of the video file
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              videoPreview.setAttribute('src', e.target.result);
+              videoPreview.style.display = 'block';
+              imagePreview.style.display = 'none';
+            };
+            reader.readAsDataURL(videoInput.files[0]);
+          }
+
+          // Close the image modal when the user clicks on the close button
+          var imageCloseBtn = document.querySelector("#image-modal .close");
+          imageCloseBtn.onclick = function() {
+            var imageModal = document.querySelector('#image-modal');
+            imageModal.style.display = "none";
+          };
+
+          // Close the video modal when the user clicks on the close button
+          var videoCloseBtn = document.querySelector("#video-modal .close");
+          videoCloseBtn.onclick = function() {
+            var videoModal = document.querySelector('#video-modal');
+            var videoPreview = document.querySelector('#video-preview');
+            videoModal.style.display = "none";
+            videoPreview.pause();
+          };
+
+          $(document).ready(function() {
+
+
+            // Send the message
             $('.submit').click(function() {
               var message = $('#message').val();
               var image = $('.image-input').prop('files')[0];
@@ -951,7 +1146,7 @@ if (sqlsrv_execute($rstmt)) {
               formData.append('recipientId', recipientId);
               formData.append('video', video);
 
-
+              // Send the AJAX request
               $.ajax({
                 url: 'send_message.php',
                 type: 'POST',
@@ -961,7 +1156,7 @@ if (sqlsrv_execute($rstmt)) {
                 success: function(response) {
                   console.log(response);
                   $('#message').val('');
-                  // $(".chatbox").load(location.href + " .chatbox>*", "");
+
 
                 }
               });
@@ -1017,13 +1212,107 @@ if (sqlsrv_execute($rstmt)) {
           });
         </script>
         <script>
-          window.onload = function() {
-            var chatbox = document.querySelector(".chatbox");
-            chatbox.scrollTop = chatbox.scrollHeight;
+          // Get the video element
+          const myVideo = document.getElementById("myVideo");
+
+          // Get the controls
+          const playPauseButton = document.getElementById("playPauseButton");
+          const rewindButton = document.getElementById("rewindButton");
+          const fastForwardButton = document.getElementById("fastForwardButton");
+          const volumeRange = document.getElementById("volumeRange");
+          const timeRange = document.getElementById("timeRange");
+          const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+
+          // Update the current time display
+          // function updateCurrentTimeDisplay() {
+          //   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
+          // }
+
+          // Format time in minutes and seconds
+          // function formatTime(time) {
+          //   const minutes = Math.floor(time / 60);
+          //   const seconds = Math.floor(time % 60);
+          //   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+          // }
+
+          // Toggle play/pause
+          function togglePlayPause() {
+            // console.log("Toggle play/pause button clicked");
+            if (myVideo.paused) {
+              myVideo.play();
+              playPauseButton.textContent = "Pause";
+            } else {
+              myVideo.pause();
+              playPauseButton.textContent = "Play";
+            }
+          }
+
+
+          // Rewind 10 seconds
+          function rewind() {
+            myVideo.currentTime -= 10;
+          }
+
+          // Fast forward 10 seconds
+          function fastForward() {
+            myVideo.currentTime += 10;
+          }
+
+          // Set volume
+          function setVolume() {
+            myVideo.volume = volumeRange.value;
+          }
+
+          // Set current time
+          function setCurrentTime() {
+            myVideo.currentTime = timeRange.value;
+            updateCurrentTimeDisplay();
+          }
+
+          // Update the time range input on time update
+          myVideo.ontimeupdate = function() {
+            timeRange.value = myVideo.currentTime;
+            updateCurrentTimeDisplay();
+          };
+
+          // Get the video and time range input elements
+          // const myVideo = document.getElementById("myVideo");
+          // const timeRange = document.getElementById("timeRange");
+
+          // Set the max value of the time range input on metadata load
+          myVideo.onloadedmetadata = function() {
+            timeRange.max = myVideo.duration;
+            updateCurrentTimeDisplay();
+            updateDurationDisplay();
+          };
+
+          // Update the current time display element when the time updates
+          myVideo.ontimeupdate = function() {
+            updateCurrentTimeDisplay();
+          };
+
+          // Update the current time display element
+          function updateCurrentTimeDisplay() {
+            const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+            const currentTime = myVideo.currentTime;
+            currentTimeDisplay.textContent = formatTime(currentTime);
+          }
+
+          // Update the duration display element
+          function updateDurationDisplay() {
+            const durationDisplay = document.getElementById("durationDisplay");
+            const duration = myVideo.duration;
+            durationDisplay.textContent = formatTime(duration);
+          }
+
+          // Format the time in the format of "h:m:ss"
+          function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+            return formattedTime;
           }
         </script>
-
-        <!-- Modal -->
         <!-- Modal -->
         <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
