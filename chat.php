@@ -18,6 +18,16 @@ if (sqlsrv_execute($rstmt)) {
   }
 }
 ?>
+<?php
+// Check if UserIdx is set in the URL
+if (!isset($_GET["UserIdx"])) {
+  // Redirect to chat.php with UserIdx parameter
+  header("Location: chat.php?UserIdx=" . $UserId);
+  exit(); // End script execution to prevent further output
+}
+// UserIdx is already set, continue with rest of the script
+?>
+
 
 <!DOCTYPE html>
 <html>
