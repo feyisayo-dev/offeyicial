@@ -1212,106 +1212,98 @@ if (sqlsrv_execute($rstmt)) {
           });
         </script>
         <script>
-          // Get the video element
-          const myVideo = document.getElementById("myVideo");
+          document.addEventListener("DOMContentLoaded", function() {
+            // Your code here
+            // Get the video element
+            const myVideo = document.getElementById("myVideo");
 
-          // Get the controls
-          const playPauseButton = document.getElementById("playPauseButton");
-          const rewindButton = document.getElementById("rewindButton");
-          const fastForwardButton = document.getElementById("fastForwardButton");
-          const volumeRange = document.getElementById("volumeRange");
-          const timeRange = document.getElementById("timeRange");
-          const currentTimeDisplay = document.getElementById("currentTimeDisplay");
-
-          // Update the current time display
-          // function updateCurrentTimeDisplay() {
-          //   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
-          // }
-
-          // Format time in minutes and seconds
-          // function formatTime(time) {
-          //   const minutes = Math.floor(time / 60);
-          //   const seconds = Math.floor(time % 60);
-          //   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-          // }
-
-          // Toggle play/pause
-          function togglePlayPause() {
-            // console.log("Toggle play/pause button clicked");
-            if (myVideo.paused) {
-              myVideo.play();
-              playPauseButton.textContent = "Pause";
-            } else {
-              myVideo.pause();
-              playPauseButton.textContent = "Play";
-            }
-          }
-
-
-          // Rewind 10 seconds
-          function rewind() {
-            myVideo.currentTime -= 10;
-          }
-
-          // Fast forward 10 seconds
-          function fastForward() {
-            myVideo.currentTime += 10;
-          }
-
-          // Set volume
-          function setVolume() {
-            myVideo.volume = volumeRange.value;
-          }
-
-          // Set current time
-          function setCurrentTime() {
-            myVideo.currentTime = timeRange.value;
-            updateCurrentTimeDisplay();
-          }
-
-          // Update the time range input on time update
-          myVideo.ontimeupdate = function() {
-            timeRange.value = myVideo.currentTime;
-            updateCurrentTimeDisplay();
-          };
-
-          // Get the video and time range input elements
-          // const myVideo = document.getElementById("myVideo");
-          // const timeRange = document.getElementById("timeRange");
-
-          // Set the max value of the time range input on metadata load
-          myVideo.onloadedmetadata = function() {
-            timeRange.max = myVideo.duration;
-            updateCurrentTimeDisplay();
-            updateDurationDisplay();
-          };
-
-          // Update the current time display element when the time updates
-          myVideo.ontimeupdate = function() {
-            updateCurrentTimeDisplay();
-          };
-
-          // Update the current time display element
-          function updateCurrentTimeDisplay() {
+            // Get the controls
+            const playPauseButton = document.getElementById("playPauseButton");
+            const rewindButton = document.getElementById("rewindButton");
+            const fastForwardButton = document.getElementById("fastForwardButton");
+            const volumeRange = document.getElementById("volumeRange");
+            const timeRange = document.getElementById("timeRange");
             const currentTimeDisplay = document.getElementById("currentTimeDisplay");
-            const currentTime = myVideo.currentTime;
-            currentTimeDisplay.textContent = formatTime(currentTime);
-          }
 
-          // Update the duration display element
-          function updateDurationDisplay() {
-            const durationDisplay = document.getElementById("durationDisplay");
-            const duration = myVideo.duration;
-            durationDisplay.textContent = formatTime(duration);
-          }
+            myVideo.addEventListener("loadedmetadata", function() {
+              // Toggle play/pause
+              function togglePlayPause() {
+                // console.log("Toggle play/pause button clicked");
+                if (myVideo.paused) {
+                  myVideo.play();
+                  playPauseButton.textContent = "Pause";
+                } else {
+                  myVideo.pause();
+                  playPauseButton.textContent = "Play";
+                }
+              }
+              // Add event listener to update the time range input on time update
+              myVideo.ontimeupdate = function() {
+                timeRange.value = myVideo.currentTime;
+                updateCurrentTimeDisplay();
+              };
+              // Rewind 10 seconds
+              function rewind() {
+                myVideo.currentTime -= 10;
+              }
 
-          // Format the time in the format of "h:m:ss"
-          function formatTime(time) {
-            const minutes = Math.floor(time / 60);
-            const seconds = Math.floor(time % 60);
-            const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-            return formattedTime;
-          }
+              // Fast forward 10 seconds
+              function fastForward() {
+                myVideo.currentTime += 10;
+              }
+
+              // Set volume
+              function setVolume() {
+                myVideo.volume = volumeRange.value;
+              }
+
+              // Set current time
+              function setCurrentTime() {
+                myVideo.currentTime = timeRange.value;
+                updateCurrentTimeDisplay();
+              }
+
+              // Update the time range input on time update
+              myVideo.ontimeupdate = function() {
+                timeRange.value = myVideo.currentTime;
+                updateCurrentTimeDisplay();
+              };
+
+              // Set the max value of the time range input on metadata load
+              myVideo.onloadedmetadata = function() {
+                timeRange.max = myVideo.duration;
+                updateCurrentTimeDisplay();
+                updateDurationDisplay();
+              };
+
+              // Update the current time display element when the time updates
+              myVideo.ontimeupdate = function() {
+                updateCurrentTimeDisplay();
+              };
+
+              // Update the current time display element
+              function updateCurrentTimeDisplay() {
+                const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+                const currentTime = myVideo.currentTime;
+                currentTimeDisplay.textContent = formatTime(currentTime);
+              }
+
+              // Update the duration display element
+              function updateDurationDisplay() {
+                const durationDisplay = document.getElementById("durationDisplay");
+                const duration = myVideo.duration;
+                durationDisplay.textContent = formatTime(duration);
+              }
+
+              // Format the time in the format of "h:m:ss"
+              function formatTime(time) {
+                const minutes = Math.floor(time / 60);
+                const seconds = Math.floor(time % 60);
+                const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+                return formattedTime;
+              }
+            });
+          });
         </script>
         <!-- Modal -->
         <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
