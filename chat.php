@@ -18,16 +18,6 @@ if (sqlsrv_execute($rstmt)) {
   }
 }
 ?>
-<?php
-// Check if UserIdx is set in the URL
-if (!isset($_GET["UserIdx"])) {
-  // Redirect to chat.php with UserIdx parameter
-  header("Location: chat.php?UserIdx=" . $UserId);
-  exit(); // End script execution to prevent further output
-}
-// UserIdx is already set, continue with rest of the script
-?>
-
 
 <!DOCTYPE html>
 <html>
@@ -669,83 +659,6 @@ if (!isset($_GET["UserIdx"])) {
         margin-bottom: 5px;
       }
     }
-
-    .video-container {
-      position: relative;
-      padding-bottom: 56.25%;
-      /* 16:9 */
-      height: 0;
-      overflow: hidden;
-    }
-
-    .video-container video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .video-controls {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-
-    .video-controls button {
-      background-color: transparent;
-      border: none;
-      color: #fff;
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    /* Volume control */
-    .volume-control {
-      display: flex;
-      align-items: center;
-      margin-right: 20px;
-    }
-
-    .volume-control input[type="range"] {
-      width: 100px;
-      height: 10px;
-      margin-left: 10px;
-    }
-
-    /* Time control */
-    .time-control {
-      display: flex;
-      align-items: center;
-    }
-
-    .time-control input[type="range"] {
-      flex-grow: 1;
-      height: 4px;
-    }
-
-    .time-display {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      margin-left: 10px;
-      width: 100px;
-      font-size: 12px;
-    }
-
-    #currentTimeDisplay,
-    #durationDisplay {
-      text-align: right;
-      min-width: 30px;
-      color: white;
-
-    }
   </style>
 </head>
 
@@ -1024,7 +937,7 @@ if (!isset($_GET["UserIdx"])) {
                       div.innerHTML += '<div class="image"><img src="' + message.sent_image + '"></div>';
                     }
                     if (message.sent_video) {
-                      div.innerHTML += '<div class="video-container"><div id="videoplayer"><video id="myVideo" class="w-100"><source src="' + message.sent_video + '" type="video/mp4">Your browser does not support the video tag.</video><div class="video-controls"><button id="rewindButton" onclick="rewind()">-10s</button><button id="fastForwardButton" onclick="fastForward()">+10s</button><button onclick="togglePlayPause()"><span id="playPauseButton">Play</span></button><div class="volume-control"><input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"></div><div class="time-control"><input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()"><div class="time-display"><div id="currentTimeDisplay">0:00</div><div id="durationDisplay">0:00</div></div></div></div><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div></div>';
+                      div.innerHTML += '<div class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
                       // Add event listener to play the video when the "Watch Video" button is clicked
                       var videoPlayer = div.querySelector('video');
                       var playButton = div.querySelector('#buttonplay');
@@ -1221,100 +1134,7 @@ if (!isset($_GET["UserIdx"])) {
             });
           });
         </script>
-        <script>
-          document.addEventListener("DOMContentLoaded", function() {
-            // Your code here
-            // Get the video element
-            const myVideo = document.getElementById("myVideo");
 
-            // Get the controls
-            const playPauseButton = document.getElementById("playPauseButton");
-            const rewindButton = document.getElementById("rewindButton");
-            const fastForwardButton = document.getElementById("fastForwardButton");
-            const volumeRange = document.getElementById("volumeRange");
-            const timeRange = document.getElementById("timeRange");
-            const currentTimeDisplay = document.getElementById("currentTimeDisplay");
-
-            myVideo.addEventListener("loadedmetadata", function() {
-              // Toggle play/pause
-              function togglePlayPause() {
-                // console.log("Toggle play/pause button clicked");
-                if (myVideo.paused) {
-                  myVideo.play();
-                  playPauseButton.textContent = "Pause";
-                } else {
-                  myVideo.pause();
-                  playPauseButton.textContent = "Play";
-                }
-              }
-              // Add event listener to update the time range input on time update
-              myVideo.ontimeupdate = function() {
-                timeRange.value = myVideo.currentTime;
-                updateCurrentTimeDisplay();
-              };
-              // Rewind 10 seconds
-              function rewind() {
-                myVideo.currentTime -= 10;
-              }
-
-              // Fast forward 10 seconds
-              function fastForward() {
-                myVideo.currentTime += 10;
-              }
-
-              // Set volume
-              function setVolume() {
-                myVideo.volume = volumeRange.value;
-              }
-
-              // Set current time
-              function setCurrentTime() {
-                myVideo.currentTime = timeRange.value;
-                updateCurrentTimeDisplay();
-              }
-
-              // Update the time range input on time update
-              myVideo.ontimeupdate = function() {
-                timeRange.value = myVideo.currentTime;
-                updateCurrentTimeDisplay();
-              };
-
-              // Set the max value of the time range input on metadata load
-              myVideo.onloadedmetadata = function() {
-                timeRange.max = myVideo.duration;
-                updateCurrentTimeDisplay();
-                updateDurationDisplay();
-              };
-
-              // Update the current time display element when the time updates
-              myVideo.ontimeupdate = function() {
-                updateCurrentTimeDisplay();
-              };
-
-              // Update the current time display element
-              function updateCurrentTimeDisplay() {
-                const currentTimeDisplay = document.getElementById("currentTimeDisplay");
-                const currentTime = myVideo.currentTime;
-                currentTimeDisplay.textContent = formatTime(currentTime);
-              }
-
-              // Update the duration display element
-              function updateDurationDisplay() {
-                const durationDisplay = document.getElementById("durationDisplay");
-                const duration = myVideo.duration;
-                durationDisplay.textContent = formatTime(duration);
-              }
-
-              // Format the time in the format of "h:m:ss"
-              function formatTime(time) {
-                const minutes = Math.floor(time / 60);
-                const seconds = Math.floor(time % 60);
-                const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-                return formattedTime;
-              }
-            });
-          });
-        </script>
         <!-- Modal -->
         <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">

@@ -130,7 +130,7 @@ if (isset($_SESSION['UserId'])) {
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
+            <a class="nav-link" onclick="location.href=\'logoutmodal.php\'"><i class="bi bi-box-arrow-right"></i>Logout</a>
             </li>
         </ul>
     </div>
@@ -375,7 +375,7 @@ if (isset($_SESSION['UserId'])) {
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i>Logout</a>
+            <a class="nav-link" onclick="location.href=\'logoutmodal.php\'"><i class="bi bi-box-arrow-right"></i>Logout</a>
             </li>
         </ul>
     </div>
