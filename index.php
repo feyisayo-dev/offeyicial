@@ -370,11 +370,6 @@ include('db.php');
 
     @media (max-width: 767px) {
 
-      /* Set the height of the navbar to 100% */
-      .navbar {
-        height: 100%;
-      }
-
       /* Set the height of the collapsed navbar to 100vh */
       .navbar-collapse {
         height: 100vh;
@@ -450,7 +445,7 @@ include('db.php');
       position: absolute;
       z-index: 9999;
       background-color: #fff;
-      border: 1px solid #ddd;
+      /* border: 1px solid #ddd; */
       border-top: none;
 
     }

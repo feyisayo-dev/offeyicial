@@ -768,7 +768,7 @@ session_start();
                 characters
             </div>
 
-            <p><button href="login.php">Back To login</button></p>
+            <button class="login" onclick="location.href='login.php'">Back To login</button>
 
         </div>
 </body>
@@ -873,57 +873,56 @@ session_start();
     }
 
 
-// Define a function to check if either of the password fields is invalid
-function checkPasswordValidity() {
-  const password = passwordInput.value;
-  const confirmPassword = confirmPasswordInput.value;
+    // Define a function to check if either of the password fields is invalid
+    function checkPasswordValidity() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
 
-  // Check if either password field is invalid
-  if (
-    !password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/) ||
-    password !== confirmPassword
-  ) {
-    // Either password field is invalid, hide the submit button
-    submitregpage.style.display = 'none';
-  } else {
-    // Both password fields are valid, show the submit button
-    submitregpage.style.display = 'inline-block';
-  }
-}
+        // Check if either password field is invalid
+        if (
+            !password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/) ||
+            password !== confirmPassword
+        ) {
+            // Either password field is invalid, hide the submit button
+            submitregpage.style.display = 'none';
+        } else {
+            // Both password fields are valid, show the submit button
+            submitregpage.style.display = 'inline-block';
+        }
+    }
 
-// Check password on keyup
-passwordInput.addEventListener('keyup', () => {
-  // Validate password
-  if (passwordInput.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/)) {
-    passwordInput.classList.add('valid');
-    passwordInput.classList.remove('invalid');
-    inappropriatePasswordError.style.display = 'none';
-  } else {
-    passwordInput.classList.add('invalid');
-    passwordInput.classList.remove('valid');
-    inappropriatePasswordError.style.display = 'block';
-  }
+    // Check password on keyup
+    passwordInput.addEventListener('keyup', () => {
+        // Validate password
+        if (passwordInput.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/)) {
+            passwordInput.classList.add('valid');
+            passwordInput.classList.remove('invalid');
+            inappropriatePasswordError.style.display = 'none';
+        } else {
+            passwordInput.classList.add('invalid');
+            passwordInput.classList.remove('valid');
+            inappropriatePasswordError.style.display = 'block';
+        }
 
-  // Check password validity and update submit button display style
-  checkPasswordValidity();
-});
+        // Check password validity and update submit button display style
+        checkPasswordValidity();
+    });
 
-confirmPasswordInput.addEventListener('keyup', () => {
-  // Check if passwords match
-  if (passwordInput.value === confirmPasswordInput.value) {
-    confirmPasswordInput.classList.add('valid');
-    confirmPasswordInput.classList.remove('invalid');
-    confirmPasswordError.style.display = 'none';
-  } else {
-    confirmPasswordInput.classList.add('invalid');
-    confirmPasswordInput.classList.remove('valid');
-    confirmPasswordError.style.display = 'block';
-  }
+    confirmPasswordInput.addEventListener('keyup', () => {
+        // Check if passwords match
+        if (passwordInput.value === confirmPasswordInput.value) {
+            confirmPasswordInput.classList.add('valid');
+            confirmPasswordInput.classList.remove('invalid');
+            confirmPasswordError.style.display = 'none';
+        } else {
+            confirmPasswordInput.classList.add('invalid');
+            confirmPasswordInput.classList.remove('valid');
+            confirmPasswordError.style.display = 'block';
+        }
 
-  // Check password validity and update submit button display style
-  checkPasswordValidity();
-});
-
+        // Check password validity and update submit button display style
+        checkPasswordValidity();
+    });
 </script>
 
 <script>

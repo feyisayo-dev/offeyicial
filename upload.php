@@ -51,7 +51,7 @@ $UserId = $_SESSION['UserId'];
         width: 100%;
       }
     }
-    
+
 
     .custom-body {
       background-color: #f2f2f2;
@@ -139,7 +139,7 @@ $UserId = $_SESSION['UserId'];
       width: 50%;
     }
 
-    navbar-nav a {
+    .navbar-nav a {
       font-size: 15px;
       text-transform: uppercase;
       font-weight: 500;
@@ -170,6 +170,9 @@ $UserId = $_SESSION['UserId'];
       /* add some space between image and text */
     }
 
+
+
+    
     .custom-link {
       text-decoration: none;
       cursor: pointer;
@@ -207,7 +210,7 @@ $UserId = $_SESSION['UserId'];
       position: absolute;
       z-index: 9999;
       background-color: #fff;
-      border: 1px solid #ddd;
+      /* border: 1px solid #ddd; */
       border-top: none;
 
     }
@@ -278,6 +281,8 @@ $UserId = $_SESSION['UserId'];
   </div>
 </body>
 <script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
 <script>
   $('.custom-file-input').on('change', function() {
     var fileName = $(this).val().split('\\').pop();

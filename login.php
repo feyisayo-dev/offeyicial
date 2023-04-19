@@ -10,31 +10,35 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
 
 
 <html>
+
 <head>
-<meta name="description"/>
-<link rel="icon" href="img\offeyicial.png" type="image/jpeg" sizes="32x32" />
-<link rel="stylesheet" href="css/normalize.css">
-<link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
-<link href="css/all.min.css" rel="stylesheet">
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css\font\bootstrap-icons.css">
-<title>Login</title>
-<link rel="stylesheet" href="css/bootstrap.min.css">
-<meta charset=utf-8>
-<style>
+    <meta name="description" />
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/font/bootstrap-icons.css">
+    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
+    <link href="css/aos.css" rel="stylesheet">
+    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/remixicon/remixicon.css" rel="stylesheet">
+    <link href="profile.css" rel="stylesheet">
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <title>Login</title>
+    <meta charset=utf-8>
+    <style>
         @media (max-width: 500px) {
             body {
                 font-size: 12px;
             }
         }
-        
+
         body {
             font-family: montserrat;
             font-size: 14px;
             background-image: url(img/bg.jpeg);
             background-size: cover;
         }
-        
+
         .form_wrapper {
             background: transparent;
             width: 100%;
@@ -44,31 +48,31 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             justify-content: center;
             height: 100%;
         }
-        
+
         .form_container {
             /* border: 2px solid blue; */
             padding: 1cm;
             /* background-image: url(img/connecting_users.jpg); */
             background: transparent;
         }
-        
+
         .title_container {
             margin-bottom: 20px;
         }
-        
+
         .form-group {
             display: flex;
             align-items: center;
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             width: 100px;
             font-weight: bold;
             margin-right: 10px;
             color: white;
         }
-        
+
         .form-group input {
             flex-grow: 1;
             padding: 10px;
@@ -76,37 +80,37 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             border: none;
             box-shadow: 2px 2px 2px #0066ff;
         }
-        
+
         .form-group input[type="checkbox"] {
             margin-left: 10px;
             border: 2px
         }
-        
+
         .form-inline {
             display: flex;
             flex-flow: row wrap;
             align-items: center;
         }
-        
+
         .form-inline label {
             margin: 0 5px 0 0;
         }
-        
+
         .form-inline input,
         .form-inline select {
             flex: 1;
             margin-bottom: 5px;
         }
-        
+
         .form-inline .form-group {
             display: flex;
             align-items: center;
         }
-        
+
         .form-inline .form-control {
             width: 100%;
         }
-        
+
         .form_wrapper {
             width: 100%;
             margin: auto;
@@ -117,7 +121,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             border-style: groove;
             box-sizing: border-box; */
         }
-        
+
         .login {
             background-color: #198754;
             color: white;
@@ -129,31 +133,32 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             margin-bottom: 10px;
             cursor: not-allowed;
             width: 100px;
-            
+
         }
+
         .form_wrapper input[type=login]:hover {
             background: #01fa0e;
         }
-        
+
         .form_wrapper input[type=login]:focus {
             background: #01fa0e;
         }
-        
+
         .form-group input[type="password"] {
             position: relative;
         }
-        
+
         .form-group input[type="checkbox"] {
             position: absolute;
             top: 10px;
             right: 10px;
         }
-        
+
         .show-password-btn {
             font-size: 12px;
             padding: 3px 6px;
         }
-        
+
         button.container {
             font-size: 0.8em;
             /* make the font smaller */
@@ -161,7 +166,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             /* reduce the size of the button */
             width: 50px;
         }
-        
+
         h2 {
             color: white;
             /* sets text color to red */
@@ -171,8 +176,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             /* centers the text */
             background: transparent;
         }
+
         /* Position the icon at the top left corner of the page */
-        
+
         .icon {
             float: left;
             margin-top: 10px;
@@ -180,7 +186,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             width: 50px;
             length: 50px;
         }
-        
+
         .form_wrapper input[type=checkbox],
         .form_wrapper input[type=radio] {
             border: 0;
@@ -192,18 +198,18 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             position: absolute;
             width: 1px;
         }
-        
+
         .form_container .row .col_half.last {
             border-left: 1px solid #cccccc;
         }
-        
+
         .checkbox_option label {
             margin-right: 1em;
             height: 40px;
             padding: 3px;
             position: relative;
         }
-        
+
         .checkbox_option label:before {
             content: "";
             display: inline-block;
@@ -217,7 +223,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             background-clip: content-box;
             transition: all 0.2s ease;
         }
-        
+
         .checkbox_option label:after {
             border-right: 2px solid #000000;
             border-top: 2px solid #000000;
@@ -231,15 +237,15 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             width: 7px;
             display: none;
         }
-        
+
         .checkbox_option input:hover+label:before {
             border-color: #000000;
         }
-        
+
         .checkbox_option input:checked+label:before {
             border-color: #000000;
         }
-        
+
         .checkbox_option input:checked+label:after {
             -moz-animation: check 0.8s ease 0s running;
             -webkit-animation: check 0.8s ease 0s running;
@@ -249,11 +255,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             height: 20px;
             border-color: #000000;
         }
-        
+
         .radio_option label {
             margin-right: 1em;
         }
-        
+
         .radio_option label:before {
             content: "";
             display: inline-block;
@@ -268,21 +274,21 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             background-clip: content-box;
             transition: all 0.2s ease;
         }
-        
+
         .radio_option input:hover+label:before {
             border-color: #000000;
         }
-        
+
         .radio_option input:checked+label:before {
             background-color: #000000;
             border-color: #000000;
         }
-        
+
         .select_option {
             position: relative;
             width: 100%;
         }
-        
+
         .select_option select {
             display: inline-block;
             width: 100%;
@@ -298,11 +304,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             -moz-appearance: none;
             transition: all 0.2s ease;
         }
-        
+
         .select_option select::-ms-expand {
             display: none;
         }
-        
+
         .select_option select:hover,
         .select_option select:focus {
             color: #000000;
@@ -310,7 +316,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             border-color: #000000;
             outline: none;
         }
-        
+
         .select_arrow {
             position: absolute;
             top: calc(50% - 4px);
@@ -322,12 +328,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             border-style: solid;
             border-color: #7b7b7b transparent transparent transparent;
         }
-        
+
         .select_option select:hover+.select_arrow,
         .select_option select:focus+.select_arrow {
             border-top-color: #000000;
         }
-        
+
         .credit {
             position: relative;
             z-index: 1;
@@ -335,149 +341,173 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             padding: 15px;
             color: #f5ba1a;
         }
-        
+
         .credit a {
             color: #e1a70a;
         }
-        
+
         @-webkit-keyframes check {
             0% {
                 height: 0;
                 width: 0;
             }
+
             25% {
                 height: 0;
                 width: 7px;
             }
+
             50% {
                 height: 20px;
                 width: 7px;
             }
         }
-        
+
         @keyframes check {
             0% {
                 height: 0;
                 width: 0;
             }
+
             25% {
                 height: 0;
                 width: 7px;
             }
+
             50% {
                 height: 20px;
                 width: 7px;
             }
         }
-        
+
         @-webkit-keyframes expand {
             0% {
                 -webkit-transform: scale3d(1, 0, 1);
                 opacity: 0;
             }
+
             25% {
                 -webkit-transform: scale3d(1, 1.2, 1);
             }
+
             50% {
                 -webkit-transform: scale3d(1, 0.85, 1);
             }
+
             75% {
                 -webkit-transform: scale3d(1, 1.05, 1);
             }
+
             100% {
                 -webkit-transform: scale3d(1, 1, 1);
                 opacity: 1;
             }
         }
-        
+
         @keyframes expand {
             0% {
                 -webkit-transform: scale3d(1, 0, 1);
                 transform: scale3d(1, 0, 1);
                 opacity: 0;
             }
+
             25% {
                 -webkit-transform: scale3d(1, 1.2, 1);
                 transform: scale3d(1, 1.2, 1);
             }
+
             50% {
                 -webkit-transform: scale3d(1, 0.85, 1);
                 transform: scale3d(1, 0.85, 1);
             }
+
             75% {
                 -webkit-transform: scale3d(1, 1.05, 1);
                 transform: scale3d(1, 1.05, 1);
             }
+
             100% {
                 -webkit-transform: scale3d(1, 1, 1);
                 transform: scale3d(1, 1, 1);
                 opacity: 1;
             }
         }
-        
+
         @-webkit-keyframes bounce {
             0% {
                 -webkit-transform: translate3d(0, -25px, 0);
                 opacity: 0;
             }
+
             25% {
                 -webkit-transform: translate3d(0, 10px, 0);
             }
+
             50% {
                 -webkit-transform: translate3d(0, -6px, 0);
             }
+
             75% {
                 -webkit-transform: translate3d(0, 2px, 0);
             }
+
             100% {
                 -webkit-transform: translate3d(0, 0, 0);
                 opacity: 1;
             }
         }
-        
+
         @keyframes bounce {
             0% {
                 -webkit-transform: translate3d(0, -25px, 0);
                 transform: translate3d(0, -25px, 0);
                 opacity: 0;
             }
+
             25% {
                 -webkit-transform: translate3d(0, 10px, 0);
                 transform: translate3d(0, 10px, 0);
             }
+
             50% {
                 -webkit-transform: translate3d(0, -6px, 0);
                 transform: translate3d(0, -6px, 0);
             }
+
             75% {
                 -webkit-transform: translate3d(0, 2px, 0);
                 transform: translate3d(0, 2px, 0);
             }
+
             100% {
                 -webkit-transform: translate3d(0, 0, 0);
                 transform: translate3d(0, 0, 0);
                 opacity: 1;
             }
         }
-        
+
         @media (max-width: 600px) {
             .form_wrapper .col_half {
                 width: 100%;
                 float: none;
             }
+
             .bottom_row .col_half {
                 width: 50%;
                 float: left;
             }
+
             .form_container .row .col_half.last {
                 border-left: none;
             }
+
             .remember_me {
                 padding-bottom: 20px;
             }
         }
+
         /*  */
-        
+
         .input_field input {
             width: 100%;
             padding: 15px;
@@ -485,7 +515,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             padding-right: 50px;
             border: 1.4px solid #e6d9d9;
         }
-        
+
         .input_field .showPass {
             position: absolute;
             top: 0;
@@ -501,23 +531,24 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             cursor: pointer;
             color: dodgerblue;
         }
-        
+
         .input_field .showPass:focus {
             outline: none;
         }
+
         /*  */
-        
+
         a {
             text-decoration: none;
             color: dodgerblue;
         }
-        
+
         .navbar-nav a {
             font-size: 15px;
             text-transform: uppercase;
             font-weight: 500;
         }
-        
+
         .navbar-light .navbar-brand {
             color: #000;
             font-size: 25px;
@@ -525,29 +556,207 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             font-weight: 700;
             letter-spacing: 2px;
         }
-        
+
         .navbar-light .navbar-brand:focus,
         .navbar-light .navbar-brand:hover {
             color: #000;
         }
-        
+
         .navbar-light .navbar-nav .navbar-link {
             color: #000;
         }
-        button{
-            color:white;
+
+        .navbar-brand img {
+            display: inline-block;
+            height: 30px;
+            /* adjust height as needed */
+            margin-right: 10px;
+            /* add some space between image and text */
+        }
+
+
+
+        @media (max-width: 768px) {
+            .navbar-collapse {
+                position: fixed;
+                top: 56px;
+                bottom: 0;
+                left: 100%;
+                z-index: 1;
+                width: 100%;
+                padding-right: 1rem;
+                padding-left: 1rem;
+                overflow-y: auto;
+                visibility: hidden;
+                background-color: #fff;
+                transition: visibility 0s linear 0.33s, left 0.33s ease-in-out;
+            }
+
+            .navbar-collapse.show {
+                left: 0;
+                visibility: visible;
+                transition-delay: 0s;
+            }
+
+            .navbar-toggler {
+                border-color: transparent;
+            }
+
+            .navbar-toggler:focus {
+                outline: none;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
+        @media (max-width: 767px) {
+
+            /* Set the height of the collapsed navbar to 100vh */
+            .navbar-collapse {
+                height: 100vh;
+            }
+
+            /* Set the position of the collapsed navbar to fixed */
+            .navbar-collapse.show {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 9999;
+                overflow-y: scroll;
+            }
+
+            /* Set the padding of the navbar items */
+            .navbar-nav {
+                padding-top: 30px;
+                padding-bottom: 30px;
+            }
+
+            /* Set the font size and padding of the navbar items */
+            .navbar-nav .nav-link {
+                font-size: 18px;
+                padding: 10px;
+            }
+
+            /* Set the color of the navbar items */
+            .navbar-nav .nav-link.custom-link {
+                color: #fff;
+                background-color: #28a745;
+                border-radius: 5px;
+                padding: 8px 15px;
+            }
+
+            /* Set the position of the search bar */
+            .search-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            /* Set the width of the search bar */
+            .searchtext {
+                width: 100%;
+                padding: 10px;
+                border-radius: 5px;
+                border: none;
+            }
+        }
+
+        button {
+            color: white;
             background-color: #198754;
             height: 2.5em;
             border: groove;
             border-radius: 10px;
         }
+
+        .reg {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 767px) {
+            .reg {
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+
+        .reg button {
+            color: green;
+            box-shadow: white;
+            background-color: transparent;
+            width: 80px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .reg button:hover {
+            transform: scale(1.05);
+        }
+
+        .register:hover {
+            background-color: white;
+        }
+
+        .btn:hover {
+            background-color: red;
+            border-radius: 10px;
+        }
+
+        /* form {
+  display: flex;
+  align-items: center;
+} */
+
+        .verification {
+            height: 40px;
+            padding: 0 10px;
+            border-radius: 5px;
+            border: none;
+            margin-right: 10px;
+        }
+
+        input[type="email"] {
+            flex: 1;
+            /* border: black; */
+            height: 40px;
+            padding: 0 10px;
+            border-radius: 5px;
+            /* border: none; */
+            margin-right: 10px;
+        }
+
+        .verification {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .verification:hover {
+            background-color: #0069d9;
+        }
+
+        .forgot-password-form h2 {
+            color: black;
+            text-transform: uppercase;
+            font-size: 30px;
+        }
     </style>
 </head>
+
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <a class="navbar-brand" href="home.php"><span class="text-success"> Offeyicial </span></a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="home.php"><span class="text-success">Offeyicial</span></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navmenu">
@@ -564,112 +773,227 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                 <li class="nav-item">
                     <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
                 </li>
-
+            </ul>
         </div>
     </nav>
-<div class="form_wrapper">
-  
-    <div class="form_container">
-        <div class="title_container">
-            <h2> Login Form</h2>
+    <div class="form_wrapper">
+
+        <div class="form_container">
+            <div class="title_container">
+                <h2> Login Form</h2>
+            </div>
+            <center>
+                <div id="message" style='color:red;'></div>
+            </center>
+            <div class="row clearfix">
+                <div class="form-group"><span><i aria-hidden="true" class="fa fa-envelope"></i></span>
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" placeholder="Email" name="email">
+                </div>
+                <div class="row clearfix">
+
+                    <div class="form-group">
+                        <label for="psw">Password:</label>
+                        <input type="password" id="psw" placeholder="Password" name="psw" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+                        <button class="container" type="button" id="show-password-button" onclick="showPassword()"> Show
+
+                    </div>
+                </div>
+
+            </div>
+            <div>
+                <center>
+                    <input type="Login" name="Login" class="Login" value="Login" />
+                </center>
+
+
+
+            </div>
+
+
+
+            <div class="input_field checkbox_option">
+                <input type="checkbox" id="cb2">
+                <label for="cb2">remember me</label>
+            </div>
+            <div class="reg">
+                <button class="register" onclick="location.href='reg.php'">Register</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#forgotpassword">
+                    Forgot Password
+                </button>
+            </div>
+
         </div>
-      <center> <div id="message" style='color:red;'></div></center> 
-    <div class="row clearfix">
-      <div class="form-group"><span><i aria-hidden="true" class="fa fa-envelope"></i></span>
-        <label for="email">Email:</label>
-        <input type="email" class="form-control" id="email" placeholder="Email" name="email">
-      </div>
-    <div class="row clearfix">
+    </div>
+    <div class="modal fade" id="forgotpassword" tabindex="-1" aria-labelledby="forgotpasswordLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotpasswordLabel">Forget password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="forgot-password-form">
+                        <h2>Forgot Password</h2>
+                        <p>Please enter your email address below to receive a verification code to reset your password.</p>
+                        <div id="forgot-password-form">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" required>
+                            <button type="button" class="verification" onclick="sendVerificationCode()">Send Code</button>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label for="psw">Password:</label>
-        <input type="password" id="psw" placeholder="Password" name="psw" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
-        <button class="container" type="button" id="show-password-button" onclick="showPassword()"> Show
+                    <div class="verify-code-form" style="display:none;">
+                        <h2>Verify Code</h2>
+                        <p>Please enter the verification code you received in your email.</p>
+                        <div id="verify-code-form">
+                            <label for="verification-code">Verification Code:</label>
+                            <input type="text" id="verification-code" name="verification-code" required>
+                            <button type="button" class="verification" onclick="verifyCode()">Verify</button>
+                        </div>
+                    </div>
 
-      </div>
+
+                    <div class="reset-password-form" style="display: none;">
+                        <h2>Reset Password</h2>
+                        <p>Please enter your new password below:</p>
+                        <form>
+                            <label for="new-password">New Password:</label>
+                            <input type="password" id="new-password" name="new-password" required>
+                            <label for="confirm-password">Confirm Password:</label>
+                            <input type="password" id="confirm-password" name="confirm-password" required>
+                            <button type="submit" onclick="resetPassword()">Reset Password</button>
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
-
-    </div>
-    <div>
-        <center>
-        <input type="Login" name="Login" class="Login" value="Login" />
-        </center>
-        
-              
-      
     </div>
 
-                   
-                    
-    <div class="input_field checkbox_option">
-        <input type="checkbox" id="cb2">
-        <label for="cb2">remember me</label>
-        
-                    
-    </div>
-    
-    </div>
-</div>
 </body>
 
-<script src="js/jquery.min.js"></script>  
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+
 
 <script>
- $('.Login').click(function() {
-    let email = $('#email').val();
-    let psw = $('#psw').val();
+    function sendVerificationCode() {
+        // Get the user's email address
+        const email = $("#email").val();
 
-    if(email != "" && psw != "") {
+        // Send a verification code to the user's email address using AJAX
         $.ajax({
-            url: "LoginSubmit.php",
             type: "POST",
-            async: false,
+            url: "send_verification_code.php",
             data: {
-                "Login": 1,
-                "email": email,
-                "psw": psw
+                email: email
             },
-            success: function(data) {
-                var jsonData = JSON.parse(data);
-                if (jsonData.status == "success") {
-                    var UserId = jsonData.UserId;
-                    // check if the user is already logged in
-                    if (window.location.pathname != '/offeyicialchatroom/user_profile.php') {
-                        window.location.href = "user_profile.php?UserId=" +UserId;
-                    } 
+            success: function(response) {
+                if (response === "success") {
+                    // Show the verification code form
+                    $(".forgot-password-form").hide();
+                    $(".verify-code-form").show();
                 } else {
-                    alert("Invalid login credentials");
+                    alert("Failed to send verification code.");
                 }
             }
         });
-    } else {
-        alert("Please fill in all fields");
     }
-});
 
+    function verifyCode() {
+        // Get the verification code entered by the user
+        const verificationCode = $("#verification-code").val();
+
+        // Verify the verification code using AJAX
+        $.ajax({
+            type: "POST",
+            url: "verify_code.php",
+            data: {
+                verificationCode: verificationCode
+            },
+            success: function(response) {
+                if (response === "success") {
+                    // Redirect the user to the password reset page
+                    window.location.href = "reset_password.php";
+                } else {
+                    alert("Incorrect verification code.");
+                }
+            }
+        });
+    }
+
+    function resetPassword() {
+        // Get the new password entered by the user
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+
+        // Check if the new password and confirm password match
+        if (newPassword !== confirmPassword) {
+            alert("New password and confirm password do not match.");
+            return;
+        }
+
+        // Update the user's password (using your preferred method)
+
+        // Redirect the user to the login page
+        window.location.href = "login.php";
+    }
+</script>
+
+<script>
+    $('.Login').click(function() {
+        let email = $('#email').val();
+        let psw = $('#psw').val();
+
+        if (email != "" && psw != "") {
+            $.ajax({
+                url: "LoginSubmit.php",
+                type: "POST",
+                async: false,
+                data: {
+                    "Login": 1,
+                    "email": email,
+                    "psw": psw
+                },
+                success: function(data) {
+                    var jsonData = JSON.parse(data);
+                    if (jsonData.status == "success") {
+                        var UserId = jsonData.UserId;
+                        // check if the user is already logged in
+                        if (window.location.pathname != '/offeyicialchatroom/user_profile.php') {
+                            window.location.href = "user_profile.php?UserId=" + UserId;
+                        }
+                    } else {
+                        alert("Invalid login credentials");
+                    }
+                }
+            });
+        } else {
+            alert("Please fill in all fields");
+        }
+    });
 </script>
 
 
 <script>
-function showPassword() {
-  var passwordInput = document.getElementById("psw");
-  var showPasswordButton = document.getElementById("show-password-button");
+    function showPassword() {
+        var passwordInput = document.getElementById("psw");
+        var showPasswordButton = document.getElementById("show-password-button");
 
-  if (passwordInput.type === "password") {
-    passwordInput.type = "text";
-    showPasswordButton.innerHTML = "Hide";
-  } else {
-    passwordInput.type = "password";
-    showPasswordButton.innerHTML = "Show";
-  }
-}
-
-  </script>
-
-
-</html> 
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            showPasswordButton.innerHTML = "Hide";
+        } else {
+            passwordInput.type = "password";
+            showPasswordButton.innerHTML = "Show";
+        }
+    }
+</script>
 
 
-
-
-
+</html>

@@ -248,6 +248,7 @@ if (isset($_SESSION['UserId'])) {
                     <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
                     <div class="time-display">
                       <div id="currentTimeDisplay">0:00</div>
+                      <div id="stroke"> / </div>
                       <div id="durationDisplay">0:00</div>
                     </div>
                   </div>
@@ -478,6 +479,7 @@ if (isset($_SESSION['UserId'])) {
                     <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
                     <div class="time-display">
                       <div id="currentTimeDisplay">0:00</div>
+                      <div id="stroke"> / </div>
                       <div id="durationDisplay">0:00</div>
                     </div>
                   </div>

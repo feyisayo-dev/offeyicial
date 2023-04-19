@@ -289,7 +289,7 @@ if (sqlsrv_execute($rstmt)) {
       position: absolute;
       z-index: 9999;
       background-color: #fff;
-      border: 1px solid #ddd;
+      /* border: 1px solid #ddd; */
       border-top: none;
     }
 
@@ -601,14 +601,6 @@ if (sqlsrv_execute($rstmt)) {
 
     /* The Modal (background) */
     .modal {
-      display: none;
-      /* Hidden by default */
-      position: fixed;
-      /* Stay in place */
-      z-index: 1;
-      /* Sit on top */
-      left: 0;
-      top: 0;
       width: 100%;
       /* Full width */
       height: 100%;
@@ -747,17 +739,6 @@ if (sqlsrv_execute($rstmt)) {
         <div class="chatbox">
 
         </div>
-        <div class="preview">
-          <div id="image-modal" class="modal">
-            <span class="close">&times;</span>
-            <img id="image-preview" src="#" alt="Image Preview">
-          </div>
-          <div id="video-modal" class="modal">
-            <span class="close">&times;</span>
-            <video id="video-preview" src="#"></video>
-          </div>
-        </div>
-
         <br><br>
 
 
@@ -984,72 +965,48 @@ if (sqlsrv_execute($rstmt)) {
 
         <script>
           function previewImage() {
-            console.log('previewImage() called');
-            var imagePreview = document.querySelector('#image-preview');
-            var videoPreview = document.querySelector('#video-preview');
-            var imageInput = document.querySelector('.image-input');
-            var videoInput = document.querySelector('.video-input');
+            // Get the selected file
+            var file = document.getElementById('image').files[0];
 
-            // Reset the video preview and hide the image preview when no file is selected
-            if (!imageInput.files[0]) {
-              videoPreview.style.display = 'none';
-              imagePreview.style.display = 'none';
-              return;
+            // Create a FileReader object
+            var reader = new FileReader();
+
+            // Set the image source when the file is loaded
+            reader.onload = function(e) {
+              var imgModal = document.getElementById('image-modal');
+              var imgPreview = document.getElementById('image-preview');
+              imgPreview.src = e.target.result;
+              imgModal.style.display = "block";
             }
 
-            // Show the preview of the image file
-            var reader = new FileReader();
-            reader.onload = function(e) {
-              imagePreview.setAttribute('src', e.target.result);
-              imagePreview.style.display = 'block';
-              videoPreview.style.display = 'none';
-            };
-            reader.readAsDataURL(imageInput.files[0]);
+            // Load the file as a data URL
+            reader.readAsDataURL(file);
           }
+
 
           function previewVideo() {
-            console.log('previewVideo() called');
-            var imagePreview = document.querySelector('#image-preview');
-            var videoPreview = document.querySelector('#video-preview');
-            var imageInput = document.querySelector('.image-input');
-            var videoInput = document.querySelector('.video-input');
-            var videoModal = document.querySelector('#video-modal');
+            let fileInput = document.querySelector('.video-input');
+            let file = fileInput.files[0];
+            let videoPreview = document.querySelector('#video-preview');
+            let videoModal = document.querySelector('#video-modal');
+            let closeModal = videoModal.querySelector('.close');
 
-            // Reset the image preview and hide the video preview when no file is selected
-            if (!videoInput.files[0]) {
-              videoPreview.style.display = 'none';
-              imagePreview.style.display = 'none';
-              return;
+            let reader = new FileReader();
+
+            reader.addEventListener('load', function() {
+              videoPreview.src = reader.result;
+              videoModal.style.display = 'block';
+            }, false);
+
+            if (file) {
+              reader.readAsDataURL(file);
             }
 
-            // Show the modal
-            videoModal.style.display = "block";
-
-            // Show the preview of the video file
-            var reader = new FileReader();
-            reader.onload = function(e) {
-              videoPreview.setAttribute('src', e.target.result);
-              videoPreview.style.display = 'block';
-              imagePreview.style.display = 'none';
-            };
-            reader.readAsDataURL(videoInput.files[0]);
+            closeModal.addEventListener('click', function() {
+              videoModal.style.display = 'none';
+              videoPreview.src = '';
+            });
           }
-
-          // Close the image modal when the user clicks on the close button
-          var imageCloseBtn = document.querySelector("#image-modal .close");
-          imageCloseBtn.onclick = function() {
-            var imageModal = document.querySelector('#image-modal');
-            imageModal.style.display = "none";
-          };
-
-          // Close the video modal when the user clicks on the close button
-          var videoCloseBtn = document.querySelector("#video-modal .close");
-          videoCloseBtn.onclick = function() {
-            var videoModal = document.querySelector('#video-modal');
-            var videoPreview = document.querySelector('#video-preview');
-            videoModal.style.display = "none";
-            videoPreview.pause();
-          };
 
           $(document).ready(function() {
 
@@ -1176,7 +1133,38 @@ if (sqlsrv_execute($rstmt)) {
             </div>
           </div>
         </div>
-
+        <div class="preview">
+          <div id="image-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="image-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="image-modal-label">Image Preview</h5>
+                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <img id="image-preview" src="#" alt="Image Preview">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
+                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <video id="video-preview" src="#"></video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 </body>
 
 </html>
