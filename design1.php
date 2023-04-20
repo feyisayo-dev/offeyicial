@@ -1,72 +1,39 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-session_start();
-include 'db.php';
-if (isset($_POST['UserId']) && isset($_POST['recipientId'])) {
-    $UserId = $_POST['UserId'];
-    $recipientId = $_POST['recipientId'];
-    // rest of the code that uses these variables
+
+/**
+ * This example shows sending a message using a local sendmail binary.
+ */
+
+//Import the PHPMailer class into the global namespace
+use PHPMailer\PHPMailer\PHPMailer;
+
+require 'vendor/autoload.php';
+
+//Create a new PHPMailer instance
+$mail = new PHPMailer();
+//Set PHPMailer to use the sendmail transport
+$mail->Sendmail = 'C:\xampp\sendmail\sendmail.exe';
+$mail->isSendmail();
+//Set who the message is to be sent from
+$mail->setFrom('oluwafeyisayofummi@gmail.com', 'First Last');
+//Set an alternative reply-to address
+$mail->addReplyTo('allmarlians125@gmail.com', 'First Last');
+//Set who the message is to be sent to
+$mail->addAddress('elderwaleoladipo@gmail.com', 'John Doe');
+//Set the subject line
+$mail->Subject = 'PHPMailer sendmail test';
+//Read an HTML message body from an external file, convert referenced images to embedded,
+//convert HTML into a basic plain-text alternative body
+$mail->msgHTML(file_get_contents('youarereg.php'), __DIR__);
+//Replace the plain text body with one created manually
+$mail->AltBody = 'This is a plain-text message body';
+//Attach an image file
+$mail->addAttachment('img/1.jpg');
+
+//send the message, check for errors
+if (!$mail->send()) {
+    echo 'Mailer Error: ' . $mail->ErrorInfo;
 } else {
-    echo "Error: UserId or recipientId parameter is missing from URL";
+    echo 'Message sent!';
 }
-
-if (isset($_POST['message']) && !empty($_POST['message'])) {
-    $message = $_POST['message'];
-} else {
-    $message = null;
-}
-
-
-$sql = "SELECT COUNT(chatId) FROM chats";
-$stmt = sqlsrv_query($conn, $sql);
-
-if ($stmt === false || $stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
-
-$UserCounter = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC)[0];
-$num = $UserCounter + 1;
-$num_padded = sprintf("%05d", $num);
-
-$chatId = 'CHAT' . $UserId . $recipientId . $num_padded;
-
-// File Upload
-if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-    $file = $_FILES['image'];
-    $file_name = $file['name'];
-    $file_tmp = $file['tmp_name'];
-    $file_size = $file['size'];
-    $file_error = $file['error'];
-
-    // Check if the file size is within the allowed limit
-    if ($file_size <= 1000000) {
-        // Move the uploaded file to a permanent location
-        move_uploaded_file($file_tmp, "sentimages/" . $file_name);
-
-        // Store the file name in the database
-        $sent_image = "sentimages/" . $file_name;
-    } else {
-        echo "File size too large.";
-    }
-} else {
-    $sent_image = null;
-}
-
-// Insert data into the database
-$query = "INSERT INTO chats ([[UserId]
-    ,[recipientId]
-    ,[Sent]
-    ,[sentimage]
-    ,[chatId]
-    ,[senderId]) 
-    VALUES ('$UserId', '$recipientId', '$message', '$sent_image', '$chatId', '$UserId')";
-
-if (sqlsrv_query($conn, $query)) {
-    echo "Message sent.";
-} else {
-    echo "Error: " . sqlsrv_errors();
-}
-
-
 ?>

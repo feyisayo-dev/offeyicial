@@ -87,17 +87,12 @@ include('db.php');
       /* font-weight: bold; */
     }
 
-
-    /* Post author */
-    /* .post-author {
-  margin: 0;
-  font-weight: bold;
-  margin-right: 10px;
-} */
-
     /* Post title */
     .post-title {
       margin-top: 0;
+      justify-content: center;
+      display: flex;
+      text-transform: uppercase;
     }
 
     /* Post content */
@@ -122,80 +117,80 @@ include('db.php');
     }
 
     .video-container {
-  position: relative;
-  padding-bottom: 56.25%;
-  /* 16:9 */
-  height: 0;
-  overflow: hidden;
-}
+      position: relative;
+      padding-bottom: 56.25%;
+      /* 16:9 */
+      height: 0;
+      overflow: hidden;
+    }
 
-.video-container video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
 
-.video-controls {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  box-sizing: border-box;
-}
+    .video-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      box-sizing: border-box;
+    }
 
-.video-controls button {
-  background-color: transparent;
-  border: none;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-}
+    .video-controls button {
+      background-color: transparent;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
 
-/* Volume control */
-.volume-control {
-  display: flex;
-  align-items: center;
-  margin-right: 20px;
-}
+    /* Volume control */
+    .volume-control {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
 
-.volume-control input[type="range"] {
-  width: 100px;
-  height: 10px;
-  margin-left: 10px;
-}
+    .volume-control input[type="range"] {
+      width: 100px;
+      height: 10px;
+      margin-left: 10px;
+    }
 
-/* Time control */
-.time-control {
-  display: flex;
-  align-items: center;
-}
+    /* Time control */
+    .time-control {
+      display: flex;
+      align-items: center;
+    }
 
-.time-control input[type="range"] {
-  flex-grow: 1;
-  height: 4px;
-}
+    .time-control input[type="range"] {
+      flex-grow: 1;
+      height: 4px;
+    }
 
-.time-display {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-left: 10px;
-  width: 100px;
-  font-size: 12px;
-}
+    .time-display {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-left: 10px;
+      width: 100px;
+      font-size: 12px;
+    }
 
-#currentTimeDisplay,
-#durationDisplay {
-  text-align: right;
-  min-width: 30px;
-  color: white;
-}
+    #currentTimeDisplay,
+    #durationDisplay {
+      text-align: right;
+      min-width: 30px;
+      color: white;
+    }
 
 
     /* Post date */
@@ -771,7 +766,7 @@ include('db.php');
           <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
         </li>
         <li class="nav-item">
-        <a class="nav-link" onclick="location.href='logoutmodal.php'"><i class="bi bi-box-arrow-right"></i>Logout</a>
+          <a class="nav-link" onclick="location.href='logoutmodal.php'"><i class="bi bi-box-arrow-right"></i>Logout</a>
         </li>
 
     </div>
@@ -1271,31 +1266,31 @@ include('db.php');
   });
 </script>
 <script>
-    // Get the video element
-const myVideo = document.getElementById("myVideo");
+  // Get the video element
+  const myVideo = document.getElementById("myVideo");
 
-// Get the controls
-const playPauseButton = document.getElementById("playPauseButton");
-const rewindButton = document.getElementById("rewindButton");
-const fastForwardButton = document.getElementById("fastForwardButton");
-const volumeRange = document.getElementById("volumeRange");
-const timeRange = document.getElementById("timeRange");
-const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+  // Get the controls
+  const playPauseButton = document.getElementById("playPauseButton");
+  const rewindButton = document.getElementById("rewindButton");
+  const fastForwardButton = document.getElementById("fastForwardButton");
+  const volumeRange = document.getElementById("volumeRange");
+  const timeRange = document.getElementById("timeRange");
+  const currentTimeDisplay = document.getElementById("currentTimeDisplay");
 
-// Update the current time display
-// function updateCurrentTimeDisplay() {
-//   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
-// }
+  // Update the current time display
+  // function updateCurrentTimeDisplay() {
+  //   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
+  // }
 
-// Format time in minutes and seconds
-// function formatTime(time) {
-//   const minutes = Math.floor(time / 60);
-//   const seconds = Math.floor(time % 60);
-//   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-// }
+  // Format time in minutes and seconds
+  // function formatTime(time) {
+  //   const minutes = Math.floor(time / 60);
+  //   const seconds = Math.floor(time % 60);
+  //   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+  // }
 
-// Toggle play/pause
-function togglePlayPause() {
+  // Toggle play/pause
+  function togglePlayPause() {
     // console.log("Toggle play/pause button clicked");
     if (myVideo.paused) {
       myVideo.play();
@@ -1304,74 +1299,73 @@ function togglePlayPause() {
       myVideo.pause();
       playPauseButton.textContent = "Play";
     }
-}
-
-  
-// Rewind 10 seconds
-function rewind() {
-  myVideo.currentTime -= 10;
-}
-
-// Fast forward 10 seconds
-function fastForward() {
-  myVideo.currentTime += 10;
-}
-
-// Set volume
-function setVolume() {
-  myVideo.volume = volumeRange.value;
-}
-
-// Set current time
-function setCurrentTime() {
-  myVideo.currentTime = timeRange.value;
-  updateCurrentTimeDisplay();
-}
-
-// Update the time range input on time update
-myVideo.ontimeupdate = function() {
-  timeRange.value = myVideo.currentTime;
-  updateCurrentTimeDisplay();
-};
-
-// Get the video and time range input elements
-// const myVideo = document.getElementById("myVideo");
-// const timeRange = document.getElementById("timeRange");
-
-// Set the max value of the time range input on metadata load
-myVideo.onloadedmetadata = function() {
-  timeRange.max = myVideo.duration;
-  updateCurrentTimeDisplay();
-  updateDurationDisplay();
-};
-
-// Update the current time display element when the time updates
-myVideo.ontimeupdate = function() {
-  updateCurrentTimeDisplay();
-};
-
-// Update the current time display element
-function updateCurrentTimeDisplay() {
-  const currentTimeDisplay = document.getElementById("currentTimeDisplay");
-  const currentTime = myVideo.currentTime;
-  currentTimeDisplay.textContent = formatTime(currentTime);
-}
-
-// Update the duration display element
-function updateDurationDisplay() {
-  const durationDisplay = document.getElementById("durationDisplay");
-  const duration = myVideo.duration;
-  durationDisplay.textContent = formatTime(duration);
-}
-
-// Format the time in the format of "h:m:ss"
-function formatTime(time) {
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
-  const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-  return formattedTime;
-}
+  }
 
 
+  // Rewind 10 seconds
+  function rewind() {
+    myVideo.currentTime -= 10;
+  }
+
+  // Fast forward 10 seconds
+  function fastForward() {
+    myVideo.currentTime += 10;
+  }
+
+  // Set volume
+  function setVolume() {
+    myVideo.volume = volumeRange.value;
+  }
+
+  // Set current time
+  function setCurrentTime() {
+    myVideo.currentTime = timeRange.value;
+    updateCurrentTimeDisplay();
+  }
+
+  // Update the time range input on time update
+  myVideo.ontimeupdate = function() {
+    timeRange.value = myVideo.currentTime;
+    updateCurrentTimeDisplay();
+  };
+
+  // Get the video and time range input elements
+  // const myVideo = document.getElementById("myVideo");
+  // const timeRange = document.getElementById("timeRange");
+
+  // Set the max value of the time range input on metadata load
+  myVideo.onloadedmetadata = function() {
+    timeRange.max = myVideo.duration;
+    updateCurrentTimeDisplay();
+    updateDurationDisplay();
+  };
+
+  // Update the current time display element when the time updates
+  myVideo.ontimeupdate = function() {
+    updateCurrentTimeDisplay();
+  };
+
+  // Update the current time display element
+  function updateCurrentTimeDisplay() {
+    const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+    const currentTime = myVideo.currentTime;
+    currentTimeDisplay.textContent = formatTime(currentTime);
+  }
+
+  // Update the duration display element
+  function updateDurationDisplay() {
+    const durationDisplay = document.getElementById("durationDisplay");
+    const duration = myVideo.duration;
+    durationDisplay.textContent = formatTime(duration);
+  }
+
+  // Format the time in the format of "h:m:ss"
+  function formatTime(time) {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    return formattedTime;
+  }
 </script>
+
 </html>

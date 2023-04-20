@@ -1,0 +1,14 @@
+{
+    "name": "offeyicialchatroom/chatapp",
+    "description": "social media app",
+    "type": "project",
+    "authors": [
+        {
+            "name": "offeyicial"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "phpmailer/phpmailer": "^6.5"
+    }
+}
