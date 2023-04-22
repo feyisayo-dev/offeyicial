@@ -35,7 +35,7 @@ include('db.php');
   <script src="js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="css/owl.carousel.min.css">
   <link rel="stylesheet" href="css/owl.theme.default.min.css">
-  <script src="js/owl.carousel.min.js"></script>
+  <!-- <script src="js/owl.carousel.min.js"></script> -->
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
@@ -1129,7 +1129,20 @@ include('db.php');
 
     setTimeout(function() {
       // Add refresh button to the top of the page
-      $('body').prepend('<button class="refresh-button">Refresh</button>');
+      $('body').prepend('<button class="refresh-button"><i class="bi-arrow-clockwise"></i></button>');
+      // Position the refresh button at the top center
+      $('.refresh-button').css({
+        'position': 'fixed',
+        'top': '80px',
+        'left': '50%',
+        'transform': 'translateX(-50%)',
+        'z-index': '9999',
+        'background-color': 'white',
+        'color':'black',
+        'border': 'none',
+        'border-radius': '50%' ,
+        'font-size':'30px',
+      });
     }, refreshTime);
 
     // Refresh button click event

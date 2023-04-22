@@ -749,6 +749,55 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             text-transform: uppercase;
             font-size: 30px;
         }
+
+        .verify-code-form,
+        .reset-password-form {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .verify-code-form h2,
+        .reset-password-form h2 {
+            margin-top: 0;
+        }
+
+        .verify-code-form p,
+        .reset-password-form p {
+            margin-bottom: 10px;
+        }
+
+        .verify-code-form label,
+        .reset-password-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .verify-code-form input[type="text"],
+        .reset-password-form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .verify-code-form button,
+        .reset-password-form button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .verify-code-form button:hover,
+        .reset-password-form button[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
     </style>
 </head>
 
@@ -838,7 +887,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                         <p>Please enter your email address below to receive a verification code to reset your password.</p>
                         <div id="forgot-password-form">
                             <label for="email">Email:</label>
-                            <input type="email" id="email" name="email" required>
+                            <input type="email" id="emailtosendto" name="email" required>
                             <button type="button" class="verification" onclick="sendVerificationCode()">Send Code</button>
                         </div>
                     </div>
@@ -857,13 +906,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                     <div class="reset-password-form" style="display: none;">
                         <h2>Reset Password</h2>
                         <p>Please enter your new password below:</p>
-                        <form>
+                        <div>
                             <label for="new-password">New Password:</label>
                             <input type="password" id="new-password" name="new-password" required>
                             <label for="confirm-password">Confirm Password:</label>
                             <input type="password" id="confirm-password" name="confirm-password" required>
                             <button type="submit" onclick="resetPassword()">Reset Password</button>
-                        </form>
+                        </div>
                     </div>
 
                 </div>
@@ -882,24 +931,30 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
 
 
 <script>
+    var userEmail = "";
+
     function sendVerificationCode() {
         // Get the user's email address
-        const email = $("#email").val();
+        const emailtosendto = $("#emailtosendto").val();
+
+        // Store the email in a variable
+        userEmail = emailtosendto;
 
         // Send a verification code to the user's email address using AJAX
         $.ajax({
             type: "POST",
             url: "send_verification_code.php",
             data: {
-                email: email
+                emailtosendto: emailtosendto
             },
             success: function(response) {
                 if (response === "success") {
                     // Show the verification code form
+                    alert("Your verification is your UserId, current year, firstname no spaces in between")
                     $(".forgot-password-form").hide();
                     $(".verify-code-form").show();
                 } else {
-                    alert("Failed to send verification code.");
+                    alert(response);
                 }
             }
         });
@@ -919,7 +974,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             success: function(response) {
                 if (response === "success") {
                     // Redirect the user to the password reset page
-                    window.location.href = "reset_password.php";
+                    $(".verify-code-form").hide();
+                    $(".reset-password-form").show();
                 } else {
                     alert("Incorrect verification code.");
                 }
@@ -932,6 +988,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         const newPassword = document.getElementById("new-password").value;
         const confirmPassword = document.getElementById("confirm-password").value;
 
+        // Use the stored email variable
+        const emailtosendto = userEmail;
+
         // Check if the new password and confirm password match
         if (newPassword !== confirmPassword) {
             alert("New password and confirm password do not match.");
@@ -939,11 +998,27 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         }
 
         // Update the user's password (using your preferred method)
-
-        // Redirect the user to the login page
-        window.location.href = "login.php";
+        // Verify the verification code using AJAX
+        $.ajax({
+            type: "POST",
+            url: "updatepass.php",
+            data: {
+                editpass: 1,
+                emailtosendto: emailtosendto,
+                newPassword: newPassword,
+            },
+            success: function(response) {
+                if (response === "success") {
+                    // Redirect the user to the login page
+                    window.location.href = "login.php";
+                } else {
+                    alert(response);
+                }
+            }
+        });
     }
 </script>
+
 
 <script>
     $('.Login').click(function() {

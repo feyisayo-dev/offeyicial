@@ -3,33 +3,32 @@ session_start();
 include("db.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["email"];
+    $email = $_POST["emailtosendto"];
 
-    $sql = "SELECT UserId FROM User_Profile WHERE email = '$email'";
+    // Check if the user exists in the database
+    $sql = "SELECT UserId, First_Name, Surname FROM User_Profile WHERE email = '$email'";
     $result = sqlsrv_query($conn, $sql);
 
     if ($result) {
-        $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
-        $user_id = $row['UserId'];
+        if(sqlsrv_has_rows($result)) {
+            $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
+            $UserId = $row['UserId'];
+            $firstName = $row['First_Name'];
+            $surname = $row['Surname'];
 
-        $timestamp = time();
-        $rand_num = rand(1000, 9999); // Generate a random 4-digit number
-        $verification_code = $user_id . $timestamp . $rand_num;
-    }
+            // Assume $userId, $firstName, and $surname contain the user's information
+            $verificationCode = $UserId . date("Y") . $firstName;
 
-    // Send the verification code to the user's email address
-    $to = $email;
-    $subject = "Verification Code";
-    $message = "Your verification code is: " . $verificationCode;
-    $headers = "From: oluwafeyisayofummi@gmail.com" . "\r\n" .
-        "Reply-To:" . $to . "\r\n" .
-        "X-Mailer: PHP/" . phpversion();
+            $_SESSION["verification_code"] = $verificationCode;
 
-    if (mail($to, $subject, $message, $headers)) {
-        // Store the verification code in the session for later use
-        $_SESSION["verification_code"] = $verificationCode;
-        echo "success";
+            echo "success";
+        } else {
+            // User does not exist
+            echo "User does not exist.";
+        }
     } else {
-        echo "failure: " . error_get_last()["message"];
+        // Error in SQL query
+        echo "Error in SQL query.";
     }
 }
+?>
