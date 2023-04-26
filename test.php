@@ -9,7 +9,7 @@ require 'vendor/phpmailer/PHPMailer/src/SMTP.php';
 //Create a new PHPMailer instance
 $mail = new PHPMailer;
 // enable SMTP debugging
-$mail->SMTPDebug = 4;
+$mail->SMTPDebug = 3;
 //Set the SMTP settings
 $mail->isSMTP(); //Enable SMTP
 $mail->Host = 'smtp.gmail.com'; //Set the SMTP server to gmail

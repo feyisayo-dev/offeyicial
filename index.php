@@ -39,6 +39,7 @@ include('db.php');
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
+  <script src="js/slim.min.js"></script>
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/png" sizes="32x32" />
   <style>
@@ -736,6 +737,25 @@ include('db.php');
       max-height: 200px;
       overflow-y: auto;
     }
+
+    #threedots {
+      display: flex;
+      justify-content: flex-end;
+      text-decoration: none;
+      align-items: right;
+      margin-left: auto;
+    }
+
+    #block {
+      color: black;
+      background-color: transparent;
+      width: 100%;
+      border: none;
+    }
+
+    #block:hover {
+      transform: scale(1.05);
+    }
   </style>
 </head>
 
@@ -823,6 +843,21 @@ include('db.php');
       echo '<div class="post-header">';
       echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
       echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
+      echo '<div id="threedots">
+    <button type="button" class="btn btn-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="fas fa-ellipsis-h"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right">
+    <button type="button" class="btn btn-primary" id="block" data-bs-toggle="modal" data-bs-target="#blockUserModal">
+    Block user
+  </button>  
+      <button type="button" class="btn btn-primary" id="block" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal">
+      Block this type of post
+  </button>  
+      <a class="dropdown-item" href="#">Report user</a>
+      <a class="dropdown-item" href="#">Repost post</a>
+    </div>
+  </div>';
       echo '</div>';
       echo '<h2 class="post-title">' . $row['title'] . '</h2>';
       if (!empty($row['image']) && !empty($row['video'])) {
@@ -1044,6 +1079,110 @@ include('db.php');
   </div>
 
   </div>
+  <!-- Modal -->
+  <div class="modal fade" id="blockUserModal" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Why do you want to block this user?</p>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="pornographic-content">
+            <label class="form-check-label" for="pornographic-content">
+              Pornographic content
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="not-a-fan-of-posts">
+            <label class="form-check-label" for="not-a-fan-of-posts">
+              Not a fan of user's posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="bloody-content">
+            <label class="form-check-label" for="bloody-content">
+              Bloody content
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="flashy-content">
+            <label class="form-check-label" for="flashy-content">
+              Flashy content
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="other-reason">
+            <label class="form-check-label" for="other-reason">
+              Other reason
+            </label>
+          </div>
+          <div class="form-group mt-3" id="other-reason-textbox" style="display: none;">
+            <label for="other-reason-text">Please specify:</label>
+            <textarea class="form-control" id="other-reason-text" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="blockUser()">Block</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- group type of post  -->
+  <div class="modal fade" id="blockTypeofPostModal" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blockTypeofPostModalLabel">Block Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Could you help us categorize what sort of post this is?</p>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="pornographic-content-posts">
+            <label class="form-check-label" for="pornographic-content-posts">
+              Pornographic content post
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="racist-posts">
+            <label class="form-check-label" for="racist-posts">
+              Racist posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="bloody-content-posts">
+            <label class="form-check-label" for="bloody-content-posts">
+              Bloody content posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="flashy-content-posts">
+            <label class="form-check-label" for="flashy-content-posts">
+              Flashy content posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="other-reason-posts">
+            <label class="form-check-label" for="other-reason-posts">
+              Other reason
+            </label>
+          </div>
+          <div class="form-group mt-3 blockpost" id="other-reason-textbox-posts" style="display: none;">
+            <label for="other-reason-text">Please specify:</label>
+            <textarea class="form-control" id="other-reason-text-posts" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-postid="<?php echo $postId ?>" onclick="blockPosts()">Block</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 <script src="js/jquery.min.js"></script>
@@ -1136,12 +1275,12 @@ include('db.php');
         'top': '80px',
         'left': '50%',
         'transform': 'translateX(-50%)',
-        'z-index': '9999',
+        'z-index': '999',
         'background-color': 'white',
-        'color':'black',
+        'color': 'black',
         'border': 'none',
-        'border-radius': '50%' ,
-        'font-size':'30px',
+        'border-radius': '50%',
+        'font-size': '30px',
       });
     }, refreshTime);
 
@@ -1378,6 +1517,121 @@ include('db.php');
     const seconds = Math.floor(time % 60);
     const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
     return formattedTime;
+  }
+</script>
+<script>
+  // Get the selected reasons for blocking the user
+  const pornographicContent = document.getElementById("pornographic-content").checked;
+  const notAFanOfPosts = document.getElementById("not-a-fan-of-posts").checked;
+  const bloodyContent = document.getElementById("bloody-content").checked;
+  const flashyContent = document.getElementById("flashy-content").checked;
+  const otherReasonCheckbox = document.getElementById("other-reason");
+  const otherReasonTextbox = document.getElementById("other-reason-textbox");
+  otherReasonCheckbox.addEventListener("change", () => {
+    if (otherReasonCheckbox.checked) {
+      otherReasonTextbox.style.display = "block";
+    } else {
+      otherReasonTextbox.style.display = "none";
+    }
+  });
+
+  function blockUser() {
+
+    // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
+    const form = new FormData();
+    form.append("pornographicContent", pornographicContent);
+    form.append("notAFanOfPosts", notAFanOfPosts);
+    form.append("bloodyContent", bloodyContent);
+    form.append("flashyContent", flashyContent);
+    form.append("otherReason", otherReasonCheckbox);
+    form.append("otherReasonText", otherReasonTextbox);
+
+    $.ajax({
+      url: 'blockuser.php',
+      type: 'POST',
+      data: form,
+      processData: false,
+      contentType: false,
+      success: function(response) {
+        console.log(response);
+        alert("User blocked successfully.");
+      },
+      error: function(error) {
+        console.error(error);
+        alert("An error occurred while blocking the user. Please try again later.");
+      }
+    });
+  }
+</script>
+<script>
+  $(document).ready(function() {
+    // Add event listener to "other reason" checkbox
+    $('#other-reason-posts').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('#other-reason-textbox-posts').show();
+      } else {
+        $('#other-reason-textbox-posts').hide();
+      }
+    });
+
+    // Add event listener to all checkboxes
+    $(".blockpost").on('change', function() {
+      if ($(this).is(':checked')) {
+        alert($(this).siblings('label').text());
+      }
+    });
+  });
+
+  function blockPosts() {
+    // Get the values of all the form elements
+    const checkboxes = document.querySelectorAll('.blockpost');
+    const checkedCheckboxes = [];
+    checkboxes.forEach((checkbox) => {
+      if (checkbox.checked) {
+        checkedCheckboxes.push(checkbox.id);
+      }
+    });
+    if (checkedCheckboxes.length > 0) {
+      alert('Checked checkboxes: ' + checkedCheckboxes.join(', '));
+    } else {
+      alert('Please select at least one checkbox.');
+    }
+    var postId = document.querySelector('.btn[data-postid]').getAttribute('data-postid');
+    alert(postId);
+    const pornographicContentPosts = $('#pornographic-content-posts').is(':checked');
+    const racistPosts = $('#racist-posts').is(':checked');
+    const bloodyContentPosts = $('#bloody-content-posts').is(':checked');
+    const flashyContentPosts = $('#flashy-content-posts').is(':checked');
+    const otherReasonCheckboxPosts = $('#other-reason-posts').is(':checked');
+    const otherReasonTextPosts = $('#other-reason-text-posts').val();
+
+    // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
+    const form = new FormData();
+    form.append("postId", postId);
+    form.append("pornographicContentPosts", pornographicContentPosts);
+    form.append("racistPosts", racistPosts);
+    form.append("bloodyContentPosts", bloodyContentPosts);
+    form.append("flashyContentPosts", flashyContentPosts);
+    form.append("otherReasonCheckboxPosts", otherReasonCheckboxPosts);
+    form.append("otherReasonTextPosts", otherReasonTextPosts);
+
+    $.ajax({
+      url: 'blockpost.php',
+      type: 'POST',
+      data: form,
+      processData: false,
+      contentType: false,
+      success: function(response) {
+        if (response == "success") {
+          console.log(response);
+          alert("Post type blocked successfully.");
+        }
+      },
+      error: function(error) {
+        console.error(error);
+        alert("An error occurred while blocking the type of post. Please try again later.");
+      }
+    });
   }
 </script>
 
