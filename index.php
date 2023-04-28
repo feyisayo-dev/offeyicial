@@ -7,12 +7,11 @@ if (!isset($_SESSION['loggedin'])) {
 ?>
 <?php
 $UserId = $_SESSION["UserId"];
-include('db.php');
+include 'db.php';
 
 ?>
 <?php
-include('db.php');
-
+include 'db.php';
 
 ?>
 
@@ -746,15 +745,19 @@ include('db.php');
       margin-left: auto;
     }
 
-    #block {
+    #block,
+    .blockButton {
       color: black;
       background-color: transparent;
       width: 100%;
       border: none;
     }
 
-    #block:hover {
+    #block:hover,
+    .blockButton:hover {
       transform: scale(1.05);
+      background-color: transparent;
+      color: black;
     }
   </style>
 </head>
@@ -797,10 +800,10 @@ include('db.php');
     <br>
     <?php
     // Connect to the database
-    include('db.php');
+    include 'db.php';
     $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
-    FROM posts 
-    JOIN User_Profile ON User_Profile.UserId = posts.UserId 
+    FROM posts
+    JOIN User_Profile ON User_Profile.UserId = posts.UserId
     LEFT JOIN likes ON likes.PostId = posts.PostId
     GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
     ORDER BY posts.date_posted DESC";
@@ -850,10 +853,16 @@ include('db.php');
     <div class="dropdown-menu dropdown-menu-right">
     <button type="button" class="btn btn-primary" id="block" data-bs-toggle="modal" data-bs-target="#blockUserModal">
     Block user
-  </button>  
-      <button type="button" class="btn btn-primary" id="block" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal">
-      Block this type of post
-  </button>  
+  </button>
+  <div>
+  <button type="button" class="btn btn-primary blockButton" id="blockButton-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal-' . $postId . '">
+  Block this type of post
+</button>
+<input type="hidden" id="b' . $postId . '" value="' . $postId . '">
+</div>
+
+
+
       <a class="dropdown-item" href="#">Report user</a>
       <a class="dropdown-item" href="#">Repost post</a>
     </div>
@@ -874,9 +883,9 @@ include('db.php');
     <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
     <button onclick="togglePlayPause()">
       <span id="playPauseButton">Play</span>
-    </button>                        
+    </button>
     <div class="volume-control">
-      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"> 
+      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()">
     </div>
     <div class="time-control">
       <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
@@ -904,9 +913,9 @@ include('db.php');
     <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
     <button onclick="togglePlayPause()">
       <span id="playPauseButton">Play</span>
-    </button>                        
+    </button>
     <div class="volume-control">
-      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()"> 
+      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()">
     </div>
     <div class="time-control">
       <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
@@ -935,10 +944,60 @@ include('db.php');
       </button>
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal" data-postid="' . $postId . '">
       <i class="bi bi-chat-dots"></i> Comment
-    <input type="hidden" id="postId" value="' . $postId . '">
 
-  </button>  
+  </button>
   </div>';
+      echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blockTypeofPostModalLabel">Block Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Could you help us categorize what sort of post this is?</p>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="pornographic-content-posts">
+            <label class="form-check-label" for="pornographic-content-posts">
+              Pornographic content post
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="racist-posts">
+            <label class="form-check-label" for="racist-posts">
+              Racist posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="bloody-content-posts">
+            <label class="form-check-label" for="bloody-content-posts">
+              Bloody content posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="flashy-content-posts">
+            <label class="form-check-label" for="flashy-content-posts">
+              Flashy content posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockpost" type="checkbox" value="" id="other-reason-posts">
+            <label class="form-check-label" for="other-reason-posts">
+              Other reason
+            </label>
+          </div>
+          <div class="form-group mt-3 blockpost" id="other-reason-textbox-posts" style="display: none;">
+            <label for="other-reason-text">Please specify:</label>
+            <textarea class="form-control" id="other-reason-text-posts" rows="3"></textarea>
+          </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="blockPosts()">Block</button>
+      </div>
+    </div>
+  </div>
+</div>';
       echo '</section>';
     }
     ?>
@@ -1126,63 +1185,13 @@ include('db.php');
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="blockUser()">Block</button>
+          <button type="button" class="btn btn-primary" id="blockUserButton" onclick="blockPosts()">Block</button>
         </div>
       </div>
     </div>
   </div>
   <!-- group type of post  -->
-  <div class="modal fade" id="blockTypeofPostModal" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="blockTypeofPostModalLabel">Block Post</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Could you help us categorize what sort of post this is?</p>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="pornographic-content-posts">
-            <label class="form-check-label" for="pornographic-content-posts">
-              Pornographic content post
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="racist-posts">
-            <label class="form-check-label" for="racist-posts">
-              Racist posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="bloody-content-posts">
-            <label class="form-check-label" for="bloody-content-posts">
-              Bloody content posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="flashy-content-posts">
-            <label class="form-check-label" for="flashy-content-posts">
-              Flashy content posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="other-reason-posts">
-            <label class="form-check-label" for="other-reason-posts">
-              Other reason
-            </label>
-          </div>
-          <div class="form-group mt-3 blockpost" id="other-reason-textbox-posts" style="display: none;">
-            <label for="other-reason-text">Please specify:</label>
-            <textarea class="form-control" id="other-reason-text-posts" rows="3"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-postid="<?php echo $postId ?>" onclick="blockPosts()">Block</button>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
 </body>
 <script src="js/jquery.min.js"></script>
@@ -1582,6 +1591,11 @@ include('db.php');
     });
   });
 
+  $(document).on('click', '.blockButton', function() {
+    var postId = $(this).data('postid');
+    alert(postId);
+  });
+
   function blockPosts() {
     // Get the values of all the form elements
     const checkboxes = document.querySelectorAll('.blockpost');
@@ -1596,14 +1610,21 @@ include('db.php');
     } else {
       alert('Please select at least one checkbox.');
     }
-    var postId = document.querySelector('.btn[data-postid]').getAttribute('data-postid');
+
+    var postId = $(this).data('postid');
+    // Retrieve the post ID from the hidden input field
     alert(postId);
-    const pornographicContentPosts = $('#pornographic-content-posts').is(':checked');
-    const racistPosts = $('#racist-posts').is(':checked');
-    const bloodyContentPosts = $('#bloody-content-posts').is(':checked');
-    const flashyContentPosts = $('#flashy-content-posts').is(':checked');
-    const otherReasonCheckboxPosts = $('#other-reason-posts').is(':checked');
-    const otherReasonTextPosts = $('#other-reason-text-posts').val();
+    const pornographicContentPosts = $('#blockTypeofPostModal-' + postId + ' #pornographic-content-posts').is(':checked');
+    alert(pornographicContentPosts);
+    const racistPosts = $('#blockTypeofPostModal-' + postId + ' #racist-posts').is(':checked');
+    alert(racistPosts);
+    const bloodyContentPosts = $('#blockTypeofPostModal-' + postId + ' #bloody-content-posts').is(':checked');
+    alert(bloodyContentPosts);
+    const flashyContentPosts = $('#blockTypeofPostModal-' + postId + ' #flashy-content-posts').is(':checked');
+    alert(flashyContentPosts);
+    const otherReasonCheckboxPosts = $('#blockTypeofPostModal-' + postId + ' #other-reason-posts').is(':checked');
+    alert(otherReasonCheckboxPosts);
+    const otherReasonTextPosts = $('#blockTypeofPostModal-' + postId + ' #other-reason-text-posts').val();
 
     // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
     const form = new FormData();
@@ -1614,6 +1635,7 @@ include('db.php');
     form.append("flashyContentPosts", flashyContentPosts);
     form.append("otherReasonCheckboxPosts", otherReasonCheckboxPosts);
     form.append("otherReasonTextPosts", otherReasonTextPosts);
+    form.append("checkedCheckboxes", checkedCheckboxes);
 
     $.ajax({
       url: 'blockpost.php',
@@ -1622,13 +1644,18 @@ include('db.php');
       processData: false,
       contentType: false,
       success: function(response) {
+        // confirm what is being said in the console
+        console.log(response);
         if (response == "success") {
           console.log(response);
           alert("Post type blocked successfully.");
+          // alert checked checkbox
+          alert(checkedCheckboxes);
+          $('#blockTypeofPostModal').modal('hide');
         }
       },
-      error: function(error) {
-        console.error(error);
+      error: function(response) {
+        console.error(response);
         alert("An error occurred while blocking the type of post. Please try again later.");
       }
     });

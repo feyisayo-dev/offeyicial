@@ -9,19 +9,28 @@ if (!isset($_SESSION['UserId'])) {
 }
 
 // Get post ID from AJAX request
-// $postId = $_POST['postId'];
-$postId = isset($_POST['postId']);
+$postId = $_POST['postId'];
+$checkedCheckboxes = $_POST['checkedCheckboxes'];
+
 
 
 // Get user ID from session
 $UserId = $_SESSION['UserId'];
 
 // Get block preferences from AJAX request
-$pornographic = isset($_POST['pornographic']) ? 'Yes' : 'No';
-$bloody = isset($_POST['bloody']) ? 'Yes' : 'No';
-$racism = isset($_POST['racism']) ? 'Yes' : 'No';
-$flashy = isset($_POST['flashy']) ? 'Yes' : 'No';
-$other = isset($_POST['otherReason']) ? $_POST['otherReasonText'] : '';
+$pornographic = $_POST['pornographicContentPosts'];
+// echo $pornographic;
+
+$racism = $_POST['racistPosts'];
+// echo $racism;
+
+$bloody = $_POST['bloodyContentPosts'];
+// echo $bloody;
+
+$flashy = $_POST['flashyContentPosts'];
+// echo $flashy;
+
+$other = isset($_POST['otherReasonCheckboxPosts']) ? $_POST['otherReasonTextPosts'] : '';
 
 // Connect to database
 include('db.php');
@@ -49,7 +58,6 @@ if (sqlsrv_has_rows($stmt)) {
     die(print_r(sqlsrv_errors(), true));
   }
   echo "success";
-
 } else {
   // User has not blocked this post, insert new preferences
   $sql = "INSERT INTO Users_prefer (UserId, Pornographic, Bloody, Racism, Flashy, Other, PostId) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -61,6 +69,8 @@ if (sqlsrv_has_rows($stmt)) {
   }
   echo "success";
 }
+// echo $checkedCheckboxes;
+
 
 // Close database connection
 sqlsrv_close($conn);
