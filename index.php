@@ -993,7 +993,7 @@ include 'db.php';
         </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="blockPosts()">Block</button>
+        <button type="button" class="btn btn-primary" data-postid="' . $postId . '" onclick="blockPosts()">Block</button>
       </div>
     </div>
   </div>
@@ -1185,7 +1185,7 @@ include 'db.php';
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="blockUserButton" onclick="blockPosts()">Block</button>
+          <button type="button" class="btn btn-primary" id="blockUserButton" data-postid="<?php echo $postId ?>" onclick="blockPosts()">Block</button>
         </div>
       </div>
     </div>
@@ -1591,10 +1591,10 @@ include 'db.php';
     });
   });
 
-  $(document).on('click', '.blockButton', function() {
-    var postId = $(this).data('postid');
-    alert(postId);
-  });
+  // $(document).on('click', '.blockButton', function() {
+  //   var postId = $(this).data('postid');
+  //   alert(postId);
+  // });
 
   function blockPosts() {
     // Get the values of all the form elements
@@ -1611,7 +1611,7 @@ include 'db.php';
       alert('Please select at least one checkbox.');
     }
 
-    var postId = $(this).data('postid');
+    const postId = $(event.target).closest('.modal').data('postid');
     // Retrieve the post ID from the hidden input field
     alert(postId);
     const pornographicContentPosts = $('#blockTypeofPostModal-' + postId + ' #pornographic-content-posts').is(':checked');
@@ -1651,7 +1651,7 @@ include 'db.php';
           alert("Post type blocked successfully.");
           // alert checked checkbox
           alert(checkedCheckboxes);
-          $('#blockTypeofPostModal').modal('hide');
+          $('#blockTypeofPostModal-' + postId).modal('hide');
         }
       },
       error: function(response) {
