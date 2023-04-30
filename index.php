@@ -745,7 +745,7 @@ include 'db.php';
       margin-left: auto;
     }
 
-    #block,
+    .blockUser,
     .blockButton {
       color: black;
       background-color: transparent;
@@ -753,7 +753,7 @@ include 'db.php';
       border: none;
     }
 
-    #block:hover,
+    .blockUser:hover,
     .blockButton:hover {
       transform: scale(1.05);
       background-color: transparent;
@@ -851,9 +851,12 @@ include 'db.php';
       <i class="fas fa-ellipsis-h"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right">
-    <button type="button" class="btn btn-primary" id="block" data-bs-toggle="modal" data-bs-target="#blockUserModal">
-    Block user
-  </button>
+    <div>
+  <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $postId . '">
+  Block User
+</button>
+<input type="hidden" id="bu' . $postId . '" value="' . $postId . '">
+</div>
   <div>
   <button type="button" class="btn btn-primary blockButton" id="blockButton-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal-' . $postId . '">
   Block this type of post
@@ -998,6 +1001,57 @@ include 'db.php';
     </div>
   </div>
 </div>';
+      echo '<div class="modal fade" data-postid="' . $postId . '" id="blockUserModal-' . $postId . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Why do you want to block this user?</p>
+          <div class="form-check">
+            <input class="form-check-input blockuser" type="checkbox" value="" id="pornographic-content">
+            <label class="form-check-label " for="pornographic-content">
+              Pornographic content
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockuser" type="checkbox" value="" id="not-a-fan-of-posts">
+            <label class="form-check-label " for="not-a-fan-of-posts">
+              Not a fan of user"s posts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockuser" type="checkbox" value="" id="bloody-content">
+            <label class="form-check-label " for="bloody-content">
+              Bloody content
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockuser" type="checkbox" value="" id="flashy-content">
+            <label class="form-check-label " for="flashy-content">
+              Flashy content
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input blockuser" type="checkbox" value="" id="other-reason">
+            <label class="form-check-label " for="other-reason">
+              Other reason
+            </label>
+          </div>
+          <div class="form-group mt-3" id="other-reason-textbox" style="display: none;">
+            <label for="other-reason-text">Please specify:</label>
+            <textarea class="form-control" id="other-reason-text" rows="3"></textarea>
+          </div>
+        </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-primary" data-postid="' . $postId . '" onclick="blockUser()">Block</button>
+  </div>
+</div>
+</div>
+</div>';
       echo '</section>';
     }
     ?>
@@ -1138,60 +1192,6 @@ include 'db.php';
   </div>
 
   </div>
-  <!-- Modal -->
-  <div class="modal fade" id="blockUserModal" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Why do you want to block this user?</p>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="pornographic-content">
-            <label class="form-check-label" for="pornographic-content">
-              Pornographic content
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="not-a-fan-of-posts">
-            <label class="form-check-label" for="not-a-fan-of-posts">
-              Not a fan of user's posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="bloody-content">
-            <label class="form-check-label" for="bloody-content">
-              Bloody content
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="flashy-content">
-            <label class="form-check-label" for="flashy-content">
-              Flashy content
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="other-reason">
-            <label class="form-check-label" for="other-reason">
-              Other reason
-            </label>
-          </div>
-          <div class="form-group mt-3" id="other-reason-textbox" style="display: none;">
-            <label for="other-reason-text">Please specify:</label>
-            <textarea class="form-control" id="other-reason-text" rows="3"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="blockUserButton" data-postid="<?php echo $postId ?>" onclick="blockPosts()">Block</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- group type of post  -->
-
 
 </body>
 <script src="js/jquery.min.js"></script>
@@ -1529,24 +1529,50 @@ include 'db.php';
   }
 </script>
 <script>
-  // Get the selected reasons for blocking the user
-  const pornographicContent = document.getElementById("pornographic-content").checked;
-  const notAFanOfPosts = document.getElementById("not-a-fan-of-posts").checked;
-  const bloodyContent = document.getElementById("bloody-content").checked;
-  const flashyContent = document.getElementById("flashy-content").checked;
-  const otherReasonCheckbox = document.getElementById("other-reason");
-  const otherReasonTextbox = document.getElementById("other-reason-textbox");
-  otherReasonCheckbox.addEventListener("change", () => {
-    if (otherReasonCheckbox.checked) {
-      otherReasonTextbox.style.display = "block";
-    } else {
-      otherReasonTextbox.style.display = "none";
-    }
+  $(document).ready(function() {
+    // Add event listener to "other reason" checkbox
+    $('#other-reason').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('#other-reason-textbox').show();
+      } else {
+        $('#other-reason-textbox').hide();
+      }
+    });
+
+    // Add event listener to all checkboxes
+    $(".blockuser").on('change', function() {
+      if ($(this).is(':checked')) {
+        alert($(this).siblings('label').text());
+      }
+    });
   });
 
-  function blockUser() {
 
+  function blockUser() {
+    // Get the values of all the form elements
+    const checkboxes = document.querySelectorAll('.blockuser');
+    const checkedCheckboxes = [];
+    checkboxes.forEach((checkbox) => {
+      if (checkbox.checked) {
+        checkedCheckboxes.push(checkbox.id);
+      }
+    });
+    if (checkedCheckboxes.length > 0) {
+      alert('Checked checkboxes: ' + checkedCheckboxes.join(', '));
+    } else {
+      alert('Please select at least one checkbox.');
+    }
+
+    const postId = $(event.target).closest('.modal').data('postid');
     // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
+    // Get the selected reasons for blocking the user
+    const pornographicContentPosts = $('#blockUserModal-' + postId + ' #pornographic-content').is(':checked');
+    const notAFanOfPosts = $('#blockUserModal-' + postId + ' #not-a-fan-of-posts').is(':checked');
+    const bloodyContent = $('#blockUserModal-' + postId + ' #bloody-content').is(':checked');
+    const flashyContent = $('#blockUserModal-' + postId + ' #flashy-content').is(':checked');
+    const otherReasonCheckbox = $('#blockUserModal-' + postId + ' #other-reason').is(':checked');
+    const otherReasonTextbox = $('#blockTypeofPostModal-' + postId + ' #other-reason-textbox').val();
+
     const form = new FormData();
     form.append("pornographicContent", pornographicContent);
     form.append("notAFanOfPosts", notAFanOfPosts);
