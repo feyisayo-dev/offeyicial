@@ -10,9 +10,6 @@ if (!isset($_SESSION['UserId'])) {
 
 // Get post ID from AJAX request
 $postId = $_POST['postId'];
-$checkedCheckboxes = $_POST['checkedCheckboxes'];
-
-
 
 // Get user ID from session
 $UserId = $_SESSION['UserId'];
@@ -40,7 +37,7 @@ if ($conn === false) {
 }
 
 // Check if user has already blocked this post
-$sql = "SELECT UserId FROM Users_prefer WHERE UserId = ? AND PostId = ?";
+$sql = "SELECT UserId FROM User_prefer_post WHERE UserId = ? AND PostId = ?";
 $params = array($UserId, $postId);
 $stmt = sqlsrv_query($conn, $sql, $params);
 
@@ -50,7 +47,7 @@ if ($stmt === false) {
 
 if (sqlsrv_has_rows($stmt)) {
   // User has already blocked this post, update their preferences
-  $sql = "UPDATE Users_prefer SET Pornographic = ?, Bloody = ?, Racism = ?, Flashy = ?, Other = ? WHERE UserId = ? AND PostId = ?";
+  $sql = "UPDATE User_prefer_post SET Pornographic = ?, Bloody = ?, Racism = ?, Flashy = ?, Other = ? WHERE UserId = ? AND PostId = ?";
   $params = array($pornographic, $bloody, $racism, $flashy, $other, $UserId, $postId);
   $stmt = sqlsrv_query($conn, $sql, $params);
 
@@ -60,7 +57,7 @@ if (sqlsrv_has_rows($stmt)) {
   echo "success";
 } else {
   // User has not blocked this post, insert new preferences
-  $sql = "INSERT INTO Users_prefer (UserId, Pornographic, Bloody, Racism, Flashy, Other, PostId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  $sql = "INSERT INTO User_prefer_post (UserId, Pornographic, Bloody, Racism, Flashy, Other, PostId) VALUES (?, ?, ?, ?, ?, ?, ?)";
   $params = array($UserId, $pornographic, $bloody, $racism, $flashy, $other, $postId);
   $stmt = sqlsrv_query($conn, $sql, $params);
 
@@ -69,7 +66,6 @@ if (sqlsrv_has_rows($stmt)) {
   }
   echo "success";
 }
-// echo $checkedCheckboxes;
 
 
 // Close database connection

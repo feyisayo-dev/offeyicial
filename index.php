@@ -852,10 +852,10 @@ include 'db.php';
     </button>
     <div class="dropdown-menu dropdown-menu-right">
     <div>
-  <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $postId . '">
+  <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $row['UserId'] . '" data-recipientId="' . $row['UserId'] . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $row['UserId'] . '">
   Block User
 </button>
-<input type="hidden" id="bu' . $postId . '" value="' . $postId . '">
+<input type="hidden" id="bu' . $row['UserId'] . '" value="' . $row['UserId'] . '">
 </div>
   <div>
   <button type="button" class="btn btn-primary blockButton" id="blockButton-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal-' . $postId . '">
@@ -1001,7 +1001,7 @@ include 'db.php';
     </div>
   </div>
 </div>';
-      echo '<div class="modal fade" data-postid="' . $postId . '" id="blockUserModal-' . $postId . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+      echo '<div class="modal fade" data-recipientId="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
 <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1047,7 +1047,7 @@ include 'db.php';
         </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    <button type="button" class="btn btn-primary" data-postid="' . $postId . '" onclick="blockUser()">Block</button>
+    <button type="button" class="btn btn-primary" data-recipientId="' . $row['UserId'] . '" onclick="blockUser()">Block</button>
   </div>
 </div>
 </div>
@@ -1528,6 +1528,11 @@ include 'db.php';
     return formattedTime;
   }
 </script>
+<!-- <script>
+  $("blockUserModal-"+postId).on('hidden.bs.modal', function () {
+    $('input[type="checkbox"]').prop('checked', false);
+  })
+</script> -->
 <script>
   $(document).ready(function() {
     // Add event listener to "other reason" checkbox
@@ -1563,17 +1568,19 @@ include 'db.php';
       alert('Please select at least one checkbox.');
     }
 
-    const postId = $(event.target).closest('.modal').data('postid');
+    const recipientId = $(this).closest('.modal').data('recipientId');
+    alert(recipientId);
     // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
     // Get the selected reasons for blocking the user
-    const pornographicContentPosts = $('#blockUserModal-' + postId + ' #pornographic-content').is(':checked');
-    const notAFanOfPosts = $('#blockUserModal-' + postId + ' #not-a-fan-of-posts').is(':checked');
-    const bloodyContent = $('#blockUserModal-' + postId + ' #bloody-content').is(':checked');
-    const flashyContent = $('#blockUserModal-' + postId + ' #flashy-content').is(':checked');
-    const otherReasonCheckbox = $('#blockUserModal-' + postId + ' #other-reason').is(':checked');
-    const otherReasonTextbox = $('#blockTypeofPostModal-' + postId + ' #other-reason-textbox').val();
+    const pornographicContent = $('#blockUserModal-' + recipientId + ' #pornographic-content').is(':checked');
+    const notAFanOfPosts = $('#blockUserModal-' + recipientId + ' #not-a-fan-of-posts').is(':checked');
+    const bloodyContent = $('#blockUserModal-' + recipientId + ' #bloody-content').is(':checked');
+    const flashyContent = $('#blockUserModal-' + recipientId + ' #flashy-content').is(':checked');
+    const otherReasonCheckbox = $('#blockUserModal-' + recipientId + ' #other-reason').is(':checked');
+    const otherReasonTextbox = $('#blockTypeofPostModal-' + recipientId + ' #other-reason-textbox').val();
 
     const form = new FormData();
+    form.append("recipientId", recipientId);
     form.append("pornographicContent", pornographicContent);
     form.append("notAFanOfPosts", notAFanOfPosts);
     form.append("bloodyContent", bloodyContent);
@@ -1616,7 +1623,7 @@ include 'db.php';
       }
     });
   });
-
+  //  check userId of the post before modal 
   // $(document).on('click', '.blockButton', function() {
   //   var postId = $(this).data('postid');
   //   alert(postId);
