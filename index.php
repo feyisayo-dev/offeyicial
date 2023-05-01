@@ -1570,7 +1570,6 @@ include 'db.php';
 
     const recipientId = $(this).closest('.modal').data('recipientId');
     alert(recipientId);
-    // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
     // Get the selected reasons for blocking the user
     const pornographicContent = $('#blockUserModal-' + recipientId + ' #pornographic-content').is(':checked');
     const notAFanOfPosts = $('#blockUserModal-' + recipientId + ' #not-a-fan-of-posts').is(':checked');
