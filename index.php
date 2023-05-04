@@ -852,7 +852,7 @@ include 'db.php';
     </button>
     <div class="dropdown-menu dropdown-menu-right">
     <div>
-  <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $row['UserId'] . '" data-recipientId="' . $row['UserId'] . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $row['UserId'] . '">
+  <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $row['UserId'] . '" data-recipientid="' . $row['UserId'] . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $row['UserId'] . '">
   Block User
 </button>
 <input type="hidden" id="bu' . $row['UserId'] . '" value="' . $row['UserId'] . '">
@@ -1001,7 +1001,7 @@ include 'db.php';
     </div>
   </div>
 </div>';
-      echo '<div class="modal fade" data-recipientId="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+      echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
 <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1047,7 +1047,7 @@ include 'db.php';
         </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    <button type="button" class="btn btn-primary" data-recipientId="' . $row['UserId'] . '" onclick="blockUser()">Block</button>
+    <button type="button" class="btn btn-primary" data-recipient-id="' . $row['UserId'] . '" onclick="blockUser()">Block</button>
   </div>
 </div>
 </div>
@@ -1568,7 +1568,7 @@ include 'db.php';
       alert('Please select at least one checkbox.');
     }
 
-    const recipientId = $(this).closest('.modal').data('recipientId');
+    const recipientId = $(event.target).data('recipient-id');
     alert(recipientId);
     // Get the selected reasons for blocking the user
     const pornographicContent = $('#blockUserModal-' + recipientId + ' #pornographic-content').is(':checked');
