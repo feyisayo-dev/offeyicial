@@ -1036,9 +1036,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                     "psw": psw
                 },
                 success: function(data) {
-                    var jsonData = JSON.parse(data);
-                    if (jsonData.status == "success") {
-                        var UserId = jsonData.UserId;
+                    console.log(data);
+                    if (data !== 'failed') {
+                        var UserId = data;
                         // check if the user is already logged in
                         if (window.location.pathname != '/offeyicialchatroom/user_profile.php') {
                             window.location.href = "user_profile.php?UserId=" + UserId;
@@ -1047,6 +1047,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                         alert("Invalid login credentials");
                     }
                 }
+
             });
         } else {
             alert("Please fill in all fields");

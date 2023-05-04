@@ -2,7 +2,7 @@
 session_start();
 include('db.php');
 
-if(isset($_POST['Login'])) {
+if (isset($_POST['Login'])) {
     $email = $_POST['email'];
     $password = $_POST['psw'];
 
@@ -10,25 +10,26 @@ if(isset($_POST['Login'])) {
     $sql = "SELECT UserId, Password FROM User_Profile WHERE email = ?";
     $params = array($email);
     $stmt = sqlsrv_query($conn, $sql, $params);
-    
-    if($stmt !== false && sqlsrv_has_rows($stmt)) {
+
+    if ($stmt !== false && sqlsrv_has_rows($stmt)) {
         $row = sqlsrv_fetch_array($stmt);
         $UserId = $row['UserId'];
         $hashed_password = $row['Password'];
-        
-        if($password === $hashed_password) {
+
+        if (password_verify($password, $hashed_password)) {
             // Login successful
             $_SESSION['UserId'] = $UserId;
-            echo json_encode(['status' => "success", 'UserId' => $UserId]);
+            echo $UserId; // Return the UserId as a simple string
+            exit();
         } else {
             // Invalid email or password
-            echo json_encode(["status" => 'failed']);
+            echo 'failed'; // Return a simple string indicating login failure
         }
     } else {
         // Invalid email or password
-        echo json_encode(["status" => 'failed']);
+        echo 'failed'; // Return a simple string indicating login failure
     }
-  
+
     $_SESSION['loggedin'] = true;
 }
 
@@ -37,3 +38,4 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
 } else {
     // The user is not logged in
 }
+?>

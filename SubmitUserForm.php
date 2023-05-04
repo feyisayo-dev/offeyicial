@@ -1,22 +1,20 @@
-
 <?php
-
-//insert memebers using unique user id
 include('db.php');
 
 if (isset($_POST['Submit'])) {
 	require('db.php');
-	$sql = "select count(UserId) from User_Profile";
+	$sql = "SELECT TOP 1 UserId FROM User_Profile ORDER BY UserId DESC";
 	$stmt = sqlsrv_query($conn, $sql);
 	if ($stmt === false) {
 		die(print_r(sqlsrv_errors(), true));
 	} else {
-
-
-		while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC)) {
-			$UserCounter = trim($row[0]);
+		if (sqlsrv_has_rows($stmt)) {
+			$row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC);
+			$lastUserId = trim($row[0]);
+			$num = substr($lastUserId, -5) + 1;
+		} else {
+			$num = 1;
 		}
-		$num = $UserCounter + 1;
 		$num_padded = sprintf("%05d", $num);
 		$num_padded; // return 04
 	}
@@ -24,6 +22,7 @@ if (isset($_POST['Submit'])) {
 	$RegDate = date("M-d-Y");
 
 	$UserId = 'OFF' . $num_padded;
+
 
 	$Surname = ($_POST['Surname']);
 	$First_Name = ($_POST['First_Name']);
