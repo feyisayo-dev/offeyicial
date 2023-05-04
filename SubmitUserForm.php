@@ -2,6 +2,7 @@
 <?php
 
 //insert memebers using unique user id
+include('db.php');
 
 if (isset($_POST['Submit'])) {
 	require('db.php');
@@ -28,13 +29,13 @@ if (isset($_POST['Submit'])) {
 	$First_Name = ($_POST['First_Name']);
 	$gender = ($_POST['gender']);
 	$email = ($_POST['email']);
-	$pasword = ($_POST['psw']);
+	$password = $_POST['psw'];
+	$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 	$phone = ($_POST['phone']);
 	$dob = ($_POST['dob']);
 	$countryId = ($_POST['countryId']);
 	$stateId = ($_POST['stateId']);
 
-	include('db.php');
 
 	// Check if email already exists
 	$email_exists_query = "SELECT COUNT(*) AS count FROM User_Profile WHERE email = '$email'";
@@ -46,7 +47,7 @@ if (isset($_POST['Submit'])) {
 
 	if ($email_exists_count > 0) {
 		$response = array('Email already registered');
-		echo json_encode($response);
+		echo json_encode(array($response));
 	} else {
 		$sql = "Insert into User_Profile ([UserId]
 	,[Surname]
@@ -58,7 +59,7 @@ if (isset($_POST['Submit'])) {
 	,[dob]
 	,[countryId]
 	,[stateId])
-	values('$UserId','$Surname','$First_Name','$gender','$email','$pasword','$phone','$dob','$countryId','$stateId')";
+	values('$UserId','$Surname','$First_Name','$gender','$email','$hashedPassword','$phone','$dob','$countryId','$stateId')";
 
 
 		$smc = sqlsrv_query($conn, $sql);
@@ -66,7 +67,8 @@ if (isset($_POST['Submit'])) {
 		//give information if the data is successful or not.
 
 		if ($smc === false) {
-			echo " <font color='black'><em> data not successfully upload</em></font><br/>";
+			$error_message = array("error" => "data not successfully upload");
+			echo json_encode($error_message);
 			die(print_r(sqlsrv_errors(), true));
 		} else {
 			$response = array('UserId' => $UserId);

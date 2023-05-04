@@ -967,7 +967,7 @@ session_start();
                     var response = JSON.parse(data);
                     if (response.UserId) {
                         alert("Registration Successful");
-                        alert("Your UserId is, please keep it properly:" .response.UserId);
+                        alert("Your UserId is, please keep it properly: " + response.UserId);
                         window.location.href = "user_profile.php?UserId=" + response.UserId;
                     } else {
                         alert("Issue while creating account");
