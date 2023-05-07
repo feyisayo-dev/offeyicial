@@ -1,7 +1,9 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-  header('Location: login.php');
+
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+  $UserId = $_SESSION["UserId"];
+  header("Location: user_profile.php?UserId=" . $UserId);
   exit();
 }
 ?>

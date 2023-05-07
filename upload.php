@@ -1,7 +1,9 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-  header('Location: login.php');
+
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+  $UserId = $_SESSION["UserId"];
+  header("Location: user_profile.php?UserId=" . $UserId);
   exit();
 }
 ?>
@@ -282,14 +284,14 @@ $UserId = $_SESSION['UserId'];
 </body>
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-
+<!-- name of the files -->
 <script>
   $('.custom-file-input').on('change', function() {
     var fileName = $(this).val().split('\\').pop();
     $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
   });
 </script>
-
+ <!-- uploading a post  -->
 <script>
   $(document).ready(function() {
     $('.submit').click(function() {
@@ -352,6 +354,7 @@ $UserId = $_SESSION['UserId'];
     });
   });
 </script>
+<!-- script for searching -->
 <script>
   const searchBox = document.getElementById('search');
   const resultsDiv = document.getElementById('user_table');

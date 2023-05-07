@@ -1,12 +1,14 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-  header('Location: login.php');
+
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+  $UserId = $_SESSION["UserId"];
+  header("Location: user_profile.php?UserId=" . $UserId);
   exit();
 }
 ?>
 <?php
-include('db.php');
+include 'db.php';
 $UserId = $_SESSION['UserId'];
 // Get the surname and first name of the user with the UserId from the database
 $rsql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
@@ -34,9 +36,9 @@ if (sqlsrv_execute($rstmt)) {
   <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="css/remixicon/remixicon.css" rel="stylesheet">
   <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
   <script src="js/popper.min.js"></script>
   <!-- Bootstrap core JavaScript -->
-  <script src="js/bootstrap.min.js"></script>
   <script src="js/twemoji.min.js"></script>
 
 
@@ -262,6 +264,21 @@ if (sqlsrv_execute($rstmt)) {
       color: white;
     }
 
+    .call-icon {
+      float: right;
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+      margin-right: 30px;
+    }
+
+    .call-icon:hover {
+      transform: scale(1.05);
+      color: white;
+    }
+
     .navbar form {
       display: inline-block;
       margin-left: 20px;
@@ -345,8 +362,8 @@ if (sqlsrv_execute($rstmt)) {
     /* Chat button */
     button[data-bs-target="#sidebar"] {
       position: absolute;
-      top: 50px;
-      right: 30px;
+      top: 60px;
+      right: 300px;
       z-index: 9999;
       background-color: #04AA6D;
       color: #fff;
@@ -665,7 +682,7 @@ if (sqlsrv_execute($rstmt)) {
       // session_start();
 
       // Connect to the database
-      include('db.php');
+      include 'db.php';
 
       $UserId = $_SESSION['UserId'];
 
@@ -700,7 +717,7 @@ if (sqlsrv_execute($rstmt)) {
     <div class="chat-header">
       <h1>
         <?php
-        include('db.php');
+        include 'db.php';
 
         // Get the UserId of the user you are talking to
         $recipientId = $_GET['UserIdx'];
@@ -733,6 +750,7 @@ if (sqlsrv_execute($rstmt)) {
           }
           echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
           echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
+          echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
         }
         echo '</div>';
         ?>
@@ -876,6 +894,7 @@ if (sqlsrv_execute($rstmt)) {
 
 
         <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
         <script>
           var sidebarToggle = document.getElementById('sidebar-toggle');
 
@@ -967,10 +986,8 @@ if (sqlsrv_execute($rstmt)) {
           function previewImage() {
             // Get the selected file
             var file = document.getElementById('image').files[0];
-
             // Create a FileReader object
             var reader = new FileReader();
-
             // Set the image source when the file is loaded
             reader.onload = function(e) {
               var imgModal = document.getElementById('image-modal');
@@ -978,11 +995,9 @@ if (sqlsrv_execute($rstmt)) {
               imgPreview.src = e.target.result;
               imgModal.style.display = "block";
             }
-
             // Load the file as a data URL
             reader.readAsDataURL(file);
           }
-
 
           function previewVideo() {
             let fileInput = document.querySelector('.video-input');
@@ -990,9 +1005,7 @@ if (sqlsrv_execute($rstmt)) {
             let videoPreview = document.querySelector('#video-preview');
             let videoModal = document.querySelector('#video-modal');
             let closeModal = videoModal.querySelector('.close');
-
             let reader = new FileReader();
-
             reader.addEventListener('load', function() {
               videoPreview.src = reader.result;
               videoModal.style.display = 'block';
@@ -1001,16 +1014,12 @@ if (sqlsrv_execute($rstmt)) {
             if (file) {
               reader.readAsDataURL(file);
             }
-
             closeModal.addEventListener('click', function() {
               videoModal.style.display = 'none';
               videoPreview.src = '';
             });
           }
-
           $(document).ready(function() {
-
-
             // Send the message
             $('.submit').click(function() {
               var message = $('#message').val();
@@ -1018,14 +1027,12 @@ if (sqlsrv_execute($rstmt)) {
               var UserId = '<?php echo $UserId; ?>';
               var recipientId = '<?php echo $_GET['UserIdx']; ?>';
               var video = $('#video').prop('files')[0];
-
               var formData = new FormData();
               formData.append('message', message);
               formData.append('image', image);
               formData.append('UserId', UserId);
               formData.append('recipientId', recipientId);
               formData.append('video', video);
-
               // Send the AJAX request
               $.ajax({
                 url: 'send_message.php',
@@ -1036,8 +1043,6 @@ if (sqlsrv_execute($rstmt)) {
                 success: function(response) {
                   console.log(response);
                   $('#message').val('');
-
-
                 }
               });
             });
@@ -1049,8 +1054,6 @@ if (sqlsrv_execute($rstmt)) {
               var value = $(this).val().toLowerCase();
               if (value === "") {
                 // Clear the table if the search box is empty
-                //   $('#user_table').val('');
-
                 $("#user_table").html("");
               } else {
                 // Run the search function if the search box is not empty
@@ -1064,16 +1067,13 @@ if (sqlsrv_execute($rstmt)) {
         <script>
           const searchBox = document.getElementById('search');
           const resultsDiv = document.getElementById('user_table');
-
           searchBox.addEventListener('input', function() {
             const searchTerm = this.value;
-
             // Clear the results if the search box is empty
             if (!searchTerm.trim()) {
               resultsDiv.innerHTML = '';
               return;
             }
-
             // Your search function here
             $("#search").on("keyup", function() {
               var search_query = $(this).val();
@@ -1091,7 +1091,59 @@ if (sqlsrv_execute($rstmt)) {
             });
           });
         </script>
+        <!-- <script>
+          $(document).ready(function() {
+            $('#callbtn').click(function() {
+              $.ajax({
+                url: 'call.php',
+                success: function(response) {
+                  // display response in modal window
+                },
+                error: function() {
+                  alert('Error calling server');
+                }
+              });
+            });
+          });
+        </script> -->
+        <script>
+          var recipientId = "<?php echo $recipientId ?>"
+          $(document).ready(function() {
+            $('#callbtn').click(function() {
+              // alert('how are you');
+              $.ajax({
+                url: 'call.php?UserIdx=' + recipientId,
+                success: function(response) {
+                  console.log(response);
+                  $('#call-modal .modal-body').html(response);
+                  $('#call-modal').modal('show'); // use Bootstrap modal function to show the modal
 
+                },
+                error: function() {
+                  console.log();
+                  alert('Error calling server');
+                }
+              });
+            });
+          });
+        </script>
+
+        <div class="modal fade" id="call-modal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <img class="recipientPassportmodal" style="border-radius: 50%; width: 50px; height: 50px; margin: 10px;" src="<?php echo $recipientPassport; ?>">
+                <h4 class="modal-title">
+                  <?php echo $recipientSurname . ' ' . $recipientFirstName; ?>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              <div class="modal-body">
+                <!-- response from call.php will be displayed here -->
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Modal -->
         <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
@@ -1103,8 +1155,7 @@ if (sqlsrv_execute($rstmt)) {
               </div>
               <div class="modal-body">
                 <?php
-                include('db.php');
-
+                include 'db.php';
                 // Get the UserId of the user you are talking to
                 $recipientId = $_GET['UserIdx'];
                 // Fetch the passport image
@@ -1122,7 +1173,6 @@ if (sqlsrv_execute($rstmt)) {
                   $passportImage = "UserPassport/" . $Passport;
                 }
                 echo '<img id="modalImg" src="' . $passportImage . '">';
-
 
                 ?>
 
