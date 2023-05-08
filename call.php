@@ -39,7 +39,6 @@ if (sqlsrv_execute($stmt)) {
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
-    <!-- <script src="js/popper.min.js"></script> -->
     <!-- Bootstrap core JavaScript -->
     <link rel="stylesheet" href="css/owl.carousel.min.css">
     <link rel="stylesheet" href="css/owl.theme.default.min.css">
@@ -128,7 +127,7 @@ if (sqlsrv_execute($stmt)) {
             <div id="remote_video"></div>
             <div class="row">
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="callTypeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="callTypeDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Select call type
                     </button>
                     <div class="dropdown-menu" aria-labelledby="callTypeDropdown">
@@ -150,6 +149,7 @@ if (sqlsrv_execute($stmt)) {
     <script src="js/bootstrap.min.js"></script>
     <script src="js/slim.min.js"></script>
     <script src="js/dexie.min.js"></script>
+    <script src="js/popper.min.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/adapter-latest.js"></script>
     <!-- <script src="js/index.umd.js"></script> -->
@@ -222,7 +222,12 @@ if (sqlsrv_execute($stmt)) {
                     });
             }
         });
+
+        $('#callTypeDropdown').on('click', function() {
+            $('#callTypeDropdown').dropdown('toggle');
+        });
     </script>
+
 </body>
 
 </html>
