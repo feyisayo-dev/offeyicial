@@ -30,55 +30,68 @@ if (sqlsrv_execute($stmt)) {
 
 <head>
     <title>Video Call</title>
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/font/bootstrap-icons.css">
+    <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
+    <link href="css/aos.css" rel="stylesheet">
+    <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/remixicon/remixicon.css" rel="stylesheet">
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <!-- <script src="js/popper.min.js"></script> -->
+    <!-- Bootstrap core JavaScript -->
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <!-- <script src="js/owl.carousel.min.js"></script> -->
+
+    <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
+
     <style>
+        /* Call modal styles */
         .callmain {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-        }
-
-        #recipient_info {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-        }
-
-        #recipient_info h3 {
-            margin-top: 10px;
-            font-size: 1.2rem;
+            min-height: 50vh;
+            margin: 10px;
         }
 
         .callbody {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
         }
 
-        #local_video {
-            width: 300px;
-            height: 225px;
-            margin-bottom: 10px;
-        }
-
+        #local_video,
         #remote_video {
-            width: 300px;
-            height: 225px;
-            margin-bottom: 20px;
+            width: 100%;
+            height: 200px;
+            background-color: #333;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .dropdown-menu {
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .dropdown-menu a {
+            font-size: 16px;
         }
 
         #call_button,
         #hangup_button {
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            border-radius: 50%;
-            background-color: transparent;
-            border: none;
             margin: 10px;
-            cursor: pointer;
-            width: 50%;
-            position: relative;
+            font-size: 24px;
+            background-color: #ddd;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            transition: all 0.3s ease;
         }
 
         #call_button {
@@ -93,115 +106,122 @@ if (sqlsrv_execute($stmt)) {
         #hangup_button:hover {
             transform: scale(1.05);
         }
+
+        #call_button:hover,
+        #hangup_button:hover {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 576px) {
+            .callbody {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="callmain">
-        <!-- <div id="recipient_info">
-            <img class="recipientPassport" src="<?php echo $recipientPassport; ?>">
-            <h3><?php echo $recipientSurname . ' ' . $recipientFirstName; ?></h3>
-        </div> -->
         <div class="callbody">
             <div id="local_video"></div>
             <div id="remote_video"></div>
             <div class="row">
-                <button id="call_button"><i class="bi bi-telephone"></i></button>
-                <button id="hangup_button"><i class="bi bi-telephone"></i></button>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="callTypeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select call type
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="callTypeDropdown">
+                        <a class="dropdown-item" href="#" id="videoCallOption">Video Call</a>
+                        <a class="dropdown-item" href="#" id="audioCallOption">Audio Call</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="btn-group" role="group" aria-label="Call buttons">
+                        <button id="call_button" class="btn"><i class="bi bi-telephone"></i></button>
+                        <button id="hangup_button" class="btn"><i class="bi bi-telephone"></i></button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-
     <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/slim.min.js"></script>
+    <script src="js/dexie.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/adapter-latest.js"></script>
+    <!-- <script src="js/index.umd.js"></script> -->
+    <!-- <script>
+        $(document).ready(function() {
+            $('#callTypeDropdown').click(function() {
+                alert('Yes, button is clickable');
+            });
+        });
+    </script> -->
+
+
     <script>
         // initialize variables
-        var localStream, remoteStream, pc, isCaller;
+        var localStream, remoteStream, pc, isCaller, selectedCallType;
 
-        // get user media
-        navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: true
-            })
-            .then(function(stream) {
-                // save local stream
-                localStream = stream;
-                document.querySelector('#local_video').srcObject = localStream;
+        // get dropdown options and call button
+        var videoCallOption = document.querySelector('#videoCallOption');
+        var audioCallOption = document.querySelector('#audioCallOption');
+        var callButton = document.querySelector('#call_button');
 
-                // create peer connection
-                pc = new RTCPeerConnection();
+        // add event listeners to dropdown options
+        videoCallOption.addEventListener('click', function() {
+            selectedCallType = 'video';
+        });
 
-                // add local stream to peer connection
-                pc.addStream(localStream);
+        audioCallOption.addEventListener('click', function() {
+            selectedCallType = 'audio';
+        });
 
-                // listen for incoming ice candidates
-                pc.onicecandidate = function(event) {
-                    if (event.candidate) {
-                        sendMessage(JSON.stringify({
-                            'candidate': event.candidate
-                        }));
-                    }
-                };
+        // add event listener to call button
+        callButton.addEventListener('click', function() {
+            // get user media based on selected call type
+            if (selectedCallType === 'video') {
+                navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                        video: true
+                    })
+                    .then(function(stream) {
+                        // save local stream
+                        localStream = stream;
+                        document.querySelector('#local_video').srcObject = localStream;
 
-                // listen for incoming remote stream
-                pc.onaddstream = function(event) {
-                    document.querySelector('#remote_video').srcObject = event.stream;
-                };
+                        // create peer connection and add local stream
+                        pc = new RTCPeerConnection();
+                        pc.addStream(localStream);
 
-                // listen for hangup event
-                document.querySelector('#hangup_button').addEventListener('click', function() {
-                    pc.close();
-                    localStream.getTracks().forEach(function(track) {
-                        track.stop();
+                        // ...
+                    })
+                    .catch(function(error) {
+                        console.error(error);
                     });
-                    remoteStream.getTracks().forEach(function(track) {
-                        track.stop();
-                    });
-                });
+            } else if (selectedCallType === 'audio') {
+                navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                        video: false
+                    })
+                    .then(function(stream) {
+                        // save local stream
+                        localStream = stream;
 
-                // check if we are the caller or the callee
-                if (isCaller) {
-                    // create offer
-                    pc.createOffer().then(function(offer) {
-                        return pc.setLocalDescription(offer);
-                    }).then(function() {
-                        sendMessage(JSON.stringify({
-                            'sdp': pc.localDescription
-                        }));
-                    });
-                } else {
-                    // listen for incoming offer
-                    pc.ondatachannel = function(event) {
-                        var channel = event.channel;
-                        channel.onmessage = function(event) {
-                            var message = JSON.parse(event.data);
-                            if (message.sdp) {
-                                pc.setRemoteDescription(new RTCSessionDescription(message.sdp)).then(function() {
-                                    if (pc.remoteDescription.type == 'offer') {
-                                        pc.createAnswer().then(function(answer) {
-                                            return pc.setLocalDescription(answer);
-                                        }).then(function() {
-                                            sendMessage(JSON.stringify({
-                                                'sdp': pc.localDescription
-                                            }));
-                                        });
-                                    }
-                                });
-                            } else if (message.candidate) {
-                                pc.addIceCandidate(new RTCIceCandidate(message.candidate));
-                            }
-                        };
-                    };
-                }
-            })
-            .catch(function(error) {
-                console.error(error);
-            });
+                        // create peer connection and add local stream
+                        pc = new RTCPeerConnection();
+                        pc.addStream(localStream);
 
-        // send message using websockets
-        function sendMessage(message) {
-            // code to send message using websockets
-        }
+                        // ...
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
+            }
+        });
     </script>
 </body>
 

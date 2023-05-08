@@ -364,7 +364,7 @@ if (sqlsrv_execute($rstmt)) {
       position: absolute;
       top: 60px;
       right: 300px;
-      z-index: 9999;
+      z-index: 999;
       background-color: #04AA6D;
       color: #fff;
       border: none;
