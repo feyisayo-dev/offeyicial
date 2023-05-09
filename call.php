@@ -223,9 +223,9 @@ if (sqlsrv_execute($stmt)) {
             }
         });
 
-        $('#callTypeDropdown').on('click', function() {
-            $('#callTypeDropdown').dropdown('toggle');
-        });
+        // $('#callTypeDropdown').on('click', function() {
+        //     $('#callTypeDropdown').dropdown('toggle');
+        // });
     </script>
 
 </body>

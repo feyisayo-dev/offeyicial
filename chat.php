@@ -668,6 +668,14 @@ if (sqlsrv_execute($rstmt)) {
         margin-bottom: 5px;
       }
     }
+
+    .call-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+    }
   </style>
 </head>
 
@@ -1091,33 +1099,33 @@ if (sqlsrv_execute($rstmt)) {
             });
           });
         </script>
-        <!-- <script>
-          $(document).ready(function() {
-            $('#callbtn').click(function() {
-              $.ajax({
-                url: 'call.php',
-                success: function(response) {
-                  // display response in modal window
-                },
-                error: function() {
-                  alert('Error calling server');
-                }
-              });
-            });
-          });
-        </script> -->
+
         <script>
           var recipientId = "<?php echo $recipientId ?>"
           $(document).ready(function() {
             $('#callbtn').click(function() {
-              // alert('how are you');
               $.ajax({
                 url: 'call.php?UserIdx=' + recipientId,
                 success: function(response) {
-                  console.log(response);
+                  // Load the call.php page in the modal
                   $('#call-modal .modal-body').html(response);
-                  $('#call-modal').modal('show'); // use Bootstrap modal function to show the modal
-
+                  // Show the modal
+                  $('#call-modal').modal('show');
+                  // Move the document ready function inside the success callback
+                  $('#call-modal').find('#callbtn').click(function() {
+                    // alert('how are you');
+                    $.ajax({
+                      url: 'call.php?UserIdx=' + recipientId,
+                      success: function(response) {
+                        // console.log(response);
+                        $('#call-modal .modal-body').html(response);
+                      },
+                      error: function() {
+                        console.log();
+                        alert('Error calling server');
+                      }
+                    });
+                  });
                 },
                 error: function() {
                   console.log();
@@ -1127,16 +1135,25 @@ if (sqlsrv_execute($rstmt)) {
             });
           });
         </script>
+        <script>
+          $('#call-modal').on('hide.bs.modal', function(e) {
+            if (!confirm('Are you sure you want to leave the call?')) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }
+          });
+        </script>
 
-        <div class="modal fade" id="call-modal">
-          <div class="modal-dialog">
+        <!-- Call modal -->
+        <div class="modal fade call-modal" id="call-modal" tabindex="-1" role="dialog" aria-labelledby="call-modal-label" aria-hidden="true">
+          <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <img class="recipientPassportmodal" style="border-radius: 50%; width: 50px; height: 50px; margin: 10px;" src="<?php echo $recipientPassport; ?>">
                 <h4 class="modal-title">
                   <?php echo $recipientSurname . ' ' . $recipientFirstName; ?>
                 </h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
                 <!-- response from call.php will be displayed here -->
@@ -1144,6 +1161,7 @@ if (sqlsrv_execute($rstmt)) {
             </div>
           </div>
         </div>
+
         <!-- Modal -->
         <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
