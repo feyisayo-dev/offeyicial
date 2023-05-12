@@ -1107,51 +1107,41 @@ if (sqlsrv_execute($rstmt)) {
               $.ajax({
                 url: 'call.php?UserIdx=' + recipientId,
                 success: function(response) {
-                  // Load the call.php page in the modal
                   $('#call-modal .modal-body').html(response);
-                  // Show the modal
                   $('#call-modal').modal('show');
-                  // Move the document ready function inside the success callback
                   $('#call-modal').find('#callbtn').click(function() {
-                    // alert('how are you');
                     $.ajax({
                       url: 'call.php?UserIdx=' + recipientId,
                       success: function(response) {
-                        // console.log(response);
                         $('#call-modal .modal-body').html(response);
                       },
                       error: function() {
-                        console.log();
                         alert('Error calling server');
                       }
                     });
                   });
+                  $('#call-modal').on('hide.bs.modal', function(e) {
+                    if (!confirm('Are you sure you want to leave the call?')) {
+                      e.preventDefault();
+                      e.stopImmediatePropagation();
+                    }
+                  });
                 },
                 error: function() {
-                  console.log();
                   alert('Error calling server');
                 }
               });
             });
           });
         </script>
-        <script>
-          $('#call-modal').on('hide.bs.modal', function(e) {
-            if (!confirm('Are you sure you want to leave the call?')) {
-              e.preventDefault();
-              e.stopImmediatePropagation();
-            }
-          });
-        </script>
 
         <!-- Call modal -->
-        <div class="modal fade call-modal" id="call-modal" tabindex="-1" role="dialog" aria-labelledby="call-modal-label" aria-hidden="true">
+        <div class="modal fade" id="call-modal" tabindex="-1" role="dialog" aria-labelledby="call-modal-label" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <img class="recipientPassportmodal" style="border-radius: 50%; width: 50px; height: 50px; margin: 10px;" src="<?php echo $recipientPassport; ?>">
                 <h4 class="modal-title">
-                  <?php echo $recipientSurname . ' ' . $recipientFirstName; ?>
+                  Call
                 </h4>
                 <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
               </div>
