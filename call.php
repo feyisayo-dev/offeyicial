@@ -261,7 +261,7 @@ if (sqlsrv_execute($stmt)) {
         <script src="js/bootstrap.bundle.min.js"></script>
         <script src="js/adapter-latest.js"></script>
         <script src="node_modules/simplewebrtc/simplewebrtc.bundle.js"></script>
-        <script src="node_modules/simplewebrtc/simplewebrtc.js"></script>
+        <!-- <script src="node_modules/simplewebrtc/simplewebrtc.js"></script> -->
 
         <script>
             // Initialize the SimpleWebRTC object
