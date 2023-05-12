@@ -264,19 +264,6 @@ if (sqlsrv_execute($stmt)) {
         <script src="node_modules/simplewebrtc/simplewebrtc.js"></script>
 
         <script>
-            // var callTime = document.querySelector('#call_timer');
-            // var startTime = Date.now();
-
-            // function updateCallTime() {
-            //     var elapsedTime = Math.floor((Date.now() - startTime) / 1000); // calculate elapsed time in seconds
-            //     var minutes = Math.floor(elapsedTime / 60);
-            //     var seconds = elapsedTime % 60;
-            //     callTime.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds; // format time as mm:ss
-            // }
-
-            // setInterval(updateCallTime, 1000); // call updateCallTime every second
-
-
             // Initialize the SimpleWebRTC object
             var webrtc = new SimpleWebRTC({
                 // the id/element dom element that will hold "our" video
