@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "simplewebrtc": "^1.19.1"
+    "simplewebrtc": "^3.0.2"
   }
 }
