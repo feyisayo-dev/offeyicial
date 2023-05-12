@@ -132,6 +132,7 @@ if (sqlsrv_execute($stmt)) {
                 max-width: 100%;
             }
         }
+
         .info-container .status {
             font-size: 18px;
             color: #777;
@@ -180,411 +181,183 @@ if (sqlsrv_execute($stmt)) {
 
 <body>
     <div class="callmain">
-    <div class="info-container">
-                <?php
-                // Connect to the database
-                include 'db.php';
+        <div class="info-container">
+            <?php
+            // Connect to the database
+            include 'db.php';
 
-                $UserId = $_SESSION['UserId'];
+            $UserId = $_SESSION['UserId'];
 
-                // Get the surname and first name of the user with the UserId from the database
-                $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
-                $stmt = sqlsrv_prepare($conn, $sql);
-                if (sqlsrv_execute($stmt)) {
-                    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                        $Surname = $row['Surname'];
-                        $First_Name = $row['First_Name'];
+            // Get the surname and first name of the user with the UserId from the database
+            $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+            $stmt = sqlsrv_prepare($conn, $sql);
+            if (sqlsrv_execute($stmt)) {
+                while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                    $Surname = $row['Surname'];
+                    $First_Name = $row['First_Name'];
+                }
+            }
+
+            // Get the UserId of the user you are talking to
+            $recipientId = $_GET['UserIdx'];
+
+            // Get the name of the user you are talking to
+            $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+            $stmt = sqlsrv_prepare($conn, $sql);
+            if (sqlsrv_execute($stmt)) {
+                while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                    $recipientSurname = $row['Surname'];
+                    $recipientFirstName = $row['First_Name'];
+                    $Passport = $row['Passport'];
+                    if (empty($Passport)) {
+                        $recipientPassport = "UserPassport/DefaultImage.png";
+                    } else {
+                        $recipientPassport = "UserPassport/" . $Passport;
                     }
                 }
-
-                // Get the UserId of the user you are talking to
-                $recipientId = $_GET['UserIdx'];
-
-                // Get the name of the user you are talking to
-                $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-                $stmt = sqlsrv_prepare($conn, $sql);
-                if (sqlsrv_execute($stmt)) {
-                    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                        $recipientSurname = $row['Surname'];
-                        $recipientFirstName = $row['First_Name'];
-                        $Passport = $row['Passport'];
-                        if (empty($Passport)) {
-                            $recipientPassport = "UserPassport/DefaultImage.png";
-                        } else {
-                            $recipientPassport = "UserPassport/" . $Passport;
-                        }
-                    }
-                }
-                ?>
-                <div class="name-avatar-container">
-                    <div class="avatar-container">
-                        <img class="avatar" src="<?php echo $recipientPassport; ?>" alt="">
-                    </div>
-                    <div class="name-container">
-                        <div class="name"><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></div>
-                        <div class="status">Calling...</div>
-                    </div>
+            }
+            ?>
+            <div class="name-avatar-container">
+                <div class="avatar-container">
+                    <img class="avatar" src="<?php echo $recipientPassport; ?>" alt="">
                 </div>
-        <div class="callbody">
-            <div class="row">
-                <div class="col">
-                    <button id="video_call_button" class="btn btn-primary"><i class="bi bi-camera-video"></i> Video Call</button>
-                </div>
-                <div class="col">
-                    <button id="audio_call_button" class="btn btn-secondary"><i class="bi bi-mic"></i> Audio Call</button>
+                <div class="name-container">
+                    <div class="name"><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></div>
+                    <div class="status">Calling...</div>
                 </div>
             </div>
-            <hr>
-            <div id="local_video"></div>
-            <div id="remote_video"></div>
-            <div class="row">
-                <div class="btn-group" role="group" aria-label="Call buttons">
-                    <button id="call_button" class="btn btn-success"><i class="bi bi-telephone"></i> Call</button>
-                    <button id="hangup_button" class="btn btn-danger"><i class="bi bi-telephone-x"></i> Hang Up</button>
+            <div class="callbody">
+                <div class="row">
+                    <div class="col">
+                        <button id="video_call_button" class="btn btn-primary"><i class="bi bi-camera-video"></i> Video Call</button>
+                    </div>
+                    <div class="col">
+                        <button id="audio_call_button" class="btn btn-secondary"><i class="bi bi-mic"></i> Audio Call</button>
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <p id="call_timer">00:00:00</p>
+                <hr>
+                <div id="local_video"></div>
+                <div id="remote_video"></div>
+                <div class="row">
+                    <div class="btn-group" role="group" aria-label="Call buttons">
+                        <button id="call_button" class="btn btn-success"><i class="bi bi-telephone"></i> Call</button>
+                        <button id="hangup_button" class="btn btn-danger"><i class="bi bi-telephone-x"></i> Hang Up</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p id="call_timer">00:00:00</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
-    <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/slim.min.js"></script>
-    <script src="js/dexie.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="js/adapter-latest.js"></script>
-    <script src="js/socket.io.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/slim.min.js"></script>
+        <script src="js/dexie.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script src="js/adapter-latest.js"></script>
+        <script src="node_modules/simplewebrtc/simplewebrtc.bundle.js"></script>
+        <script src="node_modules/simplewebrtc/simplewebrtc.js"></script>
+
+        <script>
+            // var callTime = document.querySelector('#call_timer');
+            // var startTime = Date.now();
+
+            // function updateCallTime() {
+            //     var elapsedTime = Math.floor((Date.now() - startTime) / 1000); // calculate elapsed time in seconds
+            //     var minutes = Math.floor(elapsedTime / 60);
+            //     var seconds = elapsedTime % 60;
+            //     callTime.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds; // format time as mm:ss
+            // }
+
+            // setInterval(updateCallTime, 1000); // call updateCallTime every second
 
 
-    <script>
-        // initialize variables
-        // var socket = io();
-        var localStream, remoteStream, pc, isCaller, selectedCallType;
-        var startTime, timerInterval;
-        const WebSocket = require('ws');
-        const server = new WebSocket.Server({
-            port: 5050
-        });
-
-        var ws = new WebSocket('ws://localhost:5050');
-
-        // get dropdown options and call button
-        var videoCallOption = document.querySelector('#video_call_button');
-        var audioCallOption = document.querySelector('#audio_call_button');
-        var callButton = document.querySelector('#call_button');
-        var callTime = document.querySelector('#call_timer');
-        var startTime = Date.now();
-
-        function updateCallTime() {
-            var elapsedTime = Math.floor((Date.now() - startTime) / 1000); // calculate elapsed time in seconds
-            var minutes = Math.floor(elapsedTime / 60);
-            var seconds = elapsedTime % 60;
-            callTime.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds; // format time as mm:ss
-        }
-
-        setInterval(updateCallTime, 1000); // call updateCallTime every second
-
-
-        // add event listeners to dropdown options
-        videoCallOption.addEventListener('click', function() {
-            selectedCallType = 'video';
-            document.querySelector('#local_video').style.display = 'block';
-            document.querySelector('#remote_video').style.display = 'block';
-            callTime.style.display = 'none';
-        });
-
-        audioCallOption.addEventListener('click', function() {
-            selectedCallType = 'audio';
-            document.querySelector('#local_video').style.display = 'none';
-            document.querySelector('#remote_video').style.display = 'none';
-            callTime.style.display = 'block';
-        });
-
-        // add event listener to call button
-        callButton.addEventListener('click', function() {
-            // get user media based on selected call type
-            if (selectedCallType === 'video') {
-                navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                        video: true
-                    })
-                    .then(function(stream) {
-                        // save local stream
-                        localStream = stream;
-                        document.querySelector('#local_video').srcObject = localStream;
-
-                        // create peer connection and add local stream
-                        pc = new RTCPeerConnection();
-                        pc.addStream(localStream);
-
-                        // create offer SDP message
-                        pc.createOffer().then((offer) => {
-                            // set local description
-                            pc.setLocalDescription(offer).then(() => {
-                                // send offer to signaling server
-                                const message = {
-                                    type: 'offer',
-                                    sdp: offer.sdp
-                                };
-                                ws.send(JSON.stringify(message));
-                            });
-                        });
-
-                        // handle incoming messages from signaling server
-                        ws.onmessage = (event) => {
-                            const message = JSON.parse(event.data);
-                            if (message.type === 'answer') {
-                                // set remote description
-                                const answer = new RTCSessionDescription({
-                                    type: 'answer',
-                                    sdp: message.sdp
-                                });
-                                pc.setRemoteDescription(answer);
-                            } else if (message.type === 'candidate') {
-                                // add ICE candidate to PeerConnection object
-                                const candidate = new RTCIceCandidate({
-                                    candidate: message.candidate,
-                                    sdpMLineIndex: message.label,
-                                    sdpMid: message.id
-                                });
-                                pc.addIceCandidate(candidate);
-                            }
-                        };
-
-                        // handle ICE candidate events
-                        pc.onicecandidate = (event) => {
-                            if (event.candidate) {
-                                // send ICE candidate to signaling server
-                                const message = {
-                                    type: 'candidate',
-                                    label: event.candidate.sdpMLineIndex,
-                                    id: event.candidate.sdpMid,
-                                    candidate: event.candidate.candidate
-                                };
-                                ws.send(JSON.stringify(message));
-                            }
-                        };
-                    })
-                    .catch(function(error) {
-                        console.error(error);
-                    });
-            } else if (selectedCallType === 'audio') {
-                navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                        video: false
-                    })
-                    .then(function(stream) {
-                        // save local stream
-                        localStream = stream;
-
-                        // create peer connection and add local stream
-                        pc = new RTCPeerConnection();
-                        pc.addStream(localStream);
-
-                        // start timer
-                        startTime = new Date().getTime();
-
-                        // create offer and set local description
-                        pc.createOffer({
-                            offerToReceiveAudio: 1,
-                            offerToReceiveVideo: 0
-                        }).then(function(offer) {
-                            pc.setLocalDescription(new RTCSessionDescription(offer));
-
-                            // send offer to remote peer
-                            socket.emit('offer', {
-                                offer: offer,
-                                to: callToUsername,
-                                from: username
-                            });
-                        });
-                    })
-                    .catch(function(error) {
-                        console.log('Error getting user media: ' + error);
-                    });
-            }
-        });
-        // listen for incoming calls
-        socket.on('call', function(data) {
-            // save remote username
-            callFromUsername = data.from;
-
-            // show incoming call modal
-            $('#incomingCallModal').modal('show');
-
-            // play ringtone sound
-            ringtone.play();
-
-            // set call type to video or audio
-            selectedCallType = data.callType;
-
-            // accept call when user clicks on accept button
-            $('#acceptCallBtn').click(function() {
-                // stop ringtone sound
-                ringtone.pause();
-                ringtone.currentTime = 0;
-
-                // hide incoming call modal
-                $('#incomingCallModal').modal('hide');
-
-                // save remote stream
-                remoteStream = new MediaStream();
-
-                // create peer connection and add remote stream
-                pc = new RTCPeerConnection();
-                pc.addStream(remoteStream);
-
-                // answer call and set local description
-                pc.setRemoteDescription(new RTCSessionDescription(data.offer))
-                    .then(function() {
-                        return navigator.mediaDevices.getUserMedia({
-                            audio: selectedCallType === 'audio',
-                            video: selectedCallType === 'video'
-                        });
-                    })
-                    .then(function(stream) {
-                        // save local stream
-                        localStream = stream;
-
-                        // add local stream to peer connection
-                        pc.addStream(localStream);
-
-                        // create answer and set local description
-                        return pc.createAnswer({
-                            offerToReceiveAudio: 1,
-                            offerToReceiveVideo: selectedCallType === 'video' ? 1 : 0
-                        });
-                    })
-                    .then(function(answer) {
-                        pc.setLocalDescription(new RTCSessionDescription(answer));
-
-                        // send answer to remote peer
-                        socket.emit('answer', {
-                            answer: answer,
-                            to: callFromUsername,
-                            from: username
-                        });
-                    })
-                    .catch(function(error) {
-                        console.log('Error answering call: ' + error);
-                    });
+            // Initialize the SimpleWebRTC object
+            var webrtc = new SimpleWebRTC({
+                // the id/element dom element that will hold "our" video
+                localVideoEl: 'local_video',
+                // the id/element dom element that will hold remote videos
+                remoteVideosEl: 'remote_video',
+                // immediately ask for camera access
+                autoRequestMedia: true,
+                // URL of the signaling server
+                url: 'http://localhost:8080',
+                // enable/disable peer-to-peer mode
+                enableDataChannels: true,
+                // additional ICE servers can be added here
+                // iceServers: [{url:'stun:stun.l.google.com:19302'}],
+                // Set the nick name for the user
+                nick: '<?php echo $First_Name . ' ' . $Surname; ?>'
             });
 
-            // reject call when user clicks on reject button
-            $('#rejectCallBtn').click(function() {
-                // stop ringtone sound
-                ringtone.pause();
-                ringtone.currentTime = 0;
 
-                // hide incoming call modal
-                $('#incomingCallModal').modal('hide');
 
-                // send busy signal to remote peer
-                socket.emit('busy', {
-                    to: callFromUsername,
-                    from: username
-                });
+
+
+            // Start the local video
+            webrtc.startLocalVideo();
+
+            // When the "video_call_button" is clicked
+            $('#video_call_button').click(function() {
+                // Show the local and remote video containers
+                $('#local_video').show();
+                $('#remote_video').show();
+
+                // Set the media constraints for audio and video
+                webrtc.config.media = {
+                    audio: true,
+                    video: true
+                };
+
+                // Join the video call
+                webrtc.joinRoom('<?php echo $recipientId; ?>');
+
+                // Set the status text
+                $('.status').text('In Video Call');
             });
-        });
 
-        // listen for answer from remote peer
-        socket.on('answer', function(data) {
-            // set remote description
-            pc.setRemoteDescription(new RTCSessionDescription(data.answer))
-                .catch(function(error) {
-                    console.log('Error setting remote description: ' + error);
-                });
-        });
+            // When the "audio_call_button" is clicked
+            $('#audio_call_button').click(function() {
+                // Hide the local and remote video containers
+                $('#local_video').hide();
+                $('#remote_video').hide();
 
-        // listen for busy signal from remote peer
-        socket.on('busy', function(data) {
-            // show busy signal modal
-            $('#busySignalModal').modal('show');
+                // Set the media constraints for audio only
+                webrtc.config.media = {
+                    audio: true,
+                    video: false
+                };
 
-            // stop ringtone sound
-            ringtone.pause();
-            ringtone.currentTime = 0;
+                // Join the audio call
+                webrtc.joinRoom('<?php echo $recipientId; ?>');
 
-            // hide incoming call modal
-            $('#incomingCallModal').modal('hide');
-        });
-
-        // listen for ice candidates and add to peer connection
-        pc.onicecandidate = function(event) {
-            if (event.candidate) {
-                socket.emit('ice-candidate', {
-                    candidate: event.candidate,
-                    to: callTo,
-                    from: currentUser
-                });
-            }
-        };
-
-        // create offer and set as local description
-        pc.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: false
-        }).then(function(offer) {
-            pc.setLocalDescription(offer);
-            socket.emit('make-offer', {
-                offer: offer,
-                to: callTo,
-                from: currentUser
+                // Set the status text
+                $('.status').text('In Audio Call');
             });
-        });
 
-        // listen for offer from other user
-        socket.on('offer-made', function(data) {
-            // set call type to audio or video
-            selectedCallType = data.offer.sdp.indexOf('m=video') !== -1 ? 'video' : 'audio';
+            // When the "call_button" is clicked
+            $('#call_button').click(function() {
+                // Set the status text
+                $('.status').text('Calling...');
 
-            // save other user's socket id
-            otherSocketId = data.socketId;
-
-            // set remote description
-            pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-
-            // create answer and set as local description
-            pc.createAnswer({
-                offerToReceiveAudio: true,
-                offerToReceiveVideo: selectedCallType === 'video'
-            }).then(function(answer) {
-                pc.setLocalDescription(answer);
-                socket.emit('make-answer', {
-                    answer: answer,
-                    to: otherSocketId,
-                    from: currentUser
-                });
+                // Call the recipient
+                webrtc.call('<?php echo $recipientId; ?>');
             });
-        });
 
-        // listen for answer from other user
-        socket.on('answer-made', function(data) {
-            // set remote description
-            pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-        });
+            // When the "hangup_button" is clicked
+            $('#hangup_button').click(function() {
+                // End the call
+                webrtc.leaveRoom();
 
-        // listen for ice candidates from other user and add to peer connection
-        socket.on('ice-candidate', function(data) {
-            pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-        });
-
-        // when call is ended, hang up and reset variables
-        function hangUpCall() {
-            pc.close();
-            socket.emit('hang-up', {
-                to: otherSocketId,
-                from: currentUser
+                // Set the status text
+                $('.status').text('Call Ended');
             });
-            resetCallVariables();
-        }
-    </script>
+        </script>
 
 
 </body>
