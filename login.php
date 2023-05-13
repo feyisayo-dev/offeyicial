@@ -884,17 +884,17 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                 <div class="modal-body">
                     <div class="forgot-password-form">
                         <h2>Forgot Password</h2>
-                        <p>Please enter your email address below to receive a verification code to reset your password.</p>
+                        <p>Please enter your Phone number below to receive a verification code to reset your password.</p>
                         <div id="forgot-password-form">
-                            <label for="email">Email:</label>
-                            <input type="email" id="emailtosendto" name="email" required>
+                            <label for="phone">Phone number:</label>
+                            <input type="phone" id="phonenumbertosendto" name="phone" required>
                             <button type="button" class="verification" onclick="sendVerificationCode()">Send Code</button>
                         </div>
                     </div>
 
                     <div class="verify-code-form" style="display:none;">
                         <h2>Verify Code</h2>
-                        <p>Please enter the verification code you received in your email.</p>
+                        <p>Please enter the verification code you received in your phone.</p>
                         <div id="verify-code-form">
                             <label for="verification-code">Verification Code:</label>
                             <input type="text" id="verification-code" name="verification-code" required>
@@ -931,26 +931,27 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
 
 
 <script>
-    var userEmail = "";
+    var userPhone = "";
 
     function sendVerificationCode() {
         // Get the user's email address
-        const emailtosendto = $("#emailtosendto").val();
+        const phonenumbertosendto = $("#phonenumbertosendto").val();
 
         // Store the email in a variable
-        userEmail = emailtosendto;
+        userPhone = phonenumbertosendto;
 
         // Send a verification code to the user's email address using AJAX
         $.ajax({
             type: "POST",
             url: "send_verification_code.php",
             data: {
-                emailtosendto: emailtosendto
+                phonenumbertosendto: phonenumbertosendto
             },
             success: function(response) {
-                if (response === "success") {
+                console.log(response);
+                if (response === "successyes") {
                     // Show the verification code form
-                    alert("Your verification is your UserId, current year, firstname no spaces in between")
+                    // alert("Your verification is your UserId, current year, firstname no spaces in between")
                     $(".forgot-password-form").hide();
                     $(".verify-code-form").show();
                 } else {
@@ -989,7 +990,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         const confirmPassword = document.getElementById("confirm-password").value;
 
         // Use the stored email variable
-        const emailtosendto = userEmail;
+        const phonenumbertosendto = userPhone;
 
         // Check if the new password and confirm password match
         if (newPassword !== confirmPassword) {
@@ -1004,7 +1005,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             url: "updatepass.php",
             data: {
                 editpass: 1,
-                emailtosendto: emailtosendto,
+                phonenumbertosendto: phonenumbertosendto,
                 newPassword: newPassword,
             },
             success: function(response) {

@@ -1,91 +1,96 @@
 <?php
 session_start();
-
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+  // Redirect to login page
+  header("Location: login.php");
+  exit();
+}
 if (isset($_SESSION['UserId'])) {
-    // Get the user ID of the profile owner from the URL
-    $profileOwnerId = $_GET['UserId'];
-    $UserId = $_SESSION["UserId"];
-    include('db.php');
-    // echo $profileOwnerId;
-    // echo $UserId;
-    // Check if the user viewing the profile is the same as the profile owner
-    $isProfileOwner = ($UserId == $profileOwnerId);
+  // Get the user ID of the profile owner from the URL
+  $profileOwnerId = $_GET['UserId'];
+  $UserId = $_SESSION["UserId"];
+  include('db.php');
+  // echo $profileOwnerId;
+  // echo $UserId;
+  // Check if the user viewing the profile is the same as the profile owner
+  $isProfileOwner = ($UserId == $profileOwnerId);
 
-    // Query the database to get the user's profile information
-    // ...
-    $stmt = sqlsrv_prepare($conn, "SELECT [UserId], [Surname], [First_Name], [gender], [email], [Password], [phone], [dob], [countryId], [stateId], [Passport], [bio] FROM User_Profile WHERE UserId = ?", array(&$profileOwnerId));
+  // Query the database to get the user's profile information
+  // ...
+  $stmt = sqlsrv_prepare($conn, "SELECT [UserId], [Surname], [First_Name], [gender], [email], [Password], [phone], [dob], [countryId], [stateId], [Passport], [bio] FROM User_Profile WHERE UserId = ?", array(&$profileOwnerId));
 
-    if (!$stmt) {
-        die(print_r(sqlsrv_errors(), true)); // handle the error
-    }
+  if (!$stmt) {
+    die(print_r(sqlsrv_errors(), true)); // handle the error
+  }
 
-    // execute the prepared statement
-    $FetchStatement = sqlsrv_execute($stmt);
+  // execute the prepared statement
+  $FetchStatement = sqlsrv_execute($stmt);
 
-    // handle the result set
-    if ($FetchStatement === false) {
-        die(print_r(sqlsrv_errors(), true)); // handle the error
-    }
+  // handle the result set
+  if ($FetchStatement === false) {
+    die(print_r(sqlsrv_errors(), true)); // handle the error
+  }
 
-    // fetch the data from the result set
-    $record = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-    $Surname = $record['Surname'];
-    $First_Name = $record['First_Name'];
-    $gender = $record['gender'];
-    $email = $record['email'];
-    $Password = $record['Password'];
-    $phone = $record['phone'];
-    $dob = $record['dob'];
-    $countryId = $record['countryId'];
-    $stateId = $record['stateId'];
-    $Passport = $record['Passport'];
-    $bio = $record['bio'];
+  // fetch the data from the result set
+  $record = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+  $Surname = $record['Surname'];
+  $First_Name = $record['First_Name'];
+  $gender = $record['gender'];
+  $email = $record['email'];
+  $Password = $record['Password'];
+  $phone = $record['phone'];
+  $dob = $record['dob'];
+  $countryId = $record['countryId'];
+  $stateId = $record['stateId'];
+  $Passport = $record['Passport'];
+  $bio = $record['bio'];
 
-    if (empty($Passport)) {
-        $GetPassport = "UserPassport/DefaultImage.png";
-    } else {
-        $GetPassport = "UserPassport/" . $Passport;
-    }
-    if (empty($bio)) {
-        $getbio = "Not yet set";
-    } else {
-        $getbio = $bio;
-    }
-
-
-    $fetchPostsinfo = "SELECT TOP 100 PERCENT [UserId], [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
-
-    $fetchPosts = sqlsrv_query($conn, $fetchPostsinfo);
-    if ($fetchPosts === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
+  if (empty($Passport)) {
+    $GetPassport = "UserPassport/DefaultImage.png";
+  } else {
+    $GetPassport = "UserPassport/" . $Passport;
+  }
+  if (empty($bio)) {
+    $getbio = "Not yet set";
+  } else {
+    $getbio = $bio;
+  }
 
 
-    // Get the count of followers and following for the profile owner and recipient
-    $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE UserId = ?";
-    $params = array($profileOwnerId);
-    $stmt = sqlsrv_query($conn, $sql, $params);
-    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-    $followers = $row['num_followers'];
+  $fetchPostsinfo = "SELECT TOP 100 PERCENT [UserId], [PostId], [title], [content], [video], [image], [date_posted] FROM posts WHERE UserId='$profileOwnerId' ORDER BY date_posted DESC";
 
-    $sql = "SELECT COUNT(*) as num_following FROM follows WHERE recipientId = ?";
-    $params = array($profileOwnerId);
-    $stmt = sqlsrv_query($conn, $sql, $params);
-    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-    $following = $row['num_following'];
-    // Display the profile information
-
-    $sql = "SELECT * FROM follows WHERE UserId = ? AND recipientId = ?";
-    $params = array($profileOwnerId, $UserId);
-    $stmt = sqlsrv_query($conn, $sql, $params);
-    $isFollowing = sqlsrv_has_rows($stmt);
-
-    // If $isProfileOwner is true, display all the information
+  $fetchPosts = sqlsrv_query($conn, $fetchPostsinfo);
+  if ($fetchPosts === false) {
+    die(print_r(sqlsrv_errors(), true));
+  }
 
 
-    // Check if user ID is equal to profile owner ID
-    if ($UserId == $isProfileOwner) {
-        echo '<title>Profile ~ ' . $Surname . ' ' . $First_Name . '</title>
+  // Get the count of followers and following for the profile owner and recipient
+  $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE UserId = ?";
+  $params = array($profileOwnerId);
+  $stmt = sqlsrv_query($conn, $sql, $params);
+  $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+  $followers = $row['num_followers'];
+
+  $sql = "SELECT COUNT(*) as num_following FROM follows WHERE recipientId = ?";
+  $params = array($profileOwnerId);
+  $stmt = sqlsrv_query($conn, $sql, $params);
+  $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+  $following = $row['num_following'];
+  // Display the profile information
+
+  $sql = "SELECT * FROM follows WHERE UserId = ? AND recipientId = ?";
+  $params = array($profileOwnerId, $UserId);
+  $stmt = sqlsrv_query($conn, $sql, $params);
+  $isFollowing = sqlsrv_has_rows($stmt);
+
+  // If $isProfileOwner is true, display all the information
+
+
+  // Check if user ID is equal to profile owner ID
+  if ($UserId == $isProfileOwner) {
+    echo '<title>Profile ~ ' . $Surname . ' ' . $First_Name . '</title>
     <link rel="stylesheet" href="css/all.min.css" />
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
@@ -95,13 +100,13 @@ if (isset($_SESSION['UserId'])) {
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">';
-        echo '<script src="js/popper.min.js"></script>
+    echo '<script src="js/popper.min.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 ';
-        echo '<script src="country-states.js"></script>';
-        echo '<link rel="stylesheet" href="profile.css">';
-        echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    echo '<script src="country-states.js"></script>';
+    echo '<link rel="stylesheet" href="profile.css">';
+    echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -136,14 +141,14 @@ if (isset($_SESSION['UserId'])) {
     </div>
 </nav>';
 
-        // Display all information
-        echo '<div class="container-fluid profile-section">';
-        echo '<br><br><br>';
-        echo '<div class="row">';
-        echo '<div class="col-md-4 profile-pic">';
-        echo '<img src="' . $GetPassport . '" class="button" alt="Profile Picture">';
-        echo '<P>Enhance your online persona</P>';
-        echo '<form action="" method="POST" enctype="multipart/form-data">
+    // Display all information
+    echo '<div class="container-fluid profile-section">';
+    echo '<br><br><br>';
+    echo '<div class="row">';
+    echo '<div class="col-md-4 profile-pic">';
+    echo '<img src="' . $GetPassport . '" class="button" alt="Profile Picture">';
+    echo '<P>Enhance your online persona</P>';
+    echo '<form action="" method="POST" enctype="multipart/form-data">
         <label for="upload1" class="custom-file-upload">
           <i class="fa fa-cloud-upload"></i> Choose File
         </label>
@@ -154,27 +159,27 @@ if (isset($_SESSION['UserId'])) {
 
       </form>
       ';
-        echo '<hr>';
-        echo '</div>';
-        echo '<div class="col-md-4 profile-info">';
-        echo '<h2>' . $Surname . '  ' . $First_Name . '</h2>';
-        echo '<p>Email: ' . $email . '</p>';
-        echo '<p>Phone Number: ' . $phone . '</p>';
-        echo '<p>Gender: ' . $gender . '</p>';
-        echo '<p>Date of Birth: ' . $dob . '</p>';
-        echo '<p>Location ID: ' . $countryId . ' ' . $stateId . '</p>';
-        echo '<p>Bio: ' . $getbio . '</p>';
-        echo '<div class="row">';
-        echo '<div class="col-md-4">';
-        echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">Set Bio</button>';
-        echo '</div>';
-        echo '<div class="col-md-4">';
-        echo '<button type="button" style="background-color:red;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editprofile">Edit profile</button>';
-        echo '</div>';
-        echo '</div>';
+    echo '<hr>';
+    echo '</div>';
+    echo '<div class="col-md-4 profile-info">';
+    echo '<h2>' . $Surname . '  ' . $First_Name . '</h2>';
+    echo '<p>Email: ' . $email . '</p>';
+    echo '<p>Phone Number: ' . $phone . '</p>';
+    echo '<p>Gender: ' . $gender . '</p>';
+    echo '<p>Date of Birth: ' . $dob . '</p>';
+    echo '<p>Location ID: ' . $countryId . ' ' . $stateId . '</p>';
+    echo '<p>Bio: ' . $getbio . '</p>';
+    echo '<div class="row">';
+    echo '<div class="col-md-4">';
+    echo '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">Set Bio</button>';
+    echo '</div>';
+    echo '<div class="col-md-4">';
+    echo '<button type="button" style="background-color:red;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editprofile">Edit profile</button>';
+    echo '</div>';
+    echo '</div>';
 
-        echo '</div>';
-        echo '<div class="col-md-4">
+    echo '</div>';
+    echo '<div class="col-md-4">
     <div class="row">
       <div class="col-md-6">
         <p style="margin-bottom: 0;">' . $following . '</p>
@@ -186,51 +191,51 @@ if (isset($_SESSION['UserId'])) {
       </div>
     </div>
   </div>';
-        echo '</div>';
+    echo '</div>';
 
-        echo '<div class="container">
+    echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
             <div class="posts">';
-        while ($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
-            $PostId = $row['PostId'];
-            $title = $row['title'];
-            $content = $row['content'];
-            $video = $row['video'];
-            $image = $row['image'];
-            $date_posted = new DateTime($row['date_posted']);
-            $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-            $current_date = new DateTime();
-            $date_postedx = new DateTime($formatted_date);
-            $interval = $current_date->diff($date_postedx);
+    while ($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
+      $PostId = $row['PostId'];
+      $title = $row['title'];
+      $content = $row['content'];
+      $video = $row['video'];
+      $image = $row['image'];
+      $date_posted = new DateTime($row['date_posted']);
+      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+      $current_date = new DateTime();
+      $date_postedx = new DateTime($formatted_date);
+      $interval = $current_date->diff($date_postedx);
 
-            if ($interval->y) {
-                $time_ago = $interval->y . " years ago";
-            } else if ($interval->m) {
-                $time_ago = $interval->m . " months ago";
-            } else if ($interval->d) {
-                $time_ago = $interval->d . " days ago";
-            } else if ($interval->h) {
-                $time_ago = $interval->h . " hours ago";
-            } else if ($interval->i) {
-                $time_ago = $interval->i . " minutes ago";
-            } else {
-                $time_ago = $interval->s . " seconds ago";
-            }
+      if ($interval->y) {
+        $time_ago = $interval->y . " years ago";
+      } else if ($interval->m) {
+        $time_ago = $interval->m . " months ago";
+      } else if ($interval->d) {
+        $time_ago = $interval->d . " days ago";
+      } else if ($interval->h) {
+        $time_ago = $interval->h . " hours ago";
+      } else if ($interval->i) {
+        $time_ago = $interval->i . " minutes ago";
+      } else {
+        $time_ago = $interval->s . " seconds ago";
+      }
 
-            echo '<div class="post">';
-            if (!empty($title)) {
-                echo '<h3 class="title">' . $title . '</h3>';
-            }
-            echo '<div class="row">';
-            if (!empty($image)) {
-                echo '<div class="col-md-6">
+      echo '<div class="post">';
+      if (!empty($title)) {
+        echo '<h3 class="title">' . $title . '</h3>';
+      }
+      echo '<div class="row">';
+      if (!empty($image)) {
+        echo '<div class="col-md-6">
                     <img src="' . $image . '" class="img-fluid">
                 </div>';
-            }
-            if (!empty($video)) {
-                echo '<div class="video-container">
+      }
+      if (!empty($video)) {
+        echo '<div class="video-container">
                 <video id="myVideo" class="w-100">
                   <source src="' . $row["video"] . '" type="video/mp4">
                   Your browser does not support the video tag.
@@ -256,32 +261,32 @@ if (isset($_SESSION['UserId'])) {
               </div>
               
                     ';
-            }
-            echo '</div>';
-            if (!empty($content)) {
-                echo '<p>' . $content . '</p>';
-            }
-            if (!empty($time_ago)) {
-                echo '<p>' . $time_ago . '</p>';
-            }
-            echo '</div>';
-        }
-        echo '</div>
+      }
+      echo '</div>';
+      if (!empty($content)) {
+        echo '<p>' . $content . '</p>';
+      }
+      if (!empty($time_ago)) {
+        echo '<p>' . $time_ago . '</p>';
+      }
+      echo '</div>';
+    }
+    echo '</div>
         </div>
     </div>
 </div>';
-        echo '<div class="footer">';
+    echo '<div class="footer">';
 
 
-        // Retrieve all the chats of the current user
-        $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-        $stmt = sqlsrv_query($conn, $sql);
-        if ($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
-        }
+    // Retrieve all the chats of the current user
+    $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+    $stmt = sqlsrv_query($conn, $sql);
+    if ($stmt === false) {
+      die(print_r(sqlsrv_errors(), true));
+    }
 
-        // Display the chats in a list on the sidebar
-        echo '<!-- Button to open the sidebar -->
+    // Display the chats in a list on the sidebar
+    echo '<!-- Button to open the sidebar -->
 <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
     <i class="bi bi-chat"></i> Chats
 </button>
@@ -295,45 +300,45 @@ if (isset($_SESSION['UserId'])) {
     <div class="offcanvas-body">
         <ul class="list-unstyled">';
 
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $recipientId = $row['recipientId'];
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+      $recipientId = $row['recipientId'];
 
-            // Get the name of the recipient
-            $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-            $stmt2 = sqlsrv_query($conn, $sql2);
-            if ($stmt2 === false) {
-                die(print_r(sqlsrv_errors(), true));
-            }
+      // Get the name of the recipient
+      $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+      $stmt2 = sqlsrv_query($conn, $sql2);
+      if ($stmt2 === false) {
+        die(print_r(sqlsrv_errors(), true));
+      }
 
-            $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-            $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-            $Passport = $row2['Passport'];
-            if (empty($Passport)) {
-                $passportImage = "UserPassport/DefaultImage.png";
-            } else {
-                $passportImage = "UserPassport/" . $Passport;
-            }
+      $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+      $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+      $Passport = $row2['Passport'];
+      if (empty($Passport)) {
+        $passportImage = "UserPassport/DefaultImage.png";
+      } else {
+        $passportImage = "UserPassport/" . $Passport;
+      }
 
-            // Display the recipient name and passport image in the list
-            echo '<li>';
-            echo '<div class="passport">';
-            echo '<a>';
-            echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-            echo '</a>';
-            echo '</div>';
-            echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-            echo '</li>';
-        }
+      // Display the recipient name and passport image in the list
+      echo '<li>';
+      echo '<div class="passport">';
+      echo '<a>';
+      echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+      echo '</a>';
+      echo '</div>';
+      echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+      echo '</li>';
+    }
 
-        echo '</ul>
+    echo '</ul>
     </div>
 </div>';
 
-        echo '</div>';
-        // If $isProfileOwner is false, only display some of the information
-        // ...
-    } else {
-        echo '<title>Profile ~ ' . $Surname . ' ' . $First_Name . '</title>
+    echo '</div>';
+    // If $isProfileOwner is false, only display some of the information
+    // ...
+  } else {
+    echo '<title>Profile ~ ' . $Surname . ' ' . $First_Name . '</title>
     <link rel="stylesheet" href="css/all.min.css" />
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
@@ -345,9 +350,9 @@ if (isset($_SESSION['UserId'])) {
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">';
-        echo '<link rel="stylesheet" href="profile.css">';
-        echo '<script src="country-states.js"></script>';
-        echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    echo '<link rel="stylesheet" href="profile.css">';
+    echo '<script src="country-states.js"></script>';
+    echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -382,31 +387,31 @@ if (isset($_SESSION['UserId'])) {
     </div>
 </nav>';
 
-        // Display all information
-        echo '<div class="container-fluid profile-section">';
-        echo '<br><br><br>';
-        echo '<div class="row">';
-        echo '<div class="col-md-4 profile-pic">';
-        echo '<img src="' . $GetPassport . '" class="button" alt="Profile Picture">';
-        echo '<hr>';
-        echo '</div>';
-        echo '<div class="col-md-4 profile-info">';
-        echo '<h2>' . $Surname . '  ' . $First_Name . '</h2>';
+    // Display all information
+    echo '<div class="container-fluid profile-section">';
+    echo '<br><br><br>';
+    echo '<div class="row">';
+    echo '<div class="col-md-4 profile-pic">';
+    echo '<img src="' . $GetPassport . '" class="button" alt="Profile Picture">';
+    echo '<hr>';
+    echo '</div>';
+    echo '<div class="col-md-4 profile-info">';
+    echo '<h2>' . $Surname . '  ' . $First_Name . '</h2>';
 
-        echo '<p>Gender: ' . $gender . '</p>';
-        echo '<p>Bio: ' . $getbio . '</p>';
-        echo '<div class="row">';
-        echo '<div class="col-md-5">';
-        echo '<button id="followBtn" class="follow ' . ($isFollowing ? 'following' : 'unfollow') . '">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
-        echo '</div>';
-        echo '<div class="col-md-5">';
-        echo '<button class="message" onclick="location.href=\'chat.php?UserIdx=' . $profileOwnerId . '\'">Message</button>';
-        echo '</div>';
-        echo '</div>';
+    echo '<p>Gender: ' . $gender . '</p>';
+    echo '<p>Bio: ' . $getbio . '</p>';
+    echo '<div class="row">';
+    echo '<div class="col-md-5">';
+    echo '<button id="followBtn" class="follow ' . ($isFollowing ? 'following' : 'unfollow') . '">' . ($isFollowing ? 'Unfollow' : 'Follow') . '</button>';
+    echo '</div>';
+    echo '<div class="col-md-5">';
+    echo '<button class="message" onclick="location.href=\'chat.php?UserIdx=' . $profileOwnerId . '\'">Message</button>';
+    echo '</div>';
+    echo '</div>';
 
-        echo '</div>'; // close profile-info div
+    echo '</div>'; // close profile-info div
 
-        echo '<div class="col-md-4">
+    echo '<div class="col-md-4">
     <div class="row">
       <div class="col-md-6">
         <p style="margin-bottom: 0;">' . $following . '</p>
@@ -419,49 +424,49 @@ if (isset($_SESSION['UserId'])) {
     </div>
     </div>
     ';
-        echo '<div class="container">
+    echo '<div class="container">
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
             <div class="posts">';
-        while ($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
-            $PostId = $row['PostId'];
-            $title = $row['title'];
-            $content = $row['content'];
-            $video = $row['video'];
-            $image = $row['image'];
-            $date_posted = new DateTime($row['date_posted']);
-            $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-            $current_date = new DateTime();
-            $date_postedx = new DateTime($formatted_date);
-            $interval = $current_date->diff($date_postedx);
+    while ($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
+      $PostId = $row['PostId'];
+      $title = $row['title'];
+      $content = $row['content'];
+      $video = $row['video'];
+      $image = $row['image'];
+      $date_posted = new DateTime($row['date_posted']);
+      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+      $current_date = new DateTime();
+      $date_postedx = new DateTime($formatted_date);
+      $interval = $current_date->diff($date_postedx);
 
-            if ($interval->y) {
-                $time_ago = $interval->y . " years ago";
-            } else if ($interval->m) {
-                $time_ago = $interval->m . " months ago";
-            } else if ($interval->d) {
-                $time_ago = $interval->d . " days ago";
-            } else if ($interval->h) {
-                $time_ago = $interval->h . " hours ago";
-            } else if ($interval->i) {
-                $time_ago = $interval->i . " minutes ago";
-            } else {
-                $time_ago = $interval->s . " seconds ago";
-            }
+      if ($interval->y) {
+        $time_ago = $interval->y . " years ago";
+      } else if ($interval->m) {
+        $time_ago = $interval->m . " months ago";
+      } else if ($interval->d) {
+        $time_ago = $interval->d . " days ago";
+      } else if ($interval->h) {
+        $time_ago = $interval->h . " hours ago";
+      } else if ($interval->i) {
+        $time_ago = $interval->i . " minutes ago";
+      } else {
+        $time_ago = $interval->s . " seconds ago";
+      }
 
-            echo '<div class="post">';
-            if (!empty($title)) {
-                echo '<h3 class="title">' . $title . '</h3>';
-            }
-            echo '<div class="row">';
-            if (!empty($image)) {
-                echo '<div class="col-md-9">
+      echo '<div class="post">';
+      if (!empty($title)) {
+        echo '<h3 class="title">' . $title . '</h3>';
+      }
+      echo '<div class="row">';
+      if (!empty($image)) {
+        echo '<div class="col-md-9">
                     <img src="' . $image . '" class="img-fluid">
                 </div>';
-            }
-            if (!empty($video)) {
-                echo '<div class="video-container">
+      }
+      if (!empty($video)) {
+        echo '<div class="video-container">
                 <video id="myVideo" class="w-100">
                   <source src="' . $row["video"] . '" type="video/mp4">
                   Your browser does not support the video tag.
@@ -487,22 +492,22 @@ if (isset($_SESSION['UserId'])) {
               </div>
               
                     ';
-            }
-            echo '</div>';
-            if (!empty($content)) {
-                echo '<p>' . $content . '</p>';
-            }
-            if (!empty($time_ago)) {
-                echo '<p>' . $time_ago . '</p>';
-            }
-            echo '</div>';
-        }
-        echo '</div>
+      }
+      echo '</div>';
+      if (!empty($content)) {
+        echo '<p>' . $content . '</p>';
+      }
+      if (!empty($time_ago)) {
+        echo '<p>' . $time_ago . '</p>';
+      }
+      echo '</div>';
+    }
+    echo '</div>
         </div>
     </div>
 </div>';
-    }
-    echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-labelledby="setBioModalLabel" aria-hidden="true">
+  }
+  echo '<div class="modal fade" id="setBioModal" tabindex="-1" role="dialog" aria-labelledby="setBioModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -521,7 +526,7 @@ if (isset($_SESSION['UserId'])) {
     </div>
   </div>
 </div>';
-    echo '<div class="modal fade" id="editprofile" tabindex="-1" role="dialog" aria-labelledby="editprofileLabel" aria-hidden="true">
+  echo '<div class="modal fade" id="editprofile" tabindex="-1" role="dialog" aria-labelledby="editprofileLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -598,8 +603,8 @@ if (isset($_SESSION['UserId'])) {
   </div>
   </div>
 </div>';
-    echo '<script src="js/jquery.min.js"></script>';
-    echo '<script>
+  echo '<script src="js/jquery.min.js"></script>';
+  echo '<script>
 //Script to load
 // user country code for selected option
 let user_country_code = "$countryId";
@@ -657,7 +662,7 @@ let user_country_code = "$countryId";
 
 
 
-    echo '<script>
+  echo '<script>
 $(".custom-file-input").on("change", function() {
   var fileName = $(this).val().split("////").pop();
   $(this).siblings(".custom-file-upload").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
@@ -665,7 +670,7 @@ $(".custom-file-input").on("change", function() {
 
 </script>
 ';
-    echo '<script>
+  echo '<script>
 function saveBio() {
   var bio = document.getElementById("bioTextArea").value;
   var UserId = "' . $_GET["UserId"] . '";
@@ -697,7 +702,7 @@ function saveBio() {
   $("#setBioModal").modal("hide");
 }
 </script>';
-    echo '<script>
+  echo '<script>
 function editpro() {
     var UserId = "' . $_GET["UserId"] . '";
 
@@ -742,7 +747,7 @@ function editpro() {
 }
 </script>';
 
-    echo ' <script>
+  echo ' <script>
 $(document).ready(function(){
   $("#search").on("keyup", function() {
     var value = $(this).val().toLowerCase();
@@ -759,7 +764,7 @@ $(document).ready(function(){
 });
 
 </script>';
-    echo '<script>
+  echo '<script>
 $(document).ready(function() {
   const searchBox = $("#search");
   const resultsDiv = $("#user_table");
@@ -786,7 +791,7 @@ $(document).ready(function() {
   });
 });
 </script>';
-    echo '<script>
+  echo '<script>
 $(document).ready(function() {
     var profileOwnerId = "' . $profileOwnerId . '";
     var recipientId = "' . $UserId . '";
@@ -820,7 +825,7 @@ $(document).ready(function() {
     });
 });
 </script>';
-    echo '<script>
+  echo '<script>
     // Get the video element
 const myVideo = document.getElementById("myVideo");
 
@@ -926,74 +931,74 @@ function formatTime(time) {
   </script>
   ';
 } else {
-    // User is not logged in, redirect to the login page
-    header('Location: login.php');
-    exit;
+  // User is not logged in, redirect to the login page
+  header('Location: login.php');
+  exit;
 }
 ?>
 <?php
 if (isset($_POST['button'])) {
 
-    $FirstPassportName = basename($_FILES["Fileupload"]["name"]);
+  $FirstPassportName = basename($_FILES["Fileupload"]["name"]);
 
-    $target_dir = "UserPassport/"; //directory on the server in my application folder
-    $target_file = $target_dir . $FirstPassportName;
-    $PassportName = $FirstPassportName;
-    $uploadOk = 1;
-    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+  $target_dir = "UserPassport/"; //directory on the server in my application folder
+  $target_file = $target_dir . $FirstPassportName;
+  $PassportName = $FirstPassportName;
+  $uploadOk = 1;
+  $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
 
-    if (unlink("UserPassport/" . $Passport)) {
-    }
-    //  else {
-    // 	echo 'There was a error deleting the file ' . $filename;
-    // }
+  if (unlink("UserPassport/" . $Passport)) {
+  }
+  //  else {
+  // 	echo 'There was a error deleting the file ' . $filename;
+  // }
+
+
+  include('db.php');
+
+
+  if ($imageFileType != "jpg" && $imageFileType != "pdf" && $imageFileType != "jpeg" && $imageFileType != "png") {
+
+    echo "<script type=\"text/javascript\">
+alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
+</script>";
+  }
+
+  if (move_uploaded_file($_FILES["Fileupload"]["tmp_name"], $target_file)) {
 
 
     include('db.php');
 
-
-    if ($imageFileType != "jpg" && $imageFileType != "pdf" && $imageFileType != "jpeg" && $imageFileType != "png") {
-
-        echo "<script type=\"text/javascript\">
-alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
-</script>";
-    }
-
-    if (move_uploaded_file($_FILES["Fileupload"]["tmp_name"], $target_file)) {
+    $sql = "Update User_Profile SET Passport='$PassportName' WHERE UserId='$UserId'";
 
 
-        include('db.php');
+    $smc = sqlsrv_query($conn, $sql);
 
-        $sql = "Update User_Profile SET Passport='$PassportName' WHERE UserId='$UserId'";
+    //give information if the data is successful or not.
 
+    if ($smc === false) {
+      echo " <font color='black'><em> data not successfully upload</em></font><br/>";
+      die(print_r(sqlsrv_errors(), true));
+    } else {
 
-        $smc = sqlsrv_query($conn, $sql);
-
-        //give information if the data is successful or not.
-
-        if ($smc === false) {
-            echo " <font color='black'><em> data not successfully upload</em></font><br/>";
-            die(print_r(sqlsrv_errors(), true));
-        } else {
-
-            // echo"File Upload successful";
-            echo "<script type=\"text/javascript\">
+      // echo"File Upload successful";
+      echo "<script type=\"text/javascript\">
                               alert(\"The file has been uploaded\");
                               </script>";
-        }
-
-
-
-
-        // $msg = $picture;
-
-        $URL = "user_profile.php?UserId=" . $UserId;
-        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
-        echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
-        // 	--------------------------------------------------------------------
-
     }
+
+
+
+
+    // $msg = $picture;
+
+    $URL = "user_profile.php?UserId=" . $UserId;
+    echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+    echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    // 	--------------------------------------------------------------------
+
+  }
 }
 
 ?>

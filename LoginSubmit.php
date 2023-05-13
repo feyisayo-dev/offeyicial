@@ -33,9 +33,9 @@ if (isset($_POST['Login'])) {
     $_SESSION['loggedin'] = true;
 }
 
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    // The user is logged in
-} else {
-    // The user is not logged in
-}
+// if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+//     // The user is logged in
+// } else {
+//     // The user is not logged in
+// }
 ?>

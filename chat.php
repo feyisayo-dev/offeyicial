@@ -1,9 +1,9 @@
 <?php
 session_start();
-
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-  $UserId = $_SESSION["UserId"];
-  header("Location: user_profile.php?UserId=" . $UserId);
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+  // Redirect to login page
+  header("Location: login.php");
   exit();
 }
 ?>
