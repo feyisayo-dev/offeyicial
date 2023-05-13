@@ -78,4 +78,3 @@ if (!empty($row['video'])) {
 echo'
 <button id="scrollToTopBtn"><i class="fas fa-arrow-up"></i></button>
 ';
-?>

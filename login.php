@@ -1030,26 +1030,31 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             $.ajax({
                 url: "LoginSubmit.php",
                 type: "POST",
-                async: false,
+                async: true,
                 data: {
                     "Login": 1,
-                    "email": email,
-                    "psw": psw
+                    "email": $.trim(email),
+                    "psw": $.trim(psw)
                 },
                 success: function(data) {
                     console.log(data);
                     if (data !== 'failed') {
                         var UserId = data;
                         // check if the user is already logged in
-                        if (window.location.pathname != '/offeyicialchatroom/user_profile.php') {
+                        if (window.location.pathname !== '/offeyicialchatroom/user_profile.php') {
                             window.location.href = "user_profile.php?UserId=" + UserId;
                         }
                     } else {
-                        alert("Invalid login credentials");
+                        // Display an error message using a notification system
+                        toastr.error("Invalid login credentials");
                     }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    // Handle errors using a notification system
+                    toastr.error("Oops! Something went wrong. Please try again later.");
                 }
-
             });
+
         } else {
             alert("Please fill in all fields");
         }
