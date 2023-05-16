@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #140032;
+  /* background-color: #140032; */
   overflow: hidden;
   margin: 0;
 }
@@ -19,7 +19,7 @@ body * {
   left: 0;
   right: 0;
   margin: auto;
-  border-radius: 50%;
+  /* border-radius: 50%; */
 }
 
 .galaxy:nth-child(1) {

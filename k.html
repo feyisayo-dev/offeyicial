@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Page</title>
+    <style>
+        .frame1-container {
+            width: 100%;
+            display: flex;
+            overflow: auto;
+            min-height: 100vh;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .frame1-frame1 {
+            width: 100%;
+            height: 852px;
+            display: flex;
+            position: relative;
+            align-items: flex-start;
+            flex-shrink: 0;
+        }
+
+        .frame1-loginscreen {
+            top: 0px;
+            left: 0px;
+            width: 393px;
+            height: 852px;
+            display: flex;
+            overflow: hidden;
+            position: absolute;
+            align-items: flex-start;
+            flex-shrink: 0;
+            border-radius: 50px;
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        .frame1-loginscreenlogo {
+            top: 93px;
+            left: 25px;
+            width: 341.69775390625px;
+            height: 333px;
+            display: flex;
+            position: absolute;
+            align-items: flex-start;
+            flex-shrink: 1;
+        }
+
+        .frame1-circlesoncircle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background-color: #ffffff;
+        }
+
+
+        .frame1-photo1 {
+            top: 205.01866149902344px;
+            left: 308.1492614746094px;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            border-radius: 100px;
+        }
+
+        .frame1-photo2 {
+            top: 299.45147705078125px;
+            left: 84.49254608154297px;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            border-radius: 100px;
+        }
+
+        .frame1-photo3 {
+            top: 106.85820007324219px;
+            left: 3.7276172637939453px;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            border-radius: 100px;
+        }
+
+        .frame1-photo4 {
+            top: 3.7276015281677246px;
+            left: 206.2611846923828px;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            border-radius: 100px;
+        }
+
+        .frame1-text {
+            top: 481px;
+            left: 64px;
+            color: rgba(0, 0, 0, 1);
+            width: 266px;
+            height: auto;
+            position: absolute;
+            font-size: 36px;
+            font-style: Semi Bold;
+            text-align: center;
+            font-family: Inter;
+            font-weight: 700;
+            line-height: normal;
+            font-stretch: normal;
+            text-decoration: none;
+        }
+
+        .frame1-login {
+            top: 622px;
+            left: 24px;
+            width: 347px;
+            height: 71px;
+            display: flex;
+            position: absolute;
+            align-items: flex-start;
+            flex-shrink: 1;
+            background-color: rgba(39, 59, 236, 1);
+        }
+
+        .frame1-text2 {
+            top: 22px;
+            left: 145px;
+            color: rgba(0, 0, 0, 1);
+            width: 56px;
+            height: auto;
+            position: absolute;
+            font-size: 20px;
+            font-style: Semi Bold;
+            text-align: left;
+            font-family: Inter;
+            font-weight: 700;
+            line-height: normal;
+            font-stretch: normal;
+            text-decoration: none;
+        }
+
+        .frame1-signup {
+            top: 718px;
+            left: 23px;
+            width: 347px;
+            height: 71px;
+            display: flex;
+            position: absolute;
+            align-items: flex-start;
+            flex-shrink: 1;
+            background-color: rgba(17, 212, 60, 1);
+        }
+
+        .frame1-text4 {
+            top: 24px;
+            left: 134px;
+            color: rgba(255, 255, 255, 1);
+            width: 78px;
+            height: auto;
+            position: absolute;
+            font-size: 20px;
+            font-style: Semi Bold;
+            text-align: left;
+            font-family: Inter;
+            font-weight: 700;
+            line-height: normal;
+            font-stretch: normal;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="frame1-container">
+            <div class="frame1-frame1">
+                <div class="frame1-loginscreen">
+                    <div class="frame1-loginscreenlogo">
+                        <div class="frame1-circlesoncircle">
+                            <?php include 'youarereg.php'; ?>
+                        </div>
+                        <img alt="Photo1217" src="images/animal.jpg" class="frame1-photo1" />
+                        <img alt="Photo2220" src="images/small_animal.jpg" class="frame1-photo2" />
+                        <img alt="Photo3218" src="images/animal.jpg" class="frame1-photo3" />
+                        <img alt="Photo4221" src="images/animal.jpg" class="frame1-photo4" />
+                    </div>
+                    <span class="frame1-text"><span>Let’s Connect Together</span></span>
+                    <div class="frame1-login">
+                        <div class="frame1-text2"><a href="login.php">Login</a></div>
+                    </div>
+                    <div class="frame1-signup">
+                        <div class="frame1-text4"><a href="reg.php">Sign up</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

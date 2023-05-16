@@ -274,7 +274,7 @@ if (sqlsrv_execute($stmt)) {
                 // immediately ask for camera access
                 autoRequestMedia: true,
                 // URL of the signaling server
-                url: 'http://localhost:5050',
+                url: 'http://localhost:8080/offeyicialchatroom',
                 // enable/disable peer-to-peer mode
                 enableDataChannels: true,
                 // additional ICE servers can be added here

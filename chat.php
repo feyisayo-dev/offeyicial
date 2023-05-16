@@ -1,11 +1,6 @@
 <?php
 session_start();
 // Check if user is logged in
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-  // Redirect to login page
-  header("Location: login.php");
-  exit();
-}
 ?>
 <?php
 include 'db.php';
@@ -676,6 +671,45 @@ if (sqlsrv_execute($rstmt)) {
       right: 0;
       z-index: 9999;
     }
+
+    .popup {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 4px 8px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    .popup a {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .Sent {
+      position: relative;
+    }
+
+    .Sent .popup {
+      left: -70px;
+    }
+
+    .received {
+      position: relative;
+    }
+
+    .received .popup {
+      right: -70px;
+    }
+
+    .popup a:hover {
+      background-color: #e6e6e6;
+    }
   </style>
 </head>
 
@@ -956,6 +990,51 @@ if (sqlsrv_execute($rstmt)) {
                       });
                     }
                     chatbox.appendChild(div);
+                    // Create popup div for delete and reply options
+                    var popup;
+
+                    // Add right-click event listener to each message div
+                    div.addEventListener('contextmenu', function(e) {
+                      // Prevent default right-click menu from showing
+                      e.preventDefault();
+
+                      // If a popup is already open, remove it
+                      if (popup) {
+                        popup.parentNode.removeChild(popup);
+                        popup = null;
+                      }
+
+                      // Create new popup and position it beside the clicked message
+                      popup = document.createElement('div');
+                      popup.className = 'popup';
+                      popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a>';
+                      popup.style.top = e.pageY + 'px';
+                      popup.style.left = e.pageX + 'px';
+
+                      // Add event listeners to delete and reply options
+                      var deleteBtn = popup.querySelector('.delete');
+                      deleteBtn.addEventListener('click', function() {
+                        // TODO: Implement delete functionality
+                        // Hide the message from the user or recipient
+                      });
+
+                      var replyBtn = popup.querySelector('.reply');
+                      replyBtn.addEventListener('click', function() {
+                        // TODO: Implement reply functionality
+                        // Show a reply form for the user to enter a reply message
+                      });
+
+                      // Add the popup to the chatbox
+                      chatbox.appendChild(popup);
+                    });
+
+                    // Remove the popup when the user clicks outside of it
+                    document.addEventListener('click', function(e) {
+                      if (popup && !popup.contains(e.target)) {
+                        popup.parentNode.removeChild(popup);
+                        popup = null;
+                      }
+                    });
                   });
                   chatbox.scrollTop = chatbox.scrollHeight; // Scroll to bottom
                 }
