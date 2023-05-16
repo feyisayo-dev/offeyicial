@@ -265,6 +265,7 @@ if (sqlsrv_execute($stmt)) {
         <!-- <script src="node_modules/simplewebrtc/simplewebrtc.js"></script> -->
 
         <script>
+            import SimpleWebRTC from 'node_modules/simplewebrtc';
             // Initialize the SimpleWebRTC object
             var webrtc = new SimpleWebRTC({
                 // the id/element dom element that will hold "our" video
