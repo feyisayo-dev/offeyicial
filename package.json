@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "express": "^4.18.2",
-    "simplewebrtc": "^3.0.2"
+    "simplewebrtc": "^1.19.1"
   }
 }
