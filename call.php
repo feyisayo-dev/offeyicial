@@ -265,7 +265,8 @@ if (sqlsrv_execute($stmt)) {
         <!-- <script src="node_modules/simplewebrtc/simplewebrtc.js"></script> -->
 
         <script>
-            // import SimpleWebRTC from 'node_modules/simplewebrtc';
+            // Import the SimpleWebRTC library
+            // const SimpleWebRTC = require('simplewebrtc');
             // Initialize the SimpleWebRTC object
             var webrtc = new SimpleWebRTC({
                 // the id/element dom element that will hold "our" video
@@ -275,7 +276,7 @@ if (sqlsrv_execute($stmt)) {
                 // immediately ask for camera access
                 autoRequestMedia: true,
                 // URL of the signaling server
-                url: 'http://localhost:8888',
+                url: 'http://localhost:8000',
                 // enable/disable peer-to-peer mode
                 enableDataChannels: true,
                 // additional ICE servers can be added here
