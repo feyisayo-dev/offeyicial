@@ -262,7 +262,9 @@ if (sqlsrv_execute($stmt)) {
         <script src="js/bootstrap.bundle.min.js"></script>
         <script src="js/adapter-latest.js"></script>
         <script src="node_modules/simplewebrtc/simplewebrtc.bundle.js"></script>
-        <!-- <script src="node_modules/simplewebrtc/simplewebrtc.js"></script> -->
+        <script src="node_modules/socket.io/dist/socket.js"></script>
+        <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
+        <script src="node_modules/socket.io/client-dist/socket.io.min.js"></script>
 
         <script>
             // Import the SimpleWebRTC library
