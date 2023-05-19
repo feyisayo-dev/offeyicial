@@ -1,11 +1,5 @@
 <?php
 session_start();
-// Check if user is logged in
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-  // Redirect to login page
-  header("Location: login.php");
-  exit();
-}
 ?>
 <?php
 include('db.php');
@@ -174,7 +168,7 @@ $UserId = $_SESSION['UserId'];
 
 
 
-    
+
     .custom-link {
       text-decoration: none;
       cursor: pointer;
@@ -277,7 +271,6 @@ $UserId = $_SESSION['UserId'];
       <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
       <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
     </div>
-
     <input type="submit" value="Add Post" class="submit">
     <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'">
   </div>
@@ -285,13 +278,73 @@ $UserId = $_SESSION['UserId'];
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <!-- name of the files -->
+<!-- Modal for displaying images or videos -->
+<div class="modal" id="previewModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview</h5>
+        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="carousel" class="carousel slide" data-ride="carousel">
+          <div class="carousel-inner" id="previewContainer"></div>
+          <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-sm add-more" data-bs-dismiss="modal">Add More</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   $('.custom-file-input').on('change', function() {
-    var fileName = $(this).val().split('\\').pop();
-    $(this).siblings('.custom-file-label').html('<i class="bi bi-check-circle-fill"></i> ' + fileName);
+    var files = this.files;
+    var fileType = this.accept.split('/')[0];
+    var previewContainer = $('#previewContainer');
+    previewContainer.empty();
+
+    // Check if the file type is image or video
+    if (fileType === 'image') {
+      $.each(files, function(index, file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var activeClass = (index === 0) ? 'active' : '';
+          previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
+        };
+        reader.readAsDataURL(file);
+      });
+    } else if (fileType === 'video') {
+      $.each(files, function(index, file) {
+        var videoURL = URL.createObjectURL(file);
+        var activeClass = (index === 0) ? 'active' : '';
+        previewContainer.append('<div class="carousel-item ' + activeClass + '"><video src="' + videoURL + '" controls></video></div>');
+      });
+    }
+
+    // Show the modal
+    $('#previewModal').modal('show');
+  });
+
+  $('.add-more').click(function() {
+    var fileType = $(this).data('type');
+    if (fileType === 'image') {
+      $('#image').trigger('click');
+    } else if (fileType === 'video') {
+      $('#video').trigger('click');
+    }
   });
 </script>
- <!-- uploading a post  -->
+<!-- uploading a post  -->
 <script>
   $(document).ready(function() {
     $('.submit').click(function() {
