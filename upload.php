@@ -222,6 +222,15 @@ $UserId = $_SESSION['UserId'];
       text-decoration: none;
 
     }
+
+    #modalicon {
+      color: black;
+    }
+
+    #modalicon:hover {
+      transform: scaleX(1.05);
+      color: green;
+    }
   </style>
 </head>
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -264,11 +273,11 @@ $UserId = $_SESSION['UserId'];
       <textarea id="content" name="content"></textarea>
     </div>
     <div class="custom-file">
-      <input type="file" class="custom-file-input" id="image" name="image" accept="image/*">
-      <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Image</label>
+      <input type="file" class="custom-file-input" id="image" name="image" accept="image/*" multiple>
+      <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Images</label>
     </div>
     <div class="custom-file">
-      <input type="file" class="custom-file-input" id="video" name="video" accept="video/*">
+      <input type="file" class="custom-file-input" id="video" name="video" accept="video/*" multiple>
       <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
     </div>
     <input type="submit" value="Add Post" class="submit">
@@ -287,61 +296,84 @@ $UserId = $_SESSION['UserId'];
         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
-        <div id="carousel" class="carousel slide" data-ride="carousel">
+        <div id="carousel" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-inner" id="previewContainer"></div>
-          <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
+          <a class="carousel-control-prev" href="#carousel" role="button" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" id="modalicon" aria-hidden="true"></span>
+            <span class="sr-only"></span>
           </a>
-          <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
+          <a class="carousel-control-next" href="#carousel" role="button" data-bs-slide="next">
+            <span class="carousel-control-next-icon" id="modalicon" aria-hidden="true"></span>
+            <span class="sr-only"></span>
           </a>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary btn-sm add-more" data-bs-dismiss="modal">Add More</button>
+        <button type="button" class="btn btn-primary btn-sm accept">Accept</button>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="js/jquery.min.js"></script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
 <script>
-  $('.custom-file-input').on('change', function() {
-    var files = this.files;
-    var fileType = this.accept.split('/')[0];
-    var previewContainer = $('#previewContainer');
-    previewContainer.empty();
+  $(document).ready(function() {
+    $('.custom-file-input').on('change', function() {
+      var files = this.files;
+      var fileType = this.accept.split('/')[0];
+      var previewContainer = $('#previewContainer');
+      previewContainer.empty();
 
-    // Check if the file type is image or video
-    if (fileType === 'image') {
-      $.each(files, function(index, file) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
+      // Check if the file type is image or video
+      if (fileType === 'image') {
+        $.each(files, function(index, file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var activeClass = (index === 0) ? 'active' : '';
+            previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
+          };
+          reader.readAsDataURL(file);
+        });
+      } else if (fileType === 'video') {
+        $.each(files, function(index, file) {
+          var videoURL = URL.createObjectURL(file);
           var activeClass = (index === 0) ? 'active' : '';
-          previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
-        };
-        reader.readAsDataURL(file);
-      });
-    } else if (fileType === 'video') {
-      $.each(files, function(index, file) {
-        var videoURL = URL.createObjectURL(file);
-        var activeClass = (index === 0) ? 'active' : '';
-        previewContainer.append('<div class="carousel-item ' + activeClass + '"><video src="' + videoURL + '" controls></video></div>');
-      });
-    }
+          previewContainer.append('<div class="carousel-item ' + activeClass + '"><video src="' + videoURL + '" controls></video></div>');
+        });
+      }
 
-    // Show the modal
-    $('#previewModal').modal('show');
-  });
+      // Set the data type attribute for the Accept button
+      $('.accept').data('type', fileType);
 
-  $('.add-more').click(function() {
-    var fileType = $(this).data('type');
-    if (fileType === 'image') {
-      $('#image').trigger('click');
-    } else if (fileType === 'video') {
-      $('#video').trigger('click');
-    }
+      // Show the modal
+      $('#previewModal').modal('show');
+    });
+
+    $('.accept').click(function() {
+      var fileType = $(this).data('type');
+      var fileInputs = [];
+
+      if (fileType === 'image') {
+        fileInputs = $('#image').get(0).files;
+      } else if (fileType === 'video') {
+        fileInputs = $('#video').get(0).files;
+      }
+
+      if (fileInputs.length > 0) {
+        var fileNames = [];
+
+        for (var i = 0; i < fileInputs.length; i++) {
+          fileNames.push(fileInputs[i].name);
+        }
+
+        alert('Selected Files: ' + fileNames.join(', '));
+      } else {
+        alert('No files selected.');
+      }
+    });
   });
 </script>
 <!-- uploading a post  -->
