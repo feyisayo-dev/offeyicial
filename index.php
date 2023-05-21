@@ -26,7 +26,7 @@ include 'db.php';
   <script src="js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="css/owl.carousel.min.css">
   <link rel="stylesheet" href="css/owl.theme.default.min.css">
-  
+
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
@@ -791,54 +791,54 @@ include 'db.php';
   <div class="news-feed-container">
     <br>
     <?php
-// Connect to the database
-include 'db.php';
-$query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
+    // Connect to the database
+    include 'db.php';
+    $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
     FROM posts
     JOIN User_Profile ON User_Profile.UserId = posts.UserId
     LEFT JOIN likes ON likes.PostId = posts.PostId
     GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
     ORDER BY posts.date_posted DESC";
-$params = array($UserId);
-$result = sqlsrv_query($conn, $query, $params);
+    $params = array($UserId);
+    $result = sqlsrv_query($conn, $query, $params);
 
-if ($result === false) {
-    echo "Error executing query: " . sqlsrv_errors()[0]['message'];
-    exit;
-}
-
-while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-    // Your code to display the posts
-    $date_posted = new DateTime($row['date_posted']);
-    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-    $postId = $row['PostId'];
-    $likes = $row['num_likes'];
-    $islikeing = $row['is_liking'];
-    $current_date = new DateTime();
-    $date_postedx = new DateTime($formatted_date);
-    $interval = $current_date->diff($date_postedx);
-
-    if ($interval->y) {
-        $time_ago = $interval->y . " years ago";
-    } else if ($interval->m) {
-        $time_ago = $interval->m . " months ago";
-    } else if ($interval->d) {
-        $time_ago = $interval->d . " days ago";
-    } else if ($interval->h) {
-        $time_ago = $interval->h . " hours ago";
-    } else if ($interval->i) {
-        $time_ago = $interval->i . " minutes ago";
-    } else {
-        $time_ago = $interval->s . " seconds ago";
+    if ($result === false) {
+      echo "Error executing query: " . sqlsrv_errors()[0]['message'];
+      exit;
     }
-    // Store Likes, Comments, and Shares values in variables
-    echo '<section>';
-    echo '<div class="post">';
-    echo '<div class="news-feed-post"  id="' . $postId . '">';
-    echo '<div class="post-header">';
-    echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-    echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
-    echo '<div id="threedots">
+
+    while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+      // Your code to display the posts
+      $date_posted = new DateTime($row['date_posted']);
+      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+      $postId = $row['PostId'];
+      $likes = $row['num_likes'];
+      $islikeing = $row['is_liking'];
+      $current_date = new DateTime();
+      $date_postedx = new DateTime($formatted_date);
+      $interval = $current_date->diff($date_postedx);
+
+      if ($interval->y) {
+        $time_ago = $interval->y . " years ago";
+      } else if ($interval->m) {
+        $time_ago = $interval->m . " months ago";
+      } else if ($interval->d) {
+        $time_ago = $interval->d . " days ago";
+      } else if ($interval->h) {
+        $time_ago = $interval->h . " hours ago";
+      } else if ($interval->i) {
+        $time_ago = $interval->i . " minutes ago";
+      } else {
+        $time_ago = $interval->s . " seconds ago";
+      }
+      // Store Likes, Comments, and Shares values in variables
+      echo '<section>';
+      echo '<div class="post">';
+      echo '<div class="news-feed-post"  id="' . $postId . '">';
+      echo '<div class="post-header">';
+      echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
+      echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
+      echo '<div id="threedots">
     <button type="button" class="btn btn-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       <i class="fas fa-ellipsis-h"></i>
     </button>
@@ -862,19 +862,19 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
       <a class="dropdown-item" href="#">Repost post</a>
     </div>
   </div>';
-    echo '</div>';
-    echo '<h2 class="post-title">' . $row['title'] . '</h2>';
-    if (!empty($row['image']) && !empty($row['video'])) {
+      echo '</div>';
+      echo '<h2 class="post-title">' . $row['title'] . '</h2>';
+      if (!empty($row['image']) && !empty($row['video'])) {
         echo '<div class="post-carousel">';
         echo '<div class="owl-carousel">'; // Add the owl-carousel container
 
         // Add carousel items for each post with the same postId
         while ($row['PostId'] === $postId) {
-            echo '<div class="post-item">';
-            echo '<img class="post-image" src="' . $row['image'] . '">';
-            echo '</div>';
-            // Fetch the next row
-            // ...
+          echo '<div class="post-item">';
+          echo '<img class="post-image" src="' . $row['image'] . '">';
+          echo '</div>';
+          // Fetch the next row
+          // ...
         }
 
         echo '</div>'; // Close the owl-carousel container
@@ -904,9 +904,9 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
         echo '</div>';
         echo '</div>';
         echo '</div>';
-    } else if (!empty($row['image'])) {
+      } else if (!empty($row['image'])) {
         echo '<img class="post-image" src="' . $row['image'] . '">';
-    } else if (!empty($row['video'])) {
+      } else if (!empty($row['video'])) {
         echo '<div class="post-video">';
         echo '<div class="video-container">';
         echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
@@ -932,12 +932,12 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
         echo '</div>';
         echo '</div>';
         echo '</div>';
-    }
-    echo '<p class="post-content">' . $row['content'] . '</p>';
-    //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
-    echo '<p class="post-date">' . $time_ago . '</p>';
-    echo '</div>';
-    echo '<div class="footer">
+      }
+      echo '<p class="post-content">' . $row['content'] . '</p>';
+      //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
+      echo '<p class="post-date">' . $time_ago . '</p>';
+      echo '</div>';
+      echo '<div class="footer">
       <button type="button" class="btn btn-primary like ' . ($islikeing ? 'likeing' : 'unlike') . '" data-postid="' . $postId . '">
           <span class="like-count">' . $likes . '</span>
           <span class="emoji">&#x2764;</span>
@@ -951,7 +951,7 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
 
   </button>
   </div>';
-    echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
+      echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1002,7 +1002,7 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
     </div>
   </div>
 </div>';
-    echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+      echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
 <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1053,21 +1053,21 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
 </div>
 </div>
 </div>';
-    echo '</section>';
-}
-?>
+      echo '</section>';
+    }
+    ?>
     <button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
     <?php
 
-// Retrieve all the chats of the current user
-$sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-$stmt = sqlsrv_query($conn, $sql);
-if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
+    // Retrieve all the chats of the current user
+    $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+    $stmt = sqlsrv_query($conn, $sql);
+    if ($stmt === false) {
+      die(print_r(sqlsrv_errors(), true));
+    }
 
-// Display the chats in a list on the sidebar
-echo '<!-- Button to open the sidebar -->
+    // Display the chats in a list on the sidebar
+    echo '<!-- Button to open the sidebar -->
 <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
     <i class="bi bi-chat"></i> Chats
 </button>
@@ -1081,42 +1081,42 @@ echo '<!-- Button to open the sidebar -->
     <div class="offcanvas-body">
         <ul class="list-unstyled">';
 
-while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-    $recipientId = $row['recipientId'];
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+      $recipientId = $row['recipientId'];
 
-    // Get the name of the recipient
-    $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+      // Get the name of the recipient
+      $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
 
-    $stmt2 = sqlsrv_query($conn, $sql2);
-    if ($stmt2 === false) {
+      $stmt2 = sqlsrv_query($conn, $sql2);
+      if ($stmt2 === false) {
         die(print_r(sqlsrv_errors(), true));
-    }
+      }
 
-    $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-    $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-    $Passport = $row2['Passport'];
-    if (empty($Passport)) {
+      $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+      $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+      $Passport = $row2['Passport'];
+      if (empty($Passport)) {
         $passportImage = "UserPassport/DefaultImage.png";
-    } else {
+      } else {
         $passportImage = "UserPassport/" . $Passport;
+      }
+
+      // Display the recipient name and passport image in the list
+      echo '<li>';
+      echo '<div class="passport">';
+      echo '<a>';
+      echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+      echo '</a>';
+      echo '</div>';
+      echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+      echo '</li>';
     }
 
-    // Display the recipient name and passport image in the list
-    echo '<li>';
-    echo '<div class="passport">';
-    echo '<a>';
-    echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-    echo '</a>';
-    echo '</div>';
-    echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-    echo '</li>';
-}
-
-echo '</ul>
+    echo '</ul>
     </div>
 </div>';
 
-?>
+    ?>
   </div>
 
   <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -1198,15 +1198,15 @@ echo '</ul>
 <script src="js/jquery.min.js"></script>
 <script src="js/owl.carousel.min.js"></script>
 <script>
-$(document).ready(function() {
+  $(document).ready(function() {
     $(".owl-carousel").owlCarousel({
-        items: 1,
-        loop: true,
-        nav: true,
-        dots: false
-        // You can customize other options according to your needs
+      items: 1,
+      loop: true,
+      nav: true,
+      dots: false
+      // You can customize other options according to your needs
     });
-});
+  });
 </script>
 y
 <script>
