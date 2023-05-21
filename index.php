@@ -30,7 +30,6 @@ include 'db.php';
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
-  <script src="js/owl.carousel.min.js"></script>
   <script src="js/slim.min.js"></script>
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/png" sizes="32x32" />
@@ -1197,6 +1196,7 @@ echo '</ul>
 
 </body>
 <script src="js/jquery.min.js"></script>
+<script src="js/owl.carousel.min.js"></script>
 <script>
 $(document).ready(function() {
     $(".owl-carousel").owlCarousel({
