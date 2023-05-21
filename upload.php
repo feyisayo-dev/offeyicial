@@ -211,6 +211,12 @@ $UserId = $_SESSION['UserId'];
 
     }
 
+    .fixed-size-video {
+      width: 400px;
+      height: 300px;
+    }
+
+
     #user_table li {
       padding: 8px 12px;
       cursor: pointer;
@@ -341,12 +347,20 @@ $UserId = $_SESSION['UserId'];
         $.each(files, function(index, file) {
           var videoURL = URL.createObjectURL(file);
           var activeClass = (index === 0) ? 'active' : '';
-          previewContainer.append('<div class="carousel-item ' + activeClass + '"><video src="' + videoURL + '" controls></video></div>');
+          previewContainer.append('<div class="carousel-item ' + activeClass + '"><video src="' + videoURL + '" class="fixed-size-video" controls></video></div>');
         });
       }
 
       // Set the data type attribute for the Accept button
       $('.accept').data('type', fileType);
+
+      // Update the label with file names
+      var label = $(this).siblings('.custom-file-label');
+      var fileNames = [];
+      $.each(files, function(index, file) {
+        fileNames.push(file.name);
+      });
+      label.html(fileNames.join('<br>'));
 
       // Show the modal
       $('#previewModal').modal('show');
@@ -370,6 +384,11 @@ $UserId = $_SESSION['UserId'];
         }
 
         alert('Selected Files: ' + fileNames.join(', '));
+
+        // Clear the modal content and hide the modal
+        $('#previewContainer').empty();
+        $('#previewModal').modal('hide');
+
       } else {
         alert('No files selected.');
       }
@@ -382,8 +401,8 @@ $UserId = $_SESSION['UserId'];
     $('.submit').click(function() {
       var title = $('#title').val();
       var content = $('#content').val();
-      var image = $('#image').prop('files')[0];
-      var video = $('#video').prop('files')[0];
+      var imageFiles = $('#image').prop('files');
+      var videoFiles = $('#video').prop('files');
 
       // Check if title or content is empty
       if (title === '' || content === '') {
@@ -394,9 +413,16 @@ $UserId = $_SESSION['UserId'];
       var form_data = new FormData();
       form_data.append('title', title);
       form_data.append('content', content);
-      form_data.append('image', image);
-      form_data.append('video', video);
 
+      // Append image files to FormData
+      $.each(imageFiles, function(index, file) {
+        form_data.append('image[]', file);
+      });
+
+      // Append video files to FormData
+      $.each(videoFiles, function(index, file) {
+        form_data.append('video[]', file);
+      });
 
       $.ajax({
         url: 'addpost.php', // point to server-side PHP script 
@@ -418,13 +444,9 @@ $UserId = $_SESSION['UserId'];
             $('#content').val('');
             $('#image').val('');
             $('#video').val('');
-
-
           }
         }
-
       });
-
     });
   });
 </script>

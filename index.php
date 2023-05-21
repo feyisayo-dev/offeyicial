@@ -26,10 +26,11 @@ include 'db.php';
   <script src="js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="css/owl.carousel.min.css">
   <link rel="stylesheet" href="css/owl.theme.default.min.css">
-  <!-- <script src="js/owl.carousel.min.js"></script> -->
+  
 
   <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
   <script src="js/jquery.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
   <script src="js/slim.min.js"></script>
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/png" sizes="32x32" />
@@ -177,8 +178,8 @@ include 'db.php';
       font-size: 12px;
     }
 
-    #currentTimeDisplay,
-    #durationDisplay {
+    .currentTimeDisplay,
+    .durationDisplay {
       text-align: right;
       min-width: 30px;
       color: white;
@@ -791,54 +792,54 @@ include 'db.php';
   <div class="news-feed-container">
     <br>
     <?php
-    // Connect to the database
-    include 'db.php';
-    $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
+// Connect to the database
+include 'db.php';
+$query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
     FROM posts
     JOIN User_Profile ON User_Profile.UserId = posts.UserId
     LEFT JOIN likes ON likes.PostId = posts.PostId
     GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
     ORDER BY posts.date_posted DESC";
-    $params = array($UserId);
-    $result = sqlsrv_query($conn, $query, $params);
+$params = array($UserId);
+$result = sqlsrv_query($conn, $query, $params);
 
-    if ($result === false) {
-      echo "Error executing query: " . sqlsrv_errors()[0]['message'];
-      exit;
-    }
+if ($result === false) {
+    echo "Error executing query: " . sqlsrv_errors()[0]['message'];
+    exit;
+}
 
-    while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-      // Your code to display the posts
-      $date_posted = new DateTime($row['date_posted']);
-      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-      $postId = $row['PostId'];
-      $likes = $row['num_likes'];
-      $islikeing = $row['is_liking'];
-      $current_date = new DateTime();
-      $date_postedx = new DateTime($formatted_date);
-      $interval = $current_date->diff($date_postedx);
+while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+    // Your code to display the posts
+    $date_posted = new DateTime($row['date_posted']);
+    $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+    $postId = $row['PostId'];
+    $likes = $row['num_likes'];
+    $islikeing = $row['is_liking'];
+    $current_date = new DateTime();
+    $date_postedx = new DateTime($formatted_date);
+    $interval = $current_date->diff($date_postedx);
 
-      if ($interval->y) {
+    if ($interval->y) {
         $time_ago = $interval->y . " years ago";
-      } else if ($interval->m) {
+    } else if ($interval->m) {
         $time_ago = $interval->m . " months ago";
-      } else if ($interval->d) {
+    } else if ($interval->d) {
         $time_ago = $interval->d . " days ago";
-      } else if ($interval->h) {
+    } else if ($interval->h) {
         $time_ago = $interval->h . " hours ago";
-      } else if ($interval->i) {
+    } else if ($interval->i) {
         $time_ago = $interval->i . " minutes ago";
-      } else {
+    } else {
         $time_ago = $interval->s . " seconds ago";
-      }
-      // Store Likes, Comments, and Shares values in variables
-      echo '<section>';
-      echo '<div class="post">';
-      echo '<div class="news-feed-post"  id="' . $postId . '">';
-      echo '<div class="post-header">';
-      echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-      echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
-      echo '<div id="threedots">
+    }
+    // Store Likes, Comments, and Shares values in variables
+    echo '<section>';
+    echo '<div class="post">';
+    echo '<div class="news-feed-post"  id="' . $postId . '">';
+    echo '<div class="post-header">';
+    echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
+    echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
+    echo '<div id="threedots">
     <button type="button" class="btn btn-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       <i class="fas fa-ellipsis-h"></i>
     </button>
@@ -862,73 +863,82 @@ include 'db.php';
       <a class="dropdown-item" href="#">Repost post</a>
     </div>
   </div>';
-      echo '</div>';
-      echo '<h2 class="post-title">' . $row['title'] . '</h2>';
-      if (!empty($row['image']) && !empty($row['video'])) {
+    echo '</div>';
+    echo '<h2 class="post-title">' . $row['title'] . '</h2>';
+    if (!empty($row['image']) && !empty($row['video'])) {
         echo '<div class="post-carousel">';
-        echo '<img class="post-image" src="' . $row['image'] . '">';
-        echo '<div class="post-video">
-        <div class="video-container">
-  <video id="myVideo" class="w-100">
-    <source src="' . $row["video"] . '" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-  <div class="video-controls">
-    <button id="rewindButton" onclick="rewind()">Rewind 10 seconds</button>
-    <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
-    <button onclick="togglePlayPause()">
-      <span id="playPauseButton">Play</span>
-    </button>
-    <div class="volume-control">
-      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()">
-    </div>
-    <div class="time-control">
-      <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
-      <div class="time-display">
-        <div id="currentTimeDisplay">0:00</div>
-        <div id="durationDisplay">0:00</div>
-      </div>
-    </div>
-  </div>
-</div>
+        echo '<div class="owl-carousel">'; // Add the owl-carousel container
 
-        </div>';
+        // Add carousel items for each post with the same postId
+        while ($row['PostId'] === $postId) {
+            echo '<div class="post-item">';
+            echo '<img class="post-image" src="' . $row['image'] . '">';
+            echo '</div>';
+            // Fetch the next row
+            // ...
+        }
+
+        echo '</div>'; // Close the owl-carousel container
+
+        echo '<div class="post-video">'; // Add the video container
+        echo '<div class="video-container">';
+        echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
+        echo '<source src="' . $row["video"] . '" type="video/mp4">';
+        echo 'Your browser does not support the video tag.';
+        echo '</video>';
+        echo '<div class="video-controls">';
+        echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')">Rewind 10 seconds</button>';
+        echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')">Fast forward 10 seconds</button>';
+        echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
+        echo '<span id="playPauseButton-' . $postId . '">Play</span>';
+        echo '</button>';
+        echo '<div class="volume-control">';
+        echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
         echo '</div>';
-      } else if (!empty($row['image'])) {
+        echo '<div class="time-control">';
+        echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
+        echo '<div class="time-display">';
+        echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
+        echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    } else if (!empty($row['image'])) {
         echo '<img class="post-image" src="' . $row['image'] . '">';
-      } else if (!empty($row['video'])) {
-        echo '<div class="post-video">
-        <div class="video-container">
-  <video id="myVideo" class="w-100">
-    <source src="' . $row["video"] . '" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-  <div class="video-controls">
-    <button id="rewindButton" onclick="rewind()">Rewind 10 seconds</button>
-    <button id="fastForwardButton" onclick="fastForward()">Fast forward 10 seconds</button>
-    <button onclick="togglePlayPause()">
-      <span id="playPauseButton">Play</span>
-    </button>
-    <div class="volume-control">
-      <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" onchange="setVolume()">
-    </div>
-    <div class="time-control">
-      <input type="range" id="timeRange" min="0" step="0.01" value="0" onchange="setCurrentTime()">
-      <div class="time-display">
-        <div id="currentTimeDisplay">0:00</div>
-        <div id="durationDisplay">0:00</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-      </div>';
-      }
-      echo '<p class="post-content">' . $row['content'] . '</p>';
-      //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
-      echo '<p class="post-date">' . $time_ago . '</p>';
-      echo '</div>';
-      echo '<div class="footer">
+    } else if (!empty($row['video'])) {
+        echo '<div class="post-video">';
+        echo '<div class="video-container">';
+        echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
+        echo '<source src="' . $row["video"] . '" type="video/mp4">';
+        echo 'Your browser does not support the video tag.';
+        echo '</video>';
+        echo '<div class="video-controls">';
+        echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')">Rewind 10 seconds</button>';
+        echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')">Fast forward 10 seconds</button>';
+        echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
+        echo '<span id="playPauseButton-' . $postId . '">Play</span>';
+        echo '</button>';
+        echo '<div class="volume-control">';
+        echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
+        echo '</div>';
+        echo '<div class="time-control">';
+        echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
+        echo '<div class="time-display">';
+        echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
+        echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+    echo '<p class="post-content">' . $row['content'] . '</p>';
+    //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
+    echo '<p class="post-date">' . $time_ago . '</p>';
+    echo '</div>';
+    echo '<div class="footer">
       <button type="button" class="btn btn-primary like ' . ($islikeing ? 'likeing' : 'unlike') . '" data-postid="' . $postId . '">
           <span class="like-count">' . $likes . '</span>
           <span class="emoji">&#x2764;</span>
@@ -942,7 +952,7 @@ include 'db.php';
 
   </button>
   </div>';
-      echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
+    echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -993,7 +1003,7 @@ include 'db.php';
     </div>
   </div>
 </div>';
-      echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+    echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
 <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1044,21 +1054,21 @@ include 'db.php';
 </div>
 </div>
 </div>';
-      echo '</section>';
-    }
-    ?>
+    echo '</section>';
+}
+?>
     <button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
     <?php
 
-    // Retrieve all the chats of the current user
-    $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-    $stmt = sqlsrv_query($conn, $sql);
-    if ($stmt === false) {
-      die(print_r(sqlsrv_errors(), true));
-    }
+// Retrieve all the chats of the current user
+$sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+$stmt = sqlsrv_query($conn, $sql);
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
 
-    // Display the chats in a list on the sidebar
-    echo '<!-- Button to open the sidebar -->
+// Display the chats in a list on the sidebar
+echo '<!-- Button to open the sidebar -->
 <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
     <i class="bi bi-chat"></i> Chats
 </button>
@@ -1072,42 +1082,42 @@ include 'db.php';
     <div class="offcanvas-body">
         <ul class="list-unstyled">';
 
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-      $recipientId = $row['recipientId'];
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $recipientId = $row['recipientId'];
 
-      // Get the name of the recipient
-      $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+    // Get the name of the recipient
+    $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
 
-      $stmt2 = sqlsrv_query($conn, $sql2);
-      if ($stmt2 === false) {
+    $stmt2 = sqlsrv_query($conn, $sql2);
+    if ($stmt2 === false) {
         die(print_r(sqlsrv_errors(), true));
-      }
-
-      $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-      $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-      $Passport = $row2['Passport'];
-      if (empty($Passport)) {
-        $passportImage = "UserPassport/DefaultImage.png";
-      } else {
-        $passportImage = "UserPassport/" . $Passport;
-      }
-
-      // Display the recipient name and passport image in the list
-      echo '<li>';
-      echo '<div class="passport">';
-      echo '<a>';
-      echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-      echo '</a>';
-      echo '</div>';
-      echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-      echo '</li>';
     }
 
-    echo '</ul>
+    $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+    $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+    $Passport = $row2['Passport'];
+    if (empty($Passport)) {
+        $passportImage = "UserPassport/DefaultImage.png";
+    } else {
+        $passportImage = "UserPassport/" . $Passport;
+    }
+
+    // Display the recipient name and passport image in the list
+    echo '<li>';
+    echo '<div class="passport">';
+    echo '<a>';
+    echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+    echo '</a>';
+    echo '</div>';
+    echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+    echo '</li>';
+}
+
+echo '</ul>
     </div>
 </div>';
 
-    ?>
+?>
   </div>
 
   <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -1187,7 +1197,18 @@ include 'db.php';
 
 </body>
 <script src="js/jquery.min.js"></script>
-
+<script>
+$(document).ready(function() {
+    $(".owl-carousel").owlCarousel({
+        items: 1,
+        loop: true,
+        nav: true,
+        dots: false
+        // You can customize other options according to your needs
+    });
+});
+</script>
+y
 <script>
   $(document).ready(function() {
     $('#commentModal').on('show.bs.modal', function(event) {
@@ -1419,32 +1440,13 @@ include 'db.php';
   });
 </script>
 <script>
-  // Get the video element
-  const myVideo = document.getElementById("myVideo");
+  // Declare myVideo as a global variable
+  let myVideo;
 
-  // Get the controls
-  const playPauseButton = document.getElementById("playPauseButton");
-  const rewindButton = document.getElementById("rewindButton");
-  const fastForwardButton = document.getElementById("fastForwardButton");
-  const volumeRange = document.getElementById("volumeRange");
-  const timeRange = document.getElementById("timeRange");
-  const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+  function togglePlayPause(postId) {
+    const playPauseButton = document.getElementById("playPauseButton-" + postId);
+    const myVideo = document.getElementById("myVideo-" + postId);
 
-  // Update the current time display
-  // function updateCurrentTimeDisplay() {
-  //   currentTimeDisplay.textContent = formatTime(myVideo.currentTime) + " / " + formatTime(myVideo.duration);
-  // }
-
-  // Format time in minutes and seconds
-  // function formatTime(time) {
-  //   const minutes = Math.floor(time / 60);
-  //   const seconds = Math.floor(time % 60);
-  //   return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-  // }
-
-  // Toggle play/pause
-  function togglePlayPause() {
-    // console.log("Toggle play/pause button clicked");
     if (myVideo.paused) {
       myVideo.play();
       playPauseButton.textContent = "Pause";
@@ -1454,60 +1456,67 @@ include 'db.php';
     }
   }
 
-
-  // Rewind 10 seconds
-  function rewind() {
+  function rewind(postId) {
+    const myVideo = document.getElementById("myVideo-" + postId);
     myVideo.currentTime -= 10;
   }
 
   // Fast forward 10 seconds
-  function fastForward() {
+  function fastForward(postId) {
+    const myVideo = document.getElementById("myVideo-" + postId);
     myVideo.currentTime += 10;
   }
 
   // Set volume
-  function setVolume() {
+  function setVolume(postId) {
+    const myVideo = document.getElementById("myVideo-" + postId);
+    const volumeRange = document.getElementById("volumeRange" + postId);
     myVideo.volume = volumeRange.value;
   }
 
   // Set current time
-  function setCurrentTime() {
+  function setCurrentTime(postId) {
+    const myVideo = document.getElementById("myVideo-" + postId);
+    const timeRange = document.getElementById("timeRange" + postId);
     myVideo.currentTime = timeRange.value;
     updateCurrentTimeDisplay();
   }
 
   // Update the time range input on time update
-  myVideo.ontimeupdate = function() {
+  myVideo.ontimeupdate = function(postId) {
+    const myVideo = document.getElementById("myVideo-" + postId);
+    const timeRange = document.getElementById("timeRange" + postId);
     timeRange.value = myVideo.currentTime;
     updateCurrentTimeDisplay();
   };
 
-  // Get the video and time range input elements
-  // const myVideo = document.getElementById("myVideo");
-  // const timeRange = document.getElementById("timeRange");
 
   // Set the max value of the time range input on metadata load
-  myVideo.onloadedmetadata = function() {
+  myVideo.onloadedmetadata = function(postId) {
+    const timeRange = document.getElementById("timeRange" + postId);
+    const myVideo = document.getElementById("myVideo-" + postId);
     timeRange.max = myVideo.duration;
     updateCurrentTimeDisplay();
     updateDurationDisplay();
   };
 
   // Update the current time display element when the time updates
-  myVideo.ontimeupdate = function() {
+  myVideo.ontimeupdate = function(postId) {
+    const myVideo = document.getElementById("myVideo-" + postId);
+
     updateCurrentTimeDisplay();
   };
 
   // Update the current time display element
-  function updateCurrentTimeDisplay() {
-    const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+  function updateCurrentTimeDisplay(postId) {
+    const currentTimeDisplay = document.getElementById("currentTimeDisplay" + postId);
     const currentTime = myVideo.currentTime;
     currentTimeDisplay.textContent = formatTime(currentTime);
   }
 
   // Update the duration display element
-  function updateDurationDisplay() {
-    const durationDisplay = document.getElementById("durationDisplay");
+  function updateDurationDisplay(postId) {
+    const durationDisplay = document.getElementById("durationDisplay" + postId);
     const duration = myVideo.duration;
     durationDisplay.textContent = formatTime(duration);
   }
@@ -1519,6 +1528,24 @@ include 'db.php';
     const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
     return formattedTime;
   }
+
+  // Event listener for loadedmetadata event
+  $(document).on("loadedmetadata", "video", function(event) {
+    const postId = $(event.target).data("my-video-id");
+    myVideo = document.getElementById("myVideo-" + postId);
+    const timeRange = document.getElementById("timeRange-" + postId);
+    timeRange.max = myVideo.duration;
+    updateCurrentTimeDisplay(postId);
+    updateDurationDisplay(postId);
+  });
+
+  // Event listener for timeupdate event
+  $(document).on("timeupdate", "video", function(event) {
+    const postId = $(event.target).data("my-video-id");
+    const timeRange = document.getElementById("timeRange-" + postId);
+    timeRange.value = myVideo.currentTime;
+    updateCurrentTimeDisplay(postId);
+  });
 </script>
 <!-- <script>
   $("blockUserModal-"+postId).on('hidden.bs.modal', function () {
@@ -1614,7 +1641,7 @@ include 'db.php';
       }
     });
   });
-  //  check userId of the post before modal 
+  //  check userId of the post before modal
   // $(document).on('click', '.blockButton', function() {
   //   var postId = $(this).data('postid');
   //   alert(postId);
