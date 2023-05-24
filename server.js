@@ -35,7 +35,7 @@ webSocketServer.on('request', (request) => {
 });
 
 // Start the server
-const port = 8080;
+const port = 8888;
 server.listen(port, () => {
     console.log(`WebSocket server is listening on port ${port}`);
 });
