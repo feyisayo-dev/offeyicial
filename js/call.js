@@ -135,7 +135,7 @@ function updateCallTimer(startTime) {
 var signalingSocket;
 
 function initSignaling() {
-    var signalingServerUrl = 'ws://localhost:8080'; // Replace with your signaling server URL
+    var signalingServerUrl = 'localhost:8080'; // Replace with your signaling server URL
 
     signalingSocket = new WebSocket(signalingServerUrl);
 
