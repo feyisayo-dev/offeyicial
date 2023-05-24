@@ -30,7 +30,7 @@ if (sqlsrv_execute($stmt)) {
 <html>
 
 <head>
-    <title>Video Call</title>
+    <title>Call</title>
     <link rel="stylesheet" href="css/all.min.css" />
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
@@ -252,106 +252,17 @@ if (sqlsrv_execute($stmt)) {
                 </div>
             </div>
         </div>
+    </div>
 
-
-        <script src="js/jquery.min.js"></script>
-        <script src="js/bootstrap.min.js"></script>
-        <script src="js/slim.min.js"></script>
-        <script src="js/dexie.min.js"></script>
-        <script src="js/popper.min.js"></script>
-        <script src="js/bootstrap.bundle.min.js"></script>
-        <script src="js/adapter-latest.js"></script>
-        <script src="node_modules/simplewebrtc/simplewebrtc.bundle.js"></script>
-        <script src="node_modules/socket.io/dist/socket.js"></script>
-        <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
-        <script src="node_modules/socket.io/client-dist/socket.io.min.js"></script>
-
-        <script>
-            // Import the SimpleWebRTC library
-            // const SimpleWebRTC = require('simplewebrtc');
-            // Initialize the SimpleWebRTC object
-            var webrtc = new SimpleWebRTC({
-                // the id/element dom element that will hold "our" video
-                localVideoEl: 'local_video',
-                // the id/element dom element that will hold remote videos
-                remoteVideosEl: 'remote_video',
-                // immediately ask for camera access
-                autoRequestMedia: true,
-                // URL of the signaling server
-                url: 'http://localhost:8001',
-                // enable/disable peer-to-peer mode
-                enableDataChannels: true,
-                // additional ICE servers can be added here
-                // iceServers: [{url:'stun:stun.l.google.com:19302'}],
-                // Set the nick name for the user
-                nick: '<?php echo $First_Name . ' ' . $Surname; ?>'
-            });
-
-
-
-
-
-            // Start the local video
-            webrtc.startLocalVideo();
-
-            // When the "video_call_button" is clicked
-            $('#video_call_button').click(function() {
-                // Show the local and remote video containers
-                $('#local_video').show();
-                $('#remote_video').show();
-
-                // Set the media constraints for audio and video
-                webrtc.config.media = {
-                    audio: true,
-                    video: true
-                };
-
-                // Join the video call
-                webrtc.joinRoom('<?php echo $recipientId; ?>');
-
-                // Set the status text
-                $('.status').text('In Video Call');
-            });
-
-            // When the "audio_call_button" is clicked
-            $('#audio_call_button').click(function() {
-                // Hide the local and remote video containers
-                $('#local_video').hide();
-                $('#remote_video').hide();
-
-                // Set the media constraints for audio only
-                webrtc.config.media = {
-                    audio: true,
-                    video: false
-                };
-
-                // Join the audio call
-                webrtc.joinRoom('<?php echo $recipientId; ?>');
-
-                // Set the status text
-                $('.status').text('In Audio Call');
-            });
-
-            // When the "call_button" is clicked
-            $('#call_button').click(function() {
-                // Set the status text
-                $('.status').text('Calling...');
-
-                // Call the recipient
-                webrtc.call('<?php echo $recipientId; ?>');
-            });
-
-            // When the "hangup_button" is clicked
-            $('#hangup_button').click(function() {
-                // End the call
-                webrtc.leaveRoom();
-
-                // Set the status text
-                $('.status').text('Call Ended');
-            });
-        </script>
-
-
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/slim.min.js"></script>
+    <script src="js/dexie.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <!-- Remove the individual script tags -->
+    <script src="dist/bundle.js"></script>
+    <script src="js/call.js" ></script>
 </body>
 
 </html>
