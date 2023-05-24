@@ -581,7 +581,7 @@
 
         <!-- ======= Roadmap Section ======= -->
         <section id="roadmap" class="roadmap">
-            <div class="container" data-aos="fade-up">
+            <div class="container" data-bs-aos="fade-up">
 
                 <div class="section-title">
                     <h2>Roadmap</h2>

@@ -1500,13 +1500,6 @@ y
     updateDurationDisplay();
   };
 
-  // Update the current time display element when the time updates
-  myVideo.ontimeupdate = function(postId) {
-    const myVideo = document.getElementById("myVideo-" + postId);
-
-    updateCurrentTimeDisplay();
-  };
-
   // Update the current time display element
   function updateCurrentTimeDisplay(postId) {
     const currentTimeDisplay = document.getElementById("currentTimeDisplay" + postId);
