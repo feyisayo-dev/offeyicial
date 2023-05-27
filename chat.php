@@ -61,7 +61,7 @@ if (sqlsrv_execute($rstmt)) {
     }
 
     nav a:hover {
-      color: green;
+      color: aliceblue;
     }
 
     nav i {
@@ -92,7 +92,7 @@ if (sqlsrv_execute($rstmt)) {
     .chat-header {
       text-align: left;
       /* height: 70px; */
-      background-color: #04AA6D;
+      background-color: #bed2e4;
       color: white;
       padding: 6px;
     }
@@ -131,11 +131,14 @@ if (sqlsrv_execute($rstmt)) {
       height: calc(100vh - 200px);
       overflow-y: scroll;
       padding: 10px;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
     }
 
     .Sent {
       float: right;
-      background-color: #dcf8c6;
+      background: linear-gradient(to bottom, darkturquoise 0%, aliceblue 100%);
       color: #444;
       padding: 8px;
       border-radius: 10px;
@@ -148,7 +151,7 @@ if (sqlsrv_execute($rstmt)) {
 
     .received {
       float: left;
-      background-color: white;
+      background: linear-gradient(to bottom, white 0%, #b4b1e6 100%);
       color: #444;
       padding: 8px;
       border-radius: 10px;
@@ -192,9 +195,10 @@ if (sqlsrv_execute($rstmt)) {
       box-shadow: 2px 2px 2px blue;
     }
 
+
     button[type="submit"] {
       padding: 12px 20px;
-      background-color: #04AA6D;
+      background-color: darkturquoise;
       color: white;
       border: none;
       border-radius: 5px;
@@ -214,7 +218,7 @@ if (sqlsrv_execute($rstmt)) {
     .image-input {
       /* display: none; */
       width: 180px;
-      background-color: #04AA6D;
+      background-color: aliceblue;
       color: white;
     }
 
@@ -226,7 +230,7 @@ if (sqlsrv_execute($rstmt)) {
       font-family: montserrat;
       resize: none;
       border-radius: 10px;
-      box-shadow: 2px 2px 2px #04AA6D;
+      box-shadow: 2px 2px 2px aliceblue;
     }
 
     .message-sender {
@@ -248,7 +252,10 @@ if (sqlsrv_execute($rstmt)) {
 
     .custom-file-label {
       cursor: pointer;
-      color: green;
+      color: darkturquoise;
+    }
+    .custom-file-label:hover {
+      transform: scaleX(1.05);
     }
 
     .icon {
@@ -343,7 +350,7 @@ if (sqlsrv_execute($rstmt)) {
 
     /* On hover, darken the scrollbar thumb color */
     .chatbox::-webkit-scrollbar-thumb:hover {
-      background-color: green;
+      background-color: aliceblue;
     }
 
     /* #videoPlayer {
@@ -360,8 +367,8 @@ if (sqlsrv_execute($rstmt)) {
       top: 60px;
       right: 300px;
       z-index: 999;
-      background-color: #04AA6D;
-      color: #fff;
+      background-color: aliceblue;
+      color: black;
       border: none;
       border-radius: 50px;
       padding: 15px 20px;
@@ -400,7 +407,7 @@ if (sqlsrv_execute($rstmt)) {
 
     .offcanvas-header {
       padding: 15px;
-      background-color: #04AA6D;
+      background-color: aliceblue;
       color: #fff;
     }
 
@@ -434,7 +441,7 @@ if (sqlsrv_execute($rstmt)) {
 
     .offcanvas-body ul li a:hover {
       background-color: #f7f7f7;
-      color: #04AA6D;
+      color: aliceblue;
     }
 
     li a {
@@ -480,6 +487,7 @@ if (sqlsrv_execute($rstmt)) {
       margin: 10% auto;
       width: 80%;
       max-width: 500px;
+      background-color: aliceblue;
     }
 
     .modal img {
@@ -526,7 +534,7 @@ if (sqlsrv_execute($rstmt)) {
     }
 
     .emoji {
-      color: green;
+      color: darkturquoise;
       background-color: transparent;
       border: none;
     }
@@ -534,7 +542,8 @@ if (sqlsrv_execute($rstmt)) {
     .emoji:hover {
       background-color: transparent;
       border: none;
-      color: white;
+      color: aqua;
+      transform: scaleX(1.05);
     }
 
     .emoji-picker {
@@ -625,7 +634,6 @@ if (sqlsrv_execute($rstmt)) {
 
     /* Modal Content/Box */
     .modal-content {
-      background-color: #fefefe;
       margin: 15% auto;
       /* 15% from the top and centered */
       padding: 20px;

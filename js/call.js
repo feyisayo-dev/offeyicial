@@ -11,12 +11,41 @@ var peerConnection;
 var userB = '<?php echo $_GET["UserIdx"]; ?>';
 var UserId = '<?php echo $_SESSION["UserIdx"]; ?>';
 // Event listeners for call buttons
-audioCallButton.addEventListener('click', startAudioCall);
-videoCallButton.addEventListener('click', startVideoCall);
-hangupButton.addEventListener('click', hangUpCall);
+audioCallButton.addEventListener('click', function () {
+    console.log('Audio Call Button clicked');
+    startAudioCall();
+});
+
+videoCallButton.addEventListener('click', function () {
+    console.log('Video Call Button clicked');
+    startVideoCall();
+});
+
+hangupButton.addEventListener('click', function () {
+    console.log('Hang Up Button clicked');
+    hangUpCall();
+});
+function showCallModal(mediaConstraints) {
+    // Get the modal element
+    var callModal = document.getElementById('call_modal');
+
+    // Update the UI elements
+    // Set the caller's name and status in the modal
+    var callerNameElement = callModal.querySelector('.name');
+    var callerStatusElement = callModal.querySelector('.status');
+    callerNameElement.textContent = "<?php echo $recipientFirstName . ' ' . $recipientSurname; ?>";
+    callerStatusElement.textContent = "Calling...";
+
+    // Show the modal
+    var modal = new bootstrap.Modal(callModal);
+    modal.show();
+
+
+}
+
 
 function startAudioCall() {
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
         .then(function (stream) {
             localStream = stream;
             peerConnection = new RTCPeerConnection();
@@ -25,7 +54,7 @@ function startAudioCall() {
                 peerConnection.addTrack(track, stream);
             });
 
-            sendCallOffer();
+            sendCallOffer({ audio: true, video: false }); // Specify audio constraints
 
             // Update the UI to reflect the call status
             callButton.disabled = true;
@@ -36,6 +65,11 @@ function startAudioCall() {
         .catch(function (error) {
             console.log('Error accessing microphone:', error);
         });
+    callerStatusElement.textContent = "In Audio Call";
+
+    // Hide the local and remote video elements
+    localVideoElement.style.display = 'none';
+    remoteVideoElement.style.display = 'none';
 }
 
 function startVideoCall() {
@@ -48,14 +82,18 @@ function startVideoCall() {
                 peerConnection.addTrack(track, stream);
             });
 
-            sendCallOffer();
+            sendCallOffer({ audio: true, video: true }); // Specify audio and video constraints
 
             // Update the UI to reflect the call status
             callButton.disabled = true;
             hangupButton.disabled = false;
             audioCallButton.disabled = true;
             videoCallButton.disabled = true;
+            callerStatusElement.textContent = "In Video Call";
 
+            // Show the local and remote video elements
+            localVideoElement.style.display = 'block';
+            remoteVideoElement.style.display = 'block';
             // Display the local video stream
             localVideoElement.srcObject = stream;
         })
@@ -64,35 +102,11 @@ function startVideoCall() {
         });
 }
 
-function hangUpCall() {
-    // Stop the media streams
-    localStream.getTracks().forEach(function (track) {
-        track.stop();
-    });
-
-    // Close the RTCPeerConnection
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-    }
-
-    handleHangupMessage();
-
-    // Update the UI to reflect the call status
-    callButton.disabled = false;
-    hangupButton.disabled = true;
-    audioCallButton.disabled = false;
-    videoCallButton.disabled = false;
-    localVideoElement.srcObject = null;
-    remoteVideoElement.srcObject = null;
-    callTimerElement.textContent = '00:00:00';
-}
-
-function sendCallOffer() {
-    // Create and send a signaling message with the call offer to the remote user
+function sendCallOffer(mediaConstraints) {
+    // Create and send a signaling message with the call offer and media constraints to the remote user
     var offerOptions = {
-        offerToReceiveAudio: 1,
-        offerToReceiveVideo: 1
+        offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
+        offerToReceiveVideo: mediaConstraints.video ? 1 : 0
     };
 
     peerConnection.createOffer(offerOptions)
@@ -103,10 +117,11 @@ function sendCallOffer() {
             var sdpOffer = peerConnection.localDescription;
             console.log("SDP Offer:", sdpOffer);
 
-            // Send the SDP offer to the remote user via the signaling server
+            // Send the SDP offer and media constraints to the remote user via the signaling server
             sendMessage({
                 type: 'offer',
-                offer: sdpOffer
+                offer: sdpOffer,
+                mediaConstraints: mediaConstraints
             });
         })
         .catch(function (error) {
@@ -117,11 +132,12 @@ function sendCallOffer() {
 function handleOfferMessage(message) {
     // Handle the call offer received from the caller
     var offer = new RTCSessionDescription(message.offer);
+    var mediaConstraints = message.mediaConstraints; // Retrieve the media constraints from the message object
 
     peerConnection = new RTCPeerConnection();
     peerConnection.setRemoteDescription(offer)
         .then(function () {
-            return navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            return navigator.mediaDevices.getUserMedia(mediaConstraints);
         })
         .then(function (stream) {
             localStream = stream;
@@ -144,6 +160,9 @@ function handleOfferMessage(message) {
                 type: 'answer',
                 answer: sdpAnswer
             });
+
+            // Display the call modal for the second user
+            showCallModal(mediaConstraints);
         })
         .catch(function (error) {
             console.log('Error handling call offer:', error);
@@ -155,21 +174,77 @@ function handleOfferMessage(message) {
     audioCallButton.disabled = true;
     videoCallButton.disabled = true;
 }
+function hangUpCall() {
+    // Stop the media streams
+    localStream.getTracks().forEach(function (track) {
+        track.stop();
+    });
+
+    // Close the RTCPeerConnection
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+    callerStatusElement.textContent = "Call Ended";
+
+    // Hide the local and remote video elements
+    localVideoElement.style.display = 'none';
+    remoteVideoElement.style.display = 'none';
+
+    handleHangupMessage();
+
+    // Update the UI to reflect the call status
+    callButton.disabled = false;
+    hangupButton.disabled = true;
+    audioCallButton.disabled = false;
+    videoCallButton.disabled = false;
+    localVideoElement.srcObject = null;
+    remoteVideoElement.srcObject = null;
+    callTimerElement.textContent = '00:00:00';
+}
+
 
 function handleAnswerMessage(message) {
     // Handle the call answer received from the remote user
     var answer = new RTCSessionDescription(message.answer);
 
-    if (peerConnection.signalingState === 'stable') {
+    if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
+        // If the signaling state is 'stable' or 'have-local-offer', set the remote description directly
         peerConnection.setRemoteDescription(answer)
+            .then(function () {
+                // Check if there are any pending ICE candidates to be added
+                if (pendingCandidates.length > 0) {
+                    pendingCandidates.forEach(function (candidate) {
+                        peerConnection.addIceCandidate(candidate)
+                            .catch(function (error) {
+                                console.log('Error handling pending ICE candidate:', error);
+                            });
+                    });
+                    // Clear the pending candidates array
+                    pendingCandidates = [];
+                }
+            })
             .catch(function (error) {
                 console.log('Error handling call answer:', error);
             });
     } else {
-        // Queue the remote description and apply it later
+        // If the signaling state is not 'stable' or 'have-local-offer', queue the remote description and apply it later
         peerConnection.addEventListener('signalingstatechange', function () {
-            if (peerConnection.signalingState === 'stable') {
+            if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
                 peerConnection.setRemoteDescription(answer)
+                    .then(function () {
+                        // Check if there are any pending ICE candidates to be added
+                        if (pendingCandidates.length > 0) {
+                            pendingCandidates.forEach(function (candidate) {
+                                peerConnection.addIceCandidate(candidate)
+                                    .catch(function (error) {
+                                        console.log('Error handling pending ICE candidate:', error);
+                                    });
+                            });
+                            // Clear the pending candidates array
+                            pendingCandidates = [];
+                        }
+                    })
                     .catch(function (error) {
                         console.log('Error handling call answer:', error);
                     });
@@ -177,8 +252,6 @@ function handleAnswerMessage(message) {
         });
     }
 }
-
-
 
 function handleCandidateMessage(message) {
     // Handle the ICE candidate received from the remote user

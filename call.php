@@ -48,8 +48,13 @@ if (sqlsrv_execute($stmt)) {
     <!-- <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
 
     <style>
+        body {
+            background-color: aliceblue;
+        }
+
         /* Call modal styles */
         .callmain {
+            background-color: aliceblue;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -84,9 +89,16 @@ if (sqlsrv_execute($stmt)) {
         #remote_video {
             width: 100%;
             height: 200px;
-            background-color: #333;
             margin: 10px 0;
             border-radius: 5px;
+        }
+
+        #local_video {
+            background: linear-gradient(to bottom, darkturquoise 0%, aliceblue 100%);
+        }
+
+        #remote_video {
+            background: linear-gradient(to bottom, white 0%, #b4b1e6 100%);
         }
 
         .dropdown-menu {
@@ -137,6 +149,7 @@ if (sqlsrv_execute($stmt)) {
         .info-container .status {
             font-size: 18px;
             color: #777;
+            font-weight: lighter;
         }
 
         /* Name and avatar container */
@@ -153,6 +166,7 @@ if (sqlsrv_execute($stmt)) {
             border-radius: 50%;
             overflow: hidden;
             margin-right: 10px;
+            border: 5px solid green;
         }
 
         .avatar {
@@ -169,8 +183,9 @@ if (sqlsrv_execute($stmt)) {
 
         .name {
             font-size: 1.2rem;
-            font-weight: bold;
+            font-weight: bolder;
             margin-bottom: 5px;
+            text-transform: capitalize;
         }
 
         .status {
@@ -262,7 +277,7 @@ if (sqlsrv_execute($stmt)) {
     <script src="js/bootstrap.bundle.min.js"></script>
     <!-- Remove the individual script tags -->
     <script src="dist/bundle.js"></script>
-    <script src="js/call.js" ></script>
+    <!-- <script src="js/call.js" ></script> -->
 </body>
 
 </html>
