@@ -8,11 +8,17 @@ var hangupButton = document.getElementById('hangup_button');
 var audioCallButton = document.getElementById('audio_call_button');
 var videoCallButton = document.getElementById('video_call_button');
 var peerConnection;
-var userB = '<?php echo $_GET["UserIdx"]; ?>';
-var UserId = '<?php echo $_SESSION["UserIdx"]; ?>';
+// var userB = '<?php echo $_GET["UserIdx"]; ?>';
+// var UserId = '<?php echo $_SESSION["UserIdx"]; ?>';
+var callModal = document.getElementById('call_modal');
+var callerNameElement = document.getElementById('name');
+var callerStatusElement = document.getElementById('status');
+// var recipientFirstName = "<?php echo $recipientFirstName; ?>";
+// var recipientSurname = "<?php echo $recipientSurname; ?>";
 // Event listeners for call buttons
 audioCallButton.addEventListener('click', function () {
     console.log('Audio Call Button clicked');
+    console.log(recipientFirstName + ' ' + recipientSurname);
     startAudioCall();
 });
 
@@ -26,21 +32,13 @@ hangupButton.addEventListener('click', function () {
     hangUpCall();
 });
 function showCallModal(mediaConstraints) {
-    // Get the modal element
-    var callModal = document.getElementById('call_modal');
-
-    // Update the UI elements
     // Set the caller's name and status in the modal
-    var callerNameElement = callModal.querySelector('.name');
-    var callerStatusElement = callModal.querySelector('.status');
-    callerNameElement.textContent = "<?php echo $recipientFirstName . ' ' . $recipientSurname; ?>";
-    callerStatusElement.textContent = "Calling...";
 
-    // Show the modal
+    callerNameElement.textContent = recipientFirstName + ' ' + recipientSurname;
+    callerStatusElement.textContent = "Calling...";
+    // Show the modals
     var modal = new bootstrap.Modal(callModal);
     modal.show();
-
-
 }
 
 
@@ -59,8 +57,8 @@ function startAudioCall() {
             // Update the UI to reflect the call status
             callButton.disabled = true;
             hangupButton.disabled = false;
-            audioCallButton.disabled = true;
-            videoCallButton.disabled = true;
+            audioCallButton.disabled = false;
+            videoCallButton.disabled = false;
         })
         .catch(function (error) {
             console.log('Error accessing microphone:', error);
@@ -87,8 +85,8 @@ function startVideoCall() {
             // Update the UI to reflect the call status
             callButton.disabled = true;
             hangupButton.disabled = false;
-            audioCallButton.disabled = true;
-            videoCallButton.disabled = true;
+            audioCallButton.disabled = false;
+            videoCallButton.disabled = false;
             callerStatusElement.textContent = "In Video Call";
 
             // Show the local and remote video elements
@@ -171,8 +169,8 @@ function handleOfferMessage(message) {
     // Update the UI to reflect the call status
     callButton.disabled = true;
     hangupButton.disabled = false;
-    audioCallButton.disabled = true;
-    videoCallButton.disabled = true;
+    audioCallButton.disabled = false;
+    videoCallButton.disabled = false;
 }
 function hangUpCall() {
     // Stop the media streams
@@ -210,7 +208,21 @@ function handleAnswerMessage(message) {
 
     if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
         // If the signaling state is 'stable' or 'have-local-offer', set the remote description directly
-        peerConnection.setRemoteDescription(answer)
+        setRemoteDescription(answer);
+    } else {
+        // If the signaling state is not 'stable' or 'have-local-offer', queue the remote description and apply it later
+        peerConnection.addEventListener('signalingstatechange', function () {
+            if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
+                setRemoteDescription(answer);
+            }
+        });
+    }
+}
+
+function setRemoteDescription(description) {
+    if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
+        // If the signaling state is 'stable' or 'have-local-offer', set the remote description directly
+        peerConnection.setRemoteDescription(description)
             .then(function () {
                 // Check if there are any pending ICE candidates to be added
                 if (pendingCandidates.length > 0) {
@@ -231,7 +243,7 @@ function handleAnswerMessage(message) {
         // If the signaling state is not 'stable' or 'have-local-offer', queue the remote description and apply it later
         peerConnection.addEventListener('signalingstatechange', function () {
             if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
-                peerConnection.setRemoteDescription(answer)
+                peerConnection.setRemoteDescription(description)
                     .then(function () {
                         // Check if there are any pending ICE candidates to be added
                         if (pendingCandidates.length > 0) {
@@ -252,6 +264,7 @@ function handleAnswerMessage(message) {
         });
     }
 }
+
 
 function handleCandidateMessage(message) {
     // Handle the ICE candidate received from the remote user

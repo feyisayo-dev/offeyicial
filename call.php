@@ -238,8 +238,8 @@ if (sqlsrv_execute($stmt)) {
                     <img class="avatar" src="<?php echo $recipientPassport; ?>" alt="">
                 </div>
                 <div class="name-container">
-                    <div class="name"><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></div>
-                    <div class="status">Calling...</div>
+                    <div id="name" class="name"><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></div>
+                    <div id="status" class="status">Calling...</div>
                 </div>
             </div>
             <div class="callbody">
@@ -275,6 +275,12 @@ if (sqlsrv_execute($stmt)) {
     <script src="js/dexie.min.js"></script>
     <script src="js/popper.min.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        var recipientFirstName = "<?php echo $recipientFirstName; ?>";
+        var recipientSurname = "<?php echo $recipientSurname; ?>";
+        var userB = '<?php echo $_GET["UserIdx"]; ?>';
+        var UserId = '<?php echo $_SESSION["UserId"]; ?>';
+    </script>
     <!-- Remove the individual script tags -->
     <script src="dist/bundle.js"></script>
     <!-- <script src="js/call.js" ></script> -->
