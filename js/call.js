@@ -31,15 +31,7 @@ hangupButton.addEventListener('click', function () {
     console.log('Hang Up Button clicked');
     hangUpCall();
 });
-function showCallModal(mediaConstraints) {
-    // Set the caller's name and status in the modal
 
-    callerNameElement.textContent = recipientFirstName + ' ' + recipientSurname;
-    callerStatusElement.textContent = "Calling...";
-    // Show the modals
-    var modal = new bootstrap.Modal(callModal);
-    modal.show();
-}
 
 
 function startAudioCall() {
@@ -159,8 +151,7 @@ function handleOfferMessage(message) {
                 answer: sdpAnswer
             });
 
-            // Display the call modal for the second user
-            showCallModal(mediaConstraints);
+;
         })
         .catch(function (error) {
             console.log('Error handling call offer:', error);
