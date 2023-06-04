@@ -15,7 +15,6 @@ $UserId = $_SESSION['UserId'];
     Share a Post
   </title>
 
-  <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css\font\bootstrap-icons.css">
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <script src="js/jquery.min.js"></script>

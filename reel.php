@@ -20,6 +20,10 @@ $sql = "SELECT User_Profile.UserId, User_Profile.Surname, User_Profile.First_Nam
 $params = array($UserId, $UserId);
 $stmt = sqlsrv_prepare($conn, $sql, $params);
 
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
 if (sqlsrv_execute($stmt)) {
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
         $followerID = $row['UserId'];
@@ -36,43 +40,47 @@ if (sqlsrv_execute($stmt)) {
 
         // Retrieve and display the follower's reels
         $reelsQuery = "SELECT reelId, Video, Photo
-                   FROM reels
-                   WHERE UserId = ?";
+                       FROM reels
+                       WHERE UserId = ?";
         $reelsParams = array($followerID);
         $reelsStmt = sqlsrv_prepare($conn, $reelsQuery, $reelsParams);
 
         if (sqlsrv_execute($reelsStmt)) {
-            while ($reelsRow = sqlsrv_fetch_array($reelsStmt, SQLSRV_FETCH_ASSOC)) {
-                $reelID = $reelsRow['reelId'];
-                $reelVideo = $reelsRow['Video'];
-                $reelPhoto = $reelsRow['Photo'];
+            $reelsCount = sqlsrv_num_rows($reelsStmt);
 
-                // Display the reel information
-                echo "<div class='reel-container'>";
-                echo "<div class='reel'>";
-                echo "<video src='" . $reelVideo . "' controls></video>";
-                echo "<img src='" . $reelPhoto . "'>";
-                echo "<div class='reel-overlay'>";
-                echo "<button class='like-button'>Like</button>";
-                echo "<button class='comment-button'>Comment</button>";
-                echo "<button class='share-button'>Share</button>";
-                echo "<button class='save-button'>Save</button>";
-                echo "</div>";
-                echo "</div>";
-                echo "</div>";
+            if ($reelsCount > 0) {
+                while ($reelsRow = sqlsrv_fetch_array($reelsStmt, SQLSRV_FETCH_ASSOC)) {
+                    $reelID = $reelsRow['reelId'];
+                    $reelVideo = $reelsRow['Video'];
+                    $reelPhoto = $reelsRow['Photo'];
+
+                    // Display the reel information
+                    echo "<div class='reel-container'>";
+                    echo "<div class='reel'>";
+                    echo "<video src='" . $reelVideo . "' controls></video>";
+                    echo "<img src='" . $reelPhoto . "'>";
+                    echo "<div class='reel-overlay'>";
+                    echo "<button class='like-button'>Like</button>";
+                    echo "<button class='comment-button'>Comment</button>";
+                    echo "<button class='share-button'>Share</button>";
+                    echo "<button class='save-button'>Save</button>";
+                    echo "</div>";
+                    echo "</div>";
+                    echo "</div>";
+                }
+            } else {
+                // No reels found for the follower
+                echo "<div class='no-reels'>Get more friends</div>";
             }
+        } else {
+            die(print_r(sqlsrv_errors(), true));
         }
 
         echo "</div>";
     }
-
-    if (sqlsrv_num_rows($stmt) === 0) {
-        echo "<div class='no-reels'>Get more friends</div>";
-    }
-}else{
-    echo "No reels";
+} else {
+    die(print_r(sqlsrv_errors(), true));
 }
-
 
 echo '</body>';
 echo '</html>';
