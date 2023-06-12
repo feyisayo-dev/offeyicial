@@ -194,14 +194,34 @@ function hangUpCall() {
 
 
 function handleAnswerMessage(message) {
-    // Handle the call answer received from the remote user
     var answer = new RTCSessionDescription(message.answer);
 
-    if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
-        // If the signaling state is 'stable' or 'have-local-offer', set the remote description directly
+    if (peerConnection.signalingState === 'stable') {
         setRemoteDescription(answer);
+    } else if (peerConnection.signalingState === 'have-local-offer') {
+        // If the signaling state is 'have-local-offer', set the remote description and create an answer
+        setRemoteDescription(answer)
+            .then(function () {
+                return peerConnection.createAnswer();
+            })
+            .then(function (newAnswer) {
+                return peerConnection.setLocalDescription(newAnswer);
+            })
+            .then(function () {
+                var sdpAnswer = peerConnection.localDescription;
+                console.log("SDP Answer:", sdpAnswer);
+
+                // Send the SDP answer to the caller via the signaling server
+                sendMessage({
+                    type: 'answer',
+                    answer: sdpAnswer
+                });
+            })
+            .catch(function (error) {
+                console.log('Error handling call answer:', error);
+            });
     } else {
-        // If the signaling state is not 'stable' or 'have-local-offer', queue the remote description and apply it later
+        // If the signaling state is neither 'stable' nor 'have-local-offer', queue the remote description and apply it later
         peerConnection.addEventListener('signalingstatechange', function () {
             if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
                 setRemoteDescription(answer);
