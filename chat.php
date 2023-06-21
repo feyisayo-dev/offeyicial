@@ -742,6 +742,23 @@ if (sqlsrv_execute($rstmt)) {
     .dropdown-option:hover {
       background-color: #f2f2f2;
     }
+
+    .changebackground {
+      position: absolute;
+      display: block;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+
+    .theme-option {
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .theme-option:hover {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 
@@ -992,6 +1009,25 @@ if (sqlsrv_execute($rstmt)) {
           });
         </script>
         <script>
+          // Function to save the theme settings to localStorage
+          function savechatheaderTheme(theme) {
+            localStorage.setItem('dropdownTheme', theme);
+          }
+
+          // Function to apply the theme settings to the chatbox
+          function applychatheaderTheme(theme) {
+            var chatheader = document.querySelector('.chat-header');
+            chatheader.style.backgroundColor = theme;
+          }
+
+          // Check if there are previously saved theme settings in localStorage
+          var savedDropdownTheme = localStorage.getItem('dropdownTheme');
+          if (savedDropdownTheme) {
+            // Apply the saved theme settings
+            applychatheaderTheme(savedDropdownTheme);
+          }
+
+
           document.addEventListener('contextmenu', function(event) {
             var clickedElement = event.target;
 
@@ -1029,6 +1065,10 @@ if (sqlsrv_execute($rstmt)) {
                 var newColor = prompt('Enter a new background color:');
                 if (newColor !== null && newColor.trim() !== '') {
                   document.querySelector('.chat-header').style.backgroundColor = newColor;
+                  // Save the new theme settings
+                  savechatheaderTheme(newColor);
+                  // Apply the new theme settings
+                  applychatheaderTheme(newColor);
                 }
               });
 
@@ -1041,6 +1081,119 @@ if (sqlsrv_execute($rstmt)) {
           });
         </script>
         <script>
+          // Function to save the theme settings to localStorage
+          function savebackgroundTheme(theme) {
+            localStorage.setItem('chatboxTheme', theme);
+          }
+
+          // Function to apply the theme settings to the chatbox
+          function applybackgroundTheme(theme) {
+            var chatbox = document.querySelector('.chatbox');
+            chatbox.style.backgroundColor = theme;
+          }
+
+          // Check if there are previously saved theme settings in localStorage
+          var savedChatboxTheme = localStorage.getItem('chatboxTheme');
+          if (savedChatboxTheme) {
+            // Apply the saved theme settings
+            applybackgroundTheme(savedChatboxTheme);
+          }
+
+
+          document.addEventListener('contextmenu', function(event) {
+            var clickedElement = event.target;
+
+            // Check if the clicked element is within a .chatbox element
+            var chatbox = clickedElement.closest('.chatbox');
+
+            // Remove any existing dropdown menus except the one within the clicked chatbox element
+            var existingBackgrounds = document.querySelectorAll('.changebackground');
+            existingBackgrounds.forEach(function(dropdownMenu) {
+              if (dropdownMenu !== chatbox.querySelector('.changebackground')) {
+                dropdownMenu.remove();
+              }
+            });
+
+            if (chatbox) {
+              event.preventDefault();
+
+              var changeThemeOption = document.createElement('div');
+              changeThemeOption.textContent = 'Change Theme';
+              changeThemeOption.classList.add('theme-option');
+
+              var backgrounds = document.createElement('div');
+              backgrounds.classList.add('changebackground');
+              backgrounds.appendChild(changeThemeOption);
+
+              // Append the dropdown menu to the clicked .chatbox element
+              chatbox.appendChild(backgrounds);
+
+              var rect = event.target.getBoundingClientRect();
+              backgrounds.style.top = '130px';
+              backgrounds.style.right = '600px';
+
+              changeThemeOption.addEventListener('click', function() {
+                var newColor = prompt('Enter a new background color:');
+                if (newColor !== null && newColor.trim() !== '') {
+                  chatbox.style.backgroundColor = newColor;
+                  // Save the new theme settings
+                  savebackgroundTheme(newColor);
+                  // Apply the new theme settings
+                  applybackgroundTheme(newColor);
+                }
+              });
+
+              document.addEventListener('click', function(event) {
+                if (!event.target.closest('.chatbox')) {
+                  backgrounds.remove();
+                }
+              });
+            }
+          });
+        </script>
+        <script>
+          // Function to save the theme settings to localStorage
+          function savemessagebackgroundTheme(theme) {
+            localStorage.setItem('messagecolor', theme);
+          }
+
+          // Function to apply the theme settings to the chatbox
+          function applymessagesbackgroundTheme(theme) {
+            var messages = document.querySelectorAll('.Sent, .received');
+            messages.forEach(function(message) {
+              message.style.backgroundColor = theme;
+            });
+          }
+
+
+          // Check if there are previously saved theme settings in localStorage
+          var savedmessagecolorTheme = localStorage.getItem('messagecolor');
+          if (savedmessagecolorTheme) {
+            // Apply the saved theme settings
+            applymessagesbackgroundTheme(savedmessagecolorTheme);
+          }
+
+          // Function to save the theme settings to localStorage
+          function savemessageTheme(theme) {
+            localStorage.setItem('messageTheme', theme);
+          }
+
+          // Function to apply the theme settings to the chatbox
+          function applymessagesTheme(theme) {
+            var messages = document.querySelectorAll('.Sent, .received');
+            messages.forEach(function(message) {
+              message.style.background = theme;
+            });
+          }
+
+
+          // Check if there are previously saved theme settings in localStorage
+          var savedmessageTheme = localStorage.getItem('messageTheme');
+          if (savedmessageTheme) {
+            // Apply the saved theme settings
+            applymessagesTheme(savedmessageTheme);
+          }
+
           var lastTimestamp = Date.now();
 
           function checkForNewMessages() {
@@ -1126,43 +1279,65 @@ if (sqlsrv_execute($rstmt)) {
 
                       var changeThemeBtn = popup.querySelector('.change-theme');
                       changeThemeBtn.addEventListener('click', function() {
-                        // TODO: Implement change theme functionality
-                        // Show options to change the background or background color
-                        var changeThemeOptions = document.createElement('div');
-                        changeThemeOptions.className = 'change-theme-options';
-                        changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
-                        popup.appendChild(changeThemeOptions);
+                        // Check if change theme options already exist
+                        var changeThemeOptions = popup.querySelector('.change-theme-options');
+                        if (changeThemeOptions) {
+                          // If change theme options already exist, remove them
+                          changeThemeOptions.remove();
+                        } else {
+                          var changeThemeOptions = document.createElement('div');
+                          changeThemeOptions.className = 'change-theme-options';
+                          changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
+                          popup.appendChild(changeThemeOptions);
 
-                        var backgroundBtn = popup.querySelector('.background-gradient');
-                        backgroundBtn.addEventListener('click', function() {
-                          // TODO: Implement reply functionality
-                          // Show a reply form for the user to enter a reply message
-                          var newColor = prompt('Enter a new background gradient:');
-                          if (newColor !== null && newColor.trim() !== '') {
-                            var messageElement = e.target.closest('.message');
-                            if (messageElement && messageElement.classList.contains('Sent')) {
-                              messageElement.style.background = newColor;
-                            } else if (messageElement && messageElement.classList.contains('received')) {
-                              messageElement.style.background = newColor;
+                          var backgroundBtn = popup.querySelector('.background-gradient');
+                          backgroundBtn.addEventListener('click', function(e) {
+                            var newColor = prompt('Enter a new background gradient:');
+                            if (newColor !== null && newColor.trim() !== '') {
+                              if (clickedClass === 'Sent') {
+                                var sentElements = document.querySelectorAll('.Sent');
+                                sentElements.forEach(function(element) {
+                                  element.style.background = newColor;
+                                });
+                              } else if (clickedClass === 'received') {
+                                var receivedElements = document.querySelectorAll('.received');
+                                receivedElements.forEach(function(element) {
+                                  element.style.background = newColor;
+                                });
+                              }
                             }
-                          }
-                        });
+                            // Save the new theme settings
+                            savemessageTheme(newColor);
+                            // Apply the new theme settings
+                            applymessagesTheme(newColor);
+                          });
 
-                        var backgroundcolorBtn = popup.querySelector('.background-color');
-                        backgroundcolorBtn.addEventListener('click', function() {
-                          // TODO: Implement reply functionality
-                          // Show a reply form for the user to enter a reply message
-                          var newColor = prompt('Enter a new background color:');
-                          if (newColor !== null && newColor.trim() !== '') {
-                            var messageElement = e.target.closest('.message');
-                            if (messageElement && messageElement.classList.contains('Sent')) {
-                              messageElement.style.backgroundColor = newColor;
-                            } else if (messageElement && messageElement.classList.contains('received')) {
-                              messageElement.style.backgroundColor = newColor;
+
+
+                          var backgroundcolorBtn = popup.querySelector('.background-color');
+                          backgroundcolorBtn.addEventListener('click', function(e) {
+                            var newColor = prompt('Enter a new background color:');
+                            if (newColor !== null && newColor.trim() !== '') {
+                              if (clickedClass === 'Sent') {
+                                var sentElements = document.querySelectorAll('.Sent');
+                                sentElements.forEach(function(element) {
+                                  element.style.backgroundColor = newColor;
+                                });
+                              } else if (clickedClass === 'received') {
+                                var receivedElements = document.querySelectorAll('.received');
+                                receivedElements.forEach(function(element) {
+                                  element.style.backgroundColor = newColor;
+                                });
+                              }
                             }
-                          }
-                        });
+                            // Save the new theme settings
+                            savemessagebackgroundTheme(newColor);
+                            // Apply the new theme settings
+                            applymessagesbackgroundTheme(newColor);
+                          });
+                        }
                       });
+
                       // Add the popup to the chatbox
                       chatbox.appendChild(popup);
 
