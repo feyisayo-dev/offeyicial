@@ -1072,8 +1072,9 @@ if (sqlsrv_execute($rstmt)) {
                 }
               });
 
-              document.addEventListener('click', function(event) {
-                if (!event.target.closest('.chat-header')) {
+              // Remove the popup when the user clicks outside of it
+              document.addEventListener('click', function(e) {
+                if (dropdownMenu.contains(e.target)) {
                   dropdownMenu.remove();
                 }
               });
@@ -1088,8 +1089,9 @@ if (sqlsrv_execute($rstmt)) {
 
           // Function to apply the theme settings to the chatbox
           function applybackgroundTheme(theme) {
-            var chatbox = document.querySelector('.chatbox');
-            chatbox.style.backgroundColor = theme;
+            var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
+
+            chatboxes.style.backgroundColor = theme;
           }
 
           // Check if there are previously saved theme settings in localStorage
@@ -1099,18 +1101,17 @@ if (sqlsrv_execute($rstmt)) {
             applybackgroundTheme(savedChatboxTheme);
           }
 
-
           document.addEventListener('contextmenu', function(event) {
             var clickedElement = event.target;
 
             // Check if the clicked element is within a .chatbox element
-            var chatbox = clickedElement.closest('.chatbox');
+            var chatbox = clickedElement.closest('.chatbox, .chat-container');
 
             // Remove any existing dropdown menus except the one within the clicked chatbox element
             var existingBackgrounds = document.querySelectorAll('.changebackground');
-            existingBackgrounds.forEach(function(dropdownMenu) {
-              if (dropdownMenu !== chatbox.querySelector('.changebackground')) {
-                dropdownMenu.remove();
+            existingBackgrounds.forEach(function(background) {
+              if (background !== chatbox.querySelector('.changebackground')) {
+                background.remove();
               }
             });
 
@@ -1143,55 +1144,91 @@ if (sqlsrv_execute($rstmt)) {
                 }
               });
 
-              document.addEventListener('click', function(event) {
-                if (!event.target.closest('.chatbox')) {
+              // Remove the popup when the user clicks outside of it
+              document.addEventListener('click', function(e) {
+                if (!backgrounds.contains(e.target)) {
                   backgrounds.remove();
                 }
               });
             }
           });
         </script>
+
         <script>
           // Function to save the theme settings to localStorage
-          function savemessagebackgroundTheme(theme) {
-            localStorage.setItem('messagecolor', theme);
+          function saveSentmessagebackgroundTheme(theme) {
+            localStorage.setItem('messageSentcolor', theme);
+          }
+          // Function to save the theme settings to localStorage
+          function saveRecievedmessagebackgroundTheme(theme) {
+            localStorage.setItem('messageReceivedcolor', theme);
           }
 
           // Function to apply the theme settings to the chatbox
-          function applymessagesbackgroundTheme(theme) {
-            var messages = document.querySelectorAll('.Sent, .received');
-            messages.forEach(function(message) {
+          function applySentmessagesbackgroundTheme(theme) {
+            var sentbackground = document.querySelectorAll('.Sent');
+            sentbackground.forEach(function(message) {
+              message.style.backgroundColor = theme;
+            });
+          }
+          // Function to apply the theme settings to the chatbox
+          function applyReceivedmessagesbackgroundTheme(theme) {
+            var receivedbackground = document.querySelectorAll('.received');
+            receivedbackground.forEach(function(message) {
               message.style.backgroundColor = theme;
             });
           }
 
 
           // Check if there are previously saved theme settings in localStorage
-          var savedmessagecolorTheme = localStorage.getItem('messagecolor');
-          if (savedmessagecolorTheme) {
+          var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
+          if (savedSentmessagecolorTheme) {
             // Apply the saved theme settings
-            applymessagesbackgroundTheme(savedmessagecolorTheme);
+            applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
+          }
+          // Check if there are previously saved theme settings in localStorage
+          var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
+          if (savedReceivedmessagecolorTheme) {
+            // Apply the saved theme settings
+            applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
           }
 
           // Function to save the theme settings to localStorage
-          function savemessageTheme(theme) {
-            localStorage.setItem('messageTheme', theme);
+          function saveSentmessageTheme(theme) {
+            localStorage.setItem('messageSentTheme', theme);
+          }
+          // Function to save the theme settings to localStorage
+          function saveReceivedmessageTheme(theme) {
+            localStorage.setItem('messageReceivedTheme', theme);
           }
 
           // Function to apply the theme settings to the chatbox
-          function applymessagesTheme(theme) {
-            var messages = document.querySelectorAll('.Sent, .received');
-            messages.forEach(function(message) {
+          function applySentmessagesTheme(theme) {
+            var sent = document.querySelectorAll('.Sent');
+            sent.forEach(function(message) {
+              message.style.background = theme;
+            });
+          }
+          // Function to apply the theme settings to the chatbox
+          function applyReceivedmessagesTheme(theme) {
+            var received = document.querySelectorAll('.received');
+            received.forEach(function(message) {
               message.style.background = theme;
             });
           }
 
 
           // Check if there are previously saved theme settings in localStorage
-          var savedmessageTheme = localStorage.getItem('messageTheme');
-          if (savedmessageTheme) {
+          var savedSentmessageTheme = localStorage.getItem('messageSentTheme');
+          if (savedSentmessageTheme) {
             // Apply the saved theme settings
-            applymessagesTheme(savedmessageTheme);
+            applySentmessagesTheme(savedSentmessageTheme);
+          }
+          // Check if there are previously saved theme settings in localStorage
+          var savedReceivedmessageTheme = localStorage.getItem('messageReceivedTheme');
+          if (savedReceivedmessageTheme) {
+            // Apply the saved theme settings
+            applyReceivedmessagesTheme(savedReceivedmessageTheme);
           }
 
           var lastTimestamp = Date.now();
@@ -1298,18 +1335,23 @@ if (sqlsrv_execute($rstmt)) {
                                 var sentElements = document.querySelectorAll('.Sent');
                                 sentElements.forEach(function(element) {
                                   element.style.background = newColor;
+                                  // Save the new theme settings
+                                  saveSentmessageTheme(newColor);
+                                  // Apply the new theme settings
+                                  applySentmessagesTheme(newColor);
                                 });
                               } else if (clickedClass === 'received') {
                                 var receivedElements = document.querySelectorAll('.received');
                                 receivedElements.forEach(function(element) {
                                   element.style.background = newColor;
+                                  // Save the new theme settings
+                                  saveReceivedmessageTheme(newColor);
+                                  // Apply the new theme settings
+                                  applyReceivedmessagesTheme(newColor);
                                 });
                               }
                             }
-                            // Save the new theme settings
-                            savemessageTheme(newColor);
-                            // Apply the new theme settings
-                            applymessagesTheme(newColor);
+
                           });
 
 
@@ -1322,18 +1364,22 @@ if (sqlsrv_execute($rstmt)) {
                                 var sentElements = document.querySelectorAll('.Sent');
                                 sentElements.forEach(function(element) {
                                   element.style.backgroundColor = newColor;
+                                  // Save the new theme settings
+                                  saveSentmessagebackgroundTheme(newColor);
+                                  // Apply the new theme settings
+                                  applySentmessagesbackgroundTheme(newColor);
                                 });
                               } else if (clickedClass === 'received') {
                                 var receivedElements = document.querySelectorAll('.received');
                                 receivedElements.forEach(function(element) {
                                   element.style.backgroundColor = newColor;
+                                  // Save the new theme settings
+                                  saveRecievedmessagebackgroundTheme(newColor);
+                                  // Apply the new theme settings
+                                  applyReceivedmessagesbackgroundTheme(newColor);
                                 });
                               }
                             }
-                            // Save the new theme settings
-                            savemessagebackgroundTheme(newColor);
-                            // Apply the new theme settings
-                            applymessagesbackgroundTheme(newColor);
                           });
                         }
                       });
