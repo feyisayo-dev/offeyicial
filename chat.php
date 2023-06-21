@@ -40,6 +40,11 @@ if (sqlsrv_execute($rstmt)) {
 
 
   <style>
+    @font-face {
+      font-family: 'Modern-Age';
+      src: url('fonts/Modern-Age.ttf');
+    }
+
     body {
       background-color: #f2f2f2;
     }
@@ -254,6 +259,7 @@ if (sqlsrv_execute($rstmt)) {
       cursor: pointer;
       color: darkturquoise;
     }
+
     .custom-file-label:hover {
       transform: scaleX(1.05);
     }
@@ -514,6 +520,7 @@ if (sqlsrv_execute($rstmt)) {
       font-weight: 500;
       letter-spacing: 2px;
       text-transform: uppercase;
+      font-family: Modern-Age;
     }
 
     .logo {
@@ -717,6 +724,23 @@ if (sqlsrv_execute($rstmt)) {
 
     .popup a:hover {
       background-color: #e6e6e6;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      display: block;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+
+    .dropdown-option {
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .dropdown-option:hover {
+      background-color: #f2f2f2;
     }
   </style>
 </head>
@@ -967,7 +991,55 @@ if (sqlsrv_execute($rstmt)) {
             });
           });
         </script>
+        <script>
+          document.addEventListener('contextmenu', function(event) {
+            var clickedElement = event.target;
 
+            // Check if the clicked element is within a .chat-header element
+            var chatHeader = clickedElement.closest('.chat-header');
+
+            // Remove any existing dropdown menus except the one within the clicked .chat-header element
+            var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
+            existingDropdownMenus.forEach(function(dropdownMenu) {
+              if (dropdownMenu !== chatHeader.querySelector('.dropdown-menu')) {
+                dropdownMenu.remove();
+              }
+            });
+
+            if (chatHeader) {
+              event.preventDefault();
+
+              var changeThemeOption = document.createElement('div');
+              changeThemeOption.textContent = 'Change Theme';
+              changeThemeOption.classList.add('dropdown-option');
+
+              var dropdownMenu = document.createElement('div');
+              dropdownMenu.classList.add('dropdown-menu');
+              dropdownMenu.appendChild(changeThemeOption);
+
+              // Append the dropdown menu to the clicked .chat-header element
+              chatHeader.appendChild(dropdownMenu);
+
+
+              var rect = event.target.getBoundingClientRect();
+              dropdownMenu.style.top = '130px';
+              dropdownMenu.style.right = '600px';
+
+              changeThemeOption.addEventListener('click', function() {
+                var newColor = prompt('Enter a new background color:');
+                if (newColor !== null && newColor.trim() !== '') {
+                  document.querySelector('.chat-header').style.backgroundColor = newColor;
+                }
+              });
+
+              document.addEventListener('click', function(event) {
+                if (!event.target.closest('.chat-header')) {
+                  dropdownMenu.remove();
+                }
+              });
+            }
+          });
+        </script>
         <script>
           var lastTimestamp = Date.now();
 
@@ -998,28 +1070,48 @@ if (sqlsrv_execute($rstmt)) {
                       });
                     }
                     chatbox.appendChild(div);
-                    // Create popup div for delete and reply options
-                    var popup;
 
-                    // Add right-click event listener to each message div
+                  });
+                  chatbox.scrollTop = chatbox.scrollHeight; // Scroll to bottom
+
+                  // Add right-click event listener to each message div
+                  var messageDivs = document.querySelectorAll('.message');
+                  messageDivs.forEach(function(div) {
                     div.addEventListener('contextmenu', function(e) {
                       // Prevent default right-click menu from showing
                       e.preventDefault();
+                      // Get the class of the clicked message
+                      var clickedClass = e.target.parentNode.className;
+                      // Remove any existing popup
+                      var existingPopups = document.querySelectorAll('.popup');
+                      existingPopups.forEach(function(popup) {
+                        popup.remove();
+                      });
 
-                      // If a popup is already open, remove it
-                      if (popup) {
-                        popup.parentNode.removeChild(popup);
-                        popup = null;
-                      }
+                      // Get the class of the clicked message
+                      var clickedClass = e.target.parentNode.className;
 
                       // Create new popup and position it beside the clicked message
-                      popup = document.createElement('div');
+                      var popup = document.createElement('div');
                       popup.className = 'popup';
-                      popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a>';
-                      popup.style.top = e.pageY + 'px';
-                      popup.style.left = e.pageX + 'px';
+                      popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
 
-                      // Add event listeners to delete and reply options
+                      // Position the popup beside the clicked message
+                      var messageRect = e.target.getBoundingClientRect();
+                      var chatboxRect = chatbox.getBoundingClientRect();
+
+                      // Calculate the popup's top and left positions
+                      var popupTop = messageRect.top - chatboxRect.top + messageRect.height / 2 - popup.offsetHeight / 2;
+                      var popupLeft;
+                      if (clickedClass === 'Sent') {
+                        popupLeft = messageRect.left - chatboxRect.left - popup.offsetWidth;
+                      } else if (clickedClass === 'received') {
+                        popupLeft = messageRect.left - chatboxRect.left + messageRect.width;
+                      }
+
+                      popup.style.top = popupTop + 'px';
+                      popup.style.left = popupLeft + 'px';
+                      // Add event listeners to delete, reply, and change theme options
                       var deleteBtn = popup.querySelector('.delete');
                       deleteBtn.addEventListener('click', function() {
                         // TODO: Implement delete functionality
@@ -1032,19 +1124,56 @@ if (sqlsrv_execute($rstmt)) {
                         // Show a reply form for the user to enter a reply message
                       });
 
+                      var changeThemeBtn = popup.querySelector('.change-theme');
+                      changeThemeBtn.addEventListener('click', function() {
+                        // TODO: Implement change theme functionality
+                        // Show options to change the background or background color
+                        var changeThemeOptions = document.createElement('div');
+                        changeThemeOptions.className = 'change-theme-options';
+                        changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
+                        popup.appendChild(changeThemeOptions);
+
+                        var backgroundBtn = popup.querySelector('.background-gradient');
+                        backgroundBtn.addEventListener('click', function() {
+                          // TODO: Implement reply functionality
+                          // Show a reply form for the user to enter a reply message
+                          var newColor = prompt('Enter a new background gradient:');
+                          if (newColor !== null && newColor.trim() !== '') {
+                            var messageElement = e.target.closest('.message');
+                            if (messageElement && messageElement.classList.contains('Sent')) {
+                              messageElement.style.background = newColor;
+                            } else if (messageElement && messageElement.classList.contains('received')) {
+                              messageElement.style.background = newColor;
+                            }
+                          }
+                        });
+
+                        var backgroundcolorBtn = popup.querySelector('.background-color');
+                        backgroundcolorBtn.addEventListener('click', function() {
+                          // TODO: Implement reply functionality
+                          // Show a reply form for the user to enter a reply message
+                          var newColor = prompt('Enter a new background color:');
+                          if (newColor !== null && newColor.trim() !== '') {
+                            var messageElement = e.target.closest('.message');
+                            if (messageElement && messageElement.classList.contains('Sent')) {
+                              messageElement.style.backgroundColor = newColor;
+                            } else if (messageElement && messageElement.classList.contains('received')) {
+                              messageElement.style.backgroundColor = newColor;
+                            }
+                          }
+                        });
+                      });
                       // Add the popup to the chatbox
                       chatbox.appendChild(popup);
-                    });
 
-                    // Remove the popup when the user clicks outside of it
-                    document.addEventListener('click', function(e) {
-                      if (popup && !popup.contains(e.target)) {
-                        popup.parentNode.removeChild(popup);
-                        popup = null;
-                      }
+                      // Remove the popup when the user clicks outside of it
+                      document.addEventListener('click', function(e) {
+                        if (popup && !popup.contains(e.target)) {
+                          popup.remove();
+                        }
+                      });
                     });
                   });
-                  chatbox.scrollTop = chatbox.scrollHeight; // Scroll to bottom
                 }
               }
             };
@@ -1058,6 +1187,7 @@ if (sqlsrv_execute($rstmt)) {
 
           setInterval(checkForNewMessages, 500); // Call the function every 1 second
         </script>
+
 
 
         <script>

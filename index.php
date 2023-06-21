@@ -34,24 +34,34 @@ include 'db.php';
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/png" sizes="32x32" />
   <style>
-    /* Constant sidebar */
-    .sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 250px;
-      background-color: #f0f2f5;
+    @font-face {
+      font-family: 'Modern-Age';
+      src: url('fonts/Modern-Age.ttf');
     }
 
-    /* News feed */
-    .news-feed {
-      margin-left: 250px;
-      /* Make room for sidebar */
+    @font-face {
+      font-family: 'Billabong';
+      src: url('fonts/FontsFree-Net-Billabong.ttf');
+    }
+
+    @font-face {
+      font-family: 'SenjakalaDemoBold';
+      src: url('fonts/SenjakalaDemoBold.ttf');
+    }
+
+    @font-face {
+      font-family: 'Springlake';
+      src: url('fonts/Springlake.ttf');
+    }
+    @font-face {
+      font-family: 'WisdomVacation';
+      src: url('fonts/WisdomVacation.ttf');
     }
 
     /* News feed post */
     .post {
+      margin-left: 280px;
+      top: 0;
       background-color: #fff;
       border: 1px solid #dddfe2;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -332,161 +342,140 @@ include 'db.php';
       }
     }
 
-    .navbar-nav a {
-      font-size: 15px;
-      text-transform: uppercase;
-      font-weight: 500;
+    /* Custom CSS for the sidebar */
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      z-index: 9999;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+      background-color: #fff;
+      border-right: 1px solid #ddd;
+      padding: .5rem 1rem;
     }
 
-    .navbar-light .navbar-brand {
-      color: #000;
-      font-size: 25px;
-      text-transform: uppercase;
+    .sidebar-brand {
+      margin-left: 15px;
+      font-size: 30px;
       font-weight: 700;
       letter-spacing: 2px;
-    }
-
-    .navbar-light .navbar-brand:focus,
-    .navbar-light .navbar-brand:hover {
       color: #000;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-family: 'Modern-Age', cursive;
     }
 
-    .navbar-light .navbar-nav .navbar-link {
-      color: #000;
+    .sidebar-nav {
+      margin-top: 50px;
+      list-style: none;
+      padding: 0;
     }
 
-    @media (max-width: 767px) {
-
-      /* Set the height of the collapsed navbar to 100vh */
-      .navbar-collapse {
-        height: 100vh;
-      }
-
-      /* Set the position of the collapsed navbar to fixed */
-      .navbar-collapse.show {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 9999;
-        overflow-y: scroll;
-      }
-
-      /* Set the padding of the navbar items */
-      .navbar-nav {
-        padding-top: 30px;
-        padding-bottom: 30px;
-      }
-
-      /* Set the font size and padding of the navbar items */
-      .navbar-nav .nav-link {
-        font-size: 18px;
-        padding: 10px;
-      }
-
-      /* Set the color of the navbar items */
-      .navbar-nav .nav-link.custom-link {
-        color: #fff;
-        background-color: #28a745;
-        border-radius: 5px;
-        padding: 8px 15px;
-      }
-
-      /* Set the position of the search bar */
-      .search-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-
-      /* Set the width of the search bar */
-      .searchtext {
-        width: 100%;
-        padding: 10px;
-        border-radius: 5px;
-        border: none;
-      }
-    }
-
-    .searchtext {
-      background-color: #f2f2f2;
-      border: none;
-      padding: 8px;
+    .sidebar-nav .nav-link {
       font-size: 16px;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: #000;
+      padding: 10px 20px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-nav .nav-link:hover {
+      background-color: #f2f2f2;
+      color: #000;
+    }
+
+    .sidebar-nav .search-container {
+      display: flex;
+      align-items: center;
+      background-color: #fafafa;
+      border-radius: 8px;
+      padding: 5px;
+    }
+
+    .sidebar-nav .search-container i {
+      color: #8e8e8e;
+      margin-right: 5px;
+    }
+
+    .sidebar-nav .search-container input.searchtext {
+      border: none;
+      background-color: transparent;
+      font-size: 14px;
+      outline: none;
+      width: 100%;
+    }
+
+    .sidebar-nav .search-container input.searchtext::placeholder {
+      color: #8e8e8e;
+    }
+
+    .user-table {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 262px;
       width: 200px;
+      z-index: 9999;
+    }
+
+    .user-table.show {
+      display: block;
+    }
+
+    .user-table li {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .user-table li:hover {
+      background-color: #f2f2f2;
+      text-decoration: none;
+    }
+
+    .user-table li:hover {
+      background-color: #f2f2f2;
+      text-decoration: none;
+    }
+
+    .comment-bubble {
+      position: relative;
+      background-color: white;
+      padding: 10px;
+      margin-bottom: 10px;
       border-radius: 10px;
     }
 
-    /* searchdropdown */
-    .search-container {
-      position: relative;
-    }
-
-    #user_table {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-      position: absolute;
-      z-index: 9999;
-      background-color: #fff;
-      /* border: 1px solid #ddd; */
-      border-top: none;
-
-    }
-
-    #user_table li {
-      padding: 8px 12px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    #user_table li:hover {
-      background-color: #f2f2f2;
-      text-decoration: none;
-
-    }
-
-    .allcoments {
+    .comment-heading {
       display: flex;
-      flex-direction: row;
+      align-items: center;
       margin-bottom: 10px;
-      max-height: 200px;
-      /* adjust height as needed */
-      overflow-y: auto;
     }
 
-    .commentauthor {
-      display: inline-block;
-      vertical-align: top;
-      /* This ensures the image and name are aligned at the top */
-      margin-right: 10px;
-      /* Add some space between the image and name */
-    }
-
-    .commentpassport {
-      width: 30px;
-      /* Adjust the width of the image as needed */
-      height: 30px;
-      /* Adjust the height of the image as needed */
+    .comment-passport {
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
     }
-
 
     .post-name {
-      margin: 0;
       font-weight: bold;
     }
 
-    .seecomments {
-      flex: 1;
-      background-color: #f5f5f5;
-      border-radius: 10px;
-      padding: 5px 10px;
+    .comment-content {
       font-size: 14px;
     }
+
 
     #commentInput {
       height: 40px;
@@ -559,6 +548,8 @@ include 'db.php';
     li a {
       display: flex;
       align-items: center;
+      text-transform: uppercase;
+      text-decoration: none;
     }
 
     .passport {
@@ -751,193 +742,270 @@ include 'db.php';
       background-color: transparent;
       color: black;
     }
+
+    .post {
+      background-color: #ffffff;
+      padding: 20px;
+    }
+
+    .nav-item {
+      padding-bottom: 10px;
+    }
+
+    #notificationBox {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 300px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      display: none;
+    }
+
+    .nav-item.open #notificationBox {
+      display: block;
+    }
+
+    .comments-sidebar {
+      background-color: #f0f0f0;
+      padding: 10px;
+      height: 100vh;
+      overflow-y: auto;
+      right: 0;
+      top: 0;
+      position: fixed;
+      display: none;
+    }
+
+    .comments {
+      margin-bottom: 10px;
+    }
+
+    .comment-input {
+      padding: 10px;
+      background-color: #fff;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .emoji-picker {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .emoji-picker .btn {
+      margin-right: 10px;
+    }
+
+    .emoji-table-container {
+      display: none;
+    }
+
+    .comment-input textarea {
+      width: 100%;
+      resize: vertical;
+    }
+
+    .comment-input button {
+      margin-top: 10px;
+    }
   </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="home.php"><span class="text-success">Offeyicial</span></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+  <div class="row">
+    <div class="col-3">
+      <div class="sidebar">
+        <a class="sidebar-brand" href="home.php"><span class="text-success">Offeyicial</span></a>
+        <ul class="sidebar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="home.php"><i class="bi bi-house-door-fill"></i></i>Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i>Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='reel.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-camera-reels"></i></i>Reels</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId ?>"><i class="bi bi-plus-square"></i>New Post</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="notificationLink" href="#"><i class="bi bi-bell-fill"></i>Notifications</a>
+            <div id="notificationBox">
+              <!-- Content of the notification box goes here -->
+              <!-- You can customize the content as per your requirements -->
+            </div>
+          </li>
+          <li class="nav-item">
+            <div class="search-container">
+              <i class="bi bi-search"></i>
+              <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+            </div>
+          </li>
 
-    <div class="collapse navbar-collapse" id="navmenu">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i>Profile</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link custom-link" onclick="window.location.href='upload.php'"><i class="bi bi-plus-square"></i>Add a Post</a>
-        </li>
-        <li class="nav-item">
-          <div class="search-container">
-            <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
-            <div id="user_table">
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" onclick="location.href='logoutmodal.php'"><i class="bi bi-box-arrow-right"></i>Logout</a>
-        </li>
-
+          <li>
+            <a class="nav-link scrollto" href="#contact"><i class="bi bi-telephone"></i>Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="location.href='logoutmodal.php'"><i class="bi bi-box-arrow-right"></i>Logout</a>
+          </li>
+        </ul>
+      </div>
     </div>
-  </nav>
-  <br><br>
+    <div class="container">
+      <div id="user_table" class="user-table"></div>
 
-  <div class="news-feed-container">
-    <br>
-    <?php
-    // Connect to the database
-    include 'db.php';
-    $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
+      <div class="col-9">
+
+        <div class="news-feed-container">
+          <?php
+          // Connect to the database
+          include 'db.php';
+          $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
     FROM posts
     JOIN User_Profile ON User_Profile.UserId = posts.UserId
     LEFT JOIN likes ON likes.PostId = posts.PostId
     GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
     ORDER BY posts.date_posted DESC";
-    $params = array($UserId);
-    $result = sqlsrv_query($conn, $query, $params);
+          $params = array($UserId);
+          $result = sqlsrv_query($conn, $query, $params);
 
-    if ($result === false) {
-      echo "Error executing query: " . sqlsrv_errors()[0]['message'];
-      exit;
-    }
+          if ($result === false) {
+            echo "Error executing query: " . sqlsrv_errors()[0]['message'];
+            exit;
+          }
 
-    while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-      // Your code to display the posts
-      $date_posted = new DateTime($row['date_posted']);
-      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-      $postId = $row['PostId'];
-      $likes = $row['num_likes'];
-      $islikeing = $row['is_liking'];
-      $current_date = new DateTime();
-      $date_postedx = new DateTime($formatted_date);
-      $interval = $current_date->diff($date_postedx);
+          while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+            // Your code to display the posts
+            $date_posted = new DateTime($row['date_posted']);
+            $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
+            $postId = $row['PostId'];
+            $likes = $row['num_likes'];
+            $islikeing = $row['is_liking'];
+            $current_date = new DateTime();
+            $date_postedx = new DateTime($formatted_date);
+            $interval = $current_date->diff($date_postedx);
 
-      if ($interval->y) {
-        $time_ago = $interval->y . " years ago";
-      } else if ($interval->m) {
-        $time_ago = $interval->m . " months ago";
-      } else if ($interval->d) {
-        $time_ago = $interval->d . " days ago";
-      } else if ($interval->h) {
-        $time_ago = $interval->h . " hours ago";
-      } else if ($interval->i) {
-        $time_ago = $interval->i . " minutes ago";
-      } else {
-        $time_ago = $interval->s . " seconds ago";
-      }
-      // Store Likes, Comments, and Shares values in variables
-      echo '<section>';
-      echo '<div class="post">';
-      echo '<div class="news-feed-post"  id="' . $postId . '">';
-      echo '<div class="post-header">';
-      echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-      echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
-      echo '<div id="threedots">
-    <button type="button" class="btn btn-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      <i class="fas fa-ellipsis-h"></i>
-    </button>
-    <div class="dropdown-menu dropdown-menu-right">
-    <div>
-  <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $row['UserId'] . '" data-recipientid="' . $row['UserId'] . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $row['UserId'] . '">
-  Block User
-</button>
-<input type="hidden" id="bu' . $row['UserId'] . '" value="' . $row['UserId'] . '">
-</div>
-  <div>
-  <button type="button" class="btn btn-primary blockButton" id="blockButton-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal-' . $postId . '">
-  Block this type of post
-</button>
-<input type="hidden" id="b' . $postId . '" value="' . $postId . '">
-</div>
+            if ($interval->y) {
+              $time_ago = $interval->y . " years ago";
+            } else if ($interval->m) {
+              $time_ago = $interval->m . " months ago";
+            } else if ($interval->d) {
+              $time_ago = $interval->d . " days ago";
+            } else if ($interval->h) {
+              $time_ago = $interval->h . " hours ago";
+            } else if ($interval->i) {
+              $time_ago = $interval->i . " minutes ago";
+            } else {
+              $time_ago = $interval->s . " seconds ago";
+            }
+            // Store Likes, Comments, and Shares values in variables
+            echo '<section>';
+            echo '<div class="post">';
+            echo '<div class="news-feed-post"  id="' . $postId . '">';
+            echo '<div class="post-header">';
+            echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
+            echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
+            echo '<div id="threedots">
+                    <button type="button" class="btn btn-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                      <div>
+                        <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $row['UserId'] . '" data-recipientid="' . $row['UserId'] . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $row['UserId'] . '">
+                          Block User
+                        </button>
+                        <input type="hidden" id="bu' . $row['UserId'] . '" value="' . $row['UserId'] . '">
+                      </div>
+                      <div>
+                        <button type="button" class="btn btn-primary blockButton" id="blockButton-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal-' . $postId . '">
+                          Block this type of post
+                        </button>
+                        <input type="hidden" id="b' . $postId . '" value="' . $postId . '">
+                      </div>
+                      <a class="dropdown-item" href="#">Report user</a>
+                      <a class="dropdown-item" href="#">Repost post</a>
+                    </div>
+                  </div>';
+            echo '</div>';
+            echo '<h2 class="post-title">' . $row['title'] . '</h2>';
+            if (!empty($row['image']) && !empty($row['video'])) {
+              echo '<div class="post-carousel">';
+              echo '<div class="owl-carousel">'; // Add the owl-carousel container
 
+              // Add carousel items for each post with the same postId
+              while ($row['PostId'] === $postId) {
+                echo '<div class="post-item">';
+                echo '<img class="post-image" src="' . $row['image'] . '">';
+                echo '</div>';
+                // Fetch the next row
+                // ...
+              }
 
+              echo '</div>'; // Close the owl-carousel container
 
-      <a class="dropdown-item" href="#">Report user</a>
-      <a class="dropdown-item" href="#">Repost post</a>
-    </div>
-  </div>';
-      echo '</div>';
-      echo '<h2 class="post-title">' . $row['title'] . '</h2>';
-      if (!empty($row['image']) && !empty($row['video'])) {
-        echo '<div class="post-carousel">';
-        echo '<div class="owl-carousel">'; // Add the owl-carousel container
-
-        // Add carousel items for each post with the same postId
-        while ($row['PostId'] === $postId) {
-          echo '<div class="post-item">';
-          echo '<img class="post-image" src="' . $row['image'] . '">';
-          echo '</div>';
-          // Fetch the next row
-          // ...
-        }
-
-        echo '</div>'; // Close the owl-carousel container
-
-        echo '<div class="post-video">'; // Add the video container
-        echo '<div class="video-container">';
-        echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
-        echo '<source src="' . $row["video"] . '" type="video/mp4">';
-        echo 'Your browser does not support the video tag.';
-        echo '</video>';
-        echo '<div class="video-controls">';
-        echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')">Rewind 10 seconds</button>';
-        echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')">Fast forward 10 seconds</button>';
-        echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
-        echo '<span id="playPauseButton-' . $postId . '">Play</span>';
-        echo '</button>';
-        echo '<div class="volume-control">';
-        echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
-        echo '</div>';
-        echo '<div class="time-control">';
-        echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
-        echo '<div class="time-display">';
-        echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
-        echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-      } else if (!empty($row['image'])) {
-        echo '<img class="post-image" src="' . $row['image'] . '">';
-      } else if (!empty($row['video'])) {
-        echo '<div class="post-video">';
-        echo '<div class="video-container">';
-        echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
-        echo '<source src="' . $row["video"] . '" type="video/mp4">';
-        echo 'Your browser does not support the video tag.';
-        echo '</video>';
-        echo '<div class="video-controls">';
-        echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')">Rewind 10 seconds</button>';
-        echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')">Fast forward 10 seconds</button>';
-        echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
-        echo '<span id="playPauseButton-' . $postId . '">Play</span>';
-        echo '</button>';
-        echo '<div class="volume-control">';
-        echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
-        echo '</div>';
-        echo '<div class="time-control">';
-        echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
-        echo '<div class="time-display">';
-        echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
-        echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-      }
-      echo '<p class="post-content">' . $row['content'] . '</p>';
-      //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
-      echo '<p class="post-date">' . $time_ago . '</p>';
-      echo '</div>';
-      echo '<div class="footer">
+              echo '<div class="post-video">'; // Add the video container
+              echo '<div class="video-container">';
+              echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
+              echo '<source src="' . $row["video"] . '" type="video/mp4">';
+              echo 'Your browser does not support the video tag.';
+              echo '</video>';
+              echo '<div class="video-controls">';
+              echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')"><i class="bi bi-rewind"></i></button>';
+              echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
+              echo '<span id="playPauseButton-' . $postId . '"><i class="bi bi-play"></i></span>';
+              echo '</button>';
+              echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')"><i class="bi bi-fast-forward"></i></button>';
+              echo '<div class="volume-control">';
+              echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
+              echo '</div>';
+              echo '<div class="time-control">';
+              echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
+              echo '<div class="time-display">';
+              echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
+              echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
+              echo '</div>';
+              echo '</div>';
+              echo '</div>';
+              echo '</div>';
+              echo '</div>';
+            } else if (!empty($row['image'])) {
+              echo '<img class="post-image" src="' . $row['image'] . '">';
+            } else if (!empty($row['video'])) {
+              echo '<div class="post-video">';
+              echo '<div class="video-container">';
+              echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
+              echo '<source src="' . $row["video"] . '" type="video/mp4">';
+              echo 'Your browser does not support the video tag.';
+              echo '</video>';
+              echo '<div class="video-controls">';
+              echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')"><i class="bi bi-rewind"></i></button>';
+              echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
+              echo '<span id="playPauseButton-' . $postId . '"><i class="bi bi-play"></i></span>';
+              echo '</button>';
+              echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')"><i class="bi bi-fast-forward"></i></button>';
+              echo '<div class="volume-control">';
+              echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
+              echo '</div>';
+              echo '<div class="time-control">';
+              echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
+              echo '<div class="time-display">';
+              echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
+              echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
+              echo '</div>';
+              echo '</div>';
+              echo '</div>';
+            }
+            echo '<p class="post-content">' . $row['content'] . '</p>';
+            //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
+            echo '<p class="post-date">' . $time_ago . '</p>';
+            echo '</div>';
+            echo '<div class="footer">
       <button type="button" class="btn btn-primary like ' . ($islikeing ? 'likeing' : 'unlike') . '" data-postid="' . $postId . '">
           <span class="like-count">' . $likes . '</span>
           <span class="emoji">&#x2764;</span>
@@ -946,12 +1014,12 @@ include 'db.php';
       <button type="button" class="btn btn-primary share-button" data-postid="' . $postId . '">
           <i class="bi bi-share"></i> Share
       </button>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal" data-postid="' . $postId . '">
-      <i class="bi bi-chat-dots"></i> Comment
+      <button type="button" class="btn btn-primary comment-button" data-postid="' . $postId . '">
+  <i class="bi bi-chat-dots"></i> Comment</button>
 
-  </button>
   </div>';
-      echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
+            echo '</div>';
+            echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1002,7 +1070,7 @@ include 'db.php';
     </div>
   </div>
 </div>';
-      echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+            echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
 <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -1053,21 +1121,21 @@ include 'db.php';
 </div>
 </div>
 </div>';
-      echo '</section>';
-    }
-    ?>
-    <button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
-    <?php
+            echo '</section>';
+          }
+          ?>
+          <button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
+          <?php
 
-    // Retrieve all the chats of the current user
-    $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-    $stmt = sqlsrv_query($conn, $sql);
-    if ($stmt === false) {
-      die(print_r(sqlsrv_errors(), true));
-    }
+          // Retrieve all the chats of the current user
+          $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+          $stmt = sqlsrv_query($conn, $sql);
+          if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+          }
 
-    // Display the chats in a list on the sidebar
-    echo '<!-- Button to open the sidebar -->
+          // Display the chats in a list on the sidebar
+          echo '<!-- Button to open the sidebar -->
 <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
     <i class="bi bi-chat"></i> Chats
 </button>
@@ -1081,57 +1149,46 @@ include 'db.php';
     <div class="offcanvas-body">
         <ul class="list-unstyled">';
 
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-      $recipientId = $row['recipientId'];
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $recipientId = $row['recipientId'];
 
-      // Get the name of the recipient
-      $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+            // Get the name of the recipient
+            $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
 
-      $stmt2 = sqlsrv_query($conn, $sql2);
-      if ($stmt2 === false) {
-        die(print_r(sqlsrv_errors(), true));
-      }
+            $stmt2 = sqlsrv_query($conn, $sql2);
+            if ($stmt2 === false) {
+              die(print_r(sqlsrv_errors(), true));
+            }
 
-      $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-      $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-      $Passport = $row2['Passport'];
-      if (empty($Passport)) {
-        $passportImage = "UserPassport/DefaultImage.png";
-      } else {
-        $passportImage = "UserPassport/" . $Passport;
-      }
+            $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+            $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+            $Passport = $row2['Passport'];
+            if (empty($Passport)) {
+              $passportImage = "UserPassport/DefaultImage.png";
+            } else {
+              $passportImage = "UserPassport/" . $Passport;
+            }
 
-      // Display the recipient name and passport image in the list
-      echo '<li>';
-      echo '<div class="passport">';
-      echo '<a>';
-      echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-      echo '</a>';
-      echo '</div>';
-      echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-      echo '</li>';
-    }
+            // Display the recipient name and passport image in the list
+            echo '<li>';
+            echo '<div class="passport">';
+            echo '<a>';
+            echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+            echo '</a>';
+            echo '</div>';
+            echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+            echo '</li>';
+          }
 
-    echo '</ul>
+          echo '</ul>
     </div>
 </div>';
 
-    ?>
-  </div>
-
-  <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="commentModalLabel">Comment</h5>
-          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          ?>
         </div>
-        <div class="comments">
-
-        </div>
-        <div class="modal-body">
+      </div>
+      <div class="col-3 comments-sidebar" id="commentSidebar">
+        <div class="comment-input">
           <div class="emoji-picker">
             <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
               <i class="fas fa-smile"></i>
@@ -1183,20 +1240,57 @@ include 'db.php';
             </div>
           </div>
           <textarea class="form-control" name="commentText" placeholder="Type your comment here" id="commentInput" rows="3"></textarea>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" onclick="submitComment()">Comment</button>
         </div>
+        <div class="comments"></div>
       </div>
     </div>
-  </div>
+
 
   </div>
+  </div>
+  </div>
+  <script src="js/jquery.min.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      $('.comment-button').click(function() {
+        var postId = $(this).data('postid');
+        var commentsSidebar = $('#commentSidebar');
+
+        $.ajax({
+          type: "POST",
+          url: "getCommentBox.php",
+          data: {
+            postId: postId
+          },
+          success: function(response) {
+            commentsSidebar.find('.comments').html(response);
+            commentsSidebar.show();
+          }
+        });
+      });
+    });
+  </script>
 
 </body>
-<script src="js/jquery.min.js"></script>
 <script src="js/owl.carousel.min.js"></script>
+<script>
+  document.addEventListener("click", function(event) {
+    var notificationLink = document.getElementById("notificationLink");
+    var notificationBox = document.getElementById("notificationBox");
+
+    if (event.target !== notificationLink && !notificationLink.contains(event.target)) {
+      notificationLink.parentElement.classList.remove("open");
+    }
+  });
+
+  document.getElementById("notificationLink").addEventListener("click", function(event) {
+    event.preventDefault();
+    var parent = this.parentElement;
+    parent.classList.toggle("open");
+  });
+</script>
 <script>
   $(document).ready(function() {
     $(".owl-carousel").owlCarousel({
@@ -1208,27 +1302,8 @@ include 'db.php';
     });
   });
 </script>
-y
-<script>
-  $(document).ready(function() {
-    $('#commentModal').on('show.bs.modal', function(event) {
-      var button = $(event.relatedTarget);
-      var postId = button.data('postid');
-      var modal = $(this);
 
-      $.ajax({
-        type: "POST",
-        url: "getCommentBox.php",
-        data: {
-          postId: postId
-        },
-        success: function(response) {
-          modal.find('.comments').html(response);
-        }
-      });
-    });
-  });
-</script>
+
 <script>
   // Get postId from URL parameter
   var urlParams = new URLSearchParams(window.location.search);
@@ -1357,8 +1432,6 @@ y
       alert("Field Missing");
     }
 
-    // Close the modal
-    $("#commentModal").modal("hide");
   }
 </script>
 
@@ -1402,18 +1475,29 @@ y
       return;
     }
 
-    // Your search function here
-    $("#search").on("keyup", function() {
-      var search_query = $(this).val();
-      $.ajax({
-        url: "searchbackend.php",
-        method: "POST",
-        data: {
-          search_query: search_query
-        },
-        success: function(data) {
-          // Update the table with the returned results
-          $("#user_table").html(data);
+    $(document).ready(function() {
+      $("#search").on("keyup", function() {
+        var searchValue = $(this).val().toLowerCase();
+        if (searchValue === "") {
+          $("#user_table").removeClass("show").html("");
+        } else {
+          $.ajax({
+            url: "searchbackend.php",
+            method: "POST",
+            data: {
+              search_query: searchValue
+            },
+            success: function(data) {
+              $("#user_table").addClass("show").html(data);
+            }
+          });
+        }
+      });
+
+      $(document).on("click", function(e) {
+        // Check if the click is outside the search box and user table
+        if (!$(e.target).closest(".search-container, #user_table").length) {
+          $("#user_table").removeClass("show").html("");
         }
       });
     });
@@ -1449,10 +1533,10 @@ y
 
     if (myVideo.paused) {
       myVideo.play();
-      playPauseButton.textContent = "Pause";
+      playPauseButton.innerHTML = "<i class='bi bi-pause-circle-fill'></i>";
     } else {
       myVideo.pause();
-      playPauseButton.textContent = "Play";
+      playPauseButton.innerHTML = "<i class='bi bi-play'></i>";
     }
   }
 
@@ -1461,83 +1545,112 @@ y
     myVideo.currentTime -= 10;
   }
 
-  // Fast forward 10 seconds
+  // <i class="bi bi-fast-forward"></i>
   function fastForward(postId) {
     const myVideo = document.getElementById("myVideo-" + postId);
     myVideo.currentTime += 10;
   }
 
   // Set volume
-  function setVolume(postId) {
-    const myVideo = document.getElementById("myVideo-" + postId);
-    const volumeRange = document.getElementById("volumeRange" + postId);
-    myVideo.volume = volumeRange.value;
-  }
+  (function() {
+    function setVolume(postId) {
+      var video = document.getElementById('myVideo-' + postId);
+      var volumeRange = document.getElementById('volumeRange-' + postId);
 
-  // Set current time
+      // Set the volume of the video
+      video.volume = volumeRange.value;
+    }
+
+    // Update the volume range when the video is loaded
+    window.addEventListener('DOMContentLoaded', function() {
+      var videos = document.getElementsByTagName('video');
+
+      for (var i = 0; i < videos.length; i++) {
+        (function() {
+          var video = videos[i];
+          var postId = video.getAttribute('data-my-Video-id');
+          var volumeRange = document.getElementById('volumeRange-' + postId);
+
+          // Update the volume range as the volume changes
+          video.addEventListener('volumechange', function() {
+            volumeRange.value = video.volume;
+          });
+
+          // Set the setVolume function with the postId argument
+          volumeRange.oninput = function() {
+            setVolume(postId);
+          };
+        })();
+      }
+    });
+  })();
+
+
   function setCurrentTime(postId) {
-    const myVideo = document.getElementById("myVideo-" + postId);
-    const timeRange = document.getElementById("timeRange" + postId);
-    myVideo.currentTime = timeRange.value;
-    updateCurrentTimeDisplay();
+    return function() {
+      var video = document.getElementById('myVideo-' + postId);
+      var timeRange = document.getElementById('timeRange-' + postId);
+      var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+      // Calculate the new time based on the range value
+      var newTime = video.duration * (timeRange.value / 100);
+
+      // Set the current time of the video
+      video.currentTime = newTime;
+
+      // Update the current time display
+      currentTimeDisplay.innerHTML = formatTime(video.currentTime);
+    };
   }
 
-  // Update the time range input on time update
-  myVideo.ontimeupdate = function(postId) {
-    const myVideo = document.getElementById("myVideo-" + postId);
-    const timeRange = document.getElementById("timeRange" + postId);
-    timeRange.value = myVideo.currentTime;
-    updateCurrentTimeDisplay();
-  };
-
-
-  // Set the max value of the time range input on metadata load
-  myVideo.onloadedmetadata = function(postId) {
-    const timeRange = document.getElementById("timeRange" + postId);
-    const myVideo = document.getElementById("myVideo-" + postId);
-    timeRange.max = myVideo.duration;
-    updateCurrentTimeDisplay();
-    updateDurationDisplay();
-  };
-
-  // Update the current time display element
-  function updateCurrentTimeDisplay(postId) {
-    const currentTimeDisplay = document.getElementById("currentTimeDisplay" + postId);
-    const currentTime = myVideo.currentTime;
-    currentTimeDisplay.textContent = formatTime(currentTime);
-  }
-
-  // Update the duration display element
-  function updateDurationDisplay(postId) {
-    const durationDisplay = document.getElementById("durationDisplay" + postId);
-    const duration = myVideo.duration;
-    durationDisplay.textContent = formatTime(duration);
-  }
-
-  // Format the time in the format of "h:m:ss"
+  // Helper function to format time in HH:MM:SS format
   function formatTime(time) {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    const formattedTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-    return formattedTime;
+    var minutes = Math.floor(time / 60);
+    var seconds = Math.floor(time % 60);
+
+    // Add leading zeros if necessary
+    minutes = String(minutes).padStart(2, '0');
+    seconds = String(seconds).padStart(2, '0');
+
+    return minutes + ':' + seconds;
   }
 
-  // Event listener for loadedmetadata event
-  $(document).on("loadedmetadata", "video", function(event) {
-    const postId = $(event.target).data("my-video-id");
-    myVideo = document.getElementById("myVideo-" + postId);
-    const timeRange = document.getElementById("timeRange-" + postId);
-    timeRange.max = myVideo.duration;
-    updateCurrentTimeDisplay(postId);
-    updateDurationDisplay(postId);
-  });
+  // Update the time range and duration display when the video is loaded
+  window.addEventListener('DOMContentLoaded', function() {
+    var videos = document.getElementsByTagName('video');
 
-  // Event listener for timeupdate event
-  $(document).on("timeupdate", "video", function(event) {
-    const postId = $(event.target).data("my-video-id");
-    const timeRange = document.getElementById("timeRange-" + postId);
-    timeRange.value = myVideo.currentTime;
-    updateCurrentTimeDisplay(postId);
+    for (var i = 0; i < videos.length; i++) {
+      (function() {
+        var video = videos[i];
+        var postId = video.getAttribute('data-my-Video-id');
+        var timeRange = document.getElementById('timeRange-' + postId);
+        var durationDisplay = document.getElementById('durationDisplay-' + postId);
+
+        // Update the duration display
+        video.addEventListener('loadedmetadata', function() {
+          durationDisplay.innerHTML = formatTime(video.duration);
+        });
+
+        // Update the time range as the video progresses
+        video.addEventListener('timeupdate', function() {
+          var currentTime = video.currentTime;
+          var duration = video.duration;
+
+          // Calculate the percentage of progress
+          var progress = (currentTime / duration) * 100;
+
+          // Set the value of the time range
+          timeRange.value = progress;
+
+          // Update the current time display
+          var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+          currentTimeDisplay.innerHTML = formatTime(currentTime);
+        });
+
+        // Set the setCurrentTime function with the postId argument
+        timeRange.onchange = setCurrentTime(postId);
+      })();
+    }
   });
 </script>
 <!-- <script>

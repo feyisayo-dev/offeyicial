@@ -652,10 +652,10 @@ session_start();
                     <li class="nav-item">
                         <a class="nav-link" href="donate.php">Donate</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="contactus.php"><i class="bi bi-telephone"></i>Contact us</a>
+                    <li>
+                        <a class="nav-link scrollto" href="#contact"><i class="bi bi-telephone"></i>Contact</a>
                     </li>
-
+                </ul>
             </div>
         </nav>
         <div class="form_container">

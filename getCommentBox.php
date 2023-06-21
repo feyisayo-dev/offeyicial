@@ -27,15 +27,16 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
     $First_Name = $row['First_Name'];
     $comment = $row['comment'];
    
-    echo '<div class=allcoments>
-    <div class=commentauthor>
-        <img class="commentpassport" src="UserPassport/' . $row['Passport'] . '">
+    echo '<div class="comment-bubble">
+    <div class="comment-heading">
+        <img class="comment-passport" src="UserPassport/' . $row['Passport'] . '">
         <p class="post-name">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>
     </div>
-    <div class="seecomments">"' . $comment . '"</div>
+    <div class="comment-content">' . $comment . '</div>
 </div>';
+
+
 }
 
 // Close database connection
 sqlsrv_close($conn);
-?>

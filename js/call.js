@@ -35,6 +35,8 @@ hangupButton.addEventListener('click', function () {
 
 
 function startAudioCall() {
+    console.log('Before initiating call - localStream:', localStream);
+    console.log('Before initiating call - remoteStream:', remoteStream);
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
         .then(function (stream) {
             localStream = stream;
@@ -51,6 +53,7 @@ function startAudioCall() {
             hangupButton.disabled = false;
             audioCallButton.disabled = false;
             videoCallButton.disabled = false;
+
         })
         .catch(function (error) {
             console.log('Error accessing microphone:', error);
@@ -131,6 +134,13 @@ function handleOfferMessage(message) {
         })
         .then(function (stream) {
             localStream = stream;
+            console.log("lSTREAM:", localStream);
+
+            return navigator.mediaDevices.getUserMedia(mediaConstraints); // Obtain a separate stream for remoteStream
+        })
+        .then(function (stream) {
+            remoteStream = stream; // Assign the separate stream to remoteStream
+            console.log("rSTREAM:", remoteStream);
 
             stream.getTracks().forEach(function (track) {
                 peerConnection.addTrack(track, stream);
@@ -151,7 +161,8 @@ function handleOfferMessage(message) {
                 answer: sdpAnswer
             });
 
-;
+            // Update the remote video element to display the remote stream
+            remoteVideoElement.srcObject = remoteStream;
         })
         .catch(function (error) {
             console.log('Error handling call offer:', error);
@@ -163,6 +174,8 @@ function handleOfferMessage(message) {
     audioCallButton.disabled = false;
     videoCallButton.disabled = false;
 }
+
+
 function hangUpCall() {
     // Stop the media streams
     localStream.getTracks().forEach(function (track) {
@@ -196,35 +209,45 @@ function hangUpCall() {
 function handleAnswerMessage(message) {
     var answer = new RTCSessionDescription(message.answer);
 
-    if (peerConnection.signalingState === 'stable') {
-        setRemoteDescription(answer);
-    } else if (peerConnection.signalingState === 'have-local-offer') {
-        // If the signaling state is 'have-local-offer', set the remote description and create an answer
-        setRemoteDescription(answer)
+    if (peerConnection.signalingState === 'have-local-offer') {
+        peerConnection.setRemoteDescription(answer)
             .then(function () {
-                return peerConnection.createAnswer();
-            })
-            .then(function (newAnswer) {
-                return peerConnection.setLocalDescription(newAnswer);
-            })
-            .then(function () {
-                var sdpAnswer = peerConnection.localDescription;
-                console.log("SDP Answer:", sdpAnswer);
-
-                // Send the SDP answer to the caller via the signaling server
-                sendMessage({
-                    type: 'answer',
-                    answer: sdpAnswer
-                });
+                // Check if there are any pending ICE candidates to be added
+                if (pendingCandidates.length > 0) {
+                    pendingCandidates.forEach(function (candidate) {
+                        peerConnection.addIceCandidate(candidate)
+                            .catch(function (error) {
+                                console.log('Error handling pending ICE candidate:', error);
+                            });
+                    });
+                    // Clear the pending candidates array
+                    pendingCandidates = [];
+                }
             })
             .catch(function (error) {
                 console.log('Error handling call answer:', error);
             });
     } else {
-        // If the signaling state is neither 'stable' nor 'have-local-offer', queue the remote description and apply it later
+        // If the signaling state is not 'have-local-offer', queue the remote description and apply it later
         peerConnection.addEventListener('signalingstatechange', function () {
-            if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
-                setRemoteDescription(answer);
+            if (peerConnection.signalingState === 'have-local-offer') {
+                peerConnection.setRemoteDescription(answer)
+                    .then(function () {
+                        // Check if there are any pending ICE candidates to be added
+                        if (pendingCandidates.length > 0) {
+                            pendingCandidates.forEach(function (candidate) {
+                                peerConnection.addIceCandidate(candidate)
+                                    .catch(function (error) {
+                                        console.log('Error handling pending ICE candidate:', error);
+                                    });
+                            });
+                            // Clear the pending candidates array
+                            pendingCandidates = [];
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log('Error handling call answer:', error);
+                    });
             }
         });
     }
