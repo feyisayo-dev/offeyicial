@@ -270,6 +270,7 @@ if (sqlsrv_execute($rstmt)) {
       font-weight: bold;
       text-decoration: none;
       color: white;
+      text-transform: capitalize;
     }
 
     .call-icon {
@@ -726,23 +727,6 @@ if (sqlsrv_execute($rstmt)) {
       background-color: #e6e6e6;
     }
 
-    .dropdown-menu {
-      position: absolute;
-      display: block;
-      background-color: white;
-      border: 1px solid #ccc;
-      padding: 5px;
-    }
-
-    .dropdown-option {
-      cursor: pointer;
-      padding: 5px;
-    }
-
-    .dropdown-option:hover {
-      background-color: #f2f2f2;
-    }
-
     .changebackground {
       position: absolute;
       display: block;
@@ -758,6 +742,53 @@ if (sqlsrv_execute($rstmt)) {
 
     .theme-option:hover {
       background-color: #f2f2f2;
+    }
+
+    .dropdown {
+      display: inline-block;
+      position: relative;
+      padding: 10px;
+    }
+
+    .dropdown-toggle.custom-toggle {
+      background-color: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .dropdown-toggle.custom-toggle .dots {
+      display: block;
+      width: 3px;
+      height: 3px;
+      margin-bottom: 2px;
+      background-color: #000;
+      border-radius: 50%;
+    }
+
+    .dropdown-toggle::after {
+      display: none;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      display: none;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+
+    .dropdown-option {
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .dropdown-option:hover {
+      background-color: #f2f2f2;
+    }
+
+
+    .dropdown-item {
+      padding: 10px;
     }
   </style>
 </head>
@@ -841,6 +872,18 @@ if (sqlsrv_execute($rstmt)) {
           }
           echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
           echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
+          // Add the reset button
+          echo '<div class="dropdown">
+                <button class="dropdown-toggle custom-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#chtheme" aria-controls="chtheme">
+                  <span class="dots"></span>
+                  <span class="dots"></span>
+                  <span class="dots"></span>
+                </button>
+
+                <ul class="dropdown-menu" id="chtheme" aria-labelledby="dropdownMenuButton">
+                  <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
+                </ul>
+              </div>';
           echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
         }
         echo '</div>';
@@ -987,6 +1030,17 @@ if (sqlsrv_execute($rstmt)) {
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
         <script>
+          function resetTheme() {
+            localStorage.removeItem('messageSentcolor');
+            localStorage.removeItem('messageReceivedcolor');
+            localStorage.removeItem('messageSentTheme');
+            localStorage.removeItem('messageReceivedTheme');
+            localStorage.removeItem('dropdownTheme');
+            localStorage.removeItem('chatboxTheme');
+            location.reload(); // Reload the page to apply the default theme
+          }
+        </script>
+        <script>
           var sidebarToggle = document.getElementById('sidebar-toggle');
 
           sidebarToggle.addEventListener('mousedown', function(e) {
@@ -1087,11 +1141,14 @@ if (sqlsrv_execute($rstmt)) {
             localStorage.setItem('chatboxTheme', theme);
           }
 
+
           // Function to apply the theme settings to the chatbox
           function applybackgroundTheme(theme) {
             var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
 
-            chatboxes.style.backgroundColor = theme;
+            chatboxes.forEach(function(chatbox) {
+              chatbox.style.backgroundColor = theme;
+            });
           }
 
           // Check if there are previously saved theme settings in localStorage
@@ -1159,8 +1216,9 @@ if (sqlsrv_execute($rstmt)) {
           function saveSentmessagebackgroundTheme(theme) {
             localStorage.setItem('messageSentcolor', theme);
           }
+
           // Function to save the theme settings to localStorage
-          function saveRecievedmessagebackgroundTheme(theme) {
+          function saveReceivedmessagebackgroundTheme(theme) {
             localStorage.setItem('messageReceivedcolor', theme);
           }
 
@@ -1171,6 +1229,7 @@ if (sqlsrv_execute($rstmt)) {
               message.style.backgroundColor = theme;
             });
           }
+
           // Function to apply the theme settings to the chatbox
           function applyReceivedmessagesbackgroundTheme(theme) {
             var receivedbackground = document.querySelectorAll('.received');
@@ -1179,27 +1238,16 @@ if (sqlsrv_execute($rstmt)) {
             });
           }
 
-
-          // Check if there are previously saved theme settings in localStorage
-          var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
-          if (savedSentmessagecolorTheme) {
-            // Apply the saved theme settings
-            applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
-          }
-          // Check if there are previously saved theme settings in localStorage
-          var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
-          if (savedReceivedmessagecolorTheme) {
-            // Apply the saved theme settings
-            applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
-          }
-
           // Function to save the theme settings to localStorage
           function saveSentmessageTheme(theme) {
             localStorage.setItem('messageSentTheme', theme);
+            console.log('saved');
           }
+
           // Function to save the theme settings to localStorage
           function saveReceivedmessageTheme(theme) {
             localStorage.setItem('messageReceivedTheme', theme);
+            console.log('saved');
           }
 
           // Function to apply the theme settings to the chatbox
@@ -1209,6 +1257,7 @@ if (sqlsrv_execute($rstmt)) {
               message.style.background = theme;
             });
           }
+
           // Function to apply the theme settings to the chatbox
           function applyReceivedmessagesTheme(theme) {
             var received = document.querySelectorAll('.received');
@@ -1217,19 +1266,6 @@ if (sqlsrv_execute($rstmt)) {
             });
           }
 
-
-          // Check if there are previously saved theme settings in localStorage
-          var savedSentmessageTheme = localStorage.getItem('messageSentTheme');
-          if (savedSentmessageTheme) {
-            // Apply the saved theme settings
-            applySentmessagesTheme(savedSentmessageTheme);
-          }
-          // Check if there are previously saved theme settings in localStorage
-          var savedReceivedmessageTheme = localStorage.getItem('messageReceivedTheme');
-          if (savedReceivedmessageTheme) {
-            // Apply the saved theme settings
-            applyReceivedmessagesTheme(savedReceivedmessageTheme);
-          }
 
           var lastTimestamp = Date.now();
 
@@ -1260,6 +1296,33 @@ if (sqlsrv_execute($rstmt)) {
                       });
                     }
                     chatbox.appendChild(div);
+
+
+                    // Check if there are previously saved theme settings in localStorage
+                    var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
+                    if (savedSentmessagecolorTheme) {
+                      // Apply the saved theme settings
+                      applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
+                    }
+                    // Check if there are previously saved theme settings in localStorage
+                    var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
+                    if (savedReceivedmessagecolorTheme) {
+                      // Apply the saved theme settings
+                      applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
+                    }
+                    // Check if there are previously saved theme settings in localStorage
+                    var SavedmessageSentTheme = localStorage.getItem('messageSentTheme');
+                    if (SavedmessageSentTheme) {
+                      // Apply the saved theme settings
+                      applySentmessagesTheme(SavedmessageSentTheme);
+                    }
+                    // Check if there are previously saved theme settings in localStorage
+                    var SavedmessageReceivedTheme = localStorage.getItem('messageReceivedTheme');
+                    if (SavedmessageReceivedTheme) {
+                      // Apply the saved theme settings
+                      applyReceivedmessagesTheme(SavedmessageReceivedTheme);
+                    }
+
 
                   });
                   chatbox.scrollTop = chatbox.scrollHeight; // Scroll to bottom
@@ -1351,7 +1414,6 @@ if (sqlsrv_execute($rstmt)) {
                                 });
                               }
                             }
-
                           });
 
 
