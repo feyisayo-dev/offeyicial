@@ -1,8 +1,5 @@
 <?php
 session_start();
-// Check if user is logged in
-?>
-<?php
 $UserId = $_SESSION["UserId"];
 include 'db.php';
 
@@ -33,6 +30,7 @@ include 'db.php';
   <script src="js/slim.min.js"></script>
   <script src="country-states.js"></script>
   <link rel="icon" href="img\offeyicial.png" type="image/png" sizes="32x32" />
+
   <style>
     @font-face {
       font-family: 'Modern-Age';
@@ -53,6 +51,7 @@ include 'db.php';
       font-family: 'Springlake';
       src: url('fonts/Springlake.ttf');
     }
+
     @font-face {
       font-family: 'WisdomVacation';
       src: url('fonts/WisdomVacation.ttf');
@@ -162,216 +161,216 @@ include 'db.php';
     }
 
     .volume-control input[type=range] {
-  -webkit-appearance: none;
-  margin: 18px 0;
-  width: 100%;
-}
+      -webkit-appearance: none;
+      margin: 18px 0;
+      width: 100%;
+    }
 
-.volume-control input[type=range]:focus {
-  outline: none;
-}
+    .volume-control input[type=range]:focus {
+      outline: none;
+    }
 
-.volume-control input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  background: linear-gradient(to right, green, red);
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
-}
+    .volume-control input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      background: linear-gradient(to right, green, red);
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border-radius: 1.3px;
+      border: 0.2px solid #010101;
+    }
 
-.volume-control input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -6px;
-}
+    .volume-control input[type=range]::-webkit-slider-thumb {
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border: 1px solid #000000;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -6px;
+    }
 
-.volume-control input[type=range]:focus::-webkit-slider-runnable-track {
-  background: linear-gradient(to right, green, red);
-}
+    .volume-control input[type=range]:focus::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, green, red);
+    }
 
-.volume-control input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: linear-gradient(to right, green, red);
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
-}
+    .volume-control input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      background: linear-gradient(to right, green, red);
+      border-radius: 1.3px;
+      border: 0.2px solid #010101;
+    }
 
-.volume-control input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-}
+    .volume-control input[type=range]::-moz-range-thumb {
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border: 1px solid #000000;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+    }
 
-.volume-control input[type=range]::-ms-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  background: transparent;
-  border-color: transparent;
-  border-width: 16px 0;
-  color: transparent;
-}
+    .volume-control input[type=range]::-ms-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      background: transparent;
+      border-color: transparent;
+      border-width: 16px 0;
+      color: transparent;
+    }
 
-.volume-control input[type=range]::-ms-fill-lower {
-  background: #2a6495;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
+    .volume-control input[type=range]::-ms-fill-lower {
+      background: #2a6495;
+      border: 0.2px solid #010101;
+      border-radius: 2.6px;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    }
 
-.volume-control input[type=range]::-ms-fill-upper {
-  background: #3071a9;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
+    .volume-control input[type=range]::-ms-fill-upper {
+      background: #3071a9;
+      border: 0.2px solid #010101;
+      border-radius: 2.6px;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    }
 
-.volume-control input[type=range]::-ms-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-}
+    .volume-control input[type=range]::-ms-thumb {
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border: 1px solid #000000;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+    }
 
-.volume-control input[type=range]:focus::-ms-fill-lower {
-  background: #3071a9;
-}
+    .volume-control input[type=range]:focus::-ms-fill-lower {
+      background: #3071a9;
+    }
 
-.volume-control input[type=range]:focus::-ms-fill-upper {
-  background: #367ebd;
-}
+    .volume-control input[type=range]:focus::-ms-fill-upper {
+      background: #367ebd;
+    }
 
 
-/* Time control */
-.time-control {
-  display: flex;
-  align-items: center;
-}
+    /* Time control */
+    .time-control {
+      display: flex;
+      align-items: center;
+    }
 
-/* .time-control input[type="range"] {
+    /* .time-control input[type="range"] {
   flex-grow: 1;
   background: linear-gradient(to right, '.getRandomColor().', '.getRandomColor().');
 } */
-.time-control input[type=range] {
-  height: 8.4px;
-  -webkit-appearance: none;
-  margin: 10px 0;
-  width: 100%;
-  background-color: transparent;
-}
+    .time-control input[type=range] {
+      height: 8.4px;
+      -webkit-appearance: none;
+      margin: 10px 0;
+      width: 100%;
+      background-color: transparent;
+    }
 
-.time-control input[type=range]:focus {
-  outline: none;
-}
+    .time-control input[type=range]:focus {
+      outline: none;
+    }
 
-.time-control input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #002200;
-  background: #205928;
-  border-radius: 1px;
-  border: 1px solid #18D501;
-}
+    .time-control input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      animate: 0.2s;
+      box-shadow: 1px 1px 1px #002200;
+      background: #205928;
+      border-radius: 1px;
+      border: 1px solid #18D501;
+    }
 
-.time-control input[type=range]::-webkit-slider-thumb {
-  box-shadow: 3px 3px 3px #00AA00;
-  border: 2px solid #83E584;
-  height: 20px;
-  width: 20px;
-  border-radius: 20px;
-  background: #439643;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -7px;
-}
+    .time-control input[type=range]::-webkit-slider-thumb {
+      box-shadow: 3px 3px 3px #00AA00;
+      border: 2px solid #83E584;
+      height: 20px;
+      width: 20px;
+      border-radius: 20px;
+      background: #439643;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -7px;
+    }
 
-.time-control input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #205928;
-}
+    .time-control input[type=range]:focus::-webkit-slider-runnable-track {
+      background: #205928;
+    }
 
-.time-control input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #002200;
-  background: #205928;
-  border-radius: 1px;
-  border: 1px solid #18D501;
-}
+    .time-control input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      animate: 0.2s;
+      box-shadow: 1px 1px 1px #002200;
+      background: #205928;
+      border-radius: 1px;
+      border: 1px solid #18D501;
+    }
 
-.time-control input[type=range]::-moz-range-thumb {
-  box-shadow: 3px 3px 3px #00AA00;
-  border: 2px solid #83E584;
-  height: 23px;
-  width: 23px;
-  border-radius: 23px;
-  background: #439643;
-  cursor: pointer;
-}
+    .time-control input[type=range]::-moz-range-thumb {
+      box-shadow: 3px 3px 3px #00AA00;
+      border: 2px solid #83E584;
+      height: 23px;
+      width: 23px;
+      border-radius: 23px;
+      background: #439643;
+      cursor: pointer;
+    }
 
-.time-control input[type=range]::-ms-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
+    .time-control input[type=range]::-ms-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      animate: 0.2s;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
 
-.time-control input[type=range]::-ms-fill-lower {
-  background: #205928;
-  border: 1px solid #18D501;
-  border-radius: 2px;
-  box-shadow: 1px 1px 1px #002200;
-}
+    .time-control input[type=range]::-ms-fill-lower {
+      background: #205928;
+      border: 1px solid #18D501;
+      border-radius: 2px;
+      box-shadow: 1px 1px 1px #002200;
+    }
 
-.time-control input[type=range]::-ms-fill-upper {
-  background: #205928;
-  border: 1px solid #18D501;
-  border-radius: 2px;
-  box-shadow: 1px 1px 1px #002200;
-}
+    .time-control input[type=range]::-ms-fill-upper {
+      background: #205928;
+      border: 1px solid #18D501;
+      border-radius: 2px;
+      box-shadow: 1px 1px 1px #002200;
+    }
 
-.time-control input[type=range]::-ms-thumb {
-  margin-top: 1px;
-  box-shadow: 3px 3px 3px #00AA00;
-  border: 2px solid #83E584;
-  height: 23px;
-  width: 23px;
-  border-radius: 23px;
-  background: #439643;
-  cursor: pointer;
-}
+    .time-control input[type=range]::-ms-thumb {
+      margin-top: 1px;
+      box-shadow: 3px 3px 3px #00AA00;
+      border: 2px solid #83E584;
+      height: 23px;
+      width: 23px;
+      border-radius: 23px;
+      background: #439643;
+      cursor: pointer;
+    }
 
-.time-control input[type=range]:focus::-ms-fill-lower {
-  background: #205928;
-}
+    .time-control input[type=range]:focus::-ms-fill-lower {
+      background: #205928;
+    }
 
-.time-control input[type=range]:focus::-ms-fill-upper {
-  background: #205928;
-}
+    .time-control input[type=range]:focus::-ms-fill-upper {
+      background: #205928;
+    }
 
     .time-display {
       display: flex;
@@ -1101,7 +1100,7 @@ include 'db.php';
             }
             // Store Likes, Comments, and Shares values in variables
             echo '<section>';
-            echo '<div class="post">';
+            echo '<div class="post" id="post-' . $postId . '">';
             echo '<div class="news-feed-post"  id="' . $postId . '">';
             echo '<div class="post-header">';
             echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
@@ -1497,19 +1496,62 @@ include 'db.php';
     });
   });
 </script>
+<script>
+  var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
+  // Check if the UserId exists
+  if (!userId) {
+    // UserId not found, redirect to login page
+    window.location.href = "login.php";
+  }
+</script>
 
 <script>
-  // Get postId from URL parameter
   var urlParams = new URLSearchParams(window.location.search);
   var postId = urlParams.get('postId');
+  console.log(postId);
 
-  // Scroll to post with matching id
+  // Check if the PostId exists
+  function checkPostIdExistence(postId) {
+    return new Promise(function(resolve, reject) {
+      // Make an AJAX call to postIdfinding.php
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            // Response received successfully
+            var response = xhr.responseText;
+            resolve(response === 'true');
+          } else {
+            // Error occurred
+            reject();
+          }
+        }
+      };
+
+      xhr.open('GET', 'postIdfinding.php?postId=' + postId, true);
+      xhr.send();
+    });
+  }
+
   if (postId) {
-    var postElement = document.getElementById('post-' + postId);
-    if (postElement) {
-      postElement.scrollIntoView();
-    }
+    checkPostIdExistence(postId)
+      .then(function(result) {
+        if (!result) {
+          // PostId not found, redirect to 404 error page
+          window.location.href = "error404.php";
+        } else {
+          // Scroll to post with matching id
+          var postElement = document.getElementById('post-' + postId);
+          if (postElement) {
+            postElement.scrollIntoView();
+          }
+        }
+      })
+      .catch(function() {
+        // Error occurred while checking PostId existence
+        console.log('An error occurred.');
+      });
   }
 </script>
 <script>

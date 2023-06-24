@@ -14,6 +14,17 @@ if (sqlsrv_execute($rstmt)) {
     $First_Name = $row['First_Name'];
   }
 }
+// Check if the UserId exists
+$recipientId = $_GET['UserIdx'];
+$sql = "SELECT * FROM User_Profile WHERE UserId = ?";
+$params = array($recipientId);
+$stmt = sqlsrv_query($conn, $sql, $params);
+if ($stmt === false || !sqlsrv_has_rows($stmt)) {
+  // UserId not found, redirect to 404 error page
+  header("Location: error404.php");
+  exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -1471,7 +1482,15 @@ if (sqlsrv_execute($rstmt)) {
           setInterval(checkForNewMessages, 500); // Call the function every 1 second
         </script>
 
+        <script>
+          var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
+          // Check if the UserId exists
+          if (!userId) {
+            // UserId not found, redirect to login page
+            window.location.href = "login.php";
+          }
+        </script>
 
         <script>
           function insertEmoji(emoji) {

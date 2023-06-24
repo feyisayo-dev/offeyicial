@@ -283,7 +283,15 @@ if (sqlsrv_execute($stmt)) {
     </script>
     <!-- Remove the individual script tags -->
     <script src="dist/bundle.js"></script>
-    <!-- <script src="js/call.js" ></script> -->
+    <script>
+        var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
+
+        // Check if the UserId exists
+        if (!userId) {
+            // UserId not found, redirect to login page
+            window.location.href = "login.php";
+        }
+    </script>
 </body>
 
 </html>

@@ -5,6 +5,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $UserId = $_SESSION["UserId"];
     header("Location: user_profile.php?UserId=" . $UserId);
     exit();
+}else{
+    echo "notloggedin";
 }
 ?>
 
