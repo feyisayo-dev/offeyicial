@@ -9,6 +9,9 @@ echo '<link rel="stylesheet" href="reel.css">';
 echo '<link rel="icon" href="img/offeyicial.png">';
 echo '</head>';
 echo '<body>';
+echo "<div class='icon'>";
+echo "<h2>Reels</h2>";
+echo "</div>";
 include 'db.php';
 $UserId = $_SESSION["UserId"];
 
@@ -84,4 +87,3 @@ if (sqlsrv_execute($stmt)) {
 
 echo '</body>';
 echo '</html>';
-?>

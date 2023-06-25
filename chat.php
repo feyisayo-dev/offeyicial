@@ -1620,56 +1620,33 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         </script>
 
         <script>
-          var recipientId = "<?php echo $recipientId ?>"
-          $(document).ready(function() {
-            $('#callbtn').click(function() {
-              $.ajax({
-                url: 'call.php?UserIdx=' + recipientId,
-                success: function(response) {
-                  $('#call-modal .modal-body').html(response);
-                  $('#call-modal').modal('show');
-                  $('#call-modal').find('#callbtn').click(function() {
-                    $.ajax({
-                      url: 'call.php?UserIdx=' + recipientId,
-                      success: function(response) {
-                        $('#call-modal .modal-body').html(response);
-                      },
-                      error: function() {
-                        alert('Error calling server');
-                      }
-                    });
-                  });
-                  $('#call-modal').on('hide.bs.modal', function(e) {
-                    if (!confirm('Are you sure you want to leave the call?')) {
-                      e.preventDefault();
-                      e.stopImmediatePropagation();
-                    }
-                  });
-                },
-                error: function() {
-                  alert('Error calling server');
-                }
-              });
-            });
+          document.getElementById("callbtn").addEventListener("click", function() {
+            // Generate a random string of 5 characters
+            function generateRandomString() {
+              var chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+              var result = "";
+              for (var i = 0; i < 5; i++) {
+                var randomIndex = Math.floor(Math.random() * chars.length);
+                result += chars[randomIndex];
+              }
+              return result;
+            }
+
+            // Combine UserId, UserIdx, and random string to create roomId
+            var UserId = "<?php echo $_SESSION['UserId']; ?>";
+            console.log(UserId)
+            var recipientId = "<?php echo $recipientId; ?>";
+            var randomString = generateRandomString();
+            var roomId = UserId + randomString + recipientId;
+
+            // Redirect to call.php with the roomId
+            window.location.href = "call.php?roomId=" + roomId;
+
+            // Extract the UserIdx from the roomId
+            var userIdx = roomId.substring(roomId.indexOf("UserIdx") + 7);
+
           });
         </script>
-
-        <!-- Call modal -->
-        <div class="modal fade" id="call-modal" tabindex="-1" role="dialog" aria-labelledby="call-modal-label" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h4 class="modal-title">
-                  Call
-                </h4>
-                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
-              </div>
-              <div class="modal-body">
-                <!-- response from call.php will be displayed here -->
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- Modal -->
         <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
