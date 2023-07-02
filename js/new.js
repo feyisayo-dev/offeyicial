@@ -1,69 +1,52 @@
 var localStream;
 var remoteStream;
-var localVideoElement = document.getElementById('local_video');
-var remoteVideoElement = document.getElementById('remote_video');
-var callTimerElement = document.getElementById('call_timer');
-var callButton = document.getElementById('call_button');
+var localVideo = document.getElementById(UserId);
+var remoteVideo = document.getElementById(userB);
+// var callTimer = document.getElementById('call_timer');
 var hangupButton = document.getElementById('hangup_button');
 var audioCallButton = document.getElementById('audio_call_button');
 var videoCallButton = document.getElementById('video_call_button');
 var peerConnection;
-// var userB = '<?php echo $_GET["UserIdx"]; ?>';
-// var UserId = '<?php echo $_SESSION["UserIdx"]; ?>';
-var callModal = document.getElementById('call_modal');
-var callerNameElement = document.getElementById('name');
-var callerStatusElement = document.getElementById('status');
-// var recipientFirstName = "<?php echo $recipientFirstName; ?>";
-// var recipientSurname = "<?php echo $recipientSurname; ?>";
-// Event listeners for call buttons
-audioCallButton.addEventListener('click', function () {
-    console.log('Audio Call Button clicked');
-    console.log(recipientFirstName + ' ' + recipientSurname);
-    startAudioCall();
-});
 
-videoCallButton.addEventListener('click', function () {
-    console.log('Video Call Button clicked');
-    startVideoCall();
-});
+var callerStatusElement = document.getElementById('status');
+// Start the call with video by default
+startVideoCall();
 
 hangupButton.addEventListener('click', function () {
-    console.log('Hang Up Button clicked');
     hangUpCall();
 });
 
 
+audioCallButton.addEventListener('click', toggleAudio);
+videoCallButton.addEventListener('click', toggleVideo);
 
-function startAudioCall() {
-    console.log('Before initiating call - localStream:', localStream);
-    console.log('Before initiating call - remoteStream:', remoteStream);
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then(function (stream) {
-            localStream = stream;
-            peerConnection = new RTCPeerConnection();
+function toggleAudio() {
+    // Toggle audio tracks on/off
+    localStream.getAudioTracks().forEach(function (track) {
+        track.enabled = !track.enabled;
+    });
 
-            stream.getAudioTracks().forEach(function (track) {
-                peerConnection.addTrack(track, stream);
-            });
+    // Update the UI to reflect the audio status
+    var isAudioEnabled = localStream.getAudioTracks().some(function (track) {
+        return track.enabled;
+    });
 
-            sendCallOffer({ audio: true, video: false }); // Specify audio constraints
-
-            // Update the UI to reflect the call status
-            callButton.disabled = true;
-            hangupButton.disabled = false;
-            audioCallButton.disabled = false;
-            videoCallButton.disabled = false;
-
-        })
-        .catch(function (error) {
-            console.log('Error accessing microphone:', error);
-        });
-    callerStatusElement.textContent = "In Audio Call";
-
-    // Hide the local and remote video elements
-    localVideoElement.style.display = 'none';
-    remoteVideoElement.style.display = 'none';
 }
+
+function toggleVideo() {
+    // Toggle video tracks on/off
+    localStream.getVideoTracks().forEach(function (track) {
+        track.enabled = !track.enabled;
+    });
+
+    // Update the UI to reflect the video status
+    var isVideoEnabled = localStream.getVideoTracks().some(function (track) {
+        return track.enabled;
+    });
+
+}
+
+
 
 function startVideoCall() {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -78,17 +61,16 @@ function startVideoCall() {
             sendCallOffer({ audio: true, video: true }); // Specify audio and video constraints
 
             // Update the UI to reflect the call status
-            callButton.disabled = true;
             hangupButton.disabled = false;
             audioCallButton.disabled = false;
             videoCallButton.disabled = false;
             callerStatusElement.textContent = "In Video Call";
 
             // Show the local and remote video elements
-            localVideoElement.style.display = 'block';
-            remoteVideoElement.style.display = 'block';
+            localVideo.style.display = 'block';
+            remoteVideo.style.display = 'block';
             // Display the local video stream
-            localVideoElement.srcObject = stream;
+            localVideo.srcObject = stream;
         })
         .catch(function (error) {
             console.log('Error accessing camera and microphone:', error);
@@ -123,57 +105,59 @@ function sendCallOffer(mediaConstraints) {
 }
 
 function handleOfferMessage(message) {
-    // Handle the call offer received from the caller
     var offer = new RTCSessionDescription(message.offer);
-    var mediaConstraints = message.mediaConstraints; // Retrieve the media constraints from the message object
+    var mediaConstraints = message.mediaConstraints;
+
+    // Add the following line to initialize the pendingCandidates array
+    var pendingCandidates = [];
 
     peerConnection = new RTCPeerConnection();
+    // Set the remote description
     peerConnection.setRemoteDescription(offer)
         .then(function () {
-            return navigator.mediaDevices.getUserMedia(mediaConstraints);
-        })
-        .then(function (stream) {
-            localStream = stream;
-            console.log("lSTREAM:", localStream);
+            // Check if there are any pending ICE candidates to be added
+            if (pendingCandidates.length > 0) {
+                pendingCandidates.forEach(function (candidate) {
+                    peerConnection.addIceCandidate(candidate)
+                        .catch(function (error) {
+                            console.log('Error handling pending ICE candidate:', error);
+                        });
+                });
+                // Clear the pending candidates array
+                pendingCandidates = [];
+            }
 
-            return navigator.mediaDevices.getUserMedia(mediaConstraints); // Obtain a separate stream for remoteStream
-        })
-        .then(function (stream) {
-            remoteStream = stream; // Assign the separate stream to remoteStream
-            console.log("rSTREAM:", remoteStream);
-
-            stream.getTracks().forEach(function (track) {
-                peerConnection.addTrack(track, stream);
-            });
-
-            return peerConnection.createAnswer();
+            // Create an answer when the signaling state is suitable
+            if (peerConnection.signalingState === 'have-remote-offer' || peerConnection.signalingState === 'have-local-pranswer') {
+                return peerConnection.createAnswer();
+            } else {
+                throw new Error('Invalid signaling state for creating an answer.');
+            }
         })
         .then(function (answer) {
             return peerConnection.setLocalDescription(answer);
         })
         .then(function () {
             var sdpAnswer = peerConnection.localDescription;
-            console.log("SDP Answer:", sdpAnswer);
+            console.log('SDP Answer:', sdpAnswer);
 
-            // Send the SDP answer to the caller via the signaling server
             sendMessage({
                 type: 'answer',
                 answer: sdpAnswer
             });
 
-            // Update the remote video element to display the remote stream
-            remoteVideoElement.srcObject = remoteStream;
+            remoteVideo.srcObject = remoteStream;
         })
         .catch(function (error) {
             console.log('Error handling call offer:', error);
         });
 
-    // Update the UI to reflect the call status
-    callButton.disabled = true;
+    // Update the UI and enable buttons
     hangupButton.disabled = false;
     audioCallButton.disabled = false;
     videoCallButton.disabled = false;
 }
+
 
 
 function hangUpCall() {
@@ -190,20 +174,22 @@ function hangUpCall() {
     callerStatusElement.textContent = "Call Ended";
 
     // Hide the local and remote video elements
-    localVideoElement.style.display = 'none';
-    remoteVideoElement.style.display = 'none';
+    localVideo.style.display = 'none';
+    remoteVideo.style.display = 'none';
 
-    handleHangupMessage();
 
     // Update the UI to reflect the call status
-    callButton.disabled = false;
     hangupButton.disabled = true;
     audioCallButton.disabled = false;
     videoCallButton.disabled = false;
-    localVideoElement.srcObject = null;
-    remoteVideoElement.srcObject = null;
-    callTimerElement.textContent = '00:00:00';
+    localVideo.srcObject = null;
+    remoteVideo.srcObject = null;
+    // callTimer.textContent = '00:00:00';
+
+    // Redirect to chat.php?UserIdx=userB
+    window.location.href = 'chat.php?UserIdx=' + userB;
 }
+
 
 
 function handleAnswerMessage(message) {
@@ -329,6 +315,9 @@ function initSignaling() {
 
     signalingSocket.onopen = function () {
         console.log('Signaling socket connection established');
+
+        // WebSocket connection is open, call the function to send the call offer
+        startVideoCall();
     };
 
     signalingSocket.onmessage = function (event) {

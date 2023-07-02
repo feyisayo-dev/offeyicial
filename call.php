@@ -7,20 +7,20 @@ $UserId = $_SESSION['UserId'];
 ?>
 <script>
     // Get the current URL
-    var url = new URL(window.location.href);
+    // var url = new URL(window.location.href);
 
     // Get the value of the 'roomId' parameter from the URL
-    var roomId = url.searchParams.get('roomId');
+    // var roomId = url.searchParams.get('roomId');
 
     // Use the roomId value as needed
-    console.log(roomId);
-
+    // console.log(roomId);
+    var UserIdx = "<?php echo $_GET['UserIdx']; ?>"
 
     // Extract the UserIdx from the roomId
-    var regex = /OFF.*?OFF([A-Za-z0-9]+)/;
-    var match = roomId.match(regex);
-    var UserIdxno = match ? match[1] : "";
-    var UserIdx = "OFF" + UserIdxno;
+    // var regex = /OFF.*?OFF([A-Za-z0-9]+)/;
+    // var match = roomId.match(regex);
+    // var UserIdxno = match ? match[1] : "";
+    // var UserIdx = "OFF" + UserIdxno;
 
     console.log(UserIdx); // Output: OFF0006 // Output: UserIdx
     // Make an AJAX request to pass the UserIdx to a PHP script
@@ -116,9 +116,9 @@ $UserId = $_SESSION['UserId'];
             object-fit: cover;
         }
 
-        .video-player.remote {
+        /* .video-player.remote {
             display: none;
-        }
+        } */
 
         .smallFrame {
             position: fixed;
@@ -381,16 +381,15 @@ $UserId = $_SESSION['UserId'];
             <script src="js/slim.min.js"></script>
             <script src="js/dexie.min.js"></script>
             <script src="js/popper.min.js"></script>
+            <script src="js/adapter-latest.js"></script>
             <script src="js/bootstrap.bundle.min.js"></script>
             <script>
-               
                 var userB = document.getElementById("videos").querySelector(".remote").id;
                 console.log(userB);
                 var UserId = '<?php echo $_SESSION["UserId"]; ?>';
                 console.log(UserId);
-
-                var roomId = '<?php $_GET['roomId']; ?>';
             </script>
+
             <!-- Remove the individual script tags -->
             <script src="js/call.js"></script>
             <script>

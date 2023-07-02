@@ -1622,28 +1622,28 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         <script>
           document.getElementById("callbtn").addEventListener("click", function() {
             // Generate a random string of 5 characters
-            function generateRandomString() {
-              var chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-              var result = "";
-              for (var i = 0; i < 5; i++) {
-                var randomIndex = Math.floor(Math.random() * chars.length);
-                result += chars[randomIndex];
-              }
-              return result;
-            }
+            // function generateRandomString() {
+            //   var chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            //   var result = "";
+            //   for (var i = 0; i < 5; i++) {
+            //     var randomIndex = Math.floor(Math.random() * chars.length);
+            //     result += chars[randomIndex];
+            //   }
+            //   return result;
+            // }
 
             // Combine UserId, UserIdx, and random string to create roomId
             var UserId = "<?php echo $_SESSION['UserId']; ?>";
             console.log(UserId)
             var recipientId = "<?php echo $recipientId; ?>";
-            var randomString = generateRandomString();
-            var roomId = UserId + randomString + recipientId;
+            // var randomString = generateRandomString();
+            // var roomId = UserId + randomString + recipientId;
 
             // Redirect to call.php with the roomId
-            window.location.href = "call.php?roomId=" + roomId;
+            window.location.href = "call.php?UserIdx=" + recipientId;
 
             // Extract the UserIdx from the roomId
-            var userIdx = roomId.substring(roomId.indexOf("UserIdx") + 7);
+            // var userIdx = roomId.substring(roomId.indexOf("UserIdx") + 7);
 
           });
         </script>
