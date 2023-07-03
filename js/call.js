@@ -309,7 +309,7 @@ function sendMessage(message) {
 var signalingSocket;
 
 function initSignaling() {
-    var signalingServerUrl = 'ws://localhost:8888?userB=' + userB; // Replace with your signaling server URL
+    var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId; // Replace with your signaling server URL
 
     signalingSocket = new WebSocket(signalingServerUrl);
 
@@ -321,11 +321,11 @@ function initSignaling() {
     };
 
     signalingSocket.onmessage = function (event) {
-        console.log('Received message:', event.data);
-        console.log('Type of message:', typeof event.data);
-        console.log('Message value:', event.data);
+        // console.log('Received message:', event.data);
+        // console.log('Type of message:', typeof event.data);
+        // console.log('Message value:', event.data);
         if (typeof event.data === 'string') {
-            console.log('Message is a string');
+            // console.log('Message is a string');
             try {
                 // Remove the prefix "Server response:" from the message
                 var messageString = event.data.replace('Server response:', '');
