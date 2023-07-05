@@ -38,7 +38,7 @@ include 'db.php';
       font-weight: 500;
     }
 
-    .navbar-nav .search-container .searchtext2 {
+    .navbar-nav .search-container2 .searchtext2 {
       border-radius: 5px;
     }
 
@@ -1112,9 +1112,9 @@ include 'db.php';
             <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
           </li>
           <li class="nav-item">
-            <div class="search-container">
+            <div class="search-container2">
               <input class="searchtext2" type="text" id="search2" placeholder="Search for names.." title="Type in a name">
-              <div id="user_table">
+              <div id="user_table2">
           </li>
           <li class="nav-item">
             <a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i>Profile</a>
@@ -1825,6 +1825,48 @@ include 'db.php';
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
       }
+    });
+  });
+</script>
+<script>
+  const searchBox2 = document.getElementById('search2');
+  const resultsDiv2 = document.getElementById('user_table2');
+
+  searchBox.addEventListener('input', function() {
+    const searchTerm = this.value;
+
+    // Clear the results if the search box is empty
+    if (!searchTerm.trim()) {
+      resultsDiv.innerHTML = '';
+      return;
+    }
+
+    $(document).ready(function() {
+      $("#search2").on("keyup", function() {
+        // alert('yes');
+        var searchValue = $(this).val().toLowerCase();
+        if (searchValue === "") {
+          $("#user_table2").removeClass("show").html("");
+        } else {
+          $.ajax({
+            url: "searchbackend.php",
+            method: "POST",
+            data: {
+              search_query: searchValue
+            },
+            success: function(data) {
+              $("#user_table2").addClass("show").html(data);
+            }
+          });
+        }
+      });
+
+      $(document).on("click", function(e) {
+        // Check if the click is outside the search box and user table
+        if (!$(e.target).closest(".search-container2, #user_table2").length) {
+          $("#user_table2").removeClass("show").html("");
+        }
+      });
     });
   });
 </script>
