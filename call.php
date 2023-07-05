@@ -347,7 +347,7 @@ $UserId = $_SESSION['UserId'];
                 <video class="video-player remote" autoplay playsinline></video>
             </div>
 
-            <div class="over">
+            <div class="over" id="over" >
                 <image id="recipientPassport" height="50" width="50" />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
                     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">
@@ -378,10 +378,6 @@ $UserId = $_SESSION['UserId'];
 
             <script src="js/jquery.min.js"></script>
             <script src="js/bootstrap.min.js"></script>
-            <script src="js/slim.min.js"></script>
-            <script src="js/dexie.min.js"></script>
-            <script src="js/popper.min.js"></script>
-            <script src="js/adapter-latest.js"></script>
             <script src="js/bootstrap.bundle.min.js"></script>
             <script>
                 var userB = document.getElementById("videos").querySelector(".remote").id;
@@ -389,7 +385,28 @@ $UserId = $_SESSION['UserId'];
                 var UserId = '<?php echo $_SESSION["UserId"]; ?>';
                 console.log(UserId);
             </script>
+            <script>
+                $(document).ready(function() {
+                    // Get the UserIdx from the URL query parameters
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const UserIdx = urlParams.get('UserIdx');
 
+                    // Make an AJAX request to sendsession.php
+                    $.ajax({
+                        url: 'sendsession.php',
+                        type: 'POST',
+                        data: {
+                            UserIdx: UserIdx
+                        },
+                        success: function(response) {
+                            console.log(response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                });
+            </script>
             <!-- Remove the individual script tags -->
             <script src="js/call.js"></script>
             <script>

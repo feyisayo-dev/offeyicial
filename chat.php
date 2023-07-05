@@ -1,5 +1,80 @@
 <?php
 session_start();
+include 'db.php';
+$UserId = $_SESSION['UserId'];
+$UserIdx = $_GET['UserIdx'];
+// Get the name of the user you are talking to
+$sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$UserIdx'";
+$stmt = sqlsrv_prepare($conn, $sql);
+if (sqlsrv_execute($stmt)) {
+  while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $recipientSurname = $row['Surname'];
+    $recipientFirstName = $row['First_Name'];
+    $Passport = $row['Passport'];
+    if (empty($Passport)) {
+      $recipientPassport = "UserPassport/DefaultImage.png";
+    } else {
+      $recipientPassport = "UserPassport/" . $Passport;
+    }
+  }
+}
+
+?>
+
+<?php
+
+function generateSessionID($length = 10)
+{
+  $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  $sessionID = '';
+
+  $charCount = strlen($characters);
+  for ($i = 0; $i < $length; $i++) {
+    $sessionID .= $characters[rand(0, $charCount - 1)];
+  }
+
+  return $sessionID;
+}
+
+include('db.php');
+
+
+$UserId = $_SESSION['UserId'];
+$UserIdx = $_GET['UserIdx'];
+
+// Prepare and execute the SQL query to check if the combination of UserId and UserIdx already exists
+$tsql = "SELECT sessionID FROM sessionID WHERE (UserId = '$UserId' AND UserIdx = '$UserIdx') OR (UserId = '$UserIdx' AND UserIdx = '$UserId')";
+$getResults = sqlsrv_query($conn, $tsql);
+
+if ($getResults === false) {
+  die(json_encode(array("status" => "error", "message" => "Error querying the database.")));
+}
+
+// Check if the combination of UserId and UserIdx already exists
+if (sqlsrv_has_rows($getResults)) {
+  // If the combination exists, fetch the sessionID from the result set
+  $row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC);
+  $sessionID = $row['sessionID'];
+} else {
+  // If the combination does not exist, generate a new sessionID
+  $sessionID = generateSessionID();
+
+  // Prepare and execute the SQL query to insert the new sessionID into the database
+  $tsql = "INSERT INTO sessionID (sessionID, UserId, UserIdx) VALUES ('$sessionID', '$UserId', '$UserIdx')";
+  $insertResult = sqlsrv_query($conn, $tsql);
+
+  if ($insertResult === false) {
+    die(json_encode(array("status" => "error", "message" => "Error storing session ID in the database.")));
+  }
+}
+
+// Free statement and connection resources
+sqlsrv_free_stmt($getResults);
+sqlsrv_close($conn);
+?>
+
+
+<?php
 // Check if user is logged in
 ?>
 <?php
@@ -51,6 +126,68 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
 
   <style>
+    .main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f7f7f7;
+    }
+
+    .profilering {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .nameDiv h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .status h2 {
+      font-size: 16px;
+      color: #888;
+    }
+
+    .imageDiv img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 16px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .rejectBtn,
+    .answerBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      font-size: 24px;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .rejectBtn {
+      background-color: #dc3545;
+      margin-right: 16px;
+    }
+
+    .answerBtn {
+      background-color: #28a745;
+    }
+
     @font-face {
       font-family: 'Modern-Age';
       src: url('fonts/Modern-Age.ttf');
@@ -801,6 +938,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
     .dropdown-item {
       padding: 10px;
     }
+
+    .ringing-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      height: 100px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      display: none;
+      /* initially hidden */
+    }
   </style>
 </head>
 
@@ -1036,10 +1185,249 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
           ?>
         </div>
-
+        <!-- Ringing Box -->
+        <div class="ringing-box" id="ringingBox">
+          <div class="main">
+            <div class="profilering">
+              <div class="nameDiv">
+                <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
+              </div>
+              <div class="status">
+                <h2>Incoming Call</h2>
+              </div>
+              <div class="imageDiv">
+                <img src="<?php echo $recipientPassport ?>" alt="profile pic">
+              </div>
+            </div>
+            <div class="buttons">
+              <div class="reject">
+                <button id="hangup_button" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
+              </div>
+              <div class="answer">
+                <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
+        <script>
+          $(document).ready(function() {
+            // Get the UserIdx from the URL query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const UserIdx = urlParams.get('UserIdx');
+            const sessionId ="<?php echo $sessionID ?>";
+
+            // Make an AJAX request to sendsession.php
+            $.ajax({
+              url: 'sendsession.php',
+              type: 'POST',
+              data: {
+                UserIdx: UserIdx,
+                sessionId:sessionId
+              },
+              success: function(response) {
+                console.log(response);
+              },
+              error: function(xhr, status, error) {
+                console.error(error);
+              }
+            });
+          });
+        </script>
+        <script>
+          const hangupButton = document.getElementById('hangup_button');
+          const answerButton = document.getElementById('answer_button');
+          const ringingBox = document.getElementById('ringingBox');
+
+          hangupButton.addEventListener('click', function() {
+            hangUpCall();
+          });
+          answerButton.addEventListener('click', function() {
+            JoinCall();
+          });
+          // WebSocket connection
+          var signalingSocket;
+          sessionId = "<?php echo $sessionID ?>";
+          UserId = "<?php echo $UserId ?>";
+          UserIdx = "<?php echo $UserIdx ?>";
+          console.log(sessionId);
+
+          function initSignaling() {
+            var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId + '&sessionID=' + sessionId + '&UserIdx=' + UserIdx; // Modify the signaling server URL
+
+            signalingSocket = new WebSocket(signalingServerUrl);
+
+            signalingSocket.onopen = function() {
+              console.log('Signaling socket connection established');
+            };
+
+            signalingSocket.onmessage = function(event) {
+              var message = JSON.parse(event.data);
+
+              if (message.type === 'offer') {
+                handleOffer(message);
+              } else if (message.type === 'answer') {
+                handleAnswer(message);
+              } else if (message.type === 'candidate') {
+                handleCandidate(message);
+              } else if (message.type === 'ringing') {
+                showRingingBox();
+              } else if (message.type === 'hangup') {
+                handleHangup();
+              }
+            };
+
+            signalingSocket.onclose = function(event) {
+              console.log('Signaling socket connection closed:', event.code, event.reason);
+              // Perform any necessary cleanup here
+            };
+
+            signalingSocket.onerror = function(error) {
+              console.log('Signaling socket error:', error);
+            };
+          }
+
+          function sendMessage(message) {
+            if (signalingSocket.readyState === WebSocket.OPEN) {
+              signalingSocket.send(JSON.stringify(message));
+            } else {
+              console.log('WebSocket connection is not open. Message not sent:', message);
+            }
+          }
+
+          function handleOffer(offer) {
+            var offer = new RTCSessionDescription(offer);
+            var mediaConstraints = offer.mediaConstraints;
+            var pendingCandidates = [];
+
+            peerConnection = new RTCPeerConnection();
+
+            peerConnection.setRemoteDescription(offer)
+              .then(function() {
+                if (pendingCandidates.length > 0) {
+                  pendingCandidates.forEach(function(candidate) {
+                    peerConnection.addIceCandidate(candidate)
+                      .catch(function(error) {
+                        console.log('Error handling pending ICE candidate:', error);
+                      });
+                  });
+                  pendingCandidates = [];
+                }
+
+                if (
+                  peerConnection.signalingState === 'have-remote-offer' ||
+                  peerConnection.signalingState === 'have-local-pranswer'
+                ) {
+                  return peerConnection.createAnswer();
+                } else {
+                  throw new Error('Invalid signaling state for creating an answer.');
+                }
+              })
+              .then(function(answer) {
+                return peerConnection.setLocalDescription(answer);
+              })
+              .then(function() {
+                var sdpAnswer = peerConnection.localDescription;
+                console.log('SDP Answer:', sdpAnswer);
+
+                sendMessage({
+                  type: 'answer',
+                  answer: sdpAnswer
+                });
+              })
+              .catch(function(error) {
+                console.log('Error handling call offer:', error);
+              });
+          }
+
+          function handleAnswer(answer) {
+            var answer = new RTCSessionDescription(answer);
+
+            if (peerConnection.signalingState === 'have-local-offer') {
+              peerConnection.setRemoteDescription(answer)
+                .then(function() {
+                  // Check if there are any pending ICE candidates to be added
+                  if (pendingCandidates.length > 0) {
+                    pendingCandidates.forEach(function(candidate) {
+                      peerConnection.addIceCandidate(candidate)
+                        .catch(function(error) {
+                          console.log('Error handling pending ICE candidate:', error);
+                        });
+                    });
+                    // Clear the pending candidates array
+                    pendingCandidates = [];
+                  }
+                })
+                .catch(function(error) {
+                  console.log('Error handling call answer:', error);
+                });
+            } else {
+              // If the signaling state is not 'have-local-offer', queue the remote description and apply it later
+              peerConnection.addEventListener('signalingstatechange', function() {
+                if (peerConnection.signalingState === 'have-local-offer') {
+                  peerConnection.setRemoteDescription(answer)
+                    .then(function() {
+                      // Check if there are any pending ICE candidates to be added
+                      if (pendingCandidates.length > 0) {
+                        pendingCandidates.forEach(function(candidate) {
+                          peerConnection.addIceCandidate(candidate)
+                            .catch(function(error) {
+                              console.log('Error handling pending ICE candidate:', error);
+                            });
+                        });
+                        // Clear the pending candidates array
+                        pendingCandidates = [];
+                      }
+                    })
+                    .catch(function(error) {
+                      console.log('Error handling call answer:', error);
+                    });
+                }
+              });
+            }
+          }
+
+          function handleCandidate(candidate) {
+            // Handle the ICE candidate received from the remote user
+            var candidate = new RTCIceCandidate(candidate);
+            peerConnection.addIceCandidate(candidate)
+              .catch(function(error) {
+                console.log('Error handling ICE candidate:', error);
+              });
+          }
+
+          // Function to show the ringing box
+          function showRingingBox() {
+            ringingBox.style.display = 'block';
+          }
+
+          function handleHangup() {
+            hangUpCall();
+            ringingBox.style.display = 'none';
+          }
+
+          function hangUpCall() {
+            // Close the peer connection and end the call
+            if (peerConnection) {
+              peerConnection.close();
+            }
+
+            // Send a hangup message to the other user
+            sendMessage({
+              type: 'hangup',
+            });
+
+            // Hide the video elements and any other call-related UI
+            // You can add your logic here to hide the video elements and any other call-related UI
+          }
+
+          // Initialize signaling
+          initSignaling();
+        </script>
+
+
         <script>
           function resetTheme() {
             localStorage.removeItem('messageSentcolor');
@@ -1483,10 +1871,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         </script>
 
         <script>
-          var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
+          var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
           // Check if the UserId exists
-          if (!userId) {
+          if (!UserId) {
             // UserId not found, redirect to login page
             window.location.href = "login.php";
           }
@@ -1643,9 +2031,15 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             window.location.href = "call.php?UserIdx=" + recipientId;
 
             // Extract the UserIdx from the roomId
-            // var userIdx = roomId.substring(roomId.indexOf("UserIdx") + 7);
+            // var UserIdx = roomId.substring(roomId.indexOf("UserIdx") + 7);
 
           });
+        </script>
+        <script>
+          var sessionId = "<?php echo $sessionID ?>"; // Retrieve the sessionId from PHP
+
+          // Pass the sessionId to call.js
+          sessionStorage.setItem('sessionId', sessionId);
         </script>
 
         <!-- Modal -->

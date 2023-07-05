@@ -32,7 +32,11 @@ webSocketServer.on('request', (request) => {
 
   // Retrieve the UserId from the query parameters
   const UserId = request.resourceURL.query.UserId;
+  const sessionId = request.resourceURL.query.sessionID;
+  const UserIdx = request.resourceURL.query.UserIdx;
   console.log(`Client connected with UserId: ${UserId}`);
+  console.log(`Client connected with SessionI: ${sessionId}`);
+  console.log(`Client connected with UserIdx: ${UserIdx}`);
 
   // Store the connection object in the connectedUsers Map
   connectedUsers.set(connection, UserId);
@@ -66,8 +70,10 @@ webSocketServer.on('request', (request) => {
 // Handle HTTP POST requests to the '/start' URL
 app.post('/start', (req, res) => {
   // Retrieve the UserId from the request body
-  const { UserId } = req.body;
+  const { UserId, UserIdx, sessionId } = req.body;
   console.log(`Client connected with UserId: ${UserId}`);
+  console.log(`Client to be connected with UserIdx: ${UserIdx}`);
+  console.log(`Client to be connected with sessionId: ${sessionId}`);
 
 
   // Send the response
@@ -78,9 +84,9 @@ app.post('/start', (req, res) => {
 function sendRoomInfo() {
   const roomInfo = Array.from(connectedUsers.values());
   console.log('Number of people on the server:', roomInfo.length);
-  if(roomInfo.length = > 1){
+  if (roomInfo.length >= 1) {
     console.log('UserIds:', roomInfo);
-  }else{
+  } else {
     console.log('No user on server');
   }
   // Send the room information to all connected clients

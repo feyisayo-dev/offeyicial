@@ -125,10 +125,10 @@ if (sqlsrv_execute($stmt)) {
         </div>
         <div class="buttons">
             <div class="reject">
-                <button class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
+                <button id="hang_button" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
             </div>
             <div class="answer">
-                <button class="answerBtn"><i class="bi bi-telephone"></i></button>
+                <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
             </div>
         </div>
     </div>

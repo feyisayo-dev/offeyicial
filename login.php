@@ -1078,6 +1078,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         }
     }
 </script>
+<script>
+          var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
+          // Check if the UserId exists
+          if (UserId) {
+            // UserId not found, redirect to login page
+            window.location.href = "user_profile.php?UserId="+ UserId;
+          }
+        </script>
 
 </html>

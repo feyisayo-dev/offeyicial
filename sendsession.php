@@ -4,12 +4,21 @@ session_start();
 
 // Retrieve the UserId from the PHP session
 $UserId = $_SESSION['UserId'];
+$UserIdx = $_POST['UserIdx'];
+$sessionId = $_POST['sessionId'];
+
+// Return a response
+echo 'UserIdx received: ' . $UserIdx;
 
 // Set the URL of the Node.js server
-$url = 'http://localhost:8888/start?UserId=' . $UserId;
+$url = 'http://localhost:8888/start';
 
 // Set the data to be sent in the request body
-$data = ['UserId' => $UserId];
+$data = [
+    'UserId' => $UserId,
+    'UserIdx' => $UserIdx,
+    'sessionId' => $sessionId
+];
 
 // Create the request headers and options
 $options = [

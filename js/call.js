@@ -4,9 +4,13 @@ var localVideo = document.getElementById(UserId);
 var remoteVideo = document.getElementById(userB);
 // var callTimer = document.getElementById('call_timer');
 var hangupButton = document.getElementById('hangup_button');
+var over = document.getElementById('over');
 var audioCallButton = document.getElementById('audio_call_button');
 var videoCallButton = document.getElementById('video_call_button');
 var peerConnection;
+var recipientId = "";
+let offerReceived = false;
+
 
 var callerStatusElement = document.getElementById('status');
 // Start the call with video by default
@@ -59,7 +63,7 @@ function startVideoCall() {
             });
 
             sendCallOffer({ audio: true, video: true }); // Specify audio and video constraints
-
+            recipientId = userB;
             // Update the UI to reflect the call status
             hangupButton.disabled = false;
             audioCallButton.disabled = false;
@@ -78,7 +82,7 @@ function startVideoCall() {
 }
 
 function sendCallOffer(mediaConstraints) {
-    // Create and send a signaling message with the call offer and media constraints to the remote user
+    // Create and send a signaling message with the call offer, media constraints, and session identifier to the remote user
     var offerOptions = {
         offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
         offerToReceiveVideo: mediaConstraints.video ? 1 : 0
@@ -92,11 +96,15 @@ function sendCallOffer(mediaConstraints) {
             var sdpOffer = peerConnection.localDescription;
             console.log("SDP Offer:", sdpOffer);
 
-            // Send the SDP offer and media constraints to the remote user via the signaling server
+            var sessionId = sessionStorage.getItem('sessionId'); // Retrieve the sessionId from sessionStorage
+
+            // Send the SDP offer, media constraints, and sessionId to the remote user via the signaling server
             sendMessage({
                 type: 'offer',
                 offer: sdpOffer,
-                mediaConstraints: mediaConstraints
+                mediaConstraints: mediaConstraints,
+                recipientId: recipientId,
+                sessionId: sessionId // Include the sessionId in the message
             });
         })
         .catch(function (error) {
@@ -107,15 +115,13 @@ function sendCallOffer(mediaConstraints) {
 function handleOfferMessage(message) {
     var offer = new RTCSessionDescription(message.offer);
     var mediaConstraints = message.mediaConstraints;
-
-    // Add the following line to initialize the pendingCandidates array
+    var recipientId = message.recipientId;
     var pendingCandidates = [];
 
     peerConnection = new RTCPeerConnection();
-    // Set the remote description
+
     peerConnection.setRemoteDescription(offer)
         .then(function () {
-            // Check if there are any pending ICE candidates to be added
             if (pendingCandidates.length > 0) {
                 pendingCandidates.forEach(function (candidate) {
                     peerConnection.addIceCandidate(candidate)
@@ -123,12 +129,13 @@ function handleOfferMessage(message) {
                             console.log('Error handling pending ICE candidate:', error);
                         });
                 });
-                // Clear the pending candidates array
                 pendingCandidates = [];
             }
 
-            // Create an answer when the signaling state is suitable
-            if (peerConnection.signalingState === 'have-remote-offer' || peerConnection.signalingState === 'have-local-pranswer') {
+            if (
+                peerConnection.signalingState === 'have-remote-offer' ||
+                peerConnection.signalingState === 'have-local-pranswer'
+            ) {
                 return peerConnection.createAnswer();
             } else {
                 throw new Error('Invalid signaling state for creating an answer.');
@@ -146,13 +153,18 @@ function handleOfferMessage(message) {
                 answer: sdpAnswer
             });
 
-            remoteVideo.srcObject = remoteStream;
+            var remoteStream = new MediaStream();
+            peerConnection.ontrack = function (event) {
+                event.streams.forEach(function (stream) {
+                    remoteStream.addTrack(stream.track);
+                });
+                remoteVideo.srcObject = remoteStream;
+            };
         })
         .catch(function (error) {
             console.log('Error handling call offer:', error);
         });
 
-    // Update the UI and enable buttons
     hangupButton.disabled = false;
     audioCallButton.disabled = false;
     videoCallButton.disabled = false;
@@ -301,17 +313,25 @@ function handleHangupMessage() {
 }
 
 function sendMessage(message) {
-    // Send the message to the remote user through your signaling mechanism
-    signalingSocket.send(JSON.stringify(message));
-}
+    if (signalingSocket.readyState === WebSocket.OPEN) {
+      signalingSocket.send(JSON.stringify(message));
+    } else {
+      console.log('WebSocket connection is not open. Message not sent:', message);
+    }
+  }
+  
 
 // WebSocket connection
 var signalingSocket;
 
 function initSignaling() {
-    var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId; // Replace with your signaling server URL
+    // Retrieve the sessionId from sessionStorage
+    var sessionId = sessionStorage.getItem('sessionId');
+
+    var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId + '&sessionId=' + sessionId; // Modify the signaling server URL
 
     signalingSocket = new WebSocket(signalingServerUrl);
+
 
     signalingSocket.onopen = function () {
         console.log('Signaling socket connection established');

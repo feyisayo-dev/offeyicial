@@ -32,6 +32,54 @@ include 'db.php';
   <link rel="icon" href="img\offeyicial.png" type="image/png" sizes="32x32" />
 
   <style>
+    .navbar-nav a {
+      font-size: 15px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .navbar-nav .search-container .searchtext2 {
+      border-radius: 5px;
+    }
+
+    .navbar-light .navbar-brand {
+      color: #000;
+      font-size: 25px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .navbar-collapse {
+      width: 500px;
+      align-items: center;
+      display: flex;
+      justify-content: center;
+    }
+
+    .navbar-light .navbar-brand:focus,
+    .navbar-light .navbar-brand:hover {
+      color: #000;
+    }
+
+    .navbar-light .navbar-nav .navbar-link {
+      color: #000;
+    }
+
+    .navbar-brand img {
+      display: inline-block;
+      height: 30px;
+      /* adjust height as needed */
+      margin-right: 10px;
+      /* add some space between image and text */
+    }
+
+    .navbar-toggler {
+      position: absolute;
+      right: 0;
+      top: 2px;
+    }
+
     @font-face {
       font-family: 'Modern-Age';
       src: url('fonts/Modern-Age.ttf');
@@ -476,7 +524,7 @@ include 'db.php';
       margin-right: 5px;
     }
 
-    @media (max-width: 767px) {
+    @media (max-width: 900px) {
       body {
         width: 100%;
       }
@@ -521,9 +569,8 @@ include 'db.php';
         font-size: 14px;
       }
 
-      /* Hide UserPassport image */
-      .UserPassport {
-        display: none;
+      .post-title {
+        font-size: 10px;
       }
 
       /* Adjust spacing between elements */
@@ -534,11 +581,19 @@ include 'db.php';
       .post-date {
         margin-top: 10px;
       }
+
+      .post-author strong {
+        font-size: 12px;
+      }
+
+      .refresh-button {
+        top: 10px;
+      }
     }
 
     /* Custom CSS for the sidebar */
     .sidebar {
-      width: 250px;
+      width: 240px;
       height: 100vh;
       position: fixed;
       top: 0;
@@ -780,6 +835,7 @@ include 'db.php';
       line-height: 1;
       font-weight: 500;
       letter-spacing: 2px;
+      font-family: Modern-Age;
       text-transform: uppercase;
     }
 
@@ -1007,11 +1063,69 @@ include 'db.php';
     .comment-input button {
       margin-top: 10px;
     }
+
+    .addpost {
+      margin-left: 280px;
+      margin-bottom: 20px;
+      margin-top: 20px;
+    }
+
+    .addpost .input-group {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .addpost .form-control {
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .addpost .input-group-append button {
+      border-radius: 0 10px 10px 0;
+      padding: 8px;
+    }
+
+    .addpost .input-group-append button i {
+      font-size: 20px;
+    }
+
+    .addpost .input-group-append .btn-primary {
+      border-radius: 0 10px 10px 0;
+      padding: 8px 20px;
+    }
   </style>
 </head>
 
 <body>
   <div class="row">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+      <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navmenu">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
+          </li>
+          <li class="nav-item">
+            <div class="search-container">
+              <input class="searchtext2" type="text" id="search2" placeholder="Search for names.." title="Type in a name">
+              <div id="user_table">
+          </li>
+          <li class="nav-item">
+            <a class="nav-link custom-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i>Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link custom-link" onclick="window.location.href='index.php'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
     <div class="col-3">
       <div class="sidebar">
         <a class="sidebar-brand" href="home.php"><span class="text-success">Offeyicial</span></a>
@@ -1057,6 +1171,21 @@ include 'db.php';
       <div class="col-9">
 
         <div class="news-feed-container">
+          <div class="addpost">
+            <div class="input-group">
+              <input class="form-control addnewpost" type="text" id="addnewpost" placeholder="Add New Post" title="Add New Post">
+              <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="button">
+                  <i class="bi bi-camera"></i>
+                </button>
+                <button class="btn btn-outline-primary" type="button">
+                  <i class="bi bi-film"></i>
+                </button>
+                <button class="btn btn-primary" type="button">Post</button>
+              </div>
+            </div>
+          </div>
+
           <?php
           // Connect to the database
           include 'db.php';
@@ -1714,6 +1843,7 @@ include 'db.php';
 
     $(document).ready(function() {
       $("#search").on("keyup", function() {
+        // alert('yes');
         var searchValue = $(this).val().toLowerCase();
         if (searchValue === "") {
           $("#user_table").removeClass("show").html("");
@@ -1740,6 +1870,48 @@ include 'db.php';
     });
   });
 </script>
+<script>
+  function toggleSidebar() {
+    const maxWidth = 870;
+    const posts = document.querySelectorAll('.post');
+    const sidebar = document.querySelector('.sidebar');
+    const navbar = document.querySelector('.navbar');
+    const addpost = document.querySelector('.addpost');
+    const navbarCollapse = document.querySelector('.navbar-collapse');
+
+    function handleResize() {
+      const windowWidth = window.innerWidth;
+      if (windowWidth <= maxWidth) {
+        sidebar.style.display = 'none';
+        navbar.style.display = 'block';
+        posts.forEach((post) => {
+          post.style.marginLeft = '40px';
+        });
+        addpost.style.marginTop = '50px';
+        addpost.style.marginLeft = '50px';
+      } else {
+        sidebar.style.display = 'block';
+        navbar.style.display = 'none';
+        posts.forEach((post) => {
+          post.style.marginLeft = '280px';
+        });
+        addpost.style.marginTop = '20px';
+        addpost.style.marginLeft = '280px';
+        navbarCollapse.classList.remove('show');
+      }
+    }
+
+    // Initial check on page load
+    handleResize();
+
+    // Listen for window resize events
+    window.addEventListener('resize', handleResize);
+  }
+
+  // Call the toggleSidebar function
+  toggleSidebar();
+</script>
+
 <script>
   $(document).ready(function() {
     // Show or hide the button depending on the scroll position
