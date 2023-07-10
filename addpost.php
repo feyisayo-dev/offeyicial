@@ -1,9 +1,13 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 include('db.php');
 $UserId = $_SESSION['UserId'];
 
 if (isset($_POST['title'])) {
+    // Generate the post ID
     $sql = "SELECT COUNT(PostId) FROM posts";
     $stmt = sqlsrv_query($conn, $sql);
 
@@ -17,7 +21,6 @@ if (isset($_POST['title'])) {
         $num_padded = sprintf("%03d", $num);
         $num_padded; // return 04
     }
-
     $RegDate = date("M-d-Y");
     $PostId = 'POS' . $num_padded;
     $title = $_POST['title'];
@@ -31,97 +34,66 @@ if (isset($_POST['title'])) {
     $datetime = new DateTime();
     $date_posted = $datetime->format('Y-m-d H:i:s');
 
-    $imageUploadSuccess = true;
-    $videoUploadSuccess = true;
+    $imagePaths = array(); // Array to store the file paths of images
+    $videoPaths = array(); // Array to store the file paths of videos
 
     // Handle image uploads
     if (isset($_FILES['image']) && is_array($_FILES['image']['name'])) {
-        $images = $_FILES['image'];
+        $imageFiles = $_FILES['image'];
 
-        foreach ($images['tmp_name'] as $key => $tmp_name) {
-            $image_name = $images['name'][$key];
-            $image_tmp = $tmp_name;
-            $image_size = $images['size'][$key];
-            $image_error = $images['error'][$key];
+        foreach ($imageFiles['tmp_name'] as $key => $tmp_name) {
+            $media_name = $imageFiles['name'][$key];
+            $media_tmp = $tmp_name;
+            $media_size = $imageFiles['size'][$key];
+            $media_error = $imageFiles['error'][$key];
 
-            $image_ext = explode('.', $image_name);
-            $image_ext = strtolower(end($image_ext));
+            // Handle image upload
+            if ($media_error === 0) {
+                if ($media_size <= 2097152) {
+                    $media_name_new = uniqid('', true) . '.' . pathinfo($media_name, PATHINFO_EXTENSION);
+                    $media_destination = 'uploads/' . $media_name_new;
 
-            $allowed_ext = array('jpg', 'jpeg', 'png');
-
-            if (in_array($image_ext, $allowed_ext)) {
-                if ($image_error === 0) {
-                    if ($image_size <= 2097152) {
-                        $image_name_new = uniqid('', true) . '.' . $image_ext;
-                        $image_destination = 'uploads/' . $image_name_new;
-                        $UserId = $_SESSION['UserId'];
-                        if (move_uploaded_file($image_tmp, $image_destination)) {
-                            $sql = "INSERT INTO posts (UserId, PostId, title, content, image, date_posted)
-                                    VALUES ('$UserId', '$PostId', '$title', '$content', '$image_destination', '$date_posted')";
-                            $result = sqlsrv_query($conn, $sql);
-                            if (!$result) {
-                                $imageUploadSuccess = false;
-                            }
-                        } else {
-                            $imageUploadSuccess = false;
-                        }
-                    } else {
-                        $imageUploadSuccess = false;
+                    if (move_uploaded_file($media_tmp, $media_destination)) {
+                        $imagePaths[] = $media_destination; // Add image file path to the array
                     }
-                } else {
-                    $imageUploadSuccess = false;
                 }
-            } else {
-                $imageUploadSuccess = false;
             }
         }
     }
 
     // Handle video uploads
     if (isset($_FILES['video']) && is_array($_FILES['video']['name'])) {
-        $videos = $_FILES['video'];
+        $videoFiles = $_FILES['video'];
 
-        foreach ($videos['tmp_name'] as $key => $tmp_name) {
-            $video_name = $videos['name'][$key];
-            $video_tmp = $tmp_name;
-            $video_size = $videos['size'][$key];
-            $video_error = $videos['error'][$key];
+        foreach ($videoFiles['tmp_name'] as $key => $tmp_name) {
+            $media_name = $videoFiles['name'][$key];
+            $media_tmp = $tmp_name;
+            $media_size = $videoFiles['size'][$key];
+            $media_error = $videoFiles['error'][$key];
 
-            $video_ext = explode('.', $video_name);
-            $video_ext = strtolower(end($video_ext));
+            // Handle video upload
+            if ($media_error === 0) {
+                if ($media_size <= 209715200) { // max video size is 200MB
+                    $media_name_new = uniqid('', true) . '.' . pathinfo($media_name, PATHINFO_EXTENSION);
+                    $media_destination = 'uploads/' . $media_name_new;
 
-            $allowed_ext = array('mp4', 'avi', 'wmv');
-
-            if (in_array($video_ext, $allowed_ext)) {
-                if ($video_error === 0) {
-                    if ($video_size <= 209715200) { // max video size is 200MB
-                        $video_name_new = uniqid('', true) . '.' . $video_ext;
-                        $video_destination = 'uploads/' . $video_name_new;
-                        $UserId = $_SESSION['UserId'];
-                        if (move_uploaded_file($video_tmp, $video_destination)) {
-                            $sql = "INSERT INTO posts (UserId, PostId, title, content, video, date_posted)
-                                    VALUES ('$UserId', '$PostId', '$title', '$content', '$video_destination', '$date_posted')";
-                            $result = sqlsrv_query($conn, $sql);
-                            if (!$result) {
-                                $videoUploadSuccess = false;
-                            }
-                        } else {
-                            $videoUploadSuccess = false;
-                        }
-                    } else {
-                        $videoUploadSuccess = false;
+                    if (move_uploaded_file($media_tmp, $media_destination)) {
+                        $videoPaths[] = $media_destination; // Add video file path to the array
                     }
-                } else {
-                    $videoUploadSuccess = false;
                 }
-            } else {
-                $videoUploadSuccess = false;
             }
         }
     }
 
-    // Check if both image and video uploads were successful
-    if ($imageUploadSuccess && $videoUploadSuccess) {
+    $imagePathsString = implode(', ', $imagePaths); // Concatenate image file paths into a single string
+    $videoPathsString = implode(', ', $videoPaths); // Concatenate video file paths into a single string
+
+    // Insert post into the database
+    $sql = "INSERT INTO posts (UserId, PostId, title, content, image, video, date_posted)
+            VALUES ('$UserId', '$PostId', '$title', '$content', '$imagePathsString', '$videoPathsString', '$date_posted')";
+    $result = sqlsrv_query($conn, $sql);
+
+    if ($result) {
         echo "success";
     } else {
         echo "Error adding post.";

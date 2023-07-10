@@ -141,7 +141,12 @@ include 'db.php';
       margin-top: 0;
       justify-content: center;
       display: flex;
+    }
+
+    .post-title h2 {
       text-transform: uppercase;
+      font-size: 20px;
+      font-family: Springlake;
     }
 
     /* Post content */
@@ -154,6 +159,7 @@ include 'db.php';
       width: 100%;
       max-height: 600px;
       margin-bottom: 10px;
+      height: 200px;
     }
 
     /* Post video */
@@ -463,6 +469,15 @@ include 'db.php';
       border-radius: 999px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+    }
+
+    .w-100 {
+      height: 200px;
+      width: 100% !important;
+    }
+
+    .owl-carousel .owl-stage-outer {
+      height: 200px;
     }
 
     .like:hover {
@@ -1181,272 +1196,14 @@ include 'db.php';
                 <button class="btn btn-outline-primary" type="button">
                   <i class="bi bi-film"></i>
                 </button>
-                <button class="btn btn-primary" type="button">Post</button>
+                <button class="btn btn-primary" id="postButton" type="button">Post</button>
               </div>
             </div>
           </div>
 
-          <?php
-          // Connect to the database
-          include 'db.php';
-          $query = "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = ? THEN 1 ELSE 0 END) AS is_liking
-    FROM posts
-    JOIN User_Profile ON User_Profile.UserId = posts.UserId
-    LEFT JOIN likes ON likes.PostId = posts.PostId
-    GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted
-    ORDER BY posts.date_posted DESC";
-          $params = array($UserId);
-          $result = sqlsrv_query($conn, $query, $params);
-
-          if ($result === false) {
-            echo "Error executing query: " . sqlsrv_errors()[0]['message'];
-            exit;
-          }
-
-          while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-            // Your code to display the posts
-            $date_posted = new DateTime($row['date_posted']);
-            $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-            $postId = $row['PostId'];
-            $likes = $row['num_likes'];
-            $islikeing = $row['is_liking'];
-            $current_date = new DateTime();
-            $date_postedx = new DateTime($formatted_date);
-            $interval = $current_date->diff($date_postedx);
-
-            if ($interval->y) {
-              $time_ago = $interval->y . " years ago";
-            } else if ($interval->m) {
-              $time_ago = $interval->m . " months ago";
-            } else if ($interval->d) {
-              $time_ago = $interval->d . " days ago";
-            } else if ($interval->h) {
-              $time_ago = $interval->h . " hours ago";
-            } else if ($interval->i) {
-              $time_ago = $interval->i . " minutes ago";
-            } else {
-              $time_ago = $interval->s . " seconds ago";
-            }
-            // Store Likes, Comments, and Shares values in variables
-            echo '<section>';
-            echo '<div class="post" id="post-' . $postId . '">';
-            echo '<div class="news-feed-post"  id="' . $postId . '">';
-            echo '<div class="post-header">';
-            echo '<img class="UserPassport" src="UserPassport/' . $row['Passport'] . '">';
-            echo '<a href="user_profile.php?UserId=' . $row['UserId'] . '" style="text-decoration: none;"><p class="post-author"><strong>' . $row['Surname'] . ' ' . $row['First_Name'] . '</strong></p></a>';
-            echo '<div id="threedots">
-                    <button type="button" class="btn btn-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fas fa-ellipsis-h"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                      <div>
-                        <button type="button" class="btn btn-primary blockUser" id="blockUser-' . $row['UserId'] . '" data-recipientid="' . $row['UserId'] . '" data-bs-toggle="modal" data-bs-target="#blockUserModal-' . $row['UserId'] . '">
-                          Block User
-                        </button>
-                        <input type="hidden" id="bu' . $row['UserId'] . '" value="' . $row['UserId'] . '">
-                      </div>
-                      <div>
-                        <button type="button" class="btn btn-primary blockButton" id="blockButton-' . $postId . '" data-postid="' . $postId . '" data-bs-toggle="modal" data-bs-target="#blockTypeofPostModal-' . $postId . '">
-                          Block this type of post
-                        </button>
-                        <input type="hidden" id="b' . $postId . '" value="' . $postId . '">
-                      </div>
-                      <a class="dropdown-item" href="#">Report user</a>
-                      <a class="dropdown-item" href="#">Repost post</a>
-                    </div>
-                  </div>';
-            echo '</div>';
-            echo '<h2 class="post-title">' . $row['title'] . '</h2>';
-            if (!empty($row['image']) && !empty($row['video'])) {
-              echo '<div class="post-carousel">';
-              echo '<div class="owl-carousel">'; // Add the owl-carousel container
-
-              // Add carousel items for each post with the same postId
-              while ($row['PostId'] === $postId) {
-                echo '<div class="post-item">';
-                echo '<img class="post-image" src="' . $row['image'] . '">';
-                echo '</div>';
-                // Fetch the next row
-                // ...
-              }
-
-              echo '</div>'; // Close the owl-carousel container
-
-              echo '<div class="post-video">'; // Add the video container
-              echo '<div class="video-container">';
-              echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
-              echo '<source src="' . $row["video"] . '" type="video/mp4">';
-              echo 'Your browser does not support the video tag.';
-              echo '</video>';
-              echo '<div class="video-controls">';
-              echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')"><i class="bi bi-rewind"></i></button>';
-              echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
-              echo '<span id="playPauseButton-' . $postId . '"><i class="bi bi-play"></i></span>';
-              echo '</button>';
-              echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')"><i class="bi bi-fast-forward"></i></button>';
-              echo '<div class="volume-control">';
-              echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
-              echo '</div>';
-              echo '<div class="time-control">';
-              echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
-              echo '<div class="time-display">';
-              echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
-              echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
-              echo '</div>';
-              echo '</div>';
-              echo '</div>';
-              echo '</div>';
-              echo '</div>';
-            } else if (!empty($row['image'])) {
-              echo '<img class="post-image" src="' . $row['image'] . '">';
-            } else if (!empty($row['video'])) {
-              echo '<div class="post-video">';
-              echo '<div class="video-container">';
-              echo '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
-              echo '<source src="' . $row["video"] . '" type="video/mp4">';
-              echo 'Your browser does not support the video tag.';
-              echo '</video>';
-              echo '<div class="video-controls">';
-              echo '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')"><i class="bi bi-rewind"></i></button>';
-              echo '<button onclick="togglePlayPause(\'' . $postId . '\')">';
-              echo '<span id="playPauseButton-' . $postId . '"><i class="bi bi-play"></i></span>';
-              echo '</button>';
-              echo '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')"><i class="bi bi-fast-forward"></i></button>';
-              echo '<div class="volume-control">';
-              echo '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
-              echo '</div>';
-              echo '<div class="time-control">';
-              echo '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
-              echo '<div class="time-display">';
-              echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
-              echo '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
-              echo '</div>';
-              echo '</div>';
-              echo '</div>';
-            }
-            echo '<p class="post-content">' . $row['content'] . '</p>';
-            //   $date_posted = date_format($row['date_posted'], 'Y-m-d H:i:s');
-            echo '<p class="post-date">' . $time_ago . '</p>';
-            echo '</div>';
-            echo '<div class="footer">
-      <button type="button" class="btn btn-primary like ' . ($islikeing ? 'likeing' : 'unlike') . '" data-postid="' . $postId . '">
-          <span class="like-count">' . $likes . '</span>
-          <span class="emoji">&#x2764;</span>
-          ' . ($islikeing ? 'Unlike' : 'Like') . '
-      </button>
-      <button type="button" class="btn btn-primary share-button" data-postid="' . $postId . '">
-          <i class="bi bi-share"></i> Share
-      </button>
-      <button type="button" class="btn btn-primary comment-button" data-postid="' . $postId . '">
-  <i class="bi bi-chat-dots"></i> Comment</button>
-
-  </div>';
-            echo '</div>';
-            echo '<div class="modal fade" data-postid="' . $postId . '" id="blockTypeofPostModal-' . $postId . '" tabindex="-1" aria-labelledby="blockTypeofPostModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="blockTypeofPostModalLabel">Block Post</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Could you help us categorize what sort of post this is?</p>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="pornographic-content-posts">
-            <label class="form-check-label" for="pornographic-content-posts">
-              Pornographic content post
-            </label>
+          <div id="newsFeed">
+            <!-- Posts will be dynamically loaded here -->
           </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="racist-posts">
-            <label class="form-check-label" for="racist-posts">
-              Racist posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="bloody-content-posts">
-            <label class="form-check-label" for="bloody-content-posts">
-              Bloody content posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="flashy-content-posts">
-            <label class="form-check-label" for="flashy-content-posts">
-              Flashy content posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockpost" type="checkbox" value="" id="other-reason-posts">
-            <label class="form-check-label" for="other-reason-posts">
-              Other reason
-            </label>
-          </div>
-          <div class="form-group mt-3 blockpost" id="other-reason-textbox-posts" style="display: none;">
-            <label for="other-reason-text">Please specify:</label>
-            <textarea class="form-control" id="other-reason-text-posts" rows="3"></textarea>
-          </div>
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-postid="' . $postId . '" onclick="blockPosts()">Block</button>
-      </div>
-    </div>
-  </div>
-</div>';
-            echo '<div class="modal fade" data-recipient-id="' . $row['UserId'] . '" id="blockUserModal-' . $row['UserId'] . '" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Why do you want to block this user?</p>
-          <div class="form-check">
-            <input class="form-check-input blockuser" type="checkbox" value="" id="pornographic-content">
-            <label class="form-check-label " for="pornographic-content">
-              Pornographic content
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockuser" type="checkbox" value="" id="not-a-fan-of-posts">
-            <label class="form-check-label " for="not-a-fan-of-posts">
-              Not a fan of user"s posts
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockuser" type="checkbox" value="" id="bloody-content">
-            <label class="form-check-label " for="bloody-content">
-              Bloody content
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockuser" type="checkbox" value="" id="flashy-content">
-            <label class="form-check-label " for="flashy-content">
-              Flashy content
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input blockuser" type="checkbox" value="" id="other-reason">
-            <label class="form-check-label " for="other-reason">
-              Other reason
-            </label>
-          </div>
-          <div class="form-group mt-3" id="other-reason-textbox" style="display: none;">
-            <label for="other-reason-text">Please specify:</label>
-            <textarea class="form-control" id="other-reason-text" rows="3"></textarea>
-          </div>
-        </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    <button type="button" class="btn btn-primary" data-recipient-id="' . $row['UserId'] . '" onclick="blockUser()">Block</button>
-  </div>
-</div>
-</div>
-</div>';
-            echo '</section>';
-          }
-          ?>
           <button id="scrollToTopBtn"><i class="bi bi-arrow-up-short"></i></button>
           <?php
 
@@ -1562,7 +1319,7 @@ include 'db.php';
               </table>
             </div>
           </div>
-          <textarea class="form-control" name="commentText" placeholder="Type your comment here" id="commentInput" rows="3"></textarea>
+          <textarea class="form-control" name="commentText" placeholder="Type your comment" id="commentInput" rows="3"></textarea>
           <button type="button" class="btn btn-primary" onclick="submitComment()">Comment</button>
         </div>
         <div class="comments"></div>
@@ -1574,6 +1331,239 @@ include 'db.php';
   </div>
   </div>
   <script src="js/jquery.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script>
+    function loadNewsFeed() {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log('Response:', xhr.responseText);
+            var newsFeed = document.getElementById('newsFeed');
+            newsFeed.innerHTML = '';
+
+            response.posts.forEach(function(post) {
+              var postElement = document.createElement('section');
+              var postDiv = document.createElement('div');
+              postDiv.className = 'post';
+
+              var newsFeedPostDiv = document.createElement('div');
+              newsFeedPostDiv.className = 'news-feed-post';
+
+              var postHeaderDiv = document.createElement('div');
+              postHeaderDiv.className = 'post-header';
+
+              var userPassportImg = document.createElement('img');
+              userPassportImg.className = 'UserPassport';
+              userPassportImg.src = post.passport;
+
+              var authorLink = document.createElement('a');
+              authorLink.href = 'user_profile.php?UserId=' + post.UserId;
+              authorLink.style.textDecoration = 'none';
+
+              var authorNameP = document.createElement('p');
+              authorNameP.className = 'post-author';
+              authorNameP.innerHTML = '<strong>' + post.surname + ' ' + post.firstName + '</strong>';
+
+              authorLink.appendChild(authorNameP);
+              postHeaderDiv.appendChild(userPassportImg);
+              postHeaderDiv.appendChild(authorLink);
+
+              var threeDotsDiv = document.createElement('div');
+              threeDotsDiv.id = 'threedots';
+
+              var dropdownButton = document.createElement('button');
+              dropdownButton.type = 'button';
+              dropdownButton.className = 'btn btn-link';
+              dropdownButton.dataset.bsToggle = 'dropdown';
+              dropdownButton.setAttribute('aria-haspopup', 'true');
+              dropdownButton.setAttribute('aria-expanded', 'false');
+              dropdownButton.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
+
+              var dropdownMenu = document.createElement('div');
+              dropdownMenu.className = 'dropdown-menu dropdown-menu-right';
+
+              var blockUserDiv = document.createElement('div');
+              var blockUserButton = document.createElement('button');
+              blockUserButton.type = 'button';
+              blockUserButton.className = 'btn btn-primary blockUser';
+              blockUserButton.id = 'blockUser-' + post.UserId;
+              blockUserButton.dataset.recipientid = post.UserId;
+              blockUserButton.dataset.bsToggle = 'modal';
+              blockUserButton.dataset.bsTarget = '#blockUserModal-' + post.UserId;
+              blockUserButton.innerHTML = 'Block User';
+
+              var blockUserInput = document.createElement('input');
+              blockUserInput.type = 'hidden';
+              blockUserInput.id = 'bu' + post.UserId;
+              blockUserInput.value = post.UserId;
+
+              blockUserDiv.appendChild(blockUserButton);
+              blockUserDiv.appendChild(blockUserInput);
+
+              var blockButtonDiv = document.createElement('div');
+              var blockButtonButton = document.createElement('button');
+              blockButtonButton.type = 'button';
+              blockButtonButton.className = 'btn btn-primary blockButton';
+              blockButtonButton.id = 'blockButton-' + post.postId;
+              blockButtonButton.dataset.postid = post.postId;
+              blockButtonButton.dataset.bsToggle = 'modal';
+              blockButtonButton.dataset.bsTarget = '#blockTypeofPostModal-' + post.postId;
+              blockButtonButton.innerHTML = 'Block this type of post';
+
+              var blockButtonInput = document.createElement('input');
+              blockButtonInput.type = 'hidden';
+              blockButtonInput.id = 'b' + post.postId;
+              blockButtonInput.value = post.postId;
+
+              blockButtonDiv.appendChild(blockButtonButton);
+              blockButtonDiv.appendChild(blockButtonInput);
+
+              dropdownMenu.appendChild(blockUserDiv);
+              dropdownMenu.appendChild(blockButtonDiv);
+              dropdownMenu.innerHTML += '<a class="dropdown-item" href="#">Report user</a>' +
+                '<a class="dropdown-item" href="#">Repost post</a>';
+
+              threeDotsDiv.appendChild(dropdownButton);
+              threeDotsDiv.appendChild(dropdownMenu);
+
+
+              if (post.postId !== post.currentPostId) {
+                // Output the previous carousel items if any
+                if (post.carouselItems.length > 0) {
+                  var carouselContainer = document.createElement('div');
+                  carouselContainer.className = 'post-carousel';
+                  var owlCarousel = document.createElement('div');
+                  owlCarousel.className = 'owl-carousel';
+
+                  post.carouselItems.forEach(function(item) {
+                    var carouselItem = document.createElement('div');
+                    carouselItem.className = 'post-item';
+                    carouselItem.innerHTML = item;
+                    owlCarousel.appendChild(carouselItem);
+                  });
+
+                  carouselContainer.appendChild(owlCarousel);
+                  postDiv.appendChild(carouselContainer); // Append the carousel container to the post div
+                }
+
+                // Reset the carousel items array for the new postId
+                post.carouselItems = [];
+
+                // Store the current postId
+                post.currentPostId = post.postId;
+              }
+
+              // Create a div for the post media
+              var postMediaDiv = document.createElement('div');
+              postMediaDiv.className = 'post-media';
+
+              // Append the carousel items to the post media div
+              if (post.carouselItems.length > 0) {
+                var carouselContainer = document.createElement('div');
+                carouselContainer.className = 'post-carousel';
+                var owlCarousel = document.createElement('div');
+                owlCarousel.className = 'owl-carousel';
+
+                post.carouselItems.forEach(function(item) {
+                  var carouselItem = document.createElement('div');
+                  carouselItem.className = 'post-item';
+                  carouselItem.innerHTML = item;
+                  owlCarousel.appendChild(carouselItem);
+                });
+
+                carouselContainer.appendChild(owlCarousel);
+                postMediaDiv.appendChild(carouselContainer);
+              }
+
+              // Append the post media div before the post content
+              // newsFeedPostDiv.insertBefore(postMediaDiv, postContentDiv);
+
+              var postContentDiv = document.createElement('div');
+              postContentDiv.className = 'post-content';
+              postContentDiv.textContent = post.content;
+
+              var postDateDiv = document.createElement('div');
+              postDateDiv.className = 'post-date';
+              postDateDiv.textContent = post.timeAgo;
+
+              var footerDiv = document.createElement('div');
+              footerDiv.className = 'footer';
+
+              var likeButton = document.createElement('button');
+              likeButton.type = 'button';
+              likeButton.className = 'btn btn-primary like ' + (post.isLiking ? 'likeing' : 'unlike');
+              likeButton.dataset.postid = post.postId;
+              likeButton.innerHTML = '<span class="like-count">' + post.likes + '</span>' +
+                '<span class="emoji">&#x2764;</span>' +
+                (post.isLiking ? 'Unlike' : 'Like');
+
+              var shareButton = document.createElement('button');
+              shareButton.type = 'button';
+              shareButton.className = 'btn btn-primary share-button';
+              shareButton.dataset.postid = post.postId;
+              shareButton.innerHTML = '<i class="bi bi-share"></i> Share';
+
+              var commentButton = document.createElement('button');
+              commentButton.type = 'button';
+              commentButton.className = 'btn btn-primary comment-button';
+              commentButton.dataset.postid = post.postId;
+              commentButton.innerHTML = '<i class="bi bi-chat-dots"></i> Comment';
+
+              footerDiv.appendChild(likeButton);
+              footerDiv.appendChild(shareButton);
+              footerDiv.appendChild(commentButton);
+
+              postDiv.appendChild(newsFeedPostDiv);
+              newsFeedPostDiv.appendChild(postHeaderDiv);
+              postHeaderDiv.appendChild(threeDotsDiv);
+              var postTitleDiv = document.createElement('div');
+              postTitleDiv.className = 'post-title';
+
+              var postTitleH2 = document.createElement('h2');
+              postTitleH2.textContent = post.title;
+
+              postTitleDiv.appendChild(postTitleH2);
+              postDiv.appendChild(postTitleDiv);
+              postDiv.appendChild(postMediaDiv);
+              postDiv.appendChild(postContentDiv);
+              postDiv.appendChild(postDateDiv);
+              postDiv.appendChild(footerDiv);
+              postElement.appendChild(postDiv);
+
+              newsFeed.appendChild(postElement);
+            });
+            $('.owl-carousel').owlCarousel({
+              items: 1,
+              loop: true,
+              nav: true,
+              dots: false,
+              navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
+            })
+          } else {
+            console.log('Error: ' + xhr.status);
+          }
+        }
+      };
+
+      xhr.open('GET', 'get_posts.php', true);
+      xhr.send();
+    }
+
+    // Load initial news feed
+    loadNewsFeed();
+
+    // Add event listener to the "Post" button
+    var postButton = document.getElementById('postButton');
+    postButton.addEventListener('click', function() {
+      // Code to handle posting a new post
+      // ...
+
+      // After posting, reload the news feed
+      loadNewsFeed();
+    });
+  </script>
 
   <script>
     $(document).ready(function() {
@@ -1597,7 +1587,6 @@ include 'db.php';
   </script>
 
 </body>
-<script src="js/owl.carousel.min.js"></script>
 <script>
   document.addEventListener("click", function(event) {
     var notificationLink = document.getElementById("notificationLink");
@@ -1626,10 +1615,10 @@ include 'db.php';
   });
 </script>
 <script>
-  var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
+  var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
   // Check if the UserId exists
-  if (!userId) {
+  if (!UserId) {
     // UserId not found, redirect to login page
     window.location.href = "login.php";
   }
@@ -1812,64 +1801,21 @@ include 'db.php';
 </script>
 <script>
   $(document).ready(function() {
-    $("#search").on("keyup", function() {
+    $("#search2").on("keyup", function() {
+      // alert('yes');
       var value = $(this).val().toLowerCase();
       if (value === "") {
-        // Clear the table if the search box is empty
-        //   $('#user_table').val('');
-
-        $("#user_table").html("");
+        $("#user_table2").html("");
       } else {
         // Run the search function if the search box is not empty
-        $("#user_table tr").filter(function() {
+        $("#user_table2 tr").filter(function() {
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
       }
     });
   });
 </script>
-<script>
-  const searchBox2 = document.getElementById('search2');
-  const resultsDiv2 = document.getElementById('user_table2');
 
-  searchBox.addEventListener('input', function() {
-    const searchTerm = this.value;
-
-    // Clear the results if the search box is empty
-    if (!searchTerm.trim()) {
-      resultsDiv.innerHTML = '';
-      return;
-    }
-
-    $(document).ready(function() {
-      $("#search2").on("keyup", function() {
-        // alert('yes');
-        var searchValue = $(this).val().toLowerCase();
-        if (searchValue === "") {
-          $("#user_table2").removeClass("show").html("");
-        } else {
-          $.ajax({
-            url: "searchbackend.php",
-            method: "POST",
-            data: {
-              search_query: searchValue
-            },
-            success: function(data) {
-              $("#user_table2").addClass("show").html(data);
-            }
-          });
-        }
-      });
-
-      $(document).on("click", function(e) {
-        // Check if the click is outside the search box and user table
-        if (!$(e.target).closest(".search-container2, #user_table2").length) {
-          $("#user_table2").removeClass("show").html("");
-        }
-      });
-    });
-  });
-</script>
 <script>
   const searchBox = document.getElementById('search');
   const resultsDiv = document.getElementById('user_table');
@@ -1974,141 +1920,7 @@ include 'db.php';
     });
   });
 </script>
-<script>
-  // Declare myVideo as a global variable
-  let myVideo;
 
-  function togglePlayPause(postId) {
-    const playPauseButton = document.getElementById("playPauseButton-" + postId);
-    const myVideo = document.getElementById("myVideo-" + postId);
-
-    if (myVideo.paused) {
-      myVideo.play();
-      playPauseButton.innerHTML = "<i class='bi bi-pause-circle-fill'></i>";
-    } else {
-      myVideo.pause();
-      playPauseButton.innerHTML = "<i class='bi bi-play'></i>";
-    }
-  }
-
-  function rewind(postId) {
-    const myVideo = document.getElementById("myVideo-" + postId);
-    myVideo.currentTime -= 10;
-  }
-
-  // <i class="bi bi-fast-forward"></i>
-  function fastForward(postId) {
-    const myVideo = document.getElementById("myVideo-" + postId);
-    myVideo.currentTime += 10;
-  }
-
-  // Set volume
-  (function() {
-    function setVolume(postId) {
-      var video = document.getElementById('myVideo-' + postId);
-      var volumeRange = document.getElementById('volumeRange-' + postId);
-
-      // Set the volume of the video
-      video.volume = volumeRange.value;
-    }
-
-    // Update the volume range when the video is loaded
-    window.addEventListener('DOMContentLoaded', function() {
-      var videos = document.getElementsByTagName('video');
-
-      for (var i = 0; i < videos.length; i++) {
-        (function() {
-          var video = videos[i];
-          var postId = video.getAttribute('data-my-Video-id');
-          var volumeRange = document.getElementById('volumeRange-' + postId);
-
-          // Update the volume range as the volume changes
-          video.addEventListener('volumechange', function() {
-            volumeRange.value = video.volume;
-          });
-
-          // Set the setVolume function with the postId argument
-          volumeRange.oninput = function() {
-            setVolume(postId);
-          };
-        })();
-      }
-    });
-  })();
-
-
-  function setCurrentTime(postId) {
-    return function() {
-      var video = document.getElementById('myVideo-' + postId);
-      var timeRange = document.getElementById('timeRange-' + postId);
-      var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
-
-      // Calculate the new time based on the range value
-      var newTime = video.duration * (timeRange.value / 100);
-
-      // Set the current time of the video
-      video.currentTime = newTime;
-
-      // Update the current time display
-      currentTimeDisplay.innerHTML = formatTime(video.currentTime);
-    };
-  }
-
-  // Helper function to format time in HH:MM:SS format
-  function formatTime(time) {
-    var minutes = Math.floor(time / 60);
-    var seconds = Math.floor(time % 60);
-
-    // Add leading zeros if necessary
-    minutes = String(minutes).padStart(2, '0');
-    seconds = String(seconds).padStart(2, '0');
-
-    return minutes + ':' + seconds;
-  }
-
-  // Update the time range and duration display when the video is loaded
-  window.addEventListener('DOMContentLoaded', function() {
-    var videos = document.getElementsByTagName('video');
-
-    for (var i = 0; i < videos.length; i++) {
-      (function() {
-        var video = videos[i];
-        var postId = video.getAttribute('data-my-Video-id');
-        var timeRange = document.getElementById('timeRange-' + postId);
-        var durationDisplay = document.getElementById('durationDisplay-' + postId);
-
-        // Update the duration display
-        video.addEventListener('loadedmetadata', function() {
-          durationDisplay.innerHTML = formatTime(video.duration);
-        });
-
-        // Update the time range as the video progresses
-        video.addEventListener('timeupdate', function() {
-          var currentTime = video.currentTime;
-          var duration = video.duration;
-
-          // Calculate the percentage of progress
-          var progress = (currentTime / duration) * 100;
-
-          // Set the value of the time range
-          timeRange.value = progress;
-
-          // Update the current time display
-          var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
-          currentTimeDisplay.innerHTML = formatTime(currentTime);
-        });
-
-        // Set the setCurrentTime function with the postId argument
-        timeRange.onchange = setCurrentTime(postId);
-      })();
-    }
-  });
-</script>
-<!-- <script>
-  $("blockUserModal-"+postId).on('hidden.bs.modal', function () {
-    $('input[type="checkbox"]').prop('checked', false);
-  })
-</script> -->
 <script>
   $(document).ready(function() {
     // Add event listener to "other reason" checkbox
@@ -2198,7 +2010,7 @@ include 'db.php';
       }
     });
   });
-  //  check userId of the post before modal
+  //  check UserId of the post before modal
   // $(document).on('click', '.blockButton', function() {
   //   var postId = $(this).data('postid');
   //   alert(postId);

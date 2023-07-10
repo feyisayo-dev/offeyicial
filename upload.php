@@ -435,6 +435,7 @@ $UserId = $_SESSION['UserId'];
           if (response === "success") {
             console.log("Post added successfully");
             alert("Post added successfully");
+            alert(response);
             window.location.href = "index.php";
           } else {
             console.log("Error adding post: " + response);
