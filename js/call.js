@@ -8,7 +8,7 @@ var over = document.getElementById('over');
 var audioCallButton = document.getElementById('audio_call_button');
 var videoCallButton = document.getElementById('video_call_button');
 var peerConnection;
-var recipientId = "";
+var recipientId = userB;
 let offerReceived = false;
 
 
@@ -314,17 +314,28 @@ function handleHangupMessage() {
 
 function sendMessage(message) {
     if (signalingSocket.readyState === WebSocket.OPEN) {
-      signalingSocket.send(JSON.stringify(message));
+        signalingSocket.send(JSON.stringify(message));
     } else {
-      console.log('WebSocket connection is not open. Message not sent:', message);
+        console.log('WebSocket connection is not open. Message not sent:', message);
     }
-  }
-  
+}
+
 
 // WebSocket connection
 var signalingSocket;
 
 function initSignaling() {
+
+    function sendIncomingCallSignal() {
+        var message = {
+            type: 'incoming_call',
+            callerUserId: UserId // Replace UserId with the actual User ID of User A
+        };
+        sendMessage(message);
+    }
+
+    // Call this function when User A initiates a call
+    sendIncomingCallSignal();
     // Retrieve the sessionId from sessionStorage
     var sessionId = sessionStorage.getItem('sessionId');
 

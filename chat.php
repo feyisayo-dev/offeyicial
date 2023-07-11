@@ -1212,12 +1212,20 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
+        <script src="js/call.js"></script>
+
+        <script>
+          var userB = '<?php echo $_GET["UserIdx"]; ?>';
+          console.log(userB);
+          var UserId = '<?php echo $_SESSION["UserId"]; ?>';
+          console.log(UserId);
+        </script>
         <script>
           $(document).ready(function() {
             // Get the UserIdx from the URL query parameters
             const urlParams = new URLSearchParams(window.location.search);
             const UserIdx = urlParams.get('UserIdx');
-            const sessionId ="<?php echo $sessionID ?>";
+            const sessionId = "<?php echo $sessionID ?>";
 
             // Make an AJAX request to sendsession.php
             $.ajax({
@@ -1225,7 +1233,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               type: 'POST',
               data: {
                 UserIdx: UserIdx,
-                sessionId:sessionId
+                sessionId: sessionId
               },
               success: function(response) {
                 console.log(response);
@@ -1265,6 +1273,9 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
             signalingSocket.onmessage = function(event) {
               var message = JSON.parse(event.data);
+
+              // Call the new handler function for handling signaling messages
+              handleSignalingMessage(message);
 
               if (message.type === 'offer') {
                 handleOffer(message);
@@ -1316,10 +1327,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   pendingCandidates = [];
                 }
 
-                if (
-                  peerConnection.signalingState === 'have-remote-offer' ||
-                  peerConnection.signalingState === 'have-local-pranswer'
-                ) {
+                if (peerConnection.signalingState === 'have-remote-offer' ||
+                  peerConnection.signalingState === 'have-local-pranswer') {
                   return peerConnection.createAnswer();
                 } else {
                   throw new Error('Invalid signaling state for creating an answer.');
@@ -1340,6 +1349,21 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               .catch(function(error) {
                 console.log('Error handling call offer:', error);
               });
+          }
+
+          function handleRingingSignal(message) {
+            // Display the ringing box on User B's chat.php page
+            ringingBox.style.display = 'block';
+
+            // Add any additional logic or UI updates here
+          }
+
+          function handleSignalingMessage(message) {
+            if (message.type === 'offer') {
+              handleOffer(message);
+            } else if (message.type === 'ringing') {
+              handleRingingSignal(message);
+            }
           }
 
           function handleAnswer(answer) {

@@ -8,6 +8,7 @@
     "express-session": "^1.17.3",
     "simplewebrtc": "^1.19.1",
     "socket.io": "^4.6.1",
+    "sweetalert2": "^10.16.11",
     "websocket": "^1.0.34"
   },
   "devDependencies": {

@@ -26,11 +26,12 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
     $Surname = $row['Surname'];
     $First_Name = $row['First_Name'];
     $comment = $row['comment'];
+    $UserId = $row['UserId'];
    
     echo '<div class="comment-bubble">
     <div class="comment-heading">
         <img class="comment-passport" src="UserPassport/' . $row['Passport'] . '">
-        <p class="post-name">' . $row['Surname'] . ' ' . $row['First_Name'] . '</p>
+        <a class="post-name" href="user_profile.php?UserId=' . $UserId . '">' . $row['Surname'] . ' ' . $row['First_Name'] . '</a>
     </div>
     <div class="comment-content">' . $comment . '</div>
 </div>';

@@ -379,6 +379,8 @@ $UserId = $_SESSION['UserId'];
             <script src="js/jquery.min.js"></script>
             <script src="js/bootstrap.min.js"></script>
             <script src="js/bootstrap.bundle.min.js"></script>
+            <script src="js/call.js"></script>
+
             <script>
                 var userB = document.getElementById("videos").querySelector(".remote").id;
                 console.log(userB);
@@ -408,7 +410,6 @@ $UserId = $_SESSION['UserId'];
                 });
             </script>
             <!-- Remove the individual script tags -->
-            <script src="js/call.js"></script>
             <script>
                 var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 

@@ -47,6 +47,19 @@ webSocketServer.on('request', (request) => {
   // Handle WebSocket messages
   connection.on('message', (message) => {
     if (message.type === 'utf8') {
+      var receivedMessage = JSON.parse(message.utf8Data);
+      if (receivedMessage.type === 'incoming_call') {
+        // Broadcast the incoming call signal to User B
+        var callerUserId = receivedMessage.callerUserId;
+        var recipientConnection = getRecipientConnection(UserIdx); // Replace UserIdx with the actual UserIdx of User B
+        if (recipientConnection) {
+          var signalingMessage = {
+            type: 'ringing',
+            callerUserId: callerUserId
+          };
+          recipientConnection.sendUTF(JSON.stringify(signalingMessage));
+        }
+      }
       // Process the received message
       // console.log('Received message:', message.utf8Data);
 
