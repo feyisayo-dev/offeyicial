@@ -1911,6 +1911,74 @@ body * {
   </div>
 </div>
 
+<script>
+  // Get the current URL
+  // var url = new URL(window.location.href);
 
+  // Get the value of the 'roomId' parameter from the URL
+  // var roomId = url.searchParams.get('roomId');
+
+  // Use the roomId value as needed
+  // console.log(roomId);
+  var UserIdx = "<?php echo $UserIdx ?>";
+
+  // Extract the UserIdx from the roomId
+  // var regex = /OFF.*?OFF([A-Za-z0-9]+)/;
+  // var match = roomId.match(regex);
+  // var UserIdxno = match ? match[1] : "";
+  // var UserIdx = "OFF" + UserIdxno;
+
+  console.log(UserIdx); // Output: OFF0006 // Output: UserIdx
+  // Make an AJAX request to pass the UserIdx to a PHP script
+  var formData = new FormData();
+  formData.append("UserIdx", UserIdx);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "update_recipient.php", true);
+
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+          // Request completed successfully
+          console.log("Recipient ID updated successfully");
+
+          // Retrieve the recipientId from the response
+          var recipientId = xhr.responseText;
+          // Use the recipientId variable as needed
+          console.log(recipientId);
+          // Pass the recipientId to your PHP code by creating a hidden input field
+          var hiddenInput = document.createElement("input");
+          hiddenInput.type = "hidden";
+          hiddenInput.name = "recipientId";
+          hiddenInput.class = "hiddenrec";
+          hiddenInput.id = "hiddenrecid";
+          hiddenInput.value = recipientId;
+          document.getElementById("callmain").appendChild(hiddenInput);
+
+          // Make an AJAX request to retrieve the user profile data
+          var profileRequest = new XMLHttpRequest();
+          profileRequest.open("GET", "get_user_profile.php?UserId=" + recipientId, true);
+          profileRequest.onreadystatechange = function() {
+              if (profileRequest.readyState === 4 && profileRequest.status === 200) {
+                  // Request completed successfully
+                  console.log("User profile retrieved successfully");
+
+                  // Parse the JSON response
+                  var profileData = JSON.parse(profileRequest.responseText);
+
+                  // Update the name and passport elements in the HTML
+                  document.getElementById("recipientName").textContent = profileData.firstName + " " + profileData.surname;
+                  document.getElementById("recipientPassport").setAttribute("xlink:href", profileData.passport);
+              }
+          };
+          profileRequest.send();
+          // Update the HTML elements with recipientId
+          document.getElementById("videos").querySelector(".remote").id = recipientId;
+          console.log(recipientId);
+          document.getElementById("hang").querySelector(".hang").href = "chat.php?UserIdx=" + recipientId;
+      }
+  };
+
+  // Send the FormData object as data in the AJAX request
+  xhr.send(formData);
+</script>
 
 </html>

@@ -118,907 +118,25 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
   <link href="css/remixicon/remixicon.css" rel="stylesheet">
   <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/chat.css" rel="stylesheet">
   <script src="js/popper.min.js"></script>
   <!-- Bootstrap core JavaScript -->
   <script src="js/twemoji.min.js"></script>
 
-
-
-
-  <style>
-    .main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #f7f7f7;
-    }
-
-    .profilering {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .nameDiv h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .status h2 {
-      font-size: 16px;
-      color: #888;
-    }
-
-    .imageDiv img {
-      width: 200px;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin: 16px;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: center;
-      margin-top: 16px;
-    }
-
-    .rejectBtn,
-    .answerBtn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      font-size: 24px;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-
-    .rejectBtn {
-      background-color: #dc3545;
-      margin-right: 16px;
-    }
-
-    .answerBtn {
-      background-color: #28a745;
-    }
-
-    @font-face {
-      font-family: 'Modern-Age';
-      src: url('fonts/Modern-Age.ttf');
-    }
-
-    body {
-      background-color: #f2f2f2;
-    }
-
-    nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      background-color: #f8f9fa;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    nav a {
-      color: #212529;
-      text-decoration: none;
-      margin-left: 20px;
-      font-size: 16px;
-    }
-
-    nav a:hover {
-      color: aliceblue;
-    }
-
-    nav i {
-      margin-right: 5px;
-    }
-
-    nav .profile {
-      display: flex;
-      align-items: center;
-      margin-left: auto;
-      font-size: 14px;
-    }
-
-    nav .profile-name {
-      margin-left: 10px;
-    }
-
-
-
-    .chat-container {
-      width: 100%;
-      /* margin: 50px auto; */
-      background-color: #f2f2f2;
-      border-radius: 10px;
-      /* padding: 20px; */
-    }
-
-    .chat-header {
-      text-align: left;
-      /* height: 70px; */
-      background-color: #bed2e4;
-      color: white;
-      padding: 6px;
-    }
-
-    .recipientPassport {
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      margin-right: 10px;
-    }
-
-    .chat-header h1 {
-      margin: 0;
-    }
-
-    .chat-messages {
-      height: 300px;
-      overflow-y: scroll;
-      padding: 20px;
-    }
-
-    .chat-messages ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .chat-messages li {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .chatbox {
-      background-color: #f2f2f2;
-      height: calc(100vh - 200px);
-      overflow-y: scroll;
-      padding: 10px;
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .Sent {
-      float: right;
-      background: linear-gradient(to bottom, darkturquoise 0%, aliceblue 100%);
-      color: #444;
-      padding: 8px;
-      border-radius: 10px;
-      margin-top: 10px;
-      margin-left: auto;
-      max-width: 75%;
-      word-wrap: break-word;
-      clear: both;
-    }
-
-    .received {
-      float: left;
-      background: linear-gradient(to bottom, white 0%, #b4b1e6 100%);
-      color: #444;
-      padding: 8px;
-      border-radius: 10px;
-      margin-top: 10px;
-      margin-right: auto;
-      max-width: 75%;
-      word-wrap: break-word;
-      clear: both;
-    }
-
-    .image {
-      text-align: center;
-    }
-
-    .image img {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-
-    .message {
-      margin-bottom: 5px;
-    }
-
-    .chat-input {
-      display: flex;
-      padding: 20px;
-      background-color: #f2f2f2;
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
-
-    .chat-input input[type="text"] {
-      flex: 1;
-      padding: 12px 20px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 2px 2px 2px blue;
-    }
-
-
-    button[type="submit"] {
-      padding: 12px 20px;
-      background-color: darkturquoise;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin-left: 10px;
-    }
-
-    .image-icon {
-      display: inline-block;
-      cursor: pointer;
-    }
-
-    /* .image-icon i {
-                font-size: 25px;
-                color: gray;
-            } */
-
-    .image-input {
-      /* display: none; */
-      width: 180px;
-      background-color: aliceblue;
-      color: white;
-    }
-
-    textarea {
-      width: 100%;
-      height: 30px;
-      padding: 5px;
-      font-size: 16px;
-      font-family: montserrat;
-      resize: none;
-      border-radius: 10px;
-      box-shadow: 2px 2px 2px aliceblue;
-    }
-
-    .message-sender {
-      font-size: 12px;
-      color: black;
-    }
-
-    .chats {
-      height: auto;
-      background: auto;
-      border: 4px;
-    }
-
-    .image-input {
-      opacity: 0;
-      position: absolute;
-      pointer-events: none;
-    }
-
-    .custom-file-label {
-      cursor: pointer;
-      color: darkturquoise;
-    }
-
-    .custom-file-label:hover {
-      transform: scaleX(1.05);
-    }
-
-    .icon {
-      position: relative;
-      font-size: 20px;
-      font-weight: bold;
-      text-decoration: none;
-      color: white;
-      text-transform: capitalize;
-    }
-
-    .call-icon {
-      float: right;
-      margin-top: 10px;
-      font-size: 20px;
-      font-weight: bold;
-      text-decoration: none;
-      color: white;
-      margin-right: 30px;
-    }
-
-    .call-icon:hover {
-      transform: scale(1.05);
-      color: white;
-    }
-
-    .navbar form {
-      display: inline-block;
-      margin-left: 20px;
-    }
-
-    .searchtext {
-      background-color: #f2f2f2;
-      border: none;
-      padding: 8px;
-      font-size: 16px;
-      width: 200px;
-      border-radius: 10px;
-    }
-
-    /* searchdropdown */
-    .search-container {
-      position: relative;
-    }
-
-    #user_table {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-      position: absolute;
-      z-index: 9999;
-      background-color: #fff;
-      /* border: 1px solid #ddd; */
-      border-top: none;
-    }
-
-    #user_table li {
-      padding: 8px 12px;
-      cursor: pointer;
-    }
-
-    #user_table li:hover {
-      background-color: #f2f2f2;
-    }
-
-    .video-input {
-      opacity: 0;
-      position: absolute;
-      pointer-events: none;
-    }
-
-    .custom-file-label {
-      cursor: pointer;
-    }
-
-    .chatbox::-webkit-scrollbar-track {
-      background-color: #f5f5f5;
-    }
-
-    /* Define the scrollbar width and color */
-    .chatbox::-webkit-scrollbar {
-      width: 8px;
-      background-color: #f5f5f5;
-    }
-
-    /* Define the scrollbar thumb color */
-    .chatbox::-webkit-scrollbar-thumb {
-      background-color: #888;
-      border-radius: 10px;
-    }
-
-
-    /* On hover, darken the scrollbar thumb color */
-    .chatbox::-webkit-scrollbar-thumb:hover {
-      background-color: aliceblue;
-    }
-
-    /* #videoPlayer {
-  max-width: 100%;
-  max-height: 100%;
-  margin: auto;
-} */
-
-
-
-    /* Chat button */
-    button[data-bs-target="#sidebar"] {
-      position: absolute;
-      top: 60px;
-      right: 300px;
-      z-index: 999;
-      background-color: aliceblue;
-      color: black;
-      border: none;
-      border-radius: 50px;
-      padding: 15px 20px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease-in-out;
-      width: 100px;
-      /* set a fixed width */
-      height: 50px;
-      /* set a fixed height */
-    }
-
-
-    button[data-bs-target="#sidebar"]:hover {
-      background-color: #128C7E;
-      transform: scale(1.05);
-      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Sidebar */
-    .offcanvas {
-      position: fixed;
-      bottom: 0;
-      right: -350px;
-      z-index: 9998;
-      width: 350px;
-      height: 100vh;
-      padding: 0;
-      background-color: #fff;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease-in-out;
-    }
-
-    .offcanvas.show {
-      right: 0;
-    }
-
-    .offcanvas-header {
-      padding: 15px;
-      background-color: aliceblue;
-      color: #fff;
-    }
-
-    .offcanvas-title {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-
-    .offcanvas-body {
-      padding: 15px;
-    }
-
-    .offcanvas-body ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .offcanvas-body ul li {
-      margin-bottom: 10px;
-    }
-
-    .offcanvas-body ul li a {
-      display: block;
-      color: #333;
-      text-decoration: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .offcanvas-body ul li a:hover {
-      background-color: #f7f7f7;
-      color: aliceblue;
-    }
-
-    li a {
-      display: flex;
-      align-items: center;
-    }
-
-    .passport {
-      margin-right: 10px;
-    }
-
-    .passport img {
-      width: 30px;
-      height: 30px;
-      object-fit: cover;
-      border-radius: 50%;
-    }
-
-    .name {
-      flex: 1;
-    }
-
-    .name span {
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    /* Modal styles */
-    .modal {
-      display: none;
-      /* Hide the modal by default */
-      position: fixed;
-      z-index: 9999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0, 0, 0, 0.8);
-    }
-
-    .modal-content {
-      margin: 10% auto;
-      width: 80%;
-      max-width: 500px;
-      background-color: aliceblue;
-    }
-
-    .modal img {
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-      border-radius: 5px;
-    }
-
-    /* Show the modal when the passport image is clicked */
-    .passport img:hover {
-      cursor: pointer;
-    }
-
-    .modal.show {
-      display: block;
-    }
-
-    nav .logo {
-      font-size: 30px;
-      margin: 0;
-      padding: 0;
-      line-height: 1;
-      font-weight: 500;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-family: Modern-Age;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-    }
-
-    .logo img {
-      height: 30px;
-      margin-right: 10px;
-    }
-
-    .passport,
-    .name {
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    .emoji {
-      color: darkturquoise;
-      background-color: transparent;
-      border: none;
-    }
-
-    .emoji:hover {
-      background-color: transparent;
-      border: none;
-      color: aqua;
-      transform: scaleX(1.05);
-    }
-
-    .emoji-picker {
-      position: relative;
-    }
-
-    .emoji-table-container {
-      position: absolute;
-      top: -200px;
-      /* adjust this value to suit your needs */
-      z-index: 1;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
-      padding: 10px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .emoji-picker,
-    .custom-file {
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 10px;
-    }
-
-    .textsubmit {
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    .video-container {
-      position: relative;
-      width: 400px;
-      height: 400px;
-    }
-
-    #videoplayer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .iframe {
-      display: none;
-    }
-
-    #buttonplay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
-    }
-
-    #buttonplay.clicked {
-      display: none;
-    }
-
-    .form-group {
-      position: fixed;
-      bottom: 10px;
-      width: 100%;
-      padding-top: 30px;
-    }
-
-    .preview img {
-      max-width: 100%;
-      /* max-height: 200px; */
-      display: block;
-      margin: 0 auto;
-    }
-
-    /* The Modal (background) */
-    .modal {
-      width: 100%;
-      /* Full width */
-      height: 100%;
-      /* Full height */
-      overflow: auto;
-      /* Enable scroll if needed */
-      background-color: rgba(0, 0, 0, 0.4);
-      /* Black w/ opacity */
-    }
-
-    /* Modal Content/Box */
-    .modal-content {
-      margin: 15% auto;
-      /* 15% from the top and centered */
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
-      /* Could be more or less, depending on screen size */
-    }
-
-    /* Close Button */
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    /* Style the preview image or video */
-    #image-preview,
-    #video-preview {
-      max-width: 100%;
-      max-height: 100%;
-      /* display: none; */
-    }
-
-    @media only screen and (max-width: 767px) {
-      .message {
-        font-size: 25px;
-        margin-bottom: 5px;
-      }
-    }
-
-    .call-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 9999;
-    }
-
-    .popup {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 4px 8px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      z-index: 1;
-    }
-
-    .popup a {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 14px;
-      color: #333;
-      text-decoration: none;
-    }
-
-    .Sent {
-      position: relative;
-    }
-
-    .Sent .popup {
-      left: -70px;
-    }
-
-    .received {
-      position: relative;
-    }
-
-    .received .popup {
-      right: -70px;
-    }
-
-    .popup a:hover {
-      background-color: #e6e6e6;
-    }
-
-    .changebackground {
-      position: absolute;
-      display: block;
-      background-color: white;
-      border: 1px solid #ccc;
-      padding: 5px;
-    }
-
-    .theme-option {
-      cursor: pointer;
-      padding: 5px;
-    }
-
-    .theme-option:hover {
-      background-color: #f2f2f2;
-    }
-
-    .dropdown {
-      display: inline-block;
-      position: relative;
-      padding: 10px;
-    }
-
-    .dropdown-toggle.custom-toggle {
-      background-color: transparent;
-      border: none;
-      padding: 0;
-    }
-
-    .dropdown-toggle.custom-toggle .dots {
-      display: block;
-      width: 3px;
-      height: 3px;
-      margin-bottom: 2px;
-      background-color: #000;
-      border-radius: 50%;
-    }
-
-    .dropdown-toggle::after {
-      display: none;
-    }
-
-    .dropdown-menu {
-      position: absolute;
-      display: none;
-      background-color: white;
-      border: 1px solid #ccc;
-      padding: 5px;
-    }
-
-    .dropdown-option {
-      cursor: pointer;
-      padding: 5px;
-    }
-
-    .dropdown-option:hover {
-      background-color: #f2f2f2;
-    }
-
-
-    .dropdown-item {
-      padding: 10px;
-    }
-
-    .ringing-box {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 300px;
-      height: 100px;
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      display: none;
-      /* initially hidden */
-    }
-  </style>
 </head>
 
 <body>
+  <div id="chatbox" class="chat_interface">
+    <nav>
 
-  <nav>
+      <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
 
-    <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
-
-    <div class="profile">
-      <?php
-      // session_start();
-
-      // Connect to the database
-      include 'db.php';
-
-      $UserId = $_SESSION['UserId'];
-
-      // Get the surname and first name of the user with the UserId from the database
-      $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
-      $stmt = sqlsrv_prepare($conn, $sql);
-      if (sqlsrv_execute($stmt)) {
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-          $Surname = $row['Surname'];
-          $First_Name = $row['First_Name'];
-        }
-      }
-      ?>
-      <div class="search-container">
-        <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
-        <div id="user_table">
-          <!-- <ul>
-            <li></li>
-        </ul> -->
-        </div>
-      </div>
-
-
-      <a href="user_profile.php?UserId=<?php echo $UserId ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
-    </div>
-  </nav>
-
-
-
-
-  <div class="chat-container">
-    <div class="chat-header">
-      <h1>
+      <div class="profile">
         <?php
+        // session_start();
+
+        // Connect to the database
         include 'db.php';
-
-        // Get the UserId of the user you are talking to
-        $recipientId = $_GET['UserIdx'];
-
-        // Get the name of the user you are talking to
-        $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-        $stmt = sqlsrv_prepare($conn, $sql);
-        if (sqlsrv_execute($stmt)) {
-          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $recipientSurname = $row['Surname'];
-            $recipientFirstName = $row['First_Name'];
-            $Passport = $row['Passport'];
-            if (empty($Passport)) {
-              $recipientPassport = "UserPassport/DefaultImage.png";
-            } else {
-              $recipientPassport = "UserPassport/" . $Passport;
-            }
-          }
-        }
 
         $UserId = $_SESSION['UserId'];
 
@@ -1030,189 +148,300 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             $Surname = $row['Surname'];
             $First_Name = $row['First_Name'];
           }
-          echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
-          echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
-          // Add the reset button
-          echo '<div class="dropdown">
-                <button class="dropdown-toggle custom-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#chtheme" aria-controls="chtheme">
-                  <span class="dots"></span>
-                  <span class="dots"></span>
-                  <span class="dots"></span>
-                </button>
-
-                <ul class="dropdown-menu" id="chtheme" aria-labelledby="dropdownMenuButton">
-                  <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
-                </ul>
-              </div>';
-          echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
         }
-        echo '</div>';
         ?>
-        <div class="chatbox">
-
+        <div class="search-container">
+          <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
+          <div id="user_table">
+            <!-- <ul>
+        <li></li>
+    </ul> -->
+          </div>
         </div>
-        <br><br>
 
 
-        <div class="form-group">
-          <div class="row">
-            <div class="foot">
-              <div class="emoji-picker">
-                <!-- emoji table code goes here -->
-                <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
-                  <i class="fas fa-smile"></i>
-                </button>
-                <div class="emoji-table-container" style="display:none">
-                  <table>
-                    <tr>
-                      <td onclick="insertEmoji('&#x1F600;')">😀</td>
-                      <td onclick="insertEmoji('&#x1F601;')">😁</td>
-                      <td onclick="insertEmoji('&#x1F602;')">😂</td>
-                      <td onclick="insertEmoji('&#x1F603;')">😃</td>
-                      <td onclick="insertEmoji('&#x1F604;')">😄</td>
-                      <td onclick="insertEmoji('&#x1F605;')">😅</td>
-                    </tr>
-                    <tr>
-                      <td onclick="insertEmoji('&#x1F606;')">😆</td>
-                      <td onclick="insertEmoji('&#x1F607;')">😇</td>
-                      <td onclick="insertEmoji('&#x1F608;')">😈</td>
-                      <td onclick="insertEmoji('&#x1F609;')">😉</td>
-                      <td onclick="insertEmoji('&#x1F610;')">😐</td>
-                      <td onclick="insertEmoji('&#x1F611;')">😑</td>
-                    </tr>
-                    <!-- Add more rows and columns for additional emojis -->
-                    <tr>
-                      <td onclick="insertEmoji('&#x1F60A;')">😊</td>
-                      <td onclick="insertEmoji('&#x1F60B;')">😋</td>
-                      <td onclick="insertEmoji('&#x1F60C;')">😌</td>
-                      <td onclick="insertEmoji('&#x1F60D;')">😍</td>
-                      <td onclick="insertEmoji('&#x1F60E;')">😎</td>
-                      <td onclick="insertEmoji('&#x1F60F;')">😏</td>
-                    </tr>
-                    <tr>
-                      <td onclick="insertEmoji('&#x1F612;')">😒</td>
-                      <td onclick="insertEmoji('&#x1F613;')">😓</td>
-                      <td onclick="insertEmoji('&#x1F616;')">😖</td>
-                      <td onclick="insertEmoji('&#x1F615;')">😕</td>
-                      <td onclick="insertEmoji('&#x1F617;')">😗</td>
-                      <td onclick="insertEmoji('&#x1F618;')">😘</td>
-                    </tr>
-                    <tr>
-                      <td onclick="insertEmoji('&#x1F619;')">😙</td>
-                      <td onclick="insertEmoji('&#x1F61A;')">😚</td>
-                      <td onclick="insertEmoji('&#x1F61B;')">😛</td>
-                      <td onclick="insertEmoji('&#x1F61C;')">😜</td>
-                      <td onclick="insertEmoji('&#x1F61D;')">😝</td>
-                      <td onclick="insertEmoji('&#x1F61E;')">😞</td>
-                    </tr>
-                  </table>
+        <a href="user_profile.php?UserId=<?php echo $UserId ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
+      </div>
+    </nav>
+
+
+
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <h1>
+          <?php
+          include 'db.php';
+
+          // Get the UserId of the user you are talking to
+          $recipientId = $_GET['UserIdx'];
+
+          // Get the name of the user you are talking to
+          $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+          $stmt = sqlsrv_prepare($conn, $sql);
+          if (sqlsrv_execute($stmt)) {
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+              $recipientSurname = $row['Surname'];
+              $recipientFirstName = $row['First_Name'];
+              $Passport = $row['Passport'];
+              if (empty($Passport)) {
+                $recipientPassport = "UserPassport/DefaultImage.png";
+              } else {
+                $recipientPassport = "UserPassport/" . $Passport;
+              }
+            }
+          }
+
+          $UserId = $_SESSION['UserId'];
+
+          // Get the surname and first name of the user with the UserId from the database
+          $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+          $stmt = sqlsrv_prepare($conn, $sql);
+          if (sqlsrv_execute($stmt)) {
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+              $Surname = $row['Surname'];
+              $First_Name = $row['First_Name'];
+            }
+            echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
+            echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
+            // Add the reset button
+            echo '<div class="dropdown">
+            <button class="dropdown-toggle custom-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#chtheme" aria-controls="chtheme">
+              <span class="dots"></span>
+              <span class="dots"></span>
+              <span class="dots"></span>
+            </button>
+
+            <ul class="dropdown-menu" id="chtheme" aria-labelledby="dropdownMenuButton">
+              <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
+            </ul>
+          </div>';
+            echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
+          }
+          echo '</div>';
+          ?>
+          <div class="chatbox">
+
+          </div>
+          <br><br>
+
+
+          <div class="form-group">
+            <div class="row">
+              <div class="foot">
+                <div class="emoji-picker">
+                  <!-- emoji table code goes here -->
+                  <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
+                    <i class="fas fa-smile"></i>
+                  </button>
+                  <div class="emoji-table-container" style="display:none">
+                    <table>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F600;')">😀</td>
+                        <td onclick="insertEmoji('&#x1F601;')">😁</td>
+                        <td onclick="insertEmoji('&#x1F602;')">😂</td>
+                        <td onclick="insertEmoji('&#x1F603;')">😃</td>
+                        <td onclick="insertEmoji('&#x1F604;')">😄</td>
+                        <td onclick="insertEmoji('&#x1F605;')">😅</td>
+                      </tr>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F606;')">😆</td>
+                        <td onclick="insertEmoji('&#x1F607;')">😇</td>
+                        <td onclick="insertEmoji('&#x1F608;')">😈</td>
+                        <td onclick="insertEmoji('&#x1F609;')">😉</td>
+                        <td onclick="insertEmoji('&#x1F610;')">😐</td>
+                        <td onclick="insertEmoji('&#x1F611;')">😑</td>
+                      </tr>
+                      <!-- Add more rows and columns for additional emojis -->
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                        <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                        <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                        <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                        <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                        <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                      </tr>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                        <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                        <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                        <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                        <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                        <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                      </tr>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                        <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                        <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                        <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                        <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                        <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                      </tr>
+                    </table>
+                  </div>
                 </div>
-              </div>
-              <div class="custom-file">
-                <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
-                <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
-              </div>
-              <div class="custom-file">
-                <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
-                <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
-              </div>
+                <div class="custom-file">
+                  <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
+                  <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
+                </div>
+                <div class="custom-file">
+                  <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
+                  <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
+                </div>
 
 
-              <div class="d-flex" style="align-items:center">
-                <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
-                <button type="submit" class="submit"><i class="bi bi-send"></i></button>
+                <div class="d-flex" style="align-items:center">
+                  <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
+                  <button type="submit" class="submit"><i class="bi bi-send"></i></button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="footer">
-          <?php
+          <div class="footer">
+            <?php
 
-          // Retrieve all the chats of the current user
-          $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-          $stmt = sqlsrv_query($conn, $sql);
-          if ($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
-          }
-
-          // Display the chats in a list on the sidebar
-          echo '<!-- Button to open the sidebar -->
-<button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-    <i class="bi bi-chat"></i></button>
-
-<!-- Sidebar -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
-        <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <ul class="list-unstyled">';
-
-          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $recipientId = $row['recipientId'];
-
-            // Get the name of the recipient
-            $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-            $stmt2 = sqlsrv_query($conn, $sql2);
-            if ($stmt2 === false) {
+            // Retrieve all the chats of the current user
+            $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+            $stmt = sqlsrv_query($conn, $sql);
+            if ($stmt === false) {
               die(print_r(sqlsrv_errors(), true));
             }
 
-            $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-            $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-            $Passport = $row2['Passport'];
-            if (empty($Passport)) {
-              $passportImage = "UserPassport/DefaultImage.png";
-            } else {
-              $passportImage = "UserPassport/" . $Passport;
+            // Display the chats in a list on the sidebar
+            echo '<!-- Button to open the sidebar -->
+<button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+<i class="bi bi-chat"></i></button>
+
+<!-- Sidebar -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+<div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+    <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+    <ul class="list-unstyled">';
+
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+              $recipientId = $row['recipientId'];
+
+              // Get the name of the recipient
+              $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+              $stmt2 = sqlsrv_query($conn, $sql2);
+              if ($stmt2 === false) {
+                die(print_r(sqlsrv_errors(), true));
+              }
+
+              $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+              $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+              $Passport = $row2['Passport'];
+              if (empty($Passport)) {
+                $passportImage = "UserPassport/DefaultImage.png";
+              } else {
+                $passportImage = "UserPassport/" . $Passport;
+              }
+
+              // Display the recipient name and passport image in the list
+              echo '<li>';
+              echo '<div class="passport">';
+              echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
+              echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+              echo '</a>';
+              echo '</div>';
+              echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+              echo '</li>';
             }
 
-            // Display the recipient name and passport image in the list
-            echo '<li>';
-            echo '<div class="passport">';
-            echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
-            echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-            echo '</a>';
-            echo '</div>';
-            echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-            echo '</li>';
-          }
-
-          echo '</ul>
-    </div>
+            echo '</ul>
+</div>
 </div>';
 
-          ?>
-        </div>
-        <!-- Ringing Box -->
-        <div class="ringing-box" id="ringingBox">
-          <div class="main">
-            <div class="profilering">
-              <div class="nameDiv">
-                <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
+            ?>
+          </div>
+          <!-- Ringing Box -->
+          <div class="ringing-box" id="ringingBox">
+            <div class="main">
+              <div class="profilering">
+                <div class="nameDiv">
+                  <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
+                </div>
+                <div class="status">
+                  <h2>Incoming Call</h2>
+                </div>
+                <div class="imageDiv">
+                  <img src="<?php echo $recipientPassport ?>" alt="profile pic">
+                </div>
               </div>
-              <div class="status">
-                <h2>Incoming Call</h2>
-              </div>
-              <div class="imageDiv">
-                <img src="<?php echo $recipientPassport ?>" alt="profile pic">
-              </div>
-            </div>
-            <div class="buttons">
-              <div class="reject">
-                <button id="hangup_button" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
-              </div>
-              <div class="answer">
-                <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
+              <div class="buttons">
+                <div class="reject">
+                  <button id="hangup_button_pop" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
+                </div>
+                <div class="answer">
+                  <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+      </div>
+    </div>
+    <div id="callInterface" style="display: none;">
+      <div class="callmain" id="callmain">
+        <div class="info-container">
+          <?php
+          // Connect to the database
+          include 'db.php';
 
+          $UserId = $_SESSION['UserId'];
+
+          // Get the surname and first name of the user with the UserId from the database
+          $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserIdx'";
+          $stmt = sqlsrv_prepare($conn, $sql);
+          if (sqlsrv_execute($stmt)) {
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+              $Surname = $row['Surname'];
+              $First_Name = $row['First_Name'];
+            }
+          }
+
+          ?>
+          <div id="videos">
+            <video class="video-player local" id="<?php echo $UserId; ?>" autoplay playsinline></video>
+            <video class="video-player remote" id="<?php echo $UserIdx; ?>" autoplay playsinline></video>
+          </div>
+
+          <div class="over" id="over">
+            <image id="recipientPassport" height="50" width="50" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">
+                <tspan class="recipientName" dy="0"><?php echo $Surname ?></tspan>
+                <tspan class="recipientName" x="50%" dy="1.5em"><?php echo $First_Name ?></tspan>
+                <!-- <a id="recipientName" x="50%" dy="1.5em"><?php echo $First_Name . '' . $Surname ?></a> -->
+              </text>
+            </svg>
+            <div id="status" class="status">Calling...</div>
+          </div>
+
+
+          <div id="controls">
+
+            <div class="control-container" id="video_call_button">
+              <img src="icons/camera.png" />
+            </div>
+
+            <div class="control-container" id="audio_call_button">
+              <img src="icons/mic.png" />
+            </div>
+
+            <div id="hang">
+              <div class="control-container hang" href="" id="hangup_button">
+                <img src="icons/phone.png" />
+              </div>
+            </div>
+
+          </div>
+        </div>
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
-        <script src="js/call.js"></script>
+        <!-- <script src="js/call.js"></script> -->
 
         <script>
           var userB = '<?php echo $_GET["UserIdx"]; ?>';
@@ -1227,43 +456,147 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             const UserIdx = urlParams.get('UserIdx');
             const sessionId = "<?php echo $sessionID ?>";
 
-            // Make an AJAX request to sendsession.php
-            $.ajax({
-              url: 'sendsession.php',
-              type: 'POST',
-              data: {
+            $.post('sendsession.php', {
                 UserIdx: UserIdx,
                 sessionId: sessionId
-              },
-              success: function(response) {
+              })
+              .done(function(response) {
                 console.log(response);
-              },
-              error: function(xhr, status, error) {
+              })
+              .fail(function(xhr, status, error) {
                 console.error(error);
-              }
-            });
+              });
+
           });
         </script>
         <script>
-          const hangupButton = document.getElementById('hangup_button');
+          // Remove unnecessary code
+          const hangupButtonpop = document.getElementById('hangup_button_pop');
           const answerButton = document.getElementById('answer_button');
           const ringingBox = document.getElementById('ringingBox');
-
-          hangupButton.addEventListener('click', function() {
-            hangUpCall();
-          });
-          answerButton.addEventListener('click', function() {
-            JoinCall();
-          });
-          // WebSocket connection
           var signalingSocket;
-          sessionId = "<?php echo $sessionID ?>";
-          UserId = "<?php echo $UserId ?>";
-          UserIdx = "<?php echo $UserIdx ?>";
+          var sessionId = "<?php echo $sessionID ?>";
+          var UserId = "<?php echo $UserId ?>";
+          var UserIdx = "<?php echo $UserIdx ?>";
+          var peerConnection; // Declare peerConnection as a global variable
           console.log(sessionId);
+          console.log(UserId);
+          console.log(UserIdx);
+          var localStream;
+          var remoteStream;
+          var localVideo = document.getElementById("<?php echo $UserId; ?>");
+          var remoteVideo = document.getElementById("<?php echo $UserIdx; ?>");
+          var hangupButton = document.getElementById('hangup_button');
+          var audioCallButton = document.getElementById('audio_call_button');
+          var videoCallButton = document.getElementById('video_call_button');
+          var callerStatusElement = document.getElementById('status');
+          var chatInterface = document.getElementById('chatbox');
+          var callInterface = document.getElementById('callInterface');
+          var callbtn = document.getElementById('callbtn');
+
+
+
+          // hangupButton.addEventListener('click', function() {
+          //   hangUpCall();
+          // });
+          callbtn.addEventListener('click', function() {
+            // Hide the chat interface
+            chatInterface.style.display = 'none';
+            // Show the call interface
+            callInterface.style.display = 'block';
+            startVideoCall();
+          });
+          audioCallButton.addEventListener('click', toggleAudio);
+          videoCallButton.addEventListener('click', toggleVideo);
+
+          function toggleAudio() {
+            localStream.getAudioTracks().forEach(function(track) {
+              track.enabled = !track.enabled;
+            });
+          }
+
+          function toggleVideo() {
+            localStream.getVideoTracks().forEach(function(track) {
+              track.enabled = !track.enabled;
+            });
+          }
+
+
+          function joinCall(message) {
+            // Hide the chat interface
+            chatInterface.style.display = 'none';
+            // Show the call interface
+            callInterface.style.display = 'block';
+
+            var offer = new RTCSessionDescription(message.offer);
+            var mediaConstraints = message.mediaConstraints;
+ 
+
+            function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
+              return new Promise(function(resolve, reject) {
+                function attempt() {
+                  navigator.mediaDevices.getUserMedia(mediaConstraints)
+                    .then(resolve)
+                    .catch(function(error) {
+                      if (maxRetries > 0) {
+                        console.log('Failed to access camera and microphone. Retrying...');
+                        maxRetries--;
+                        setTimeout(attempt, delay);
+                      } else {
+                        // Use the canvas as the video stream source
+                        reject(error);
+                      }
+                    });
+                }
+                attempt();
+              });
+            }
+            // Start video and audio using the media constraints from the offer
+            getUserMediaWithRetry(mediaConstraints, 7, 1000)
+              .then(function(stream) {
+                localStream = stream;
+                peerConnection = new RTCPeerConnection();
+
+                stream.getTracks().forEach(function(track) {
+                  peerConnection.addTrack(track, stream);
+                });
+
+                peerConnection.setRemoteDescription(offer)
+                  .then(function() {
+                    if (
+                      peerConnection.signalingState === 'have-remote-offer' ||
+                      peerConnection.signalingState === 'have-local-pranswer'
+                    ) {
+                      return peerConnection.createAnswer();
+                    } else {
+                      throw new Error('Invalid signaling state for creating an answer.');
+                    }
+                  })
+                  .then(function(answer) {
+                    return peerConnection.setLocalDescription(answer);
+                  })
+                  .then(function() {
+                    var sdpAnswer = peerConnection.localDescription;
+                    console.log('SDP Answer:', sdpAnswer);
+
+                    sendMessage({
+                      type: 'answer',
+                      answer: sdpAnswer,
+                      callerUserId: UserIdx,
+                      callertoUserId: UserId
+                    });
+                  })
+                  .catch(function(error) {
+                    console.log('Error handling call offer:', error);
+                  });
+              })
+              .catch(function(error) {
+                console.log('Error accessing camera and microphone:', error);
+              });
+          }
 
           function initSignaling() {
-            var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId + '&sessionID=' + sessionId + '&UserIdx=' + UserIdx; // Modify the signaling server URL
+            var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId + '&sessionID=' + sessionId + '&UserIdx=' + UserIdx;
 
             signalingSocket = new WebSocket(signalingServerUrl);
 
@@ -1271,28 +604,27 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               console.log('Signaling socket connection established');
             };
 
+
+
             signalingSocket.onmessage = function(event) {
               var message = JSON.parse(event.data);
-
-              // Call the new handler function for handling signaling messages
-              handleSignalingMessage(message);
+              console.log(message);
 
               if (message.type === 'offer') {
-                handleOffer(message);
+                handleIncomingOffer(message);
+              } else if (message.type === 'incoming_call') {
+                handleIncomingCall(message);
               } else if (message.type === 'answer') {
-                handleAnswer(message);
-              } else if (message.type === 'candidate') {
-                handleCandidate(message);
-              } else if (message.type === 'ringing') {
-                showRingingBox();
+                handleAnswerMessage(message);
               } else if (message.type === 'hangup') {
-                handleHangup();
+                handleHangupMessage(message);
+              } else if (message.type === 'candidate') {
+                handleCandidateMessage(message);
               }
             };
 
             signalingSocket.onclose = function(event) {
               console.log('Signaling socket connection closed:', event.code, event.reason);
-              // Perform any necessary cleanup here
             };
 
             signalingSocket.onerror = function(error) {
@@ -1300,35 +632,114 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             };
           }
 
-          function sendMessage(message) {
-            if (signalingSocket.readyState === WebSocket.OPEN) {
-              signalingSocket.send(JSON.stringify(message));
-            } else {
-              console.log('WebSocket connection is not open. Message not sent:', message);
+          function startVideoCall() {
+            sendIncomingCallSignal();
+            startPeerConnection();
+
+            function getUserMediaWithRetry(constraints, maxRetries, delay) {
+              return new Promise(function(resolve, reject) {
+                function attempt() {
+                  navigator.mediaDevices.getUserMedia(constraints)
+                    .then(resolve)
+                    .catch(function(error) {
+                      if (maxRetries > 0) {
+                        console.log('Failed to access camera and microphone. Retrying...');
+                        maxRetries--;
+                        setTimeout(attempt, delay);
+                      } else {
+                        reject(error);
+                      }
+                    });
+                }
+                attempt();
+              });
+            }
+
+            var constraints = {
+              video: true,
+              audio: true
+            };
+            var maxRetries = 7;
+            var delay = 1000; // 1 second
+
+            getUserMediaWithRetry(constraints, maxRetries, delay)
+              .then(function(stream) {
+                localStream = stream;
+                peerConnection = new RTCPeerConnection();
+
+                stream.getTracks().forEach(function(track) {
+                  peerConnection.addTrack(track, stream);
+                });
+                sendCallOffer({
+                  audio: true,
+                  video: true
+                }, UserIdx);
+
+
+                hangupButton.disabled = false;
+                audioCallButton.disabled = false;
+                videoCallButton.disabled = false;
+
+                localVideo.style.display = 'block';
+                remoteVideo.style.display = 'block';
+                localVideo.srcObject = stream;
+              })
+              .catch(function(error) {
+                console.log('Error accessing camera and microphone:', error);
+              });
+
+            function sendIncomingCallSignal() {
+              var message = {
+                type: 'incoming_call',
+                callerUserId: UserId,
+                callertoUserId: UserIdx,
+              };
+              sendMessage(message);
+            }
+
+            function sendCallOffer(mediaConstraints) {
+              var offerOptions = {
+                offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
+                offerToReceiveVideo: mediaConstraints.video ? 1 : 0
+              };
+
+              peerConnection.createOffer(offerOptions)
+                .then(function(offer) {
+                  return peerConnection.setLocalDescription(offer);
+                })
+                .then(function() {
+                  var sdpOffer = peerConnection.localDescription;
+                  console.log("SDP Offer:", sdpOffer);
+
+                  var sessionId = "<?php echo $sessionID; ?>";
+
+                  sendMessage({
+                    type: 'offer',
+                    offer: sdpOffer,
+                    mediaConstraints: mediaConstraints,
+                    callerUserId: UserId,
+                    callertoUserId: UserIdx,
+                    sessionId: sessionId
+                  });
+                })
+                .catch(function(error) {
+                  console.log('Error creating call offer:', error);
+                });
             }
           }
 
-          function handleOffer(offer) {
-            var offer = new RTCSessionDescription(offer);
-            var mediaConstraints = offer.mediaConstraints;
-            var pendingCandidates = [];
+          function handleOffer(message) {
+            var offer = new RTCSessionDescription(message.offer);
+            var mediaConstraints = message.mediaConstraints;
 
             peerConnection = new RTCPeerConnection();
 
             peerConnection.setRemoteDescription(offer)
               .then(function() {
-                if (pendingCandidates.length > 0) {
-                  pendingCandidates.forEach(function(candidate) {
-                    peerConnection.addIceCandidate(candidate)
-                      .catch(function(error) {
-                        console.log('Error handling pending ICE candidate:', error);
-                      });
-                  });
-                  pendingCandidates = [];
-                }
-
-                if (peerConnection.signalingState === 'have-remote-offer' ||
-                  peerConnection.signalingState === 'have-local-pranswer') {
+                if (
+                  peerConnection.signalingState === 'have-remote-offer' ||
+                  peerConnection.signalingState === 'have-local-pranswer'
+                ) {
                   return peerConnection.createAnswer();
                 } else {
                   throw new Error('Invalid signaling state for creating an answer.');
@@ -1343,7 +754,9 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
                 sendMessage({
                   type: 'answer',
-                  answer: sdpAnswer
+                  answer: sdpAnswer,
+                  callerUserId: UserIdx,
+                  callertoUserId: UserId
                 });
               })
               .catch(function(error) {
@@ -1351,28 +764,65 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               });
           }
 
-          function handleRingingSignal(message) {
-            // Display the ringing box on User B's chat.php page
-            ringingBox.style.display = 'block';
+          // Define the pendingCandidates variable at the global scope
+          var pendingCandidates = [];
+          // Define the startPeerConnection() function to create and set up the peer connection
+          function startPeerConnection() {
+            peerConnection = new RTCPeerConnection();
 
-            // Add any additional logic or UI updates here
-          }
+            // Add event listener for handling ICE candidates
+            // Event listener for handling ICE candidates
+            peerConnection.addEventListener('icecandidate', function(event) {
+              if (event.candidate) {
+                console.log("Sending peerConnection");
+                if (signalingReady) {
+                  sendMessage({
+                    type: 'candidate',
+                    candidate: event.candidate,
+                    callerUserId: UserIdx,
+                    callertoUserId: UserId
+                  });
+                } else {
+                  pendingCandidates.push(event.candidate);
+                }
+              }
+            });
 
-          function handleSignalingMessage(message) {
-            if (message.type === 'offer') {
-              handleOffer(message);
-            } else if (message.type === 'ringing') {
-              handleRingingSignal(message);
+            // Function to handle the signaling server becoming ready
+            function signalingReadyHandler() {
+              signalingReady = true;
+              // Send any pending ICE candidates
+              pendingCandidates.forEach(function(candidate) {
+                sendMessage({
+                  type: 'candidate',
+                  candidate: candidate,
+                  callerUserId: UserIdx,
+                  callertoUserId: UserId
+                });
+              });
+              pendingCandidates = [];
             }
+
+            // Add event listener for handling ICE connection state changes
+            peerConnection.addEventListener('iceconnectionstatechange', function() {
+              console.log('ICE connection state:', peerConnection.iceConnectionState);
+              if (peerConnection.iceConnectionState === 'failed') {
+                // Handle ICE connection failure, if needed
+              }
+            });
+
+            // Add event listener for handling data channel
+            peerConnection.addEventListener('datachannel', function(event) {
+              // Handle data channel, if needed
+            });
           }
 
-          function handleAnswer(answer) {
-            var answer = new RTCSessionDescription(answer);
+          function handleAnswerMessage(message) {
+            var answer = new RTCSessionDescription(message.answer);
 
             if (peerConnection.signalingState === 'have-local-offer') {
               peerConnection.setRemoteDescription(answer)
                 .then(function() {
-                  // Check if there are any pending ICE candidates to be added
                   if (pendingCandidates.length > 0) {
                     pendingCandidates.forEach(function(candidate) {
                       peerConnection.addIceCandidate(candidate)
@@ -1380,7 +830,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                           console.log('Error handling pending ICE candidate:', error);
                         });
                     });
-                    // Clear the pending candidates array
                     pendingCandidates = [];
                   }
                 })
@@ -1388,12 +837,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   console.log('Error handling call answer:', error);
                 });
             } else {
-              // If the signaling state is not 'have-local-offer', queue the remote description and apply it later
               peerConnection.addEventListener('signalingstatechange', function() {
                 if (peerConnection.signalingState === 'have-local-offer') {
                   peerConnection.setRemoteDescription(answer)
                     .then(function() {
-                      // Check if there are any pending ICE candidates to be added
                       if (pendingCandidates.length > 0) {
                         pendingCandidates.forEach(function(candidate) {
                           peerConnection.addIceCandidate(candidate)
@@ -1401,7 +848,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                               console.log('Error handling pending ICE candidate:', error);
                             });
                         });
-                        // Clear the pending candidates array
                         pendingCandidates = [];
                       }
                     })
@@ -1413,43 +859,98 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
           }
 
-          function handleCandidate(candidate) {
-            // Handle the ICE candidate received from the remote user
-            var candidate = new RTCIceCandidate(candidate);
+          function handleCandidateMessage(message) {
+            console.log("Accepting peerConnection");
+            var candidate = new RTCIceCandidate(message.candidate);
             peerConnection.addIceCandidate(candidate)
               .catch(function(error) {
                 console.log('Error handling ICE candidate:', error);
               });
           }
 
-          // Function to show the ringing box
+          function handleHangupMessage() {
+            var callerUserId = message.callerUserId;
+            console.log("Call has been ended from:", callerUserId)
+            hangUpCall();
+          }
+
           function showRingingBox() {
             ringingBox.style.display = 'block';
           }
 
-          function handleHangup() {
-            hangUpCall();
-            ringingBox.style.display = 'none';
+          function handleIncomingCall(message) {
+            // Handle the incoming call
+            var callerUserId = message.callerUserId;
+            var callertoUserId = message.callertoUserId;
+            console.log('Incoming call from:', callerUserId);
+
+            // Additional logic for handling the incoming call
+            // ...
+            showRingingBox();
+          }
+
+          function handleIncomingOffer(message) {
+            // Handle the incoming call
+            var callerUserId = message.callerUserId;
+            console.log('Incoming offer from:', callerUserId);
+
+            // Function to handle the "Answer" button click
+            function handleAnswerButtonClick() {
+              joinCall(message);
+            }
+
+            // Function to handle the "Reject" button click
+            function handleRejectButtonClick() {
+              hangUpCall();
+            }
+
+            hangupButtonpop.addEventListener('click', handleRejectButtonClick);
+            answerButton.addEventListener('click', handleAnswerButtonClick);
+          }
+
+
+
+
+          function sendMessage(message) {
+            if (signalingSocket && signalingSocket.readyState === WebSocket.OPEN) {
+              signalingSocket.send(JSON.stringify(message));
+            } else {
+              console.log('WebSocket connection is not open. Message not sent:', message);
+            }
           }
 
           function hangUpCall() {
-            // Close the peer connection and end the call
-            if (peerConnection) {
-              peerConnection.close();
-            }
-
-            // Send a hangup message to the other user
-            sendMessage({
-              type: 'hangup',
+            // Stop the media streams
+            localStream.getTracks().forEach(function(track) {
+              track.stop();
             });
 
-            // Hide the video elements and any other call-related UI
-            // You can add your logic here to hide the video elements and any other call-related UI
-          }
+            // Close the RTCPeerConnection
+            if (peerConnection) {
+              peerConnection.close();
+              peerConnection = null;
+            }
 
-          // Initialize signaling
+            // Update the UI to reflect the call status
+            hangupButton.disabled = true;
+            audioCallButton.disabled = false;
+            videoCallButton.disabled = false;
+            localVideo.srcObject = null;
+            remoteVideo.srcObject = null;
+            callerStatusElement.textContent = 'Call Ended';
+            chatInterface.style.display = "block";
+            callInterface.style.display = "none";
+
+            sendMessage({
+              type: 'hangup',
+              callerUserId: UserId,
+              callertoUserId: UserIdx,
+            });
+            ringingBox.style.display = 'none';
+          }
           initSignaling();
         </script>
+
 
 
         <script>
@@ -2031,34 +1532,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           });
         </script>
 
-        <script>
-          document.getElementById("callbtn").addEventListener("click", function() {
-            // Generate a random string of 5 characters
-            // function generateRandomString() {
-            //   var chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            //   var result = "";
-            //   for (var i = 0; i < 5; i++) {
-            //     var randomIndex = Math.floor(Math.random() * chars.length);
-            //     result += chars[randomIndex];
-            //   }
-            //   return result;
-            // }
 
-            // Combine UserId, UserIdx, and random string to create roomId
-            var UserId = "<?php echo $_SESSION['UserId']; ?>";
-            console.log(UserId)
-            var recipientId = "<?php echo $recipientId; ?>";
-            // var randomString = generateRandomString();
-            // var roomId = UserId + randomString + recipientId;
 
-            // Redirect to call.php with the roomId
-            window.location.href = "call.php?UserIdx=" + recipientId;
-
-            // Extract the UserIdx from the roomId
-            // var UserIdx = roomId.substring(roomId.indexOf("UserIdx") + 7);
-
-          });
-        </script>
         <script>
           var sessionId = "<?php echo $sessionID ?>"; // Retrieve the sessionId from PHP
 

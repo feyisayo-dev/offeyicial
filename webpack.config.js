@@ -1,8 +1,8 @@
 // webpack.config.js
 module.exports = {
-    entry: './js/call.js',
+    entry: './signaling.js',
     output: {
-        filename: 'bundle.js',
+        filename: 'signal.js',
     },
     mode: 'development' // or 'production'
 };

@@ -313,12 +313,13 @@ function handleHangupMessage() {
 }
 
 function sendMessage(message) {
-    if (signalingSocket.readyState === WebSocket.OPEN) {
+    if (signalingSocket && signalingSocket.readyState === WebSocket.OPEN) {
         signalingSocket.send(JSON.stringify(message));
     } else {
         console.log('WebSocket connection is not open. Message not sent:', message);
     }
 }
+
 
 
 // WebSocket connection
