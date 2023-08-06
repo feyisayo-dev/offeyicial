@@ -156,6 +156,7 @@ function handleIncomingCall(message) {
 }
 
 function handleIncomingOffer(message) {
+  console.log('Offer message received:', message);
   const recipientConnection = getRecipientConnection(message.callerUserId);
   if (recipientConnection) {
     const signalingMessage = {
@@ -205,6 +206,7 @@ function hangupOutgoingAnswer(message) {
     const signalingMessage = {
       type: 'answer',
       answer: message.answer, // Update to access the sdp property correctly
+      mediaConstraints: message.mediaConstraints,
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
@@ -224,7 +226,7 @@ function hangupOutgoingcandidate(message) {
   if (userAConnection) {
     const signalingMessage = {
       type: 'candidate',
-      answer: message.candidate, // Update to access the sdp property correctly
+      candidate: message.candidate, // Update to access the sdp property correctly
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };

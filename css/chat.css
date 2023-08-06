@@ -236,6 +236,24 @@ button[type="submit"] {
     margin-left: 10px;
 }
 
+.voice-note {
+    padding: 12px 20px;
+    background-color: darkturquoise;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.video-note {
+    padding: 12px 20px;
+    background-color: darkturquoise;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
 .image-icon {
     display: inline-block;
     cursor: pointer;
@@ -852,9 +870,16 @@ nav .logo {
     object-fit: cover;
 }
 
-/* .video-player.remote {
-    display: none;
-} */
+.video-player.local {
+    /* height: 50%; */
+    top: 0;
+}
+
+.video-player.remote {
+    /* height: 50%; */
+    bottom: 0;
+}
+
 
 .smallFrame {
     position: fixed;
@@ -1054,4 +1079,46 @@ svg text {
         height: 20px;
         width: 20px;
     }
+}
+
+
+#sound-visualizer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 100px;
+    background-color: #00b0ff;
+    opacity: 0.7;
+    display: none;
+}
+
+.spike {
+    position: absolute;
+    bottom: 0;
+    width: 2px;
+    height: 0;
+    background-color: white;
+}
+
+.spike-left {
+    left: 0;
+}
+
+.spike-right {
+    right: 0;
+}
+
+
+#video-preview {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background-color: #000;
+    border-radius: 50%;
+    display: none;
 }

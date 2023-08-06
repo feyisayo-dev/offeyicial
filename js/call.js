@@ -111,7 +111,41 @@ function sendCallOffer(mediaConstraints) {
             console.log('Error creating call offer:', error);
         });
 }
+function handleOffer(message) {
+    var offer = new RTCSessionDescription(message.offer);
+    var mediaConstraints = message.mediaConstraints;
 
+    peerConnection = new RTCPeerConnection();
+
+    peerConnection.setRemoteDescription(offer)
+      .then(function() {
+        if (
+          peerConnection.signalingState === 'have-remote-offer' ||
+          peerConnection.signalingState === 'have-local-pranswer'
+        ) {
+          return peerConnection.createAnswer();
+        } else {
+          throw new Error('Invalid signaling state for creating an answer.');
+        }
+      })
+      .then(function(answer) {
+        return peerConnection.setLocalDescription(answer);
+      })
+      .then(function() {
+        var sdpAnswer = peerConnection.localDescription;
+        console.log('SDP Answer:', sdpAnswer);
+
+        sendMessage({
+          type: 'answer',
+          answer: sdpAnswer,
+          callerUserId: UserIdx,
+          callertoUserId: UserId
+        });
+      })
+      .catch(function(error) {
+        console.log('Error handling call offer:', error);
+      });
+  }
 function handleOfferMessage(message) {
     var offer = new RTCSessionDescription(message.offer);
     var mediaConstraints = message.mediaConstraints;

@@ -212,7 +212,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               <span class="dots"></span>
             </button>
 
-            <ul class="dropdown-menu" id="chtheme" aria-labelledby="dropdownMenuButton">
+            <ul class="dropdown-menu reset" id="chtheme" aria-labelledby="dropdownMenuButton">
               <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
             </ul>
           </div>';
@@ -221,7 +221,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           echo '</div>';
           ?>
           <div class="chatbox">
-
+            <div id="video-preview"></div>
           </div>
           <br><br>
 
@@ -290,9 +290,19 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                 </div>
 
 
-                <div class="d-flex" style="align-items:center">
-                  <textarea placeholder="Type in your message" class="form-control" id="message" rows="3"></textarea>
-                  <button type="submit" class="submit"><i class="bi bi-send"></i></button>
+                <div class="d-flex" style="align-items: center">
+                  <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
+                  <div id="sound-visualizer">
+                    <div class="spike spike-left"></div>
+                    <div class="spike spike-right"></div>
+                  </div>
+                  <button type="button" class="submit voice-note" onmousedown="startRecording('voice')" onmouseup="stopRecording('voice')" onmouseleave="cancelRecording()">
+                    <i class="bi bi-mic"></i>
+                  </button>
+                  <button type="button" class="submit video-note" onmousedown="startRecording('video')" onmouseup="stopRecording('video')" onmouseleave="cancelRecording()">
+                    <i class="bi bi-camera-video"></i>
+                  </button>
+                  <button type="submit" class="submit" id="send-button" style="display: none;"><i class="bi bi-send"></i></button>
                 </div>
               </div>
             </div>
@@ -409,7 +419,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           </div>
 
           <div class="over" id="over">
-            <image id="recipientPassport" height="50" width="50" />
+            <img id="recipientPassport" height="50" width="50" src="<?php echo $recipientPassport ?>">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
               <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">
                 <tspan class="recipientName" dy="0"><?php echo $Surname ?></tspan>
@@ -441,7 +451,145 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         </div>
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
-        <!-- <script src="js/call.js"></script> -->
+        <!-- <script></script> -->
+        <script>
+          let mediaRecorder;
+          let isRecording = false;
+          let soundVisualizerInterval;
+          let soundVisualizer = document.getElementById('sound-visualizer');
+          let videoPreview = document.getElementById('video-preview');
+          let recordingType = 'voice';
+
+          function toggleRecordingType(type) {
+            recordingType = type === 'voice' ? 'video' : 'voice'; // Toggle the recording type
+            updateRecordingUI(); // Update the UI to reflect the new recording type
+            toggleButtons();
+          }
+
+          function updateRecordingUI() {
+            const voiceButton = document.querySelector('.voice-note');
+            const videoButton = document.querySelector('.video-note');
+
+            if (recordingType === 'voice') {
+              voiceButton.style.display = 'inline-block';
+              videoButton.style.display = 'none';
+            } else if (recordingType === 'video') {
+              voiceButton.style.display = 'none';
+              videoButton.style.display = 'inline-block';
+            }
+          }
+
+          function toggleButtons() {
+            var message = document.getElementById('message').value.trim();
+            var voiceButton = document.querySelector('.voice-note');
+            var videoButton = document.querySelector('.video-note');
+            var sendButton = document.getElementById('send-button');
+
+            if (message === '') {
+              voiceButton.style.display = 'inline-block';
+              videoButton.style.display = 'inline-block';
+              sendButton.style.display = 'none';
+            } else {
+              voiceButton.style.display = 'none';
+              videoButton.style.display = 'none';
+              sendButton.style.display = 'inline-block';
+            }
+          }
+
+          let maxRetries = 7; // Maximum number of retries
+          let retryDelay = 1000; // Delay between retries in milliseconds
+
+          function startRecording(type) {
+            if (isRecording) return;
+            isRecording = true;
+
+            if (type === 'voice') {
+              soundVisualizer.style.display = 'block';
+              soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
+            } else if (type === 'video') {
+              videoPreview.style.display = 'block';
+            }
+
+            function getMediaStreamWithRetry(retriesLeft) {
+              navigator.mediaDevices.getUserMedia({
+                  audio: true,
+                  video: type === 'video'
+                })
+                .then(function(stream) {
+                  mediaRecorder = new MediaRecorder(stream);
+                  const chunks = [];
+
+                  mediaRecorder.ondataavailable = function(e) {
+                    chunks.push(e.data);
+                  };
+
+                  mediaRecorder.onstop = function() {
+                    isRecording = false;
+                    const blob = new Blob(chunks, {
+                      type: mediaRecorder.mimeType
+                    });
+                    chunks.length = 0;
+                    // You can now use the 'blob' to send the voice or video note to the server
+                    console.log('Recorded Blob:', blob);
+                  };
+
+                  mediaRecorder.start();
+                })
+                .catch(function(error) {
+                  if (retriesLeft > 0) {
+                    console.error('Error accessing media devices. Retrying...', error);
+                    setTimeout(function() {
+                      getMediaStreamWithRetry(retriesLeft - 1);
+                    }, retryDelay);
+                  } else {
+                    console.error('Failed to access media devices after multiple retries:', error);
+                  }
+                });
+            }
+
+            getMediaStreamWithRetry(maxRetries);
+
+            function updateSoundVisualizer() {
+              // You can use the MediaRecorder API to get the audio data and analyze its loudness or pitch.
+              // For simplicity, let's just generate random values to simulate the visualization.
+              const loudness = Math.random() * 100; // Replace this with actual audio loudness data
+
+              const spikeLeft = document.querySelector('.spike-left');
+              const spikeRight = document.querySelector('.spike-right');
+
+              const maxSpikeHeight = 50; // Adjust this value to control the maximum spike height
+
+              // Update the height of the spikes based on the loudness value
+              spikeLeft.style.height = `${loudness / 100 * maxSpikeHeight}px`;
+              spikeRight.style.height = `${loudness / 100 * maxSpikeHeight}px`;
+
+              // Adjust the position of the spikes to create a moving effect
+              const spikeOffset = 10; // Adjust this value to control the spike movement range
+              spikeLeft.style.left = `${-spikeOffset + loudness / 100 * spikeOffset}px`;
+              spikeRight.style.right = `${-spikeOffset + loudness / 100 * spikeOffset}px`;
+            }
+          }
+
+          function stopRecording(type) {
+            if (mediaRecorder && isRecording) {
+              mediaRecorder.stop();
+            }
+          }
+
+          function cancelRecording() {
+            if (mediaRecorder && isRecording) {
+              mediaRecorder.stop();
+              isRecording = false;
+            }
+
+            if (recordingType === 'voice') {
+              clearInterval(soundVisualizerInterval);
+              soundVisualizer.style.display = 'none';
+            } else if (recordingType === 'video') {
+              videoPreview.style.display = 'none';
+            }
+          }
+        </script>
 
         <script>
           var userB = '<?php echo $_GET["UserIdx"]; ?>';
@@ -493,9 +641,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           var chatInterface = document.getElementById('chatbox');
           var callInterface = document.getElementById('callInterface');
           var callbtn = document.getElementById('callbtn');
+          // const iceCandidates = [];
 
-
-
+          // Define the pendingCandidates array at the global scope
+          var pendingCandidates = [];
           // hangupButton.addEventListener('click', function() {
           //   hangUpCall();
           // });
@@ -521,6 +670,65 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             });
           }
 
+          function startPeerConnection() {
+            // Make sure peerConnection is already defined and initialized
+            if (!peerConnection) {
+              console.error('peerConnection is not initialized');
+              return;
+            }
+
+            // Initialize the iceCandidates array
+            var iceCandidates = [];
+
+            // Event listener for handling ICE candidates
+            peerConnection.onicecandidate = function(event) {
+              console.log('ICE candidate found:', event.candidate);
+              if (event.candidate) {
+                console.log('ICE candidate found:', event.candidate);
+                // Add the ICE candidate to the array
+                iceCandidates.push(event.candidate);
+              }
+            };
+
+            peerConnection.addEventListener('icegatheringstatechange', function() {
+              console.log('ICE gathering state:', peerConnection.iceGatheringState);
+              if (peerConnection.iceGatheringState === 'complete') {
+                // ICE gathering is complete, and all candidates have been gathered
+                console.log('ICE gathering complete. All candidates:', iceCandidates);
+                if (iceCandidates.length === 0) {
+                  console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
+                } else {
+                  // Send all ICE candidates to the remote peer
+                  sendIceCandidates(iceCandidates);
+                }
+              }
+            });
+
+            // Add event listener for handling ICE connection state change
+            peerConnection.addEventListener('iceconnectionstatechange', function() {
+              console.log('ICE connection state:', peerConnection.iceConnectionState);
+              if (peerConnection.iceConnectionState === 'failed') {
+                // Handle ICE connection failure, if needed
+              }
+            });
+
+            // Add event listener for handling data channel
+            peerConnection.addEventListener('datachannel', function(event) {
+              // Handle data channel, if needed
+            });
+          }
+
+          function sendIceCandidates(iceCandidates) {
+            // Send all ICE candidates to the remote peer
+            console.log('Sending ICE candidates:', iceCandidates);
+            sendMessage({
+              type: 'candidate',
+              candidates: iceCandidates,
+              callerUserId: UserIdx,
+              callertoUserId: UserId,
+            });
+          }
+
 
           function joinCall(message) {
             // Hide the chat interface
@@ -530,7 +738,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
             var offer = new RTCSessionDescription(message.offer);
             var mediaConstraints = message.mediaConstraints;
- 
+
 
             function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
               return new Promise(function(resolve, reject) {
@@ -560,9 +768,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                 stream.getTracks().forEach(function(track) {
                   peerConnection.addTrack(track, stream);
                 });
+                startPeerConnection();
+                // Log that the local stream is added to the peer connection
+                console.log('Local stream added to peer connection');
 
                 peerConnection.setRemoteDescription(offer)
                   .then(function() {
+                    console.log('Remote description set successfully.');
+
                     if (
                       peerConnection.signalingState === 'have-remote-offer' ||
                       peerConnection.signalingState === 'have-local-pranswer'
@@ -576,24 +789,45 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                     return peerConnection.setLocalDescription(answer);
                   })
                   .then(function() {
+                    console.log('ICE gathering state:', peerConnection.iceGatheringState);
+                    console.log('Local description set successfully.');
+
                     var sdpAnswer = peerConnection.localDescription;
                     console.log('SDP Answer:', sdpAnswer);
 
                     sendMessage({
                       type: 'answer',
                       answer: sdpAnswer,
+                      mediaConstraints: mediaConstraints,
                       callerUserId: UserIdx,
                       callertoUserId: UserId
                     });
+
                   })
                   .catch(function(error) {
                     console.log('Error handling call offer:', error);
                   });
+                // Set the local stream as the source for the local video element
+                localVideo.srcObject = localStream;
+                callerStatusElement.textContent = 'Exchanging Stream';
+
+                // When the remote stream is received, set it as the source for the remote video element
+                peerConnection.ontrack = function(event) {
+                  if (event.streams && event.streams[0]) {
+                    // Log that the remote stream is received and set as the source for the remote video element
+                    console.log('Received remote stream:', event.streams[0]);
+                    remoteVideo.srcObject = event.streams[0];
+                  }
+                };
+
+                // Log that the local stream is sent as the remote stream
+                console.log('Sending local stream as remote stream');
               })
               .catch(function(error) {
                 console.log('Error accessing camera and microphone:', error);
               });
           }
+
 
           function initSignaling() {
             var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId + '&sessionID=' + sessionId + '&UserIdx=' + UserIdx;
@@ -633,13 +867,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           }
 
           function startVideoCall() {
-            sendIncomingCallSignal();
-            startPeerConnection();
-
-            function getUserMediaWithRetry(constraints, maxRetries, delay) {
+            function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
               return new Promise(function(resolve, reject) {
                 function attempt() {
-                  navigator.mediaDevices.getUserMedia(constraints)
+                  navigator.mediaDevices.getUserMedia(mediaConstraints)
                     .then(resolve)
                     .catch(function(error) {
                       if (maxRetries > 0) {
@@ -655,17 +886,70 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               });
             }
 
-            var constraints = {
+            var mediaConstraints = {
               video: true,
               audio: true
             };
             var maxRetries = 7;
             var delay = 1000; // 1 second
 
-            getUserMediaWithRetry(constraints, maxRetries, delay)
+            getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
               .then(function(stream) {
                 localStream = stream;
+                var iceCandidates = []; // Initialize the iceCandidates array
                 peerConnection = new RTCPeerConnection();
+                // Event listener for handling ICE candidates
+                peerConnection.addEventListener('icecandidate', event => {
+                  console.log('Finding ICE candidate:', event);
+                  if (event.candidate) {
+                    console.log('ICE candidate found:', event.candidate);
+                    // Add the ICE candidate to the array
+                    iceCandidates.push(event.candidate);
+                    sendIceCandidates(iceCandidates);
+                  }
+                });
+                peerConnection.addEventListener('icegatheringstatechange', function() {
+                  console.log('ICE gathering state:', peerConnection.iceGatheringState);
+                  if (peerConnection.iceGatheringState === 'gathering') {
+                    console.log('Gathering ICE candidate gathering:', event);
+                  }
+                  if (peerConnection.iceGatheringState === 'complete') {
+                    // ICE gathering is complete, and all candidates have been gathered
+                    console.log('Gathering ICE candidate complete:', event);
+                    console.log('ICE gathering complete. All candidates:', iceCandidates);
+                    if (iceCandidates.length === 0) {
+                      console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
+                    } else {
+                      // Send all ICE candidates to the remote peer
+                      sendIceCandidates(iceCandidates);
+                    }
+                  }
+                });
+
+                // Add event listener for handling ICE connection state change
+                peerConnection.addEventListener('iceconnectionstatechange', function() {
+                  console.log('ICE connection state:', peerConnection.iceConnectionState);
+                  if (peerConnection.iceConnectionState === 'failed') {
+                    // Handle ICE connection failure, if needed
+                  }
+                });
+
+                // Add event listener for handling data channel
+                peerConnection.addEventListener('datachannel', function(event) {
+                  // Handle data channel, if needed
+                });
+
+
+                function sendIceCandidates(iceCandidates) {
+                  // Send all ICE candidates to the remote peer
+                  console.log('Sending ICE candidates:', iceCandidates);
+                  sendMessage({
+                    type: 'candidate',
+                    candidates: iceCandidates,
+                    callerUserId: UserIdx,
+                    callertoUserId: UserId,
+                  });
+                }
 
                 stream.getTracks().forEach(function(track) {
                   peerConnection.addTrack(track, stream);
@@ -698,6 +982,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
 
             function sendCallOffer(mediaConstraints) {
+              callerStatusElement.textContent = 'Sending Call Offer';
               var offerOptions = {
                 offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
                 offerToReceiveVideo: mediaConstraints.video ? 1 : 0
@@ -708,6 +993,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   return peerConnection.setLocalDescription(offer);
                 })
                 .then(function() {
+                  // Check the ICE gathering state after setting the local description
+                  // console.log('ICE gathering state:', peerConnection.iceGatheringState);
                   var sdpOffer = peerConnection.localDescription;
                   console.log("SDP Offer:", sdpOffer);
 
@@ -721,6 +1008,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                     callertoUserId: UserIdx,
                     sessionId: sessionId
                   });
+                  sendIncomingCallSignal();
+                  callerStatusElement.textContent = 'Sent Call Offer';
                 })
                 .catch(function(error) {
                   console.log('Error creating call offer:', error);
@@ -728,97 +1017,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
           }
 
-          function handleOffer(message) {
-            var offer = new RTCSessionDescription(message.offer);
-            var mediaConstraints = message.mediaConstraints;
-
-            peerConnection = new RTCPeerConnection();
-
-            peerConnection.setRemoteDescription(offer)
-              .then(function() {
-                if (
-                  peerConnection.signalingState === 'have-remote-offer' ||
-                  peerConnection.signalingState === 'have-local-pranswer'
-                ) {
-                  return peerConnection.createAnswer();
-                } else {
-                  throw new Error('Invalid signaling state for creating an answer.');
-                }
-              })
-              .then(function(answer) {
-                return peerConnection.setLocalDescription(answer);
-              })
-              .then(function() {
-                var sdpAnswer = peerConnection.localDescription;
-                console.log('SDP Answer:', sdpAnswer);
-
-                sendMessage({
-                  type: 'answer',
-                  answer: sdpAnswer,
-                  callerUserId: UserIdx,
-                  callertoUserId: UserId
-                });
-              })
-              .catch(function(error) {
-                console.log('Error handling call offer:', error);
-              });
-          }
-
-          // Define the pendingCandidates variable at the global scope
-          var pendingCandidates = [];
-          // Define the startPeerConnection() function to create and set up the peer connection
-          function startPeerConnection() {
-            peerConnection = new RTCPeerConnection();
-
-            // Add event listener for handling ICE candidates
-            // Event listener for handling ICE candidates
-            peerConnection.addEventListener('icecandidate', function(event) {
-              if (event.candidate) {
-                console.log("Sending peerConnection");
-                if (signalingReady) {
-                  sendMessage({
-                    type: 'candidate',
-                    candidate: event.candidate,
-                    callerUserId: UserIdx,
-                    callertoUserId: UserId
-                  });
-                } else {
-                  pendingCandidates.push(event.candidate);
-                }
-              }
-            });
-
-            // Function to handle the signaling server becoming ready
-            function signalingReadyHandler() {
-              signalingReady = true;
-              // Send any pending ICE candidates
-              pendingCandidates.forEach(function(candidate) {
-                sendMessage({
-                  type: 'candidate',
-                  candidate: candidate,
-                  callerUserId: UserIdx,
-                  callertoUserId: UserId
-                });
-              });
-              pendingCandidates = [];
-            }
-
-            // Add event listener for handling ICE connection state changes
-            peerConnection.addEventListener('iceconnectionstatechange', function() {
-              console.log('ICE connection state:', peerConnection.iceConnectionState);
-              if (peerConnection.iceConnectionState === 'failed') {
-                // Handle ICE connection failure, if needed
-              }
-            });
-
-            // Add event listener for handling data channel
-            peerConnection.addEventListener('datachannel', function(event) {
-              // Handle data channel, if needed
-            });
-          }
-
           function handleAnswerMessage(message) {
             var answer = new RTCSessionDescription(message.answer);
+            var UserId = message.callerUserId;
+            console.log(UserId);
 
             if (peerConnection.signalingState === 'have-local-offer') {
               peerConnection.setRemoteDescription(answer)
@@ -857,12 +1059,47 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                 }
               });
             }
+
+            // When the remote stream is received as an answer
+            peerConnection.ontrack = function(event) {
+              if (event.streams && event.streams[0]) {
+                // Set the remote stream as the source for the remote video element
+                remoteVideo.srcObject = event.streams[0];
+                callerStatusElement.textContent = 'Exchanging Stream';
+
+                // Log the remote stream to the console
+                console.log('Received remote stream:', event.streams[0]);
+              }
+            };
+
           }
 
+
           function handleCandidateMessage(message) {
-            console.log("Accepting peerConnection");
-            var candidate = new RTCIceCandidate(message.candidate);
-            peerConnection.addIceCandidate(candidate)
+            var candidate = message.candidate;
+
+            // Check if the candidate array is not empty
+            if (!Array.isArray(candidate) || candidate.length === 0) {
+              console.log('Invalid ICE candidate data:', candidate);
+              return;
+            }
+
+            // Now you can proceed to create the RTCIceCandidate
+            var rtcCandidate = new RTCIceCandidate(candidate);
+            var callerUserId = message.callerUserId;
+            console.log('Incoming candidate from:', callerUserId);
+
+            function handleAnswerButton() {
+              peerConnAdd(rtcCandidate);
+            }
+
+            answerButton.addEventListener('click', handleAnswerButton);
+          }
+
+
+
+          function peerConnAdd(rtcCandidate) {
+            peerConnection.addIceCandidate(rtcCandidate)
               .catch(function(error) {
                 console.log('Error handling ICE candidate:', error);
               });
@@ -959,7 +1196,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             localStorage.removeItem('messageReceivedcolor');
             localStorage.removeItem('messageSentTheme');
             localStorage.removeItem('messageReceivedTheme');
-            localStorage.removeItem('dropdownTheme');
+            localStorage.removeItem('dropHeaderTheme');
             localStorage.removeItem('chatboxTheme');
             location.reload(); // Reload the page to apply the default theme
           }
@@ -989,7 +1226,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         <script>
           // Function to save the theme settings to localStorage
           function savechatheaderTheme(theme) {
-            localStorage.setItem('dropdownTheme', theme);
+            localStorage.setItem('dropHeaderTheme', theme);
           }
 
           // Function to apply the theme settings to the chatbox
@@ -999,18 +1236,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           }
 
           // Check if there are previously saved theme settings in localStorage
-          var savedDropdownTheme = localStorage.getItem('dropdownTheme');
+          var savedDropdownTheme = localStorage.getItem('dropHeaderTheme');
           if (savedDropdownTheme) {
             // Apply the saved theme settings
             applychatheaderTheme(savedDropdownTheme);
           }
 
+          // Get the chat-header element
+          var chatHeader = document.querySelector('.chat-header');
 
-          document.addEventListener('contextmenu', function(event) {
-            var clickedElement = event.target;
-
-            // Check if the clicked element is within a .chat-header element
-            var chatHeader = clickedElement.closest('.chat-header');
+          // Event listener for right-click on chat-header
+          chatHeader.addEventListener('contextmenu', function(event) {
+            event.preventDefault(); // Prevent the default contextmenu behavior
 
             // Remove any existing dropdown menus except the one within the clicked .chat-header element
             var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
@@ -1020,51 +1257,50 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               }
             });
 
-            if (chatHeader) {
-              event.preventDefault();
+            var changeThemeOption = document.createElement('div');
+            changeThemeOption.textContent = 'Change header Theme';
+            changeThemeOption.classList.add('dropdown-option');
 
-              var changeThemeOption = document.createElement('div');
-              changeThemeOption.textContent = 'Change Theme';
-              changeThemeOption.classList.add('dropdown-option');
+            var dropdownMenu = document.createElement('div');
+            dropdownMenu.classList.add('dropdown-menu', 'change');
+            dropdownMenu.appendChild(changeThemeOption);
 
-              var dropdownMenu = document.createElement('div');
-              dropdownMenu.classList.add('dropdown-menu');
-              dropdownMenu.appendChild(changeThemeOption);
+            // Append the dropdown menu to the clicked .chat-header element
+            chatHeader.appendChild(dropdownMenu);
 
-              // Append the dropdown menu to the clicked .chat-header element
-              chatHeader.appendChild(dropdownMenu);
+            var rect = event.target.getBoundingClientRect();
+            dropdownMenu.style.top = '130px';
+            dropdownMenu.style.right = '400px';
+            dropdownMenu.style.zIndex = '9999';
+            dropdownMenu.style.display = 'block';
 
+            changeThemeOption.addEventListener('click', function() {
+              var newColor = prompt('Enter a background color:');
+              if (newColor !== null && newColor.trim() !== '') {
+                chatHeader.style.backgroundColor = newColor;
+                // Save the new theme settings
+                savechatheaderTheme(newColor);
+                // Apply the new theme settings
+                applychatheaderTheme(newColor);
+              }
+            });
 
-              var rect = event.target.getBoundingClientRect();
-              dropdownMenu.style.top = '130px';
-              dropdownMenu.style.right = '600px';
-
-              changeThemeOption.addEventListener('click', function() {
-                var newColor = prompt('Enter a new background color:');
-                if (newColor !== null && newColor.trim() !== '') {
-                  document.querySelector('.chat-header').style.backgroundColor = newColor;
-                  // Save the new theme settings
-                  savechatheaderTheme(newColor);
-                  // Apply the new theme settings
-                  applychatheaderTheme(newColor);
-                }
-              });
-
-              // Remove the popup when the user clicks outside of it
-              document.addEventListener('click', function(e) {
-                if (dropdownMenu.contains(e.target)) {
-                  dropdownMenu.remove();
-                }
-              });
-            }
+            // Event listener for clicks on the document
+            document.addEventListener('click', function(event) {
+              // Check if the clicked element is within the dropdown menu or chat-header
+              if (!dropdownMenu.contains(event.target) && !chatHeader.contains(event.target)) {
+                // If the clicked element is outside both, remove the dropdown from the DOM
+                dropdownMenu.remove();
+              }
+            });
           });
         </script>
+
         <script>
           // Function to save the theme settings to localStorage
           function savebackgroundTheme(theme) {
             localStorage.setItem('chatboxTheme', theme);
           }
-
 
           // Function to apply the theme settings to the chatbox
           function applybackgroundTheme(theme) {
@@ -1083,19 +1319,16 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           }
 
           document.addEventListener('contextmenu', function(event) {
+            if (event.target.closest('.chat-header')) {
+              return;
+            }
             var clickedElement = event.target;
 
             // Check if the clicked element is within a .chatbox element
-            var chatbox = clickedElement.closest('.chatbox, .chat-container');
+            var chatbox = document.querySelector('.chatbox');
+            var chatcontainer = document.querySelector('.chat-container');
 
-            // Remove any existing dropdown menus except the one within the clicked chatbox element
-            var existingBackgrounds = document.querySelectorAll('.changebackground');
-            existingBackgrounds.forEach(function(background) {
-              if (background !== chatbox.querySelector('.changebackground')) {
-                background.remove();
-              }
-            });
-
+            // If the right-click is on the chatbox, run the second script's logic
             if (chatbox) {
               event.preventDefault();
 
@@ -1118,6 +1351,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                 var newColor = prompt('Enter a new background color:');
                 if (newColor !== null && newColor.trim() !== '') {
                   chatbox.style.backgroundColor = newColor;
+                  chatcontainer.style.backgroundColor = newColor;
                   // Save the new theme settings
                   savebackgroundTheme(newColor);
                   // Apply the new theme settings
@@ -1134,6 +1368,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
           });
         </script>
+
 
         <script>
           // Function to save the theme settings to localStorage
