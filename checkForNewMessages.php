@@ -15,6 +15,7 @@ if ($stmt === false) {
 $response = array();
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     // process each row of the result set
+    $chatId = $row['chatId'];
     $senderId = $row['senderId'];
     $message = $row['Sent'];
     $sent_image = $row['sentimage'];
@@ -23,6 +24,7 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
 
     $chatItem = array();
     $chatItem['senderId'] = $senderId;
+    $chatItem['chatId'] = $chatId;
     $chatItem['message'] = $message;
     $chatItem['sent_image'] = $sent_image;
     $chatItem['sent_video'] = $sent_video;

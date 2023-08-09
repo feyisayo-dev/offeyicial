@@ -164,7 +164,7 @@ nav .profile-name {
     padding: 10px;
     position: relative;
     width: 100%;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .Sent {
@@ -1122,3 +1122,68 @@ svg text {
     border-radius: 50%;
     display: none;
 }
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+/* .message {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+} */
+
+.thumbnail {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 5px;
+}
+
+.download-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: #999;
+    text-align: right;
+    margin-top: 0.2rem;
+}
+
+.date {
+    text-align: center;
+    color: #999;
+    font-size: 0.75rem;
+    margin: 10px 0;
+    clear: both;
+    /* Add this to clear any floated elements */
+    display: block;
+    /* Set it as a block-level element */
+    width: 100%;
+    /* Occupy the entire width of the chatbox */
+    font-family: 'Modern-Age';
+}
+
+
+/* .date {
+    text-align: center;
+    margin: 10px 0;
+    color: #888;
+} */
+
+/* .Sent .date {
+    align-self: flex-end;
+}
+
+.received .date {
+    align-self: flex-start;
+} */

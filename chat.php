@@ -223,7 +223,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           <div class="chatbox">
             <div id="video-preview"></div>
           </div>
-          <br><br>
+          <!-- <br><br> -->
 
 
           <div class="form-group">
@@ -641,13 +641,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           var chatInterface = document.getElementById('chatbox');
           var callInterface = document.getElementById('callInterface');
           var callbtn = document.getElementById('callbtn');
-          // const iceCandidates = [];
+          const iceCandidates = [];
 
           // Define the pendingCandidates array at the global scope
           var pendingCandidates = [];
           // hangupButton.addEventListener('click', function() {
           //   hangUpCall();
           // });
+          // var iceServers = [{
+          //     urls: 'stun:stun.l.google.com:19302'
+          //   }, // Google STUN server
+          // ];
+
           callbtn.addEventListener('click', function() {
             // Hide the chat interface
             chatInterface.style.display = 'none';
@@ -678,22 +683,26 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
 
             // Initialize the iceCandidates array
-            var iceCandidates = [];
+            // var iceCandidates = [];
 
             // Event listener for handling ICE candidates
-            peerConnection.onicecandidate = function(event) {
-              console.log('ICE candidate found:', event.candidate);
+            peerConnection.addEventListener('icecandidate', event => {
+              console.log('Finding ICE candidate:', event);
               if (event.candidate) {
                 console.log('ICE candidate found:', event.candidate);
                 // Add the ICE candidate to the array
                 iceCandidates.push(event.candidate);
+                sendIceCandidates(iceCandidates);
               }
-            };
-
+            });
             peerConnection.addEventListener('icegatheringstatechange', function() {
               console.log('ICE gathering state:', peerConnection.iceGatheringState);
+              if (peerConnection.iceGatheringState === 'gathering') {
+                console.log('Gathering ICE candidate gathering:', event);
+              }
               if (peerConnection.iceGatheringState === 'complete') {
                 // ICE gathering is complete, and all candidates have been gathered
+                console.log('Gathering ICE candidate complete:', event);
                 console.log('ICE gathering complete. All candidates:', iceCandidates);
                 if (iceCandidates.length === 0) {
                   console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
@@ -716,17 +725,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             peerConnection.addEventListener('datachannel', function(event) {
               // Handle data channel, if needed
             });
-          }
 
-          function sendIceCandidates(iceCandidates) {
-            // Send all ICE candidates to the remote peer
-            console.log('Sending ICE candidates:', iceCandidates);
-            sendMessage({
-              type: 'candidate',
-              candidates: iceCandidates,
-              callerUserId: UserIdx,
-              callertoUserId: UserId,
-            });
+
+            function sendIceCandidates(iceCandidates) {
+              // Send all ICE candidates to the remote peer
+              console.log('Sending ICE candidates:', iceCandidates);
+              sendMessage({
+                type: 'candidate',
+                candidates: iceCandidates,
+                callerUserId: UserIdx,
+                callertoUserId: UserId,
+              });
+            }
           }
 
 
@@ -764,11 +774,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               .then(function(stream) {
                 localStream = stream;
                 peerConnection = new RTCPeerConnection();
-
+                startPeerConnection();
                 stream.getTracks().forEach(function(track) {
                   peerConnection.addTrack(track, stream);
                 });
-                startPeerConnection();
                 // Log that the local stream is added to the peer connection
                 console.log('Local stream added to peer connection');
 
@@ -896,69 +905,13 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
               .then(function(stream) {
                 localStream = stream;
-                var iceCandidates = []; // Initialize the iceCandidates array
+                // var iceCandidates = []; // Initialize the iceCandidates array
                 peerConnection = new RTCPeerConnection();
-                // Event listener for handling ICE candidates
-                peerConnection.addEventListener('icecandidate', event => {
-                  console.log('Finding ICE candidate:', event);
-                  if (event.candidate) {
-                    console.log('ICE candidate found:', event.candidate);
-                    // Add the ICE candidate to the array
-                    iceCandidates.push(event.candidate);
-                    sendIceCandidates(iceCandidates);
-                  }
-                });
-                peerConnection.addEventListener('icegatheringstatechange', function() {
-                  console.log('ICE gathering state:', peerConnection.iceGatheringState);
-                  if (peerConnection.iceGatheringState === 'gathering') {
-                    console.log('Gathering ICE candidate gathering:', event);
-                  }
-                  if (peerConnection.iceGatheringState === 'complete') {
-                    // ICE gathering is complete, and all candidates have been gathered
-                    console.log('Gathering ICE candidate complete:', event);
-                    console.log('ICE gathering complete. All candidates:', iceCandidates);
-                    if (iceCandidates.length === 0) {
-                      console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
-                    } else {
-                      // Send all ICE candidates to the remote peer
-                      sendIceCandidates(iceCandidates);
-                    }
-                  }
-                });
-
-                // Add event listener for handling ICE connection state change
-                peerConnection.addEventListener('iceconnectionstatechange', function() {
-                  console.log('ICE connection state:', peerConnection.iceConnectionState);
-                  if (peerConnection.iceConnectionState === 'failed') {
-                    // Handle ICE connection failure, if needed
-                  }
-                });
-
-                // Add event listener for handling data channel
-                peerConnection.addEventListener('datachannel', function(event) {
-                  // Handle data channel, if needed
-                });
-
-
-                function sendIceCandidates(iceCandidates) {
-                  // Send all ICE candidates to the remote peer
-                  console.log('Sending ICE candidates:', iceCandidates);
-                  sendMessage({
-                    type: 'candidate',
-                    candidates: iceCandidates,
-                    callerUserId: UserIdx,
-                    callertoUserId: UserId,
-                  });
-                }
-
+                startPeerConnection
                 stream.getTracks().forEach(function(track) {
                   peerConnection.addTrack(track, stream);
                 });
-                sendCallOffer({
-                  audio: true,
-                  video: true
-                }, UserIdx);
-
+                sendCallOffer(mediaConstraints, UserIdx);
 
                 hangupButton.disabled = false;
                 audioCallButton.disabled = false;
@@ -981,7 +934,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               sendMessage(message);
             }
 
-            function sendCallOffer(mediaConstraints) {
+            function sendCallOffer(mediaConstraints, UserIdx) {
               callerStatusElement.textContent = 'Sending Call Offer';
               var offerOptions = {
                 offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
@@ -1428,6 +1381,21 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
           var lastTimestamp = Date.now();
 
+          function isSameDay(date1, date2) {
+            return (
+              date1.getDate() === date2.getDate() &&
+              date1.getMonth() === date2.getMonth() &&
+              date1.getFullYear() === date2.getFullYear()
+            );
+          }
+
+          function getFormattedDate(date) {
+            return date.toDateString();
+          }
+
+          // isToday(date);
+          var lastDisplayedDate = null;
+
           function checkForNewMessages() {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
@@ -1438,13 +1406,63 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   var chatbox = document.querySelector('.chatbox');
                   response.forEach(function(message) {
                     var div = document.createElement('div');
+                    var timestamp = new Date(message.time_sent);
+
                     div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
-                    div.innerHTML = '<div class="message">' + message.message + '</div>';
+                    // Handle received messages
+                    if (div.className === 'received') {
+                      var chatId = message.chatId;
+                      var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
+                      if (deletedReceivedMessage === 'true') {
+                        div.innerHTML = '<div id="' + chatId + '" class="message">You deleted the message</div>';
+                        div.style.color = 'red';
+                      }
+                    }
+
+                    // Check if the message contains a video link
+                    var videoLinkRegex = /(https?:\/\/[^\s]+)/i;
+                    if (videoLinkRegex.test(message.message)) {
+                      var videoURL = message.message.match(videoLinkRegex)[0];
+
+                      // Create a link to the video
+                      var videoLink = '<a href="' + videoURL + '" target="_blank">' + videoURL + '</a>';
+
+                      // Create a download link for the video
+                      var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
+
+                      // Create the message container with video link and download button
+                      div.innerHTML = '<div class="message" id="' + message.chatId + '">' +
+                        '<div class="message-container">' + videoLink + '<br>' +
+                        '<img src="' + videoURL + '" alt="Thumbnail" class="thumbnail">' + '<br>' +
+                        downloadLink + '</div>' +
+                        '</div>';
+                      var timestamp = new Date(message.time_sent);
+                      var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                    } else {
+                      div.innerHTML = '<div id="' + message.chatId + '" class="message">' + message.message + '</div>';
+                      var timestamp = new Date(message.time_sent);
+                      var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                    }
+
                     if (message.sent_image) {
-                      div.innerHTML += '<div class="image"><img src="' + message.sent_image + '"></div>';
+                      div.innerHTML += '<div id="' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div>';
+                      var timestamp = new Date(message.time_sent);
+                      var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
                     }
                     if (message.sent_video) {
-                      div.innerHTML += '<div class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
+                      div.innerHTML += '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
                       // Add event listener to play the video when the "Watch Video" button is clicked
                       var videoPlayer = div.querySelector('video');
                       var playButton = div.querySelector('#buttonplay');
@@ -1453,9 +1471,31 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                         videoPlayer.play();
                         playButton.style.display = 'none';
                       });
+                      var timestamp = new Date(message.time_sent);
+                      var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                    }
+
+                    if (!lastDisplayedDate || !isSameDay(timestamp, lastDisplayedDate)) {
+                      var dateDiv = document.createElement('div');
+                      dateDiv.className = 'date';
+                      dateDiv.textContent = getFormattedDate(timestamp);
+                      chatbox.appendChild(dateDiv);
+                      lastDisplayedDate = timestamp;
+                    }
+                    // Check if there's a deletion status for this message
+                    var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + message.chatId);
+                    if (deletedReceivedMessage === 'true') {
+                      div.innerHTML = '<div id="' + message.chatId + '" class="message">You deleted the message</div>';
+                      div.style.color = 'red';
                     }
                     chatbox.appendChild(div);
 
+
+                    lastDisplayedDate = timestamp;
 
                     // Check if there are previously saved theme settings in localStorage
                     var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
@@ -1494,6 +1534,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       e.preventDefault();
                       // Get the class of the clicked message
                       var clickedClass = e.target.parentNode.className;
+                      var clickedId = e.target.parentNode.id;
                       // Remove any existing popup
                       var existingPopups = document.querySelectorAll('.popup');
                       existingPopups.forEach(function(popup) {
@@ -1503,11 +1544,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       // Get the class of the clicked message
                       var clickedClass = e.target.parentNode.className;
 
+
                       // Create new popup and position it beside the clicked message
                       var popup = document.createElement('div');
                       popup.className = 'popup';
+                      popup.setAttribute('data-chat-id', div.id);
                       popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
-
+                      var chatId = popup.getAttribute('data-chat-id');
+                      alert(div.id);
                       // Position the popup beside the clicked message
                       var messageRect = e.target.getBoundingClientRect();
                       var chatboxRect = chatbox.getBoundingClientRect();
@@ -1520,15 +1564,48 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       } else if (clickedClass === 'received') {
                         popupLeft = messageRect.left - chatboxRect.left + messageRect.width;
                       }
-
                       popup.style.top = popupTop + 'px';
                       popup.style.left = popupLeft + 'px';
                       // Add event listeners to delete, reply, and change theme options
                       var deleteBtn = popup.querySelector('.delete');
                       deleteBtn.addEventListener('click', function() {
-                        // TODO: Implement delete functionality
-                        // Hide the message from the user or recipient
+                        var chatId = popup.getAttribute('data-chat-id');
+                        var isSentMessage = div.className === 'Sent';
+
+                        if (isSentMessage) {
+                          // Send an AJAX request to delete the message from the database
+                          var xhr = new XMLHttpRequest();
+                          xhr.open('POST', 'delete_message.php', true);
+                          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                          var formData = 'chatId=' + encodeURIComponent(clickedId);
+
+                          xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                              console.log('Response:', xhr.responseText);
+                              var response = JSON.parse(xhr.responseText);
+                              var message = response.message;
+
+                              // Message deleted successfully from database, update UI for sent message
+                              var deletedMessage = document.getElementById(chatId);
+                              deletedMessage.innerHTML = 'You deleted this message';
+                              deletedMessage.style.color = 'red';
+                              alert(message);
+                              popup.style.display = 'none';
+                            }
+                          };
+
+                          xhr.send(formData);
+                        } else {
+                          // Update UI for received message
+                          var deletedMessage = document.getElementById(chatId);
+                          deletedMessage.innerHTML = 'You deleted the message';
+                          deletedMessage.style.color = 'red';
+                          localStorage.setItem('deletedReceivedMessage_' + chatId, 'true'); // Save the setting
+                          popup.style.display = 'none';
+                        }
                       });
+
 
                       var replyBtn = popup.querySelector('.reply');
                       replyBtn.addEventListener('click', function() {
@@ -1604,7 +1681,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                           });
                         }
                       });
-
                       // Add the popup to the chatbox
                       chatbox.appendChild(popup);
 
@@ -1697,29 +1773,37 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           $(document).ready(function() {
             // Send the message
             $('.submit').click(function() {
+
               var message = $('#message').val();
               var image = $('.image-input').prop('files')[0];
+              var videonote = $('.video-note').prop('files')[0];
+              var voicenote = $('.voice-note').prop('files')[0];
               var UserId = '<?php echo $UserId; ?>';
               var recipientId = '<?php echo $_GET['UserIdx']; ?>';
               var video = $('#video').prop('files')[0];
               var formData = new FormData();
               formData.append('message', message);
               formData.append('image', image);
+              formData.append('voicenote', voicenote);
+              formData.append('videonote', videonote);
               formData.append('UserId', UserId);
               formData.append('recipientId', recipientId);
               formData.append('video', video);
               // Send the AJAX request
-              $.ajax({
-                url: 'send_message.php',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                  console.log(response);
-                  $('#message').val('');
-                }
-              });
+              if (message != "" && image != "" && voicenote != "" && videonote != "" && video != "") {
+                $.ajax({
+                  url: 'send_message.php',
+                  type: 'POST',
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+                    console.log(response);
+                    $('#message').val('');
+                  }
+                });
+              }
+
             });
           });
         </script>
