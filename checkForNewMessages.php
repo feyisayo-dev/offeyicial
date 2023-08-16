@@ -21,6 +21,7 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $sent_image = $row['sentimage'];
     $sent_video = $row['sentvideo'];
     $time_sent = $row['time_sent'];
+    $voice_notes = $row['voice_notes'];
 
     $chatItem = array();
     $chatItem['senderId'] = $senderId;
@@ -29,6 +30,7 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $chatItem['sent_image'] = $sent_image;
     $chatItem['sent_video'] = $sent_video;
     $chatItem['time_sent'] = $time_sent;
+    $chatItem['voice_notes'] = $voice_notes;
 
     $response[] = $chatItem;
 }

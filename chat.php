@@ -168,6 +168,32 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
 
     <div class="chat-container">
+    <div class="sidebar">
+        <ul class="sidebar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="home.php"><i class="bi bi-house-door-fill"></i></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='reel.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-camera-reels"></i></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId ?>"><i class="bi bi-plus-square"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="notificationLink" href="#"><i class="bi bi-bell-fill"></i></a>
+            <div id="notificationBox">
+              <!-- Content of the notification box goes here -->
+              <!-- You can customize the content as per your requirements -->
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="location.href='logoutmodal.php'"><i class="bi bi-box-arrow-right"></i></a>
+          </li>
+        </ul>
+      </div>
       <div class="chat-header">
         <h1>
           <?php
@@ -223,8 +249,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           <div class="chatbox">
             <div id="video-preview"></div>
           </div>
-          <!-- <br><br> -->
-
 
           <div class="form-group">
             <div class="row">
@@ -292,16 +316,20 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
                 <div class="d-flex" style="align-items: center">
                   <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
-                  <div id="sound-visualizer">
-                    <div class="spike spike-left"></div>
-                    <div class="spike spike-right"></div>
-                  </div>
-                  <button type="button" class="submit voice-note" onmousedown="startRecording('voice')" onmouseup="stopRecording('voice')" onmouseleave="cancelRecording()">
+                  <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
                     <i class="bi bi-mic"></i>
                   </button>
-                  <button type="button" class="submit video-note" onmousedown="startRecording('video')" onmouseup="stopRecording('video')" onmouseleave="cancelRecording()">
+                  <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
                     <i class="bi bi-camera-video"></i>
                   </button>
+
+                  <div id="sound-visualizer" class="boxContainer">
+                    <div class="box box1"></div>
+                    <div class="box box2"></div>
+                    <div class="box box3"></div>
+                    <div class="box box4"></div>
+                    <div class="box box5"></div>
+                  </div>
                   <button type="submit" class="submit" id="send-button" style="display: none;"><i class="bi bi-send"></i></button>
                 </div>
               </div>
@@ -452,32 +480,16 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
         <!-- <script></script> -->
+
+
         <script>
           let mediaRecorder;
           let isRecording = false;
           let soundVisualizerInterval;
           let soundVisualizer = document.getElementById('sound-visualizer');
-          let videoPreview = document.getElementById('video-preview');
           let recordingType = 'voice';
+          let chunks = [];
 
-          function toggleRecordingType(type) {
-            recordingType = type === 'voice' ? 'video' : 'voice'; // Toggle the recording type
-            updateRecordingUI(); // Update the UI to reflect the new recording type
-            toggleButtons();
-          }
-
-          function updateRecordingUI() {
-            const voiceButton = document.querySelector('.voice-note');
-            const videoButton = document.querySelector('.video-note');
-
-            if (recordingType === 'voice') {
-              voiceButton.style.display = 'inline-block';
-              videoButton.style.display = 'none';
-            } else if (recordingType === 'video') {
-              voiceButton.style.display = 'none';
-              videoButton.style.display = 'inline-block';
-            }
-          }
 
           function toggleButtons() {
             var message = document.getElementById('message').value.trim();
@@ -495,13 +507,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               sendButton.style.display = 'inline-block';
             }
           }
+          let startRecordingTime;
 
           let maxRetries = 7; // Maximum number of retries
           let retryDelay = 1000; // Delay between retries in milliseconds
-
           function startRecording(type) {
             if (isRecording) return;
             isRecording = true;
+            startRecordingTime = Date.now();
 
             if (type === 'voice') {
               soundVisualizer.style.display = 'block';
@@ -516,24 +529,44 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   video: type === 'video'
                 })
                 .then(function(stream) {
-                  mediaRecorder = new MediaRecorder(stream);
-                  const chunks = [];
+                  // Check if the microphone is providing audio data
+                  if (stream.getAudioTracks().length === 0) {
+                    console.error('Microphone not providing audio data.');
+                    return;
+                  }
 
-                  mediaRecorder.ondataavailable = function(e) {
-                    chunks.push(e.data);
-                  };
+                  mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm'
+                  });
 
-                  mediaRecorder.onstop = function() {
+                  mediaRecorder.addEventListener("dataavailable", event => {
+                    console.log("Data available:", event.data);
+                    chunks.push(event.data);
+                  });
+
+                  mediaRecorder.onstop = async function() {
                     isRecording = false;
                     const blob = new Blob(chunks, {
                       type: mediaRecorder.mimeType
                     });
-                    chunks.length = 0;
-                    // You can now use the 'blob' to send the voice or video note to the server
-                    console.log('Recorded Blob:', blob);
+                    console.log('Recording stopped. Blob created:', blob);
+                    // Calculate the duration of recording in seconds
+                    const recordingDuration = (Date.now() - startRecordingTime) / 1000;
+
+                    console.log('Recording duration:', recordingDuration.toFixed(2), 'seconds');
+                    if (type === 'voice') {
+                      soundVisualizer.style.display = 'none';
+                      clearInterval(soundVisualizerInterval);
+                    }
+
+                    // Continue with async submission
+                    await submitVoiceNote(blob);
+
+                    chunks = [];
                   };
 
                   mediaRecorder.start();
+                  console.log('Recording started:', type);
                 })
                 .catch(function(error) {
                   if (retriesLeft > 0) {
@@ -546,47 +579,93 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   }
                 });
             }
-
             getMediaStreamWithRetry(maxRetries);
+          }
 
-            function updateSoundVisualizer() {
-              // You can use the MediaRecorder API to get the audio data and analyze its loudness or pitch.
-              // For simplicity, let's just generate random values to simulate the visualization.
-              const loudness = Math.random() * 100; // Replace this with actual audio loudness data
+          function updateSoundVisualizer(loudness) {
+            const spikeContainers = document.querySelectorAll('.boxContainer .box');
 
-              const spikeLeft = document.querySelector('.spike-left');
-              const spikeRight = document.querySelector('.spike-right');
+            spikeContainers.forEach((spike, index) => {
+              const animation = getAnimationForLoudness(loudness, index);
+              spike.style.animationName = animation;
+            });
+          }
 
-              const maxSpikeHeight = 50; // Adjust this value to control the maximum spike height
-
-              // Update the height of the spikes based on the loudness value
-              spikeLeft.style.height = `${loudness / 100 * maxSpikeHeight}px`;
-              spikeRight.style.height = `${loudness / 100 * maxSpikeHeight}px`;
-
-              // Adjust the position of the spikes to create a moving effect
-              const spikeOffset = 10; // Adjust this value to control the spike movement range
-              spikeLeft.style.left = `${-spikeOffset + loudness / 100 * spikeOffset}px`;
-              spikeRight.style.right = `${-spikeOffset + loudness / 100 * spikeOffset}px`;
-            }
+          function getAnimationForLoudness(loudness, index) {
+            if (loudness < 30) return 'quiet';
+            if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
+            const boxContainer = document.getElementById('sound-visualizer');
+            boxContainer.style.display = "flex"
+            return 'loud';
           }
 
           function stopRecording(type) {
             if (mediaRecorder && isRecording) {
               mediaRecorder.stop();
             }
-          }
+          };
+
 
           function cancelRecording() {
             if (mediaRecorder && isRecording) {
               mediaRecorder.stop();
               isRecording = false;
+              deleteVoiceNote(); // Call the function to delete the voice note
+              console.log("To be deleted");
             }
+            soundVisualizer.style.display = 'none';
+            clearInterval(soundVisualizerInterval);
+          }
 
-            if (recordingType === 'voice') {
-              clearInterval(soundVisualizerInterval);
-              soundVisualizer.style.display = 'none';
-            } else if (recordingType === 'video') {
-              videoPreview.style.display = 'none';
+          async function deleteVoiceNote() {
+            const formData = new FormData();
+            formData.append('filename', voiceNoteFilename); // Provide the filename to delete
+
+            try {
+              const response = await fetch('delete_voice_note.php', {
+                method: 'POST',
+                body: formData
+              });
+              const result = await response.text();
+              console.log('Voice note deleted:', result);
+            } catch (error) {
+              console.error('Error deleting voice note:', error);
+            }
+          }
+
+          function submitRecordedNote() {
+            if (mediaRecorder && isRecording) {
+              mediaRecorder.stop();
+            }
+            if (isRecording && recordingType) {
+              isRecording = false;
+              if (recordingType === 'voice' && mediaRecorder && mediaRecorder.state === 'inactive') {
+                // submitVoiceNote(blob);
+              } else if (recordingType === 'video') {
+                // Handle video recording
+                isRecording = false;
+                if (recordingType === 'video' && mediaRecorder && mediaRecorder.state === 'inactive') {}
+              }
+              recordingType = null;
+            }
+          }
+
+          async function submitVoiceNote(blob) {
+            console.log('Blob to be submitted:', blob);
+            const recipientId = encodeURIComponent('<?php echo $_GET["UserIdx"]; ?>');
+            const formData = new FormData();
+            formData.append('voicenote', blob);
+            formData.append('recipientId', recipientId);
+
+            try {
+              const response = await fetch('send_voice_note.php', {
+                method: 'POST',
+                body: formData
+              });
+              const result = await response.text();
+              console.log('Voice note saved successfully:', result);
+            } catch (error) {
+              console.error('Error saving voice note:', error);
             }
           }
         </script>
@@ -1393,6 +1472,15 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             return date.toDateString();
           }
 
+          function formatTime(time) {
+            var minutes = Math.floor(time / 60);
+            var seconds = Math.floor(time % 60);
+
+            minutes = String(minutes).padStart(2, "0");
+            seconds = String(seconds).padStart(2, "0");
+
+            return minutes + ":" + seconds;
+          }
           // isToday(date);
           var lastDisplayedDate = null;
 
@@ -1410,11 +1498,12 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
                     div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
                     // Handle received messages
+                    var sender = message.senderId
                     if (div.className === 'received') {
                       var chatId = message.chatId;
                       var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
                       if (deletedReceivedMessage === 'true') {
-                        div.innerHTML = '<div id="' + chatId + '" class="message">You deleted the message</div>';
+                        div.innerHTML = '<div id="' + chatId + '" class="message">' + 'You deleted the message' + '</div>';
                         div.style.color = 'red';
                       }
                     }
@@ -1442,7 +1531,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                         minute: '2-digit'
                       });
                       div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
-                    } else {
+                    } else if (message.message !== null) {
                       div.innerHTML = '<div id="' + message.chatId + '" class="message">' + message.message + '</div>';
                       var timestamp = new Date(message.time_sent);
                       var formattedTime = timestamp.toLocaleTimeString('en-US', {
@@ -1478,6 +1567,127 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       });
                       div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
                     }
+                    if (message.voice_notes) {
+                      // console.log(message.voice_notes);
+                      div.innerHTML += '<div id="' + message.chatId + '" class="message">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
+                      // Assign message.chatId to chatId
+                      const chatId = message.chatId;
+                      console.log(chatId);
+                      setTimeout(function() {
+                        // Use chatId to query for elements
+                        const messageContainer = document.getElementById(chatId);
+                        if (messageContainer) {
+                          const voiceNoteContainer = messageContainer.querySelector(".voiceNote");
+                          if (voiceNoteContainer) {
+                            const audio = voiceNoteContainer.querySelector("#audio-" + chatId);
+                            const timeline = voiceNoteContainer.querySelector(".timeline-" + chatId);
+                            const progress = voiceNoteContainer.querySelector(".progress-" + chatId);
+                            const playPause = voiceNoteContainer.querySelector(".play-pause-" + chatId);
+                            const currentTime = voiceNoteContainer.querySelector(".current-time-" + chatId);
+                            const totalTime = voiceNoteContainer.querySelector(".total-time-" + chatId);
+                            const volumeButton = voiceNoteContainer.querySelector(".volume-button-" + chatId);
+                            const volumeSlider = voiceNoteContainer.querySelector(".volume-slider-" + chatId);
+                            const volumePercentage = voiceNoteContainer.querySelector(".volume-percentage-" + chatId);
+                            const speedButton = voiceNoteContainer.querySelector(".speed-" + chatId);
+                            const speedLabel = voiceNoteContainer.querySelector("#speed-label-" + chatId);
+                            const speedOptions = [1, 1.5, 2];
+                            let currentSpeedIndex = 0;
+                            // setTimeout(function() {
+                            //   var x = document.getElementById("audio-" + chatId).duration;
+                            //   console.log(x);
+                            // }, 2000)
+
+                            audio.addEventListener("canplaythrough", () => {
+                              // setTimeout(function (){
+                              totalTime.innerHTML = formatTime(audio.duration);
+                              console.log(totalTime.innerHTML);
+                              audio.volume = 0.75;
+                              volumePercentage.style.width = audio.volume * 100 + "%";
+                              // }, 2500);
+                            });
+                            audio.addEventListener("ended", () => {
+                              audio.currentTime = 0; // Reset back to the beginning
+                              playPause.classList.remove("paused"); // Reset the play/pause button state
+                              progress.style.width = "0"; // Reset progress bar
+                              currentTime.textContent = formatTime(audio.currentTime); // Reset current time display
+                            });
+
+                            timeline.addEventListener("input", () => {
+                              const timeToSeek = (timeline.value / 100) * audio.duration;
+                              audio.currentTime = timeToSeek;
+                            });
+
+                            playPause.addEventListener("click", () => {
+                              if (audio.paused) {
+                                audio.play();
+                                playPause.classList.add("paused");
+                              } else {
+                                audio.pause();
+                                playPause.classList.remove("paused");
+                              }
+                            });
+
+                            audio.addEventListener("timeupdate", () => {
+                              const percent = (audio.currentTime / audio.duration) * 100;
+                              progress.style.width = percent + "%";
+                              currentTime.textContent = formatTime(audio.currentTime);
+                              timeline.value = (audio.currentTime / audio.duration) * 100;
+                            });
+
+                            volumeButton.addEventListener("click", () => {
+                              audio.muted = !audio.muted;
+                              updateVolumeIcon();
+                            });
+
+                            volumeSlider.addEventListener("click", e => {
+                              const sliderWidth = window.getComputedStyle(volumeSlider).width;
+                              const newVolume = e.offsetX / parseInt(sliderWidth);
+                              audio.volume = newVolume;
+                              volumePercentage.style.width = newVolume * 100 + "%";
+                              updateVolumeIcon();
+                            });
+
+                            speedButton.addEventListener("click", () => {
+                              currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
+                              audio.playbackRate = speedOptions[currentSpeedIndex];
+                              speedLabel.textContent = speedOptions[currentSpeedIndex] + "x";
+                            });
+
+                            function updateVolumeIcon() {
+                              volumeButton.classList.remove("volume-off", "volume-low", "volume-high");
+                              if (audio.muted) {
+                                volumeButton.classList.add("volume-off");
+                              } else if (audio.volume < 0.5) {
+                                volumeButton.classList.add("volume-low");
+                              } else {
+                                volumeButton.classList.add("volume-high");
+                              }
+                            }
+
+                            function getTimeCodeFromNum(num) {
+                              const hours = Math.floor(num / 3600);
+                              const minutes = Math.floor((num % 3600) / 60);
+                              const seconds = Math.floor(num % 60);
+                              return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+                            }
+                          } else {
+                            console.log("Voice note container not found");
+                          }
+                        } else {
+                          console.log("Message container not found");
+                        }
+                      }, 1000); // Delay of 3 seconds
+                      var timestamp = new Date(message.time_sent);
+                      var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                    }
+                    // JavaScript
+
+
+
 
                     if (!lastDisplayedDate || !isSameDay(timestamp, lastDisplayedDate)) {
                       var dateDiv = document.createElement('div');
@@ -1486,12 +1696,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       chatbox.appendChild(dateDiv);
                       lastDisplayedDate = timestamp;
                     }
-                    // Check if there's a deletion status for this message
-                    var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + message.chatId);
-                    if (deletedReceivedMessage === 'true') {
-                      div.innerHTML = '<div id="' + message.chatId + '" class="message">You deleted the message</div>';
-                      div.style.color = 'red';
-                    }
+
                     chatbox.appendChild(div);
 
 
@@ -1551,7 +1756,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       popup.setAttribute('data-chat-id', div.id);
                       popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
                       var chatId = popup.getAttribute('data-chat-id');
-                      alert(div.id);
+                      // alert(div.id);
                       // Position the popup beside the clicked message
                       var messageRect = e.target.getBoundingClientRect();
                       var chatboxRect = chatbox.getBoundingClientRect();
@@ -1570,15 +1775,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       var deleteBtn = popup.querySelector('.delete');
                       deleteBtn.addEventListener('click', function() {
                         var chatId = popup.getAttribute('data-chat-id');
-                        var isSentMessage = div.className === 'Sent';
+                        var senderId = message.senderId;
+                        var currentUserId = "<?php echo $UserId; ?>";
+                        console.log(currentUserId)
+                        var isSentMessage = senderId === currentUserId;
 
-                        if (isSentMessage) {
+                        if (isSentMessage = true) {
                           // Send an AJAX request to delete the message from the database
                           var xhr = new XMLHttpRequest();
                           xhr.open('POST', 'delete_message.php', true);
                           xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                          var formData = 'chatId=' + encodeURIComponent(clickedId);
+                          var formData = 'chatId=' + encodeURIComponent(chatId);
 
                           xhr.onreadystatechange = function() {
                             if (xhr.readyState === 4 && xhr.status === 200) {
@@ -1589,6 +1797,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                               // Message deleted successfully from database, update UI for sent message
                               var deletedMessage = document.getElementById(chatId);
                               deletedMessage.innerHTML = 'You deleted this message';
+                              deletedMessage.class = 'message';
                               deletedMessage.style.color = 'red';
                               alert(message);
                               popup.style.display = 'none';
@@ -1776,34 +1985,31 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
               var message = $('#message').val();
               var image = $('.image-input').prop('files')[0];
-              var videonote = $('.video-note').prop('files')[0];
-              var voicenote = $('.voice-note').prop('files')[0];
+              // var videonote = $('.video-note').prop('files')[0];
+              // var voicenote = $('.voice-note').prop('files')[0];
               var UserId = '<?php echo $UserId; ?>';
               var recipientId = '<?php echo $_GET['UserIdx']; ?>';
               var video = $('#video').prop('files')[0];
               var formData = new FormData();
               formData.append('message', message);
               formData.append('image', image);
-              formData.append('voicenote', voicenote);
-              formData.append('videonote', videonote);
+              // formData.append('voicenote', voicenote);
+              // formData.append('videonote', videonote);
               formData.append('UserId', UserId);
               formData.append('recipientId', recipientId);
               formData.append('video', video);
               // Send the AJAX request
-              if (message != "" && image != "" && voicenote != "" && videonote != "" && video != "") {
-                $.ajax({
-                  url: 'send_message.php',
-                  type: 'POST',
-                  data: formData,
-                  processData: false,
-                  contentType: false,
-                  success: function(response) {
-                    console.log(response);
-                    $('#message').val('');
-                  }
-                });
-              }
-
+              $.ajax({
+                url: 'send_message.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                  console.log(response);
+                  $('#message').val('');
+                }
+              });
             });
           });
         </script>

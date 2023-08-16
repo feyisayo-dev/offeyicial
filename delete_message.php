@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['chatId'])) {
         die(print_r(sqlsrv_errors(), true));
     }
     
-    $response = array('message' => 'Message deleted successfully');
+    $response = array('message' => 'Message deleted successfully', $chatId);
     echo json_encode($response); // Return JSON response
 }
 ?>
