@@ -99,6 +99,11 @@ if (isset($_SESSION['UserId'])) {
     echo '<script src="js/popper.min.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <script src="js/owl.carousel.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/sweetalert2@10.js"></script>
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
 ';
     echo '<script src="country-states.js"></script>';
     echo '<link rel="stylesheet" href="profile.css">';
@@ -197,96 +202,16 @@ if (isset($_SESSION['UserId'])) {
   </div>';
     echo '</div>';
 
-    echo '<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h3 class="text-center text-uppercase text-success">Posts</h3>
-            <div class="posts">';
-    $i = 0;
-    while ($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
-      $PostId = $row['PostId'];
-      $title = $row['title'];
-      $content = $row['content'];
-      $video = $row['video'];
-      $image = $row['image'];
-      $date_posted = new DateTime($row['date_posted']);
-      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-      $current_date = new DateTime();
-      $date_postedx = new DateTime($formatted_date);
-      $interval = $current_date->diff($date_postedx);
-
-      if ($interval->y) {
-        $time_ago = $interval->y . " years ago";
-      } else if ($interval->m) {
-        $time_ago = $interval->m . " months ago";
-      } else if ($interval->d) {
-        $time_ago = $interval->d . " days ago";
-      } else if ($interval->h) {
-        $time_ago = $interval->h . " hours ago";
-      } else if ($interval->i) {
-        $time_ago = $interval->i . " minutes ago";
-      } else {
-        $time_ago = $interval->s . " seconds ago";
-      }
-
-      if ($i % 2 === 0) {
-        echo '<div class="row">';
-      }
-
-      echo '<div class="col-md-6">';
-      echo '<div class="post">';
-      if (!empty($title)) {
-        echo '<h3 class="title">' . $title . '</h3>';
-      }
-      if (!empty($image)) {
-        echo '<div class="col-md-9">
-                <img src="' . $image . '" class="img-fluid">
-            </div>';
-      }
-      if (!empty($video)) {
-        echo '<div class="video-container">';
-        echo '<video data-my-Video-id="' . $PostId . '" id="myVideo-' . $PostId . '" class="w-100">';
-        echo '<source src="' . $row["video"] . '" type="video/mp4">';
-        echo 'Your browser does not support the video tag.';
-        echo '</video>';
-        echo '<div class="video-controls">';
-        echo '<button id="rewindButton-' . $PostId . '" onclick="rewind(\'' . $PostId . '\')"><i class=\'bi bi-rewind\'></i></button>';
-        echo '<button onclick="togglePlayPause(\'' . $PostId . '\')">';
-        echo '<span id="playPauseButton-' . $PostId . '"><i class=\'bi bi-play\'></i></span>';
-        echo '</button>';
-        echo '<button id="fastForwardButton-' . $PostId . '" onclick="fastForward(\'' . $PostId . '\')"><i class=\'bi bi-fast-forward\'></i></button>';
-        echo '<div class="volume-control">';
-        echo '<input type="range" id="volumeRange-' . $PostId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $PostId . '\')">';
-        echo '</div>';
-        echo '<div class="time-control">';
-        echo '<input type="range" id="timeRange-' . $PostId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $PostId . '\')">';
-        echo '<div class="time-display">';
-        echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $PostId . '">0:00</div>';
-        echo '<div class="slash" id="slash-' . $PostId . '">/</div>';
-        echo '<div class="durationDisplay" id="durationDisplay-' . $PostId . '">0:00</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-      }
-      if (!empty($content)) {
-        echo '<p>' . $content . '</p>';
-      }
-      if (!empty($time_ago)) {
-        echo '<p>' . $time_ago . '</p>';
-      }
-      echo '</div>';
-      echo '</div>';
-
-      if ($i % 2 === 1 || $i === sqlsrv_num_rows($fetchPosts) - 1) {
-        echo '</div>';
-      }
-
-      $i++;
-    }
-    echo '</div>
-    </div>
-</div>';
+    echo '<div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="text-center text-uppercase text-success">Posts</h3>
+                    <div id="posts" class="posts">
+                        <!-- Your posts content goes here -->
+                    </div>
+                </div>
+            </div>
+          </div>';
 
     echo '<div class="footer">';
 
@@ -362,7 +287,12 @@ if (isset($_SESSION['UserId'])) {
     <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
-    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">';
+    <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/sweetalert2@10.js"></script>';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<script src="country-states.js"></script>';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -447,90 +377,9 @@ if (isset($_SESSION['UserId'])) {
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center text-uppercase text-success">Posts</h3>
-            <div class="posts">';
-    $i = 0;
-    while ($row = sqlsrv_fetch_array($fetchPosts, SQLSRV_FETCH_ASSOC)) {
-      $PostId = $row['PostId'];
-      $title = $row['title'];
-      $content = $row['content'];
-      $video = $row['video'];
-      $image = $row['image'];
-      $date_posted = new DateTime($row['date_posted']);
-      $formatted_date = date_format($date_posted, 'Y-m-d H:i:s');
-      $current_date = new DateTime();
-      $date_postedx = new DateTime($formatted_date);
-      $interval = $current_date->diff($date_postedx);
-
-      if ($interval->y) {
-        $time_ago = $interval->y . " years ago";
-      } else if ($interval->m) {
-        $time_ago = $interval->m . " months ago";
-      } else if ($interval->d) {
-        $time_ago = $interval->d . " days ago";
-      } else if ($interval->h) {
-        $time_ago = $interval->h . " hours ago";
-      } else if ($interval->i) {
-        $time_ago = $interval->i . " minutes ago";
-      } else {
-        $time_ago = $interval->s . " seconds ago";
-      }
-
-      if ($i % 2 === 0) {
-        echo '<div class="row">';
-      }
-
-      echo '<div class="col-md-6">';
-      echo '<div class="post">';
-      if (!empty($title)) {
-        echo '<h3 class="title">' . $title . '</h3>';
-      }
-      if (!empty($image)) {
-        echo '<div class="col-md-9">
-                <img src="' . $image . '" class="img-fluid">
-            </div>';
-      }
-      if (!empty($video)) {
-        echo '<div class="video-container">';
-        echo '<video data-my-Video-id="' . $PostId . '" id="myVideo-' . $PostId . '" class="w-100">';
-        echo '<source src="' . $row["video"] . '" type="video/mp4">';
-        echo 'Your browser does not support the video tag.';
-        echo '</video>';
-        echo '<div class="video-controls">';
-        echo '<button id="rewindButton-' . $PostId . '" onclick="rewind(\'' . $PostId . '\')"><i class=\'bi bi-rewind\'></i></button>';
-        echo '<button onclick="togglePlayPause(\'' . $PostId . '\')">';
-        echo '<span id="playPauseButton-' . $PostId . '"><i class=\'bi bi-play\'></i></span>';
-        echo '</button>';
-        echo '<button id="fastForwardButton-' . $PostId . '" onclick="fastForward(\'' . $PostId . '\')"><i class=\'bi bi-fast-forward\'></i></button>';
-        echo '<div class="volume-control">';
-        echo '<input type="range" id="volumeRange-' . $PostId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $PostId . '\')">';
-        echo '</div>';
-        echo '<div class="time-control">';
-        echo '<input type="range" id="timeRange-' . $PostId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $PostId . '\')">';
-        echo '<div class="time-display">';
-        echo '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $PostId . '">0:00</div>';
-        echo '<div class="slash" id="slash-' . $PostId . '">/</div>';
-        echo '<div class="durationDisplay" id="durationDisplay-' . $PostId . '">0:00</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-      }
-      if (!empty($content)) {
-        echo '<p>' . $content . '</p>';
-      }
-      if (!empty($time_ago)) {
-        echo '<p>' . $time_ago . '</p>';
-      }
-      echo '</div>';
-      echo '</div>';
-
-      if ($i % 2 === 1 || $i === sqlsrv_num_rows($fetchPosts) - 1) {
-        echo '</div>';
-      }
-
-      $i++;
-    }
+            <div id="posts" class="posts">';
     echo '</div>
+    </div>
     </div>
 </div>';
   }
@@ -631,6 +480,7 @@ if (isset($_SESSION['UserId'])) {
   </div>
 </div>';
   echo '<script src="js/jquery.min.js"></script>';
+  echo '<script src="script.js"></script>';
   echo '<script>
 //Script to load
 // user country code for selected option
@@ -939,6 +789,7 @@ $(document).ready(function() {
         (function() {
           var video = videos[i];
           var PostId = video.getAttribute("data-my-Video-id");
+          console.log(PostId);
           var timeRange = document.getElementById("timeRange-" + PostId);
           var durationDisplay = document.getElementById("durationDisplay-" + PostId);
   

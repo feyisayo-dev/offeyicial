@@ -4,7 +4,7 @@ include('db.php');
 $UserId = $_SESSION['UserId'];
 
 if (isset($_POST['title'])) {
-    $sql = "SELECT COUNT(PostId) FROM posts";
+    $sql = "SELECT COUNT(reelId) FROM posts";
     $stmt = sqlsrv_query($conn, $sql);
 
     if ($stmt === false) {
@@ -19,7 +19,7 @@ if (isset($_POST['title'])) {
     }
 
     $RegDate = date("M-d-Y");
-    $PostId = 'POS' . $num_padded;
+    $reelId = 'REL' . $num_padded;
     $title = $_POST['title'];
 
     if (isset($_POST['content'])) {
@@ -33,49 +33,6 @@ if (isset($_POST['title'])) {
 
     $imageUploadSuccess = true;
     $videoUploadSuccess = true;
-
-    // Handle image uploads
-    if (isset($_FILES['image']) && is_array($_FILES['image']['name'])) {
-        $images = $_FILES['image'];
-
-        foreach ($images['tmp_name'] as $key => $tmp_name) {
-            $image_name = $images['name'][$key];
-            $image_tmp = $tmp_name;
-            $image_size = $images['size'][$key];
-            $image_error = $images['error'][$key];
-
-            $image_ext = explode('.', $image_name);
-            $image_ext = strtolower(end($image_ext));
-
-            $allowed_ext = array('jpg', 'jpeg', 'png');
-
-            if (in_array($image_ext, $allowed_ext)) {
-                if ($image_error === 0) {
-                    if ($image_size <= 2097152) {
-                        $image_name_new = uniqid('', true) . '.' . $image_ext;
-                        $image_destination = 'uploads/' . $image_name_new;
-                        $UserId = $_SESSION['UserId'];
-                        if (move_uploaded_file($image_tmp, $image_destination)) {
-                            $sql = "INSERT INTO posts (UserId, PostId, title, content, image, date_posted)
-                                    VALUES ('$UserId', '$PostId', '$title', '$content', '$image_destination', '$date_posted')";
-                            $result = sqlsrv_query($conn, $sql);
-                            if (!$result) {
-                                $imageUploadSuccess = false;
-                            }
-                        } else {
-                            $imageUploadSuccess = false;
-                        }
-                    } else {
-                        $imageUploadSuccess = false;
-                    }
-                } else {
-                    $imageUploadSuccess = false;
-                }
-            } else {
-                $imageUploadSuccess = false;
-            }
-        }
-    }
 
     // Handle video uploads
     if (isset($_FILES['video']) && is_array($_FILES['video']['name'])) {
@@ -99,8 +56,8 @@ if (isset($_POST['title'])) {
                         $video_destination = 'uploads/' . $video_name_new;
                         $UserId = $_SESSION['UserId'];
                         if (move_uploaded_file($video_tmp, $video_destination)) {
-                            $sql = "INSERT INTO posts (UserId, PostId, title, content, video, date_posted)
-                                    VALUES ('$UserId', '$PostId', '$title', '$content', '$video_destination', '$date_posted')";
+                            $sql = "INSERT INTO posts (UserId, reelId, title, content, video, date_posted)
+                                    VALUES ('$UserId', '$reelId', '$title', '$content', '$video_destination', '$date_posted')";
                             $result = sqlsrv_query($conn, $sql);
                             if (!$result) {
                                 $videoUploadSuccess = false;

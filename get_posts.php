@@ -53,42 +53,7 @@ while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
         'isLiking' => $isLiking,
         // 'carouselItems' => []
     );
-
-    // // Add the image to the carouselItems array if it exists
-    // if (!empty($row['image'])) {
-    //     $imageItem = '<div class="post-item"><img class="post-image" src=' . $row['image'] . '></div>';
-    //     $post['carouselItems'][] = $imageItem;
-    // }
-
-    // // Add the video to the carouselItems array if it exists
-    // if (!empty($row['video'])) {
-    //     $videoItem = '<div class="post-video">';
-    //     $videoItem .= '<video data-my-Video-id="' . $postId . '" id="myVideo-' . $postId . '" class="w-100">';
-    //     $videoItem .= '<source src=' . $row['video'] . ' type="video/mp4">';
-    //     $videoItem .= '</video>';
-    //     $videoItem .= 'Your browser does not support the video tag.';
-    //     $videoItem .= '<div class="video-controls">';
-    //     $videoItem .= '<button id="rewindButton-' . $postId . '" onclick="rewind(\'' . $postId . '\')"><i class=\'bi bi-rewind\'></i></button>';
-    //     $videoItem .= '<button onclick="togglePlayPause(\'' . $postId . '\')">';
-    //     $videoItem .= '<span id="playPauseButton-' . $postId . '"><i class=\'bi bi-play\'></i></span>';
-    //     $videoItem .= '</button>';
-    //     $videoItem .= '<button id="fastForwardButton-' . $postId . '" onclick="fastForward(\'' . $postId . '\')"><i class=\'bi bi-fast-forward\'></i></button>';
-    //     $videoItem .= '<div class="volume-control">';
-    //     $videoItem .= '<input type="range" id="volumeRange-' . $postId . '" min="0" max="1" step="0.01" value="1" onchange="setVolume(\'' . $postId . '\')">';
-    //     $videoItem .= '</div>';
-    //     $videoItem .= '<div class="time-control">';
-    //     $videoItem .= '<input type="range" id="timeRange-' . $postId . '" min="0" step="0.01" value="0" onchange="setCurrentTime(\'' . $postId . '\')">';
-    //     $videoItem .= '<div class="time-display">';
-    //     $videoItem .= '<div class="currentTimeDisplay" id="currentTimeDisplay-' . $postId . '">0:00</div>';
-    //     $videoItem .= '<div class="slash" id="slash-' . $postId . '">/</div>';
-    //     $videoItem .= '<div class="durationDisplay" id="durationDisplay-' . $postId . '">0:00</div>';
-    //     $videoItem .= '</div>';
-    //     $videoItem .= '</div>';
-    //     $videoItem .= '</div>';
-    //     $videoItem .= '</div>';
-    //     $post['carouselItems'][] = $videoItem;
-    // }
-
+   
     // Push the post into the array
     $posts[] = $post;
 }

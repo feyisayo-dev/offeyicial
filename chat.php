@@ -168,7 +168,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
 
     <div class="chat-container">
-    <div class="sidebar">
+      <div class="sidebar">
         <ul class="sidebar-nav">
           <li class="nav-item">
             <a class="nav-link" href="home.php"><i class="bi bi-house-door-fill"></i></i></a>
@@ -248,93 +248,97 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           ?>
           <div class="chatbox">
             <div id="video-preview"></div>
-          </div>
-
-          <div class="form-group">
-            <div class="row">
-              <div class="foot">
-                <div class="emoji-picker">
-                  <!-- emoji table code goes here -->
-                  <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
-                    <i class="fas fa-smile"></i>
-                  </button>
-                  <div class="emoji-table-container" style="display:none">
-                    <table>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F600;')">😀</td>
-                        <td onclick="insertEmoji('&#x1F601;')">😁</td>
-                        <td onclick="insertEmoji('&#x1F602;')">😂</td>
-                        <td onclick="insertEmoji('&#x1F603;')">😃</td>
-                        <td onclick="insertEmoji('&#x1F604;')">😄</td>
-                        <td onclick="insertEmoji('&#x1F605;')">😅</td>
-                      </tr>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F606;')">😆</td>
-                        <td onclick="insertEmoji('&#x1F607;')">😇</td>
-                        <td onclick="insertEmoji('&#x1F608;')">😈</td>
-                        <td onclick="insertEmoji('&#x1F609;')">😉</td>
-                        <td onclick="insertEmoji('&#x1F610;')">😐</td>
-                        <td onclick="insertEmoji('&#x1F611;')">😑</td>
-                      </tr>
-                      <!-- Add more rows and columns for additional emojis -->
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F60A;')">😊</td>
-                        <td onclick="insertEmoji('&#x1F60B;')">😋</td>
-                        <td onclick="insertEmoji('&#x1F60C;')">😌</td>
-                        <td onclick="insertEmoji('&#x1F60D;')">😍</td>
-                        <td onclick="insertEmoji('&#x1F60E;')">😎</td>
-                        <td onclick="insertEmoji('&#x1F60F;')">😏</td>
-                      </tr>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F612;')">😒</td>
-                        <td onclick="insertEmoji('&#x1F613;')">😓</td>
-                        <td onclick="insertEmoji('&#x1F616;')">😖</td>
-                        <td onclick="insertEmoji('&#x1F615;')">😕</td>
-                        <td onclick="insertEmoji('&#x1F617;')">😗</td>
-                        <td onclick="insertEmoji('&#x1F618;')">😘</td>
-                      </tr>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F619;')">😙</td>
-                        <td onclick="insertEmoji('&#x1F61A;')">😚</td>
-                        <td onclick="insertEmoji('&#x1F61B;')">😛</td>
-                        <td onclick="insertEmoji('&#x1F61C;')">😜</td>
-                        <td onclick="insertEmoji('&#x1F61D;')">😝</td>
-                        <td onclick="insertEmoji('&#x1F61E;')">😞</td>
-                      </tr>
-                    </table>
+            <div class="form-group">
+              <div class="row">
+                <div class="foot">
+                  <div class="emoji-picker">
+                    <!-- emoji table code goes here -->
+                    <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
+                      <i class="fas fa-smile"></i>
+                    </button>
+                    <div class="emoji-table-container" style="display:none">
+                      <table>
+                        <tr>
+                          <td onclick="insertEmoji('&#x1F600;')">😀</td>
+                          <td onclick="insertEmoji('&#x1F601;')">😁</td>
+                          <td onclick="insertEmoji('&#x1F602;')">😂</td>
+                          <td onclick="insertEmoji('&#x1F603;')">😃</td>
+                          <td onclick="insertEmoji('&#x1F604;')">😄</td>
+                          <td onclick="insertEmoji('&#x1F605;')">😅</td>
+                        </tr>
+                        <tr>
+                          <td onclick="insertEmoji('&#x1F606;')">😆</td>
+                          <td onclick="insertEmoji('&#x1F607;')">😇</td>
+                          <td onclick="insertEmoji('&#x1F608;')">😈</td>
+                          <td onclick="insertEmoji('&#x1F609;')">😉</td>
+                          <td onclick="insertEmoji('&#x1F610;')">😐</td>
+                          <td onclick="insertEmoji('&#x1F611;')">😑</td>
+                        </tr>
+                        <!-- Add more rows and columns for additional emojis -->
+                        <tr>
+                          <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                          <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                          <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                          <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                          <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                          <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                        </tr>
+                        <tr>
+                          <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                          <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                          <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                          <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                          <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                          <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                        </tr>
+                        <tr>
+                          <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                          <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                          <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                          <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                          <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                          <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                        </tr>
+                      </table>
+                    </div>
                   </div>
-                </div>
-                <div class="custom-file">
-                  <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
-                  <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
-                </div>
-                <div class="custom-file">
-                  <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
-                  <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
-                </div>
-
-
-                <div class="d-flex" style="align-items: center">
-                  <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
-                  <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
-                    <i class="bi bi-mic"></i>
-                  </button>
-                  <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
-                    <i class="bi bi-camera-video"></i>
-                  </button>
-
-                  <div id="sound-visualizer" class="boxContainer">
-                    <div class="box box1"></div>
-                    <div class="box box2"></div>
-                    <div class="box box3"></div>
-                    <div class="box box4"></div>
-                    <div class="box box5"></div>
+                  <div class="custom-file">
+                    <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
+                    <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
                   </div>
-                  <button type="submit" class="submit" id="send-button" style="display: none;"><i class="bi bi-send"></i></button>
+                  <div class="custom-file">
+                    <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
+                    <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
+                  </div>
+
+
+                  <div class="d-flex">
+                    <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
+                    <div class="button-container">
+                      <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                        <i class="bi bi-mic"></i>
+                      </button>
+                      <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                        <i class="bi bi-camera-video"></i>
+                      </button>
+                      <!-- Add any other buttons if needed -->
+                    </div>
+                    <div id="sound-visualizer" class="boxContainer">
+                      <div class="box box1"></div>
+                      <div class="box box2"></div>
+                      <div class="box box3"></div>
+                      <div class="box box4"></div>
+                      <div class="box box5"></div>
+                    </div>
+                    <button type="submit" class="submit" id="send-button" style="display: none;">
+                      <i class="bi bi-send"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
           <div class="footer">
             <?php
 
@@ -1520,8 +1524,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
 
                       // Create the message container with video link and download button
-                      div.innerHTML = '<div class="message" id="' + message.chatId + '">' +
-                        '<div class="message-container">' + videoLink + '<br>' +
+                      div.innerHTML = '<div class="message-container">' +
+                        '<div class="message" id="' + message.chatId + '">' + videoLink + '<br>' +
                         '<img src="' + videoURL + '" alt="Thumbnail" class="thumbnail">' + '<br>' +
                         downloadLink + '</div>' +
                         '</div>';
@@ -1532,26 +1536,26 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       });
                       div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
                     } else if (message.message !== null) {
-                      div.innerHTML = '<div id="' + message.chatId + '" class="message">' + message.message + '</div>';
+                      div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">' + message.message + '</div>';
                       var timestamp = new Date(message.time_sent);
                       var formattedTime = timestamp.toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit'
                       });
-                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
                     }
 
                     if (message.sent_image) {
-                      div.innerHTML += '<div id="' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div>';
+                      div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div>';
                       var timestamp = new Date(message.time_sent);
                       var formattedTime = timestamp.toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit'
                       });
-                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
                     }
                     if (message.sent_video) {
-                      div.innerHTML += '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
+                      div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
                       // Add event listener to play the video when the "Watch Video" button is clicked
                       var videoPlayer = div.querySelector('video');
                       var playButton = div.querySelector('#buttonplay');
@@ -1565,11 +1569,11 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                         hour: '2-digit',
                         minute: '2-digit'
                       });
-                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
                     }
                     if (message.voice_notes) {
                       // console.log(message.voice_notes);
-                      div.innerHTML += '<div id="' + message.chatId + '" class="message">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
+                      div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
                       // Assign message.chatId to chatId
                       const chatId = message.chatId;
                       console.log(chatId);
@@ -1676,13 +1680,13 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                         } else {
                           console.log("Message container not found");
                         }
-                      }, 1000); // Delay of 3 seconds
+                      }, 2000); // Delay of 3 seconds
                       var timestamp = new Date(message.time_sent);
                       var formattedTime = timestamp.toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit'
                       });
-                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+                      div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
                     }
                     // JavaScript
 

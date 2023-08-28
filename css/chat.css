@@ -172,7 +172,7 @@ nav .profile-name {
     margin-bottom: 50px;
 }
 
-.Sent {
+.Sent .message {
     float: right;
     /* background: linear-gradient(to bottom, darkturquoise 0%, aliceblue 100%); */
     /* color: #444; */
@@ -189,7 +189,7 @@ nav .profile-name {
     clear: both;
 }
 
-.received {
+.received .message {
     float: left;
     /* background: linear-gradient(to bottom, white 0%, #b4b1e6 100%);
     color: #444; */
@@ -245,7 +245,7 @@ button[type="submit"] {
     background-color: darkturquoise;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     margin-left: 10px;
 }
 
@@ -254,7 +254,7 @@ button[type="submit"] {
     background-color: darkturquoise;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     margin-left: 10px;
 }
 
@@ -263,7 +263,7 @@ button[type="submit"] {
     background-color: darkturquoise;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     margin-left: 10px;
 }
 
@@ -282,17 +282,6 @@ button[type="submit"] {
     width: 180px;
     background-color: aliceblue;
     color: white;
-}
-
-textarea {
-    width: 100%;
-    height: 30px;
-    padding: 5px;
-    font-size: 16px;
-    font-family: montserrat;
-    resize: none;
-    border-radius: 10px;
-    box-shadow: 2px 2px 2px aliceblue;
 }
 
 .message-sender {
@@ -671,14 +660,58 @@ nav .logo {
     display: none;
 }
 
+/* Style for the form-group container */
 .form-group {
     position: fixed;
-    bottom: 10px;
+    width: 94%;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    margin-left: -15px;
+}
+
+.row {
     width: 100%;
-    margin-left: 80px;
-}    
+}
 
+.d-flex {
+    display: flex;
+    align-items: center;
+    border-radius: 20px;
+    overflow: hidden;
+    flex-grow: 1;
+}
 
+textarea {
+    width: 100%;
+    height: 30px;
+    padding: 5px;
+    font-size: 16px;
+    font-family: montserrat;
+    resize: none;
+    border-radius: 10px;
+    box-shadow: 2px 2px 2px aliceblue;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+}
+
+.button-container button {
+    padding: 12px 20px;
+    background-color: darkturquoise;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    margin-left: 10px;
+}
+
+/* You can adjust the margin or padding as needed */
+.button-container button:first-child {
+    margin-left: 0;
+}
 .preview img {
     max-width: 100%;
     /* max-height: 200px; */
@@ -765,16 +798,14 @@ nav .logo {
     text-decoration: none;
 }
 
-.Sent {
+/* 
+.Sent,
+.received {
     position: relative;
-}
+} */
 
 .Sent .popup {
     left: -70px;
-}
-
-.received {
-    position: relative;
 }
 
 .received .popup {
@@ -1163,10 +1194,22 @@ svg text {
     cursor: pointer;
 }
 
-.timestamp {
+/* Adjust the timestamp positioning for sent and received messages */
+.Sent .timestamp {
+    float: right;
     font-size: 0.75rem;
     color: #999;
     text-align: right;
+    margin-top: 0.2rem;
+}
+
+.received .timestamp {
+    float: left;
+    /* Change float to left for received messages */
+    font-size: 0.75rem;
+    color: #999;
+    text-align: left;
+    /* Change text-align to left for received messages */
     margin-top: 0.2rem;
 }
 
@@ -1401,11 +1444,11 @@ svg text {
 }
 
 /* Styling for timestamps */
-.timestamp {
+/* .timestamp {
     margin-top: 5px;
     font-size: 12px;
     color: #888;
-}
+} */
 
 /* Custom CSS for the sidebar */
 .sidebar {
@@ -1441,11 +1484,11 @@ svg text {
 }
 
 .sidebar-nav .nav-link {
-    font-size: 16px;
+    font-size: 24px;
     text-transform: uppercase;
     font-weight: 500;
     color: #000;
-    padding: 10px 20px;
+    padding: 25px 20px;
     transition: all 0.3s ease;
 }
 
@@ -1453,3 +1496,14 @@ svg text {
     background-color: #f2f2f2;
     color: #000;
 }
+
+.message-container {
+    display: flex;
+    /* Use flex display for easy alignment */
+    flex-direction: column;
+    /* Stack message and timestamp vertically */
+    align-items: flex-start;
+    /* Align contents to the left edge */
+}
+
+@media(max-width=900px) {}
