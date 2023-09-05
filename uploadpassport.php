@@ -1,74 +1,65 @@
 <?php
-                if(isset($_POST['image'])){
-                    $UserId = $_SESSION['UserId'];
+if (isset($_POST['image'])) {
+     $UserId = $_SESSION['UserId'];
 
-$FirstPassportName=basename($_FILES["Fileupload"]["name"]);
+     $FirstPassportName = basename($_FILES["Fileupload"]["name"]);
 
-$target_dir = "UserPassport/";//directory on the server in my application folder
-$target_file = $target_dir . $FirstPassportName; 
-$PassportName= $FirstPassportName;
-$uploadOk = 1;
-$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-
-
-if (unlink("UserPassport/".$Passport)) {
-
-}
-//  else {
-// 	echo 'There was a error deleting the file ' . $filename;
-// }
+     $target_dir = "UserPassport/"; //directory on the server in my application folder
+     $target_file = $target_dir . $FirstPassportName;
+     $PassportName = $FirstPassportName;
+     $uploadOk = 1;
+     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
 
-include ('db.php');
+     if (unlink("UserPassport/" . $Passport)) {
+     }
+     //  else {
+     // 	echo 'There was a error deleting the file ' . $filename;
+     // }
 
 
-if($imageFileType != "jpg" && $imageFileType != "pdf" && $imageFileType != "jpeg" && $imageFileType != "png" ) {
+     include('db.php');
 
-echo "<script type=\"text/javascript\">
+
+     if ($imageFileType != "jpg" && $imageFileType != "pdf" && $imageFileType != "jpeg" && $imageFileType != "png") {
+
+          echo "<script type=\"text/javascript\">
 alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
-</script>"; 
+</script>";
+     }
 
-}
-
-if (move_uploaded_file($_FILES["Fileupload"]["tmp_name"], $target_file)) {
-
-
-include ('db.php');
-        
-$sql="Update User_Profile SET Passport='$PassportName' WHERE UserId='$UserId'";
+     if (move_uploaded_file($_FILES["Fileupload"]["tmp_name"], $target_file)) {
 
 
-$smc=sqlsrv_query($conn,$sql);
+          include('db.php');
 
-//give information if the data is successful or not.
+          $sql = "Update User_Profile SET Passport='$PassportName' WHERE UserId='$UserId'";
 
-If ($smc===false){
-                   echo" <font color='black'><em> data not successfully upload</em></font><br/>";
-                   die( print_r( sqlsrv_errors(), true));  
-                 }else{
-                     
-                    // echo"File Upload successful";
-                    echo "<script type=\"text/javascript\">
+
+          $smc = sqlsrv_query($conn, $sql);
+
+          //give information if the data is successful or not.
+
+          if ($smc === false) {
+               echo " <font color='black'><em> data not successfully upload</em></font><br/>";
+               die(print_r(sqlsrv_errors(), true));
+          } else {
+
+               // echo"File Upload successful";
+               echo "<script type=\"text/javascript\">
                               alert(\"The file has been uploaded\");
-                              </script>"; 
-                         }
+                              </script>";
+          }
 
 
 
 
-                              // $msg = $picture;
-                              
-                              $URL="user_profile.php?UserId=" +$UserId ;
-                              echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
-                              echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
-                              // 	--------------------------------------------------------------------
-                                                                
-                                    }
+          // $msg = $picture;
 
+          $URL = "user_profile.php?UserId=" + $UserId;
+          echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+          echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+          // 	--------------------------------------------------------------------
 
-
-
-
+     }
 }
-
-?>

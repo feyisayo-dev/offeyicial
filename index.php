@@ -1503,7 +1503,7 @@ if (sqlsrv_execute($stmt)) {
               </svg> </a>
           </li>
           <li class="nav-item">
-            <a onclick="window.location.href='addpost.php?UserId=<?php echo $UserId ?>'"> <img width="40" height="40" src="icons/add.png" class="icon" alt=""> </a>
+            <a onclick="window.location.href='upload.php?UserId=<?php echo $UserId ?>'"> <img width="40" height="40" src="icons/add.png" class="icon" alt=""> </a>
           </li>
           <li class="nav-item">
             <button onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'" class="profile-button">

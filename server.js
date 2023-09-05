@@ -1,13 +1,23 @@
-const WebSocket = require('websocket').server;
-const http = require('http');
-const express = require('express');
-const bodyParser = require('body-parser');
-
+const WebSocket = require("websocket").server;
+const http = require("http");
+const express = require("express");
+const bodyParser = require("body-parser");
+const fileUpload = require("express-fileupload");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const ffmpeg = require("fluent-ffmpeg");
+ffmpeg.setFfmpegPath(ffmpegPath);
+const cors = require("cors");
+const fs = require("fs");
+const { createWriteStream } = require('fs');
+const { PassThrough } = require('stream');
 // Create an Express app
 const app = express();
 
+// Enable CORS for all routes
+app.use(cors());
 // Enable parsing of JSON bodies
 app.use(bodyParser.json());
+app.use(fileUpload());
 
 // Create an HTTP server
 const server = http.createServer(app);
@@ -18,15 +28,15 @@ const webSocketServer = new WebSocket({
 });
 
 // Handle root route
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
 });
 
 // Keep track of connected users
 const connectedUsers = new Map();
 
 // WebSocket server event handlers
-webSocketServer.on('request', (request) => {
+webSocketServer.on("request", (request) => {
   // Retrieve the UserId from the query parameters
   const UserId = request.resourceURL.query.UserId;
   const sessionId = request.resourceURL.query.sessionID;
@@ -66,26 +76,26 @@ webSocketServer.on('request', (request) => {
   sendRoomInfo();
 
   // Handle WebSocket messages
-  connection.on('message', (message) => {
-    if (message.type === 'utf8') {
+  connection.on("message", (message) => {
+    if (message.type === "utf8") {
       var receivedMessage = JSON.parse(message.utf8Data);
 
-      if (receivedMessage.type === 'incoming_call') {
+      if (receivedMessage.type === "incoming_call") {
         handleIncomingCall(receivedMessage);
-      } else if (receivedMessage.type === 'hangup') {
+      } else if (receivedMessage.type === "hangup") {
         hangupIncomingCall(receivedMessage);
-      } else if (receivedMessage.type === 'offer') {
+      } else if (receivedMessage.type === "offer") {
         handleIncomingOffer(receivedMessage);
-      } else if (receivedMessage.type === 'answer') {
+      } else if (receivedMessage.type === "answer") {
         hangupOutgoingAnswer(receivedMessage);
-      } else if (receivedMessage.type === 'candidate') {
+      } else if (receivedMessage.type === "candidate") {
         hangupOutgoingcandidate(receivedMessage);
       } else {
         // Process other message types
         // console.log('Received message:', message.utf8Data);
         if (receivedMessage.error) {
           // Handle the error case
-          console.log('Error:', receivedMessage.error);
+          console.log("Error:", receivedMessage.error);
           return;
         }
         // Send a response message
@@ -95,7 +105,7 @@ webSocketServer.on('request', (request) => {
   });
 
   // Handle WebSocket connection close
-  connection.on('close', () => {
+  connection.on("close", () => {
     // Remove the connection from connectedUsers Map
     connectedUsers.delete(UserId);
     console.log(`Client disconnected with UserId: ${UserId}`);
@@ -121,11 +131,14 @@ function sendRoomInfo() {
     sessionId: connection.sessionId,
   }));
 
-  console.log('Number of people on the server:', roomInfo.length);
+  console.log("Number of people on the server:", roomInfo.length);
   if (roomInfo.length >= 1) {
-    console.log('UserIds:', roomInfo.map((user) => user.UserId));
+    console.log(
+      "UserIds:",
+      roomInfo.map((user) => user.UserId)
+    );
   } else {
-    console.log('No user on server');
+    console.log("No user on server");
   }
 
   // Send the room information to all connected clients
@@ -143,97 +156,95 @@ function handleIncomingCall(message) {
   const recipientConnection = getRecipientConnection(message.callerUserId);
   if (recipientConnection) {
     const signalingMessage = {
-      type: 'incoming_call',
+      type: "incoming_call",
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
     // console.log('Sending signaling message:', signalingMessage);
     recipientConnection.sendUTF(JSON.stringify(signalingMessage));
-    console.log('Incoming message sent to UserB:', message.callerUserId);
+    console.log("Incoming message sent to UserB:", message.callerUserId);
   } else {
-    console.log('Incoming connection not found:', message.callerUserId);
+    console.log("Incoming connection not found:", message.callerUserId);
   }
 }
 
 function handleIncomingOffer(message) {
-  console.log('Offer message received:', message);
+  console.log("Offer message received:", message);
   const recipientConnection = getRecipientConnection(message.callerUserId);
   if (recipientConnection) {
     const signalingMessage = {
-      type: 'offer',
+      type: "offer",
       offer: message.offer,
       mediaConstraints: message.mediaConstraints,
       callerUserId: message.callerUserId, // Include the recipient's ID
       callertoUserId: message.callertoUserId, // Include the recipient's ID
-      sessionId: message.sessionId
+      sessionId: message.sessionId,
     };
     recipientConnection.sendUTF(JSON.stringify(signalingMessage));
 
-    console.log('Offer message sent to UserB:', message.callerUserId);
+    console.log("Offer message sent to UserB:", message.callerUserId);
   } else {
-    console.log('UserB connection not found:', message.callerUserId);
+    console.log("UserB connection not found:", message.callerUserId);
   }
 }
 
-
-
 function hangupIncomingCall(message) {
   // Perform actions for hangup message
-  console.log('Hangup message received:', message);
+  console.log("Hangup message received:", message);
 
   // Send the hangup message to UserA
   const userAConnection = getUserConnection(message.callertoUserId);
   if (userAConnection) {
     const signalingMessage = {
-      type: 'hangup',
+      type: "hangup",
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
     userAConnection.sendUTF(JSON.stringify(signalingMessage));
-    console.log('Hangup message sent to UserA:', message.callertoUserId);
+    console.log("Hangup message sent to UserA:", message.callertoUserId);
   } else {
-    console.log('UserA connection not found:', message.callertoUserId);
+    console.log("UserA connection not found:", message.callertoUserId);
   }
 }
 
 function hangupOutgoingAnswer(message) {
   // Perform actions for hangup message
-  console.log('Answer message received:', message);
+  console.log("Answer message received:", message);
 
   // Send the hangup message to UserA
   const userAConnection = getRecipientConnection(message.callertoUserId);
   if (userAConnection) {
     const signalingMessage = {
-      type: 'answer',
+      type: "answer",
       answer: message.answer, // Update to access the sdp property correctly
       mediaConstraints: message.mediaConstraints,
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
     userAConnection.sendUTF(JSON.stringify(signalingMessage));
-    console.log('Answer message sent to UserA:', message.callertoUserId);
+    console.log("Answer message sent to UserA:", message.callertoUserId);
   } else {
-    console.log('UserA connection not found:', message.callertoUserId);
+    console.log("UserA connection not found:", message.callertoUserId);
   }
 }
 
 function hangupOutgoingcandidate(message) {
   // Perform actions for hangup message
-  console.log('candidate message received:', message);
+  console.log("candidate message received:", message);
 
   // Send the hangup message to UserA
   const userAConnection = getRecipientConnection(message.callertoUserId);
   if (userAConnection) {
     const signalingMessage = {
-      type: 'candidate',
+      type: "candidate",
       candidate: message.candidate, // Update to access the sdp property correctly
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
     userAConnection.sendUTF(JSON.stringify(signalingMessage));
-    console.log('candidate message sent to UserA:', message.callertoUserId);
+    console.log("candidate message sent to UserA:", message.callertoUserId);
   } else {
-    console.log('UserA connection not found:', message.callertoUserId);
+    console.log("UserA connection not found:", message.callertoUserId);
   }
 }
 
@@ -245,9 +256,72 @@ function getRecipientConnection(UserIdx) {
   }
   return null;
 }
-app.post('/start', (req, res) => {
+
+app.get("/start", (req, res) => {
   // Send the response
-  res.send('Room set up');
+  res.send("starting........");
+});
+app.post("/start", (req, res) => {
+  // Send the response
+  res.send("Room set up");
+});
+
+app.post("/trimVideo", (req, res) => {
+  console.log("Received a POST request to /trim-video");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  // Access the video file and log its details
+  const videoFile = req.files.Video;
+  console.log("Received video file:", videoFile);
+  console.log(" - Name:", videoFile.name);
+  console.log(" - Type:", videoFile.mimetype);
+  console.log(" - Size:", videoFile.size, "bytes");
+  console.log(" - Data length:", videoFile.data.length);
+
+  if (!req.files || !req.files.Video) {
+    console.log("not working");
+    return res.status(400).send("No video file uploaded.");
+  }
+
+  console.log("started");
+
+  if (videoFile.mimetype.startsWith("video/")) {
+    const outputStream = new PassThrough();
+    fs.writeFileSync(videoFile.name, videoFile.data);
+    const inputFormat = videoFile.name.split(".").pop().toLowerCase();
+    console.log("Trimming video...");
+    console.log(inputFormat);
+    console.log(videoFile.data);
+    ffmpeg()
+      .input(videoFile.name)
+      .inputFormat(inputFormat)
+      .outputOptions("-t 600")
+      .outputFormat("ismv")
+      .on("end", () => {
+        console.log("Video trimming completed.");
+
+        // Read the trimmed video data from the temporary file
+        const trimmedVideoBuffer = fs.readFileSync(videoFile.name);
+
+        // Delete the temporary file
+        fs.unlinkSync(videoFile.name);
+
+        res.setHeader("Content-Type", "Video/ismv");
+        res.setHeader("Content-Length", trimmedVideoBuffer.length);
+        res.send(trimmedVideoBuffer);
+      })
+      .on("error", (err, stdout, stderr) => {
+        console.error("Error trimming video:", err);
+        console.error("FFmpeg stdout:", stdout);
+        console.error("FFmpeg stderr:", stderr);
+        res.status(500).send(`Error trimming the video: ${err.message}`);
+      })
+  } else {
+    res.status(400).send("Invalid video file format.");
+  }
 });
 
 // Start the server

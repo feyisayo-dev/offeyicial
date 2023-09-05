@@ -15,7 +15,6 @@ if (isset($_POST['title'])) {
         }
         $num = $UserCounter + 1;
         $num_padded = sprintf("%03d", $num);
-        $num_padded; // return 04
     }
 
     $RegDate = date("M-d-Y");

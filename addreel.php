@@ -237,7 +237,7 @@ $UserId = $_SESSION["UserId"];
             position: absolute;
             bottom: -90px;
             right: 0;
-            /* display: inline-flex; */
+            display: none;
         }
 
         .buttons .material-icons {
@@ -566,6 +566,13 @@ $UserId = $_SESSION["UserId"];
             box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white, 4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
             transform: rotate(45deg);
         }
+
+        .loader {
+            display: block;
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+        }
     </style>
 </head>
 
@@ -753,6 +760,37 @@ $UserId = $_SESSION["UserId"];
 
     <script src="js/jquery.min.js"></script>
     <script>
+        var signalingSocket;
+        var UserId = "<?php echo $UserId ?>";
+        // alert(UserId);
+        function initSignaling() {
+            var signalingServerUrl = 'ws://localhost:8888?UserId=' + UserId;
+
+            signalingSocket = new WebSocket(signalingServerUrl);
+
+            signalingSocket.onopen = function() {
+                console.log('Signaling socket connection established');
+            };
+
+
+
+            signalingSocket.onmessage = function(event) {
+                var message = JSON.parse(event.data);
+                console.log(message);
+            };
+
+            signalingSocket.onclose = function(event) {
+                console.log('Signaling socket connection closed:', event.code, event.reason);
+            };
+
+            signalingSocket.onerror = function(error) {
+                console.log('Signaling socket error:', error);
+            };
+        }
+
+        initSignaling();
+    </script>
+    <script>
         const selectPublic = document.getElementById('public');
         const friends = document.querySelector('.friends');
         const reelContainer = document.querySelector('.reel_container');
@@ -870,103 +908,150 @@ $UserId = $_SESSION["UserId"];
     </script>
 
     <script>
-        // Display selected videos and photos as a preview
-        function previewReels(event) {
-            const videos = document.getElementById('videos').files;
-            // const photos = document.getElementById('photos').files;
-            const previewItems = document.querySelector('.preview-items');
+        document.addEventListener("DOMContentLoaded", function() {
+            // Display selected videos and photos as a preview
+            function previewReels(event) {
+                const videos = document.getElementById('videos').files;
+                // const photos = document.getElementById('photos').files;
+                const previewItems = document.querySelector('.preview-items');
+                const buttons = document.querySelector('.buttons');
 
-            // Clear previous previews
-            // previewItems.innerHTML = '';
+                // Clear previous previews
+                // previewItems.innerHTML = '';
 
-            // Display videos
-            for (let i = 0; i < videos.length; i++) {
-                const videoURL = URL.createObjectURL(videos[i]);
-                const videoElement = document.createElement('video');
-                videoElement.src = videoURL;
-                videoElement.controls = false;
-                videoElement.autoplay = true;
-                const previewItem = document.createElement('div');
-                previewItem.className = 'preview-item';
-                previewItem.appendChild(videoElement);
-                previewItems.appendChild(previewItem);
+                // Display videos
+                for (let i = 0; i < videos.length; i++) {
+                    // const videoElement = document.createElement('video');
+                    // videoElement.controls = true;
+                    // videoElement.autoplay = true;
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItems.appendChild(previewItem);
 
-                videoElement.addEventListener('click', function() {
-                    console.log('clicked');
-                    if (videoElement.paused) {
-                        videoElement.play();
+                    const formData = new FormData();
+
+                    const videoInput = document.getElementById('videos');
+
+                    if (videoInput.files.length > 0) {
+                        const videoFile = videoInput.files[0];
+                        console.log('VideoFile:', videoFile);
+                        console.log('Uploaded file mimetype:', videoFile.type);
+
+                        formData.append('Video', videoFile);
+
+                        const videoElement = document.createElement('video');
+                        videoElement.src = URL.createObjectURL(videoFile);
+
+                        videoElement.addEventListener('loadedmetadata', () => {
+                            const videoDuration = videoElement.duration;
+                            const videoinmins = videoDuration / 60;
+                            console.log('Video Duration:', videoinmins);
+
+                            if (videoDuration > 600) {
+                                videoElement.style.display = "none";
+                                const loader = document.createElement('img');
+                                loader.src = 'icons/internet.gif';
+                                loader.classList.add('loader');
+                                previewItems.style.backgroundColor = "white";
+                                previewItem.appendChild(loader);
+
+                                fetch('http://localhost:8888/trimVideo', {
+                                        method: 'POST',
+                                        body: formData,
+                                    })
+                                    .then((response) => {
+                                        if (!response.ok) {
+                                            throw new Error('Error fetching trimmed video data.');
+                                        }
+                                        return response.blob(); // Get the video data as a Blob
+                                    })
+                                    .then((videoBlob) => {
+                                        previewItem.removeChild(loader);
+                                        videoElement.style.display = "block";
+                                        buttons.style.display = "block";
+                                        const trimmedVideoURL = URL.createObjectURL(videoBlob);
+                                        videoElement.src = trimmedVideoURL;
+                                        previewItem.appendChild(videoElement);
+                                        previewItem.style.backgroundColor = "#333";
+                                    })
+                                    .catch((error) => {
+                                        console.error(error);
+                                    });
+                            } else {
+                                videoElement.controls = true;
+                                buttons.style.display = "block";
+                                previewItems.style.backgroundColor = "#333";
+                                previewItem.appendChild(videoElement);
+                            }
+                        });
+                        // const videoElement = document.querySelector('video');
+                        videoElement.addEventListener('click', function() {
+                            console.log('clicked');
+                            if (videoElement.paused) {
+                                videoElement.play();
+                            } else {
+                                videoElement.pause();
+                            }
+                        });
+                        // Mute Button
+                        const muteButton = previewItems.querySelector('.mute');
+                        muteButton.addEventListener('click', function() {
+                            if (videoElement.muted) {
+                                videoElement.muted = false;
+                                muteButton.querySelector('p').textContent = 'Mute';
+                            } else {
+                                videoElement.muted = true;
+                                muteButton.querySelector('p').textContent = 'Unmute';
+                            }
+                        });
+
+                        const flipButton = previewItems.querySelector('.flip');
+                        let flipState = 0; // 0: Original, 1: Flip horizontally, 2: Flip vertically, 3: Flip both
+                        flipButton.addEventListener('click', function() {
+                            flipState = (flipState + 1) % 4;
+
+                            if (flipState === 1) {
+                                videoElement.style.transform = 'scaleX(-1)';
+                            } else if (flipState === 2) {
+                                videoElement.style.transform = 'scaleY(-1)';
+                            } else if (flipState === 3) {
+                                videoElement.style.transform = 'scale(-1, -1)';
+                            } else {
+                                videoElement.style.transform = 'scale(1, 1)';
+                            }
+                        });
+
+                        // Timer Button
+                        const timerButton = previewItems.querySelector('.timer');
+                        let playbackRate = 1;
+                        timerButton.addEventListener('click', function() {
+                            if (playbackRate === 1) {
+                                playbackRate = 1.5;
+                                videoElement.playbackRate = playbackRate;
+                                timerButton.querySelector('p').textContent = `${playbackRate}x`;
+                            } else if (playbackRate === 1.5) {
+                                playbackRate = 2;
+                                videoElement.playbackRate = playbackRate;
+                                timerButton.querySelector('p').textContent = `${playbackRate}x`;
+                            } else {
+                                playbackRate = 1;
+                                videoElement.playbackRate = playbackRate;
+                                timerButton.querySelector('p').textContent = 'Speed';
+                            }
+                        });
                     } else {
-                        videoElement.pause();
+                        console.error('No video file selected.');
                     }
-                });
+                }
+
+
             }
 
-            const videoElement = document.querySelector('video'); // Assuming there's only one video element
-
-            // Mute Button
-            const muteButton = previewItems.querySelector('.mute');
-            muteButton.addEventListener('click', function() {
-                if (videoElement.muted) {
-                    videoElement.muted = false;
-                    muteButton.querySelector('p').textContent = 'Mute';
-                } else {
-                    videoElement.muted = true;
-                    muteButton.querySelector('p').textContent = 'Unmute';
-                }
-            });
-
-            const flipButton = previewItems.querySelector('.flip');
-            let flipState = 0; // 0: Original, 1: Flip horizontally, 2: Flip vertically, 3: Flip both
-            flipButton.addEventListener('click', function() {
-                flipState = (flipState + 1) % 4;
-
-                if (flipState === 1) {
-                    videoElement.style.transform = 'scaleX(-1)';
-                } else if (flipState === 2) {
-                    videoElement.style.transform = 'scaleY(-1)';
-                } else if (flipState === 3) {
-                    videoElement.style.transform = 'scale(-1, -1)';
-                } else {
-                    videoElement.style.transform = 'scale(1, 1)';
-                }
-            });
-
-            // Timer Button
-            const timerButton = previewItems.querySelector('.timer');
-            let playbackRate = 1;
-            timerButton.addEventListener('click', function() {
-                if (playbackRate === 1) {
-                    playbackRate = 1.5;
-                    videoElement.playbackRate = playbackRate;
-                    timerButton.querySelector('p').textContent = `${playbackRate}x`;
-                } else if (playbackRate === 1.5) {
-                    playbackRate = 2;
-                    videoElement.playbackRate = playbackRate;
-                    timerButton.querySelector('p').textContent = `${playbackRate}x`;
-                } else {
-                    playbackRate = 1;
-                    videoElement.playbackRate = playbackRate;
-                    timerButton.querySelector('p').textContent = 'Speed';
-                }
-            });
-
-
-            // // Display photos
-            // for (let i = 0; i < photos.length; i++) {
-            //     const photoURL = URL.createObjectURL(photos[i]);
-            //     const photoElement = document.createElement('img');
-            //     photoElement.src = photoURL;
-            //     const previewItem = document.createElement('div');
-            //     previewItem.className = 'preview-item';
-            //     previewItem.appendChild(photoElement);
-            //     previewItems.appendChild(previewItem);
-            // }
-        }
-
-        // Listen for file selection change
-        document.getElementById('videos').addEventListener('change', previewReels);
-        // document.getElementById('photos').addEventListener('change', previewReels);
+            // Listen for file selection change
+            document.getElementById('videos').addEventListener('change', previewReels);
+        });
     </script>
+
     <script>
         var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 

@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // Allow all domains to access this proxy
+header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
 $baseUrl = "https://api.deezer.com/";
