@@ -8,5 +8,10 @@ $url = $baseUrl . $query;
 
 $response = file_get_contents($url);
 
-echo $response;
+if (empty($response) || stripos($response, '<html') !== false) {
+    http_response_code(500);
+    echo json_encode(array('error' => 'Failed to fetch data from Deezer API.'));
+} else {
+    echo $response;
+}
 ?>

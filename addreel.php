@@ -573,6 +573,10 @@ $UserId = $_SESSION["UserId"];
             width: 50px;
             height: 50px;
         }
+
+        .audiobox {
+            margin-top: 30px;
+        }
     </style>
 </head>
 
@@ -703,9 +707,15 @@ $UserId = $_SESSION["UserId"];
                         <div class="tab-pane fade show active" id="device" role="tabpanel" aria-labelledby="device-tab">
                             <div class="audio-upload-box">
                                 <h4>Drag and Drop or Select Audio from Device</h4>
-                                <input type="file" accept="audio/*" id="audio-input">
+                                <input type="file" name="audios[]" accept="audio/*" id="audio-input">
+                                <div class="audio-box"><i class="bi bi-cloud-arrow-down"></i></div>
+                                <label id="label-audio" for="audio-input">Upload Reels</label>
                                 <p>Supported formats: MP3, WAV, etc.</p>
                             </div>
+                            <div class="loading"></div>
+                            <div class="audio-pick" id="audio-pick">
+                            </div>
+                            <button type="button" id="device-audio" class="btn btn-secondary">Pick</button>
                         </div>
 
                         <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
@@ -746,6 +756,7 @@ $UserId = $_SESSION["UserId"];
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
                             <input type="text" id="music-search-input" placeholder="Search for music...">
                             <ul id="music-results" class="music-results"></ul>
+                            <button type="button" id="replace-audio-button" class="btn btn-secondary" data-bs-dismiss="modal">Pick</button>
                         </div>
 
                     </div>
@@ -849,7 +860,111 @@ $UserId = $_SESSION["UserId"];
         });
     </script>
 
+
+    <!-- <script>
+       
+    </script> -->
+
+
     <script>
+        function replaceAudio(audioFileName) {
+            const videoInput = document.getElementById('videos');
+            const videopre = document.getElementById('videopre');
+            const videoFile = videoInput.files[0];
+            // console.log(audioFileName);
+
+            const formData = new FormData();
+            formData.append('Video', videoFile);
+            formData.append('MusicTracks', audioFileName);
+
+            fetch('http://localhost:8888/changeAudio', {
+                    method: 'POST',
+                    body: formData,
+                })
+
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Error fetching trimmed video data.');
+                    }
+                    return response.blob();
+                })
+                .then((videoBlob) => {
+                    console.log(videoBlob);
+                    const trimmedVideoURL = URL.createObjectURL(videoBlob);
+                    videopre.src = trimmedVideoURL;
+                    alert('Audio replacement completed successfully.');
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+
+        //Local Music
+        const audioInput = document.getElementById('audio-input');
+        const previewtab = document.getElementById('audio-pick');
+        const deviceAudio = document.getElementById('device-audio');
+        const box = document.querySelector('.audio-upload-box');
+        const loading = document.querySelector('.loading');
+
+        function previewMusic() {
+            for (let i = 0; i < audioInput.files.length; i++) {
+                const audiobox = document.createElement('div');
+                audiobox.classList.add('audiobox');
+
+                const selectedAudio = audioInput.files[i];
+                console.log("Audio file:", selectedAudio);
+                console.log(" - mimeType:", selectedAudio.type);
+
+                const audio = document.createElement('audio');
+                audio.src = URL.createObjectURL(selectedAudio);
+                audio.addEventListener('loadedmetadata', () => {
+                    const audioDuration = audio.duration;
+                    const audiomin = audioDuration / 60;
+                    console.log("Duration-", audiomin);
+                    audio.autoplay = true;
+                    audio.controls = true;
+                    audiobox.appendChild(audio);
+                    previewtab.appendChild(audiobox);
+
+                    const formData = new FormData();
+                    formData.append('audio', selectedAudio);
+                    fetch('move_music.php', {
+                            method: 'POST',
+                            body: formData,
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Audio uploaded successfully.');
+                            } else {
+                                alert('Error uploading audio.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+
+                });
+                deviceAudio.addEventListener('click', () => {
+                    box.style.display = "none";
+                    loading.innerHTML = "";
+                    const loader = document.createElement('img');
+                    loader.src = 'icons/internet.gif';
+                    loader.classList.add('loader');
+                    loading.appendChild(loader);
+
+                    const audioFileName = audioInput.files[i];
+                    console.log("Audio file:", audioFileName);
+                    console.log(" - mimeType:", audioFileName.type);
+                    replaceAudio(audioFileName);
+                });
+            }
+        }
+
+        audioInput.addEventListener('change', previewMusic);
+
+        //DEEZER Music
+
         const musicSearchInput = document.getElementById('music-search-input');
         const musicResultsList = document.getElementById('music-results');
 
@@ -871,12 +986,23 @@ $UserId = $_SESSION["UserId"];
 
                 musicTracks.forEach(track => {
                     const listItem = document.createElement('li');
-                    listItem.innerHTML = `
-                    <input type="checkbox" class="music-checkbox" id="music-checkbox-${track.id}" data-track-id="${track.id}">
-                        <label for="music-checkbox-${track.id}">
-                            ${track.title} - ${track.artist.name}
-                            <span class="duration">${formatDuration(track.duration)}</span>
-                        </label>`;
+                    const radioButton = document.createElement('input');
+                    radioButton.type = 'radio';
+                    radioButton.className = 'music-checkbox';
+                    radioButton.id = `music-checkbox-${track.id}`;
+                    radioButton.dataset.trackId = track.id;
+                    radioButton.dataset.title = `${track.title} - ${track.artist.name}`;
+                    radioButton.addEventListener('click', handleRadioClick); // Add a click event listener
+                    listItem.appendChild(radioButton);
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `music-checkbox-${track.id}`;
+                    label.innerHTML = `
+                ${track.title} - ${track.artist.name}
+                <span class="duration">${formatDuration(track.duration)}</span>
+            `;
+                    listItem.appendChild(label);
+
                     musicResultsList.appendChild(listItem);
                 });
             } catch (error) {
@@ -887,8 +1013,41 @@ $UserId = $_SESSION["UserId"];
                     console.error('Proxy response is HTML:', await response.text());
                 }
             }
-
         });
+
+        function handleRadioClick(event) {
+            const selectedMusicTrack = event.target.dataset.trackId;
+            const selectedMusicTitle = event.target.dataset.title;
+            console.log(selectedMusicTrack);
+            console.log(selectedMusicTitle);
+            const deezerURL = 'deezer.php';
+            fetch(`${deezerURL}?query=search?q=${selectedMusicTrack}`)
+                .then(response => response.json())
+                .then(deezerData => {
+                    if (deezerData.preview) {
+                        const audioUrl = deezerData.preview;
+
+                        // Create a temporary link to trigger the download
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = audioUrl;
+                        const audioFileName = `${selectedMusicTitle}.mp3`;
+                        downloadLink.download = audioFileName;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+
+                        alert('Audio download started.');
+                    } else {
+                        alert('Selected music track does not have a valid audio URL.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching music track data:', error);
+                    alert('Error fetching music track data. Please try again later.');
+                });
+        }
+
+
 
         function formatDuration(duration) {
             const minutes = Math.floor(duration / 60);
@@ -909,7 +1068,7 @@ $UserId = $_SESSION["UserId"];
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Display selected videos and photos as a preview
+
             function previewReels(event) {
                 const videos = document.getElementById('videos').files;
                 // const photos = document.getElementById('photos').files;
@@ -922,8 +1081,6 @@ $UserId = $_SESSION["UserId"];
                 // Display videos
                 for (let i = 0; i < videos.length; i++) {
                     // const videoElement = document.createElement('video');
-                    // videoElement.controls = true;
-                    // videoElement.autoplay = true;
                     const previewItem = document.createElement('div');
                     previewItem.className = 'preview-item';
                     previewItems.appendChild(previewItem);
@@ -941,50 +1098,66 @@ $UserId = $_SESSION["UserId"];
 
                         const videoElement = document.createElement('video');
                         videoElement.src = URL.createObjectURL(videoFile);
+                        videoElement.id = "videopre";
+
+                        let isLoadedMetadataHandled = false;
 
                         videoElement.addEventListener('loadedmetadata', () => {
-                            const videoDuration = videoElement.duration;
-                            const videoinmins = videoDuration / 60;
-                            console.log('Video Duration:', videoinmins);
+                            if (!isLoadedMetadataHandled) {
+                                isLoadedMetadataHandled = true;
 
-                            if (videoDuration > 600) {
-                                videoElement.style.display = "none";
-                                const loader = document.createElement('img');
-                                loader.src = 'icons/internet.gif';
-                                loader.classList.add('loader');
-                                previewItems.style.backgroundColor = "white";
-                                previewItem.appendChild(loader);
+                                const videoDuration = videoElement.duration;
+                                const videoinmins = videoDuration / 60;
+                                console.log('Video Duration:', videoinmins);
 
-                                fetch('http://localhost:8888/trimVideo', {
-                                        method: 'POST',
-                                        body: formData,
-                                    })
-                                    .then((response) => {
-                                        if (!response.ok) {
-                                            throw new Error('Error fetching trimmed video data.');
-                                        }
-                                        return response.blob(); // Get the video data as a Blob
-                                    })
-                                    .then((videoBlob) => {
-                                        previewItem.removeChild(loader);
-                                        videoElement.style.display = "block";
-                                        buttons.style.display = "block";
-                                        const trimmedVideoURL = URL.createObjectURL(videoBlob);
-                                        videoElement.src = trimmedVideoURL;
-                                        previewItem.appendChild(videoElement);
-                                        previewItem.style.backgroundColor = "#333";
-                                    })
-                                    .catch((error) => {
-                                        console.error(error);
-                                    });
-                            } else {
-                                videoElement.controls = true;
-                                buttons.style.display = "block";
-                                previewItems.style.backgroundColor = "#333";
-                                previewItem.appendChild(videoElement);
+                                if (videoDuration > 600) {
+                                    videoElement.style.display = "none";
+                                    const loader = document.createElement('img');
+                                    loader.src = 'icons/internet.gif';
+                                    loader.classList.add('loader');
+                                    previewItems.style.backgroundColor = "white";
+                                    previewItem.appendChild(loader);
+
+                                    trimVideo(formData, videoElement, loader, previewItem, previewItems);
+                                } else {
+                                    videoElement.autoplay = true;
+                                    buttons.style.display = "block";
+                                    previewItems.style.backgroundColor = "#333";
+                                    previewItem.appendChild(videoElement);
+                                }
                             }
                         });
-                        // const videoElement = document.querySelector('video');
+
+
+                        function trimVideo(formData, videoElement, loader, previewItem, previewItems) {
+                            fetch('http://localhost:8888/trimVideo', {
+                                    method: 'POST',
+                                    body: formData,
+                                })
+                                .then((response) => {
+                                    if (!response.ok) {
+                                        throw new Error('Error fetching trimmed video data.');
+                                    }
+                                    return response.blob();
+                                })
+                                .then((videoBlob) => {
+                                    previewItem.removeChild(loader);
+                                    loader.style.display = "none";
+                                    buttons.style.display = "block";
+                                    const trimmedVideoURL = URL.createObjectURL(videoBlob);
+                                    videoElement.src = trimmedVideoURL;
+                                    previewItem.appendChild(videoElement);
+                                    // videoElement.controls = true;
+                                    videoElement.autoplay = true;
+                                    videoElement.style.display = "block";
+                                    previewItem.style.backgroundColor = "#333";
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                });
+                            return;
+                        }
+
                         videoElement.addEventListener('click', function() {
                             console.log('clicked');
                             if (videoElement.paused) {

@@ -12,6 +12,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "fs": "^0.0.1-security",
     "nodemon": "^3.0.1",
+    "path": "^0.12.7",
     "simplewebrtc": "^1.19.1",
     "socket.io": "^4.6.1",
     "stream": "^0.0.2",

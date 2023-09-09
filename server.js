@@ -8,8 +8,10 @@ const ffmpeg = require("fluent-ffmpeg");
 ffmpeg.setFfmpegPath(ffmpegPath);
 const cors = require("cors");
 const fs = require("fs");
-const { createWriteStream } = require('fs');
-const { PassThrough } = require('stream');
+const { createWriteStream } = require("fs");
+const { PassThrough } = require("stream");
+const path = require("path");
+
 // Create an Express app
 const app = express();
 
@@ -289,29 +291,29 @@ app.post("/trimVideo", (req, res) => {
   console.log("started");
 
   if (videoFile.mimetype.startsWith("video/")) {
-    const outputStream = new PassThrough();
-    fs.writeFileSync(videoFile.name, videoFile.data);
+    const progressFilePath = "progress.txt";
+    fs.writeFileSync("tempVideo.mp4", videoFile.data);
     const inputFormat = videoFile.name.split(".").pop().toLowerCase();
     console.log("Trimming video...");
     console.log(inputFormat);
     console.log(videoFile.data);
     ffmpeg()
-      .input(videoFile.name)
+      .input("tempVideo.mp4")
       .inputFormat(inputFormat)
       .outputOptions("-t 600")
       .outputFormat("ismv")
       .on("end", () => {
         console.log("Video trimming completed.");
 
-        // Read the trimmed video data from the temporary file
-        const trimmedVideoBuffer = fs.readFileSync(videoFile.name);
+        const trimmedVideoBuffer = fs.readFileSync("trimmed_video.ismv");
 
         // Delete the temporary file
-        fs.unlinkSync(videoFile.name);
+        fs.unlinkSync("tempVideo.mp4");
 
-        res.setHeader("Content-Type", "Video/ismv");
+        res.setHeader("Content-Type", "video/ismv");
         res.setHeader("Content-Length", trimmedVideoBuffer.length);
-        res.send(trimmedVideoBuffer);
+        console.log("Content-Length", trimmedVideoBuffer.length);
+        res.send(trimmedVideoBuffer); // Send the response here
       })
       .on("error", (err, stdout, stderr) => {
         console.error("Error trimming video:", err);
@@ -319,8 +321,108 @@ app.post("/trimVideo", (req, res) => {
         console.error("FFmpeg stderr:", stderr);
         res.status(500).send(`Error trimming the video: ${err.message}`);
       })
+      .on("progress", (progress) => {
+        console.log("trimming-progress", progress);
+      })
+      .save("trimmed_video.ismv");
   } else {
     res.status(400).send("Invalid video file format.");
+  }
+});
+
+app.post("/changeAudio", (req, res) => {
+  console.log("Received a POST request to /change-audio");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  
+  // Access the video and audio files
+  const videoFile = req.files.Video;
+  const audioFile = req.files.MusicTracks;
+  const audioFolderPath = "temp/";
+
+  if (!audioFile || !videoFile) {
+    console.log("Audio or video file missing.");
+    return res.status(400).send("Both audio and video files are required.");
+  }
+
+  console.log("Received video file:", videoFile.name);
+  console.log("Received audio file:", audioFile.name);
+
+  const audioFilePath = path.join(__dirname, audioFolderPath, audioFile.name);
+
+  if (fs.existsSync(audioFilePath)) {
+    // The audio file exists, you can now use it for further processing
+    console.log("Audio file found:", audioFilePath);
+
+    // Read the audio file and save it with a new name
+    fs.readFile(audioFilePath, (err, audioData) => {
+      if (err) {
+        console.error("Error reading audio file:", err);
+      } else {
+        // Save the audio data with a new name
+        const tempMusicPath = "tempMusicTracks.mp3";
+        fs.writeFileSync(tempMusicPath, audioData);
+
+        // Now, proceed with processing the video and overlaying the audio
+        processVideoWithAudio(videoFile, tempMusicPath);
+      }
+    });
+  } else {
+    console.log("Audio file not found:", audioFilePath);
+    return res.status(400).send("Audio file not found.");
+  }
+
+  function processVideoWithAudio(videoFile, audioPath) {
+    console.log("Processing video with audio...");
+    
+    // Define the paths for temporary video and output video
+    const tempVideoPath = "tempVideo.mp4";
+    const outputVideoPath = "trimmed_video.ismv";
+
+    // Save the video data to a temporary file
+    fs.writeFileSync(tempVideoPath, videoFile.data);
+
+    // Check the video file format
+    const inputFormat = videoFile.name.split(".").pop().toLowerCase();
+    if (!videoFile.mimetype.startsWith("video/")) {
+      console.log("Invalid video file format.");
+      return res.status(400).send("Invalid video file format.");
+    }
+
+    // Use FFmpeg to overlay the audio onto the video
+    ffmpeg()
+      .input(tempVideoPath)
+      .input(audioPath)
+      .audioCodec("aac")
+      .outputOptions(['-map 0:v', '-map 1:a', '-c:v copy', '-shortest'])
+      .on("end", () => {
+        console.log("Video audio overlay completed.");
+
+        // Read the edited audio and send it as a response
+        const editedAudio = fs.readFileSync(outputVideoPath);
+
+        // Delete temporary files
+        fs.unlinkSync(tempVideoPath);
+        fs.unlinkSync(audioPath);
+
+        res.setHeader("Content-Type", "video/ismv");
+        res.setHeader("Content-Length", editedAudio.length);
+        console.log("Content-Length", editedAudio.length);
+        res.send(editedAudio); // Send the response here
+      })
+      .on("error", (err, stdout, stderr) => {
+        console.error("Error overlaying audio onto video:", err);
+        console.error("FFmpeg stdout:", stdout);
+        console.error("FFmpeg stderr:", stderr);
+        res.status(500).send(`Error overlaying audio onto the video: ${err.message}`);
+      })
+      .on("progress", (progress) => {
+        console.log("Audio overlay progress", progress);
+      })
+      .save(outputVideoPath);
   }
 });
 
