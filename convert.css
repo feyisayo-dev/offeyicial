@@ -1,0 +1,139 @@
+@font-face {
+    font-family: 'Modern-Age';
+    src: url('fonts/Modern-Age.ttf');
+}
+
+@font-face {
+    font-family: 'Billabong';
+    src: url('fonts/FontsFree-Net-Billabong.ttf');
+}
+
+@font-face {
+    font-family: 'SenjakalaDemoBold';
+    src: url('fonts/SenjakalaDemoBold.ttf');
+}
+
+@font-face {
+    font-family: 'Springlake';
+    src: url('fonts/Springlake.ttf');
+}
+
+@font-face {
+    font-family: 'WisdomVacation';
+    src: url('fonts/WisdomVacation.ttf');
+}
+
+/* Reset some default styles */
+body,
+h1,
+h2,
+p {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica' ! important;
+    background-color: #fff;
+    /* White background */
+    color: #FAF5E9;
+    /* Dark text color */
+}
+
+header {
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    padding: 10px 0;
+    justify-content: center;
+    align-items: center;
+}
+
+header p {
+    font-size: 24px;
+    margin-left: 20px;
+    margin-bottom: 0;
+}
+header img{
+    margin-left: 20px;
+    background-color: #009B4D;
+    border-radius: 50%;
+    margin-top: 5px;
+}
+
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 28px;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+footer {
+    border-radius: 10px;
+    align-items: center;
+    display: flex;
+    position: fixed;
+    justify-content: center;
+    bottom: 0px;
+    width: 100%;
+}
+
+footer p {
+    margin-top: 10px;
+}
+
+.upload-section,
+.pdf-preview {
+    margin-bottom: 20px;
+}
+
+.upload-section input[type="file"] {
+    display: none;
+}
+
+.name {
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#name_of_file {
+    box-shadow: 2px 2px #009B4D;
+}
+
+.compress {
+    margin-bottom: 10px;
+}
+
+.upload-section button {
+    background-color: green;
+    color: #fff;
+    float: right;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.upload-section button:hover {
+    background-color: #009B4D;
+    /* Darker background color on hover */
+}
+
+#pdfContainer {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 300px;
+    background-color: #fff;
+    /* White background for PDF container */
+}

@@ -11,7 +11,9 @@ const fs = require("fs");
 const { createWriteStream } = require("fs");
 const { PassThrough } = require("stream");
 const path = require("path");
-
+const multer = require("multer");
+const { Server } = require("socket.io");
+const sql = require("mssql");
 // Create an Express app
 const app = express();
 
@@ -20,14 +22,46 @@ app.use(cors());
 // Enable parsing of JSON bodies
 app.use(bodyParser.json());
 app.use(fileUpload());
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // Create an HTTP server
 const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+  },
+});
 
 // Create a WebSocket server
 const webSocketServer = new WebSocket({
   httpServer: server,
 });
+
+const config = {
+  user: "offeyicial",
+  password: "1oladejoA",
+  server: "offeyicial",
+  database: "offeyicial",
+  options: {
+    encrypt: true,
+    trustServerCertificate: true,
+  },
+};
+
+// Create a connection pool
+const pool = new sql.ConnectionPool(config);
+
+// Connect to the database
+pool
+  .connect()
+  .then(() => {
+    console.log("Connected to MSSQL database");
+  })
+  .catch((err) => {
+    console.error("Error connecting to MSSQL database:", err);
+  });
 
 // Handle root route
 app.get("/", (req, res) => {
@@ -308,7 +342,7 @@ app.post("/trimVideo", (req, res) => {
         const trimmedVideoBuffer = fs.readFileSync("trimmed_video.ismv");
 
         // Delete the temporary file
-        fs.unlinkSync("tempVideo.mp4");
+        fs.unlinkSync("tempVideo" + Date.now() + ".mp4");
 
         res.setHeader("Content-Type", "video/ismv");
         res.setHeader("Content-Length", trimmedVideoBuffer.length);
@@ -337,21 +371,25 @@ app.post("/changeAudio", (req, res) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
-  
+
   // Access the video and audio files
   const videoFile = req.files.Video;
-  const audioFile = req.files.MusicTracks;
+  const audioFile = req.body.MusicTracks;
   const audioFolderPath = "temp/";
 
+  if (!audioFile) {
+    console.log("Audio");
+    return res.status(400).send("files are required.");
+  }
   if (!audioFile || !videoFile) {
     console.log("Audio or video file missing.");
     return res.status(400).send("Both audio and video files are required.");
   }
 
   console.log("Received video file:", videoFile.name);
-  console.log("Received audio file:", audioFile.name);
+  console.log("Received audio file:", audioFile);
 
-  const audioFilePath = path.join(__dirname, audioFolderPath, audioFile.name);
+  const audioFilePath = path.join(__dirname, audioFolderPath, audioFile);
 
   if (fs.existsSync(audioFilePath)) {
     // The audio file exists, you can now use it for further processing
@@ -363,7 +401,7 @@ app.post("/changeAudio", (req, res) => {
         console.error("Error reading audio file:", err);
       } else {
         // Save the audio data with a new name
-        const tempMusicPath = "tempMusicTracks.mp3";
+        const tempMusicPath = "tempMusicTracks" + Date.now() + ".mp3";
         fs.writeFileSync(tempMusicPath, audioData);
 
         // Now, proceed with processing the video and overlaying the audio
@@ -377,10 +415,10 @@ app.post("/changeAudio", (req, res) => {
 
   function processVideoWithAudio(videoFile, audioPath) {
     console.log("Processing video with audio...");
-    
+
     // Define the paths for temporary video and output video
-    const tempVideoPath = "tempVideo.mp4";
-    const outputVideoPath = "trimmed_video.ismv";
+    const tempVideoPath = "tempVideo" + Date.now() + ".mp4";
+    const outputVideoPath = "trimmed_video" + Date.now() + ".ismv";
 
     // Save the video data to a temporary file
     fs.writeFileSync(tempVideoPath, videoFile.data);
@@ -397,7 +435,7 @@ app.post("/changeAudio", (req, res) => {
       .input(tempVideoPath)
       .input(audioPath)
       .audioCodec("aac")
-      .outputOptions(['-map 0:v', '-map 1:a', '-c:v copy', '-shortest'])
+      .outputOptions(["-map 0:v", "-map 1:a", "-c:v copy", "-shortest"])
       .on("end", () => {
         console.log("Video audio overlay completed.");
 
@@ -411,19 +449,135 @@ app.post("/changeAudio", (req, res) => {
         res.setHeader("Content-Type", "video/ismv");
         res.setHeader("Content-Length", editedAudio.length);
         console.log("Content-Length", editedAudio.length);
-        res.send(editedAudio); // Send the response here
+        res.send(editedAudio);
       })
       .on("error", (err, stdout, stderr) => {
         console.error("Error overlaying audio onto video:", err);
         console.error("FFmpeg stdout:", stdout);
         console.error("FFmpeg stderr:", stderr);
-        res.status(500).send(`Error overlaying audio onto the video: ${err.message}`);
+        res
+          .status(500)
+          .send(`Error overlaying audio onto the video: ${err.message}`);
       })
       .on("progress", (progress) => {
         console.log("Audio overlay progress", progress);
       })
       .save(outputVideoPath);
   }
+});
+
+app.post("/upload", (req, res) => {
+  console.log("Received a POST request to /upload");
+
+  // Enable CORS headers
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+
+  // Check if a file was uploaded
+  if (!req.files.Video) {
+    console.log("No file uploaded.");
+    return res.status(400).send("No file uploaded.");
+  }
+
+  // Access the uploaded file
+  const videoBlob = req.files.Video.data;
+  console.log("Received video buffer:", videoBlob);
+
+  // Generate a unique file name
+  const videoFileName = "reel_" + Date.now() + ".mp4";
+  console.log("Generated file name:", videoFileName);
+
+  // Define the directory where the video will be saved
+  const videoDirectory = "reels";
+
+  // Create the directory if it doesn't exist
+  if (!fs.existsSync(videoDirectory)) {
+    fs.mkdirSync(videoDirectory);
+    console.log("Created directory:", videoDirectory);
+  }
+
+  // Define the full path to save the video
+  const videoFilePath = path.join(__dirname, videoDirectory, videoFileName);
+  console.log("Saving video to:", videoFilePath);
+
+  // Write the video data to the file
+  fs.writeFile(videoFilePath, videoBlob, (err) => {
+    if (err) {
+      console.error("Error saving the video:", err);
+      return res.status(500).send("Error saving the video.");
+    }
+
+    console.log("Video saved as:", videoFilePath);
+    res.status(200).send({
+      message: "Video uploaded successfully.",
+      videoFileName: videoFileName,
+    });
+    console.log("Response sent.");
+  });
+});
+
+async function fetchReelsData() {
+  let poolConnection; // Declare a variable to hold the connection
+
+  try {
+    // Get a connection from the pool
+    poolConnection = await pool.connect();
+
+    // Create a new SQL request using the acquired connection
+    const request = new sql.Request(poolConnection);
+
+    // Execute a query to select all records from the "reels" table
+    const result = await request.query("SELECT * FROM reels");
+
+    // Map the database results to the desired format (array of objects)
+    const reelsData = result.recordset.map((record) => ({
+      UserId: record.UserId,
+      reelId: record.reelId,
+      Video: record.Video,
+      audioFileNames: record.audioFileNames,
+      caption: record.caption,
+      visibility: record.visibility,
+      comment: record.comment,
+      download: record.download,
+      like: record.like,
+      date_posted: record.date_posted,
+    }));
+
+    // Log the retrieved data
+    console.log("Retrieved reels data:", reelsData);
+
+    return reelsData;
+  } catch (error) {
+    console.error("Error fetching reels data:", error);
+    throw error;
+  } finally {
+    // Release the acquired connection back to the pool
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+// Socket.IO event handler
+io.on("connection", (socket) => {
+  const { UserId } = socket.handshake.query;
+  console.log("User on reels connected:" + UserId);
+
+  // Call the fetchReelsData() function to retrieve the data
+  fetchReelsData()
+    .then((reelsData) => {
+      io.emit("reels", reelsData);
+    })
+    .catch((error) => {
+      console.error("Error handling Socket.IO connection:", error);
+    });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
 });
 
 // Start the server

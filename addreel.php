@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:8080"); // Replace with your frontend domain
+header("Access-Control-Allow-Origin: http://localhost:8080");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
@@ -25,7 +25,6 @@ $UserId = $_SESSION["UserId"];
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
     <script src="js/popper.min.js"></script>
-    <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 
     <title>Add Reels</title>
@@ -293,6 +292,7 @@ $UserId = $_SESSION["UserId"];
         }
 
         .audio-upload-box {
+            margin-top: 20px;
             border: 2px dashed #ccc;
             padding: 20px;
             text-align: center;
@@ -308,6 +308,7 @@ $UserId = $_SESSION["UserId"];
         }
 
         .audio-search-box {
+            margin-top: 20px;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -577,6 +578,14 @@ $UserId = $_SESSION["UserId"];
         .audiobox {
             margin-top: 30px;
         }
+
+        .play-pause-button {
+            border: none;
+        }
+
+        .play-pause-button:focus-visible {
+            border: none;
+        }
     </style>
 </head>
 
@@ -618,7 +627,7 @@ $UserId = $_SESSION["UserId"];
             <div class="details_box">
                 <div class="caption_text">
                     <label class="capt" for="caption">Caption:</label>
-                    <input type="text" class="form-control" placeholder="Enter your beautiful caption">
+                    <input type="text" id="caption" class="form-control" placeholder="Enter your beautiful caption">
                 </div>
                 <div class="row">
                     <div class="publicity">
@@ -650,30 +659,30 @@ $UserId = $_SESSION["UserId"];
                 <div class="preview-container">
                     <h3>Reels Preview</h3>
                     <div class="preview-items">
-                        <div class="buttons">
-                            <div class="buttons__button">
-                                <span data-bs-toggle="modal" data-bs-target="#musicpicker" class="material-icons"><img src="icons/music.png">
-                                    <p>Music</p>
-                                </span>
-                            </div>
+                    </div>
+                    <div class="buttons">
+                        <div class="buttons__button">
+                            <span data-bs-toggle="modal" data-bs-target="#musicpicker" class="material-icons"><img src="icons/music.png">
+                                <p>Music</p>
+                            </span>
+                        </div>
 
-                            <div class="buttons__button">
-                                <span class="material-icons mute"><img src="icons/mute.png">
-                                    <p>Mute</p>
-                                </span>
-                            </div>
+                        <div class="buttons__button">
+                            <span class="material-icons mute"><img src="icons/mute.png">
+                                <p>Mute</p>
+                            </span>
+                        </div>
 
-                            <div class="buttons__button">
-                                <span class="material-icons timer"><img src="icons/timer.png">
-                                    <p>Speed</p>
-                                </span>
-                            </div>
+                        <div class="buttons__button">
+                            <span class="material-icons timer"><img src="icons/timer.png">
+                                <p>Speed</p>
+                            </span>
+                        </div>
 
-                            <div class="buttons__button">
-                                <span class="material-icons flip"><img src="icons/refresh.png">
-                                    <p>flip</p>
-                                </span>
-                            </div>
+                        <div class="buttons__button">
+                            <span class="material-icons flip"><img src="icons/refresh.png">
+                                <p>flip</p>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -727,12 +736,13 @@ $UserId = $_SESSION["UserId"];
                             <div class="audio-search-results">
                                 <!-- Table for displaying search results goes here -->
                                 <?php
-                                $audioFolder = 'audio_music'; // Folder containing audio files
+                                $audioFolder = 'temp'; // Folder containing audio files
                                 $audioFiles = scandir($audioFolder);
                                 ?>
                                 <table>
                                     <thead>
                                         <tr>
+                                            <th>Pick</th>
                                             <th>Audio Name</th>
                                             <th>Play</th>
                                         </tr>
@@ -742,21 +752,28 @@ $UserId = $_SESSION["UserId"];
                                         foreach ($audioFiles as $file) {
                                             if ($file !== '.' && $file !== '..') {
                                                 echo '<tr>';
+                                                echo '<td><input type="radio" name="selectedAudio" value="' . $file . '"></td>';
                                                 echo '<td>' . $file . '</td>';
-                                                echo '<td><audio controls><source src="' . $audioFolder . '/' . $file . '" type="audio/mpeg"></audio></td>';
+                                                echo '<td>';
+                                                echo '<audio id="audio-' . $file . '">';
+                                                echo '<source src="' . $audioFolder . '/' . $file . '" type="audio/mpeg">';
+                                                echo '</audio>';
+                                                echo '<button class="play-pause-button" id="play-pause-button-' . $file . '" onclick="setupAudioControls(\'' . $file . '\')"><img width="30px" height="30" src="icons/play.png"></button>';
+                                                echo '</td>';
                                                 echo '</tr>';
                                             }
                                         }
                                         ?>
                                     </tbody>
                                 </table>
+                                <button type="button" id="server-audio-button" class="btn btn-secondary">Pick</button>
                             </div>
                         </div>
 
                         <div class="tab-pane fade" id="server" role="tabpanel" aria-labelledby="server-tab">
                             <input type="text" id="music-search-input" placeholder="Search for music...">
                             <ul id="music-results" class="music-results"></ul>
-                            <button type="button" id="replace-audio-button" class="btn btn-secondary" data-bs-dismiss="modal">Pick</button>
+                            <button type="button" id="replace-audio-button" class="btn btn-secondary">Pick</button>
                         </div>
 
                     </div>
@@ -854,34 +871,78 @@ $UserId = $_SESSION["UserId"];
             // Update the label text with the count of selected users
             const selectedGroupLabel = document.querySelector('.people');
             const count = selectedUsers.length;
-            selectedGroupLabel.textContent = `A selected group of people (${count})`;
+            selectedGroupLabel.textContent = `A selected set of people (${count})`;
 
             // Do something with selectedUsers, like sending the video to them
         });
     </script>
 
 
-    <!-- <script>
-       
-    </script> -->
+    <script>
+        function setupAudioControls(fileName) {
+            console.log(fileName);
+            const audioElement = document.getElementById('audio-' + fileName);
+            const playPauseButton = document.getElementById('play-pause-button-' + fileName);
+
+            playPauseButton.addEventListener('click', function() {
+                if (audioElement.paused) {
+                    audioElement.play();
+                } else {
+                    audioElement.pause();
+                }
+                updatePlayPauseButtonState();
+            });
+
+            updatePlayPauseButtonState();
+
+            function updatePlayPauseButtonState() {
+                if (audioElement.paused) {
+                    playPauseButton.innerHTML = '<img width="30px" height="30px" src="icons/play.png">';
+                } else {
+                    playPauseButton.innerHTML = '<img width="30px" height="30px" src="icons/pause.png">';
+                }
+            }
+        }
+
+        document.getElementById('server-audio-button').addEventListener('click', function() {
+            const selectedRadio = document.querySelector('input[name="selectedAudio"]:checked');
+            const audioSearchResults = document.querySelector('.audio-search-results');
+            const search = document.getElementById('search');
+
+            if (selectedRadio) {
+                const selectedFileName = selectedRadio.value;
+                console.log('Selected file name:', selectedFileName);
+                replaceAudio(selectedFileName);
+                audioSearchResults.style.display = "none";
+                const loader = document.createElement('img');
+                loader.src = 'icons/internet.gif';
+                loader.classList.add('loader');
+                search.appendChild(loader);
+            } else {
+                console.log('No audio file selected.');
+            }
+        });
+    </script>
 
 
     <script>
+        let audioFileNames = [];
+
         function replaceAudio(audioFileName) {
             const videoInput = document.getElementById('videos');
             const videopre = document.getElementById('videopre');
             const videoFile = videoInput.files[0];
-            // console.log(audioFileName);
+            console.log(audioFileName);
 
             const formData = new FormData();
             formData.append('Video', videoFile);
             formData.append('MusicTracks', audioFileName);
+            audioFileNames = [];
 
             fetch('http://localhost:8888/changeAudio', {
                     method: 'POST',
                     body: formData,
                 })
-
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error('Error fetching trimmed video data.');
@@ -893,11 +954,14 @@ $UserId = $_SESSION["UserId"];
                     const trimmedVideoURL = URL.createObjectURL(videoBlob);
                     videopre.src = trimmedVideoURL;
                     alert('Audio replacement completed successfully.');
+
+                    audioFileNames.push(audioFileName);
                 })
                 .catch((error) => {
                     console.error(error);
                 });
         }
+
 
         //Local Music
         const audioInput = document.getElementById('audio-input');
@@ -956,7 +1020,8 @@ $UserId = $_SESSION["UserId"];
                     const audioFileName = audioInput.files[i];
                     console.log("Audio file:", audioFileName);
                     console.log(" - mimeType:", audioFileName.type);
-                    replaceAudio(audioFileName);
+                    console.log(" - name:", audioFileName.name);
+                    replaceAudio(audioFileName.name);
                 });
             }
         }
@@ -964,9 +1029,30 @@ $UserId = $_SESSION["UserId"];
         audioInput.addEventListener('change', previewMusic);
 
         //DEEZER Music
+        // function moveAudioToTempFolder(audioFileName) {
+        //     const formData = new FormData();
+        //     formData.append('audio', audioFileName); // Use the selected audio file name
+        //     fetch('move_music.php', {
+        //             method: 'POST',
+        //             body: formData,
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 alert('Audio moved to temp folder successfully.');
+        //             } else {
+        //                 alert('Error moving audio to temp folder.');
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //         });
+        // }
 
         const musicSearchInput = document.getElementById('music-search-input');
         const musicResultsList = document.getElementById('music-results');
+        const replaceAudioButton = document.getElementById('replace-audio-button');
+        const server = document.getElementById('server');
 
         musicSearchInput.addEventListener('keyup', async function(event) {
             const searchQuery = event.target.value;
@@ -1020,40 +1106,153 @@ $UserId = $_SESSION["UserId"];
             const selectedMusicTitle = event.target.dataset.title;
             console.log(selectedMusicTrack);
             console.log(selectedMusicTitle);
+
+            // Extract audioFileName from selectedMusicTitle
+            const audioFileName = `${selectedMusicTitle}.mp3`;
+            console.log(audioFileName);
+
             const deezerURL = 'deezer.php';
-            fetch(`${deezerURL}?query=search?q=${selectedMusicTrack}`)
+            fetch(`${deezerURL}?query=${selectedMusicTrack}`)
                 .then(response => response.json())
                 .then(deezerData => {
                     if (deezerData.preview) {
                         const audioUrl = deezerData.preview;
+                        console.log(audioUrl);
 
-                        // Create a temporary link to trigger the download
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = audioUrl;
-                        const audioFileName = `${selectedMusicTitle}.mp3`;
-                        downloadLink.download = audioFileName;
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
+                        const formData = new FormData();
+                        formData.append('audioUrl', audioUrl);
+                        formData.append('audioFileName', audioFileName);
 
-                        alert('Audio download started.');
+                        fetch('send.php?audioUrl=' + encodeURIComponent(audioUrl), {
+                                method: 'POST',
+                                body: formData,
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log('Audio saved to the server.');
+                                } else {
+                                    alert('Error saving audio.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+
+                        replaceAudioButton.addEventListener('click', () => {
+                            musicResultsList.style.display = "none";
+                            const loader = document.createElement('img');
+                            loader.src = 'icons/internet.gif';
+                            loader.classList.add('loader');
+                            server.appendChild(loader);
+                            const files = new FormData();
+                            var audioFileNameedit = audioFileName.replace(/ /g, '_');
+                            files.append('audioFileName', audioFileNameedit);
+
+                            fetch('get_file.php?audioFileName=' + encodeURIComponent(audioFileNameedit), {
+                                    method: 'POST',
+                                    body: files,
+                                })
+                                .then(response => response.blob()) // Read the response as a Blob
+                                .then(blob => {
+                                    console.log(blob);
+                                    const audioBlobUrl = blob;
+                                    var audioFileNameedit = audioFileName.replace(/ /g, '_');
+                                    replaceAudio(audioFileNameedit);
+
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                });
+                        });
                     } else {
-                        alert('Selected music track does not have a valid audio URL.');
+                        console.log('Selected music track does not have a valid audio URL.');
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching music track data:', error);
                     alert('Error fetching music track data. Please try again later.');
                 });
+
+
         }
-
-
 
         function formatDuration(duration) {
             const minutes = Math.floor(duration / 60);
             const seconds = duration % 60;
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
+
+        $(document).ready(function() {
+            $('.Submit').click(async function() {
+                const videos = document.getElementById('videopre');
+                const videoBlob = await fetch(videos.src).then(response => response.blob());
+                const videoFile = videos.files;
+                console.log(videoBlob);
+                const blob = new FormData();
+                blob.append('Video', videoBlob, 'video.mp4');
+                try {
+                    const response = await fetch('http://localhost:8888/upload', {
+                        method: 'POST',
+                        body: blob,
+                    });
+
+                    if (response.ok) {
+                        console.log(response);
+                        const responseData = await response.json();
+                        const videoFileName = responseData.videoFileName;
+                        console.log('Video uploaded successfully.');
+                        const caption = $('#caption').val();
+                        const visibility = $('#public').val();
+                        const canComment = $('#commentcheckboxes').is(':checked');
+                        const canDownload = $('#downloadcheckboxes').is(':checked');
+                        const canLike = $('#likecheckboxes').is(':checked');
+                        console.log(videoBlob);
+                        console.log(canComment);
+                        console.log(canDownload);
+                        if (videos && caption !== "" && visibility !== "" && canComment !== "" && canDownload !== "" && canLike !== "") {
+                            const formData = new FormData();
+                            formData.append('VideoBlob', videoFileName);
+                            formData.append('Caption', caption);
+                            formData.append('Visibility', visibility);
+                            formData.append('CanComment', canComment);
+                            formData.append('CanDownload', canDownload);
+                            formData.append('CanLike', canLike);
+                            formData.append('AudioFileNames', audioFileNames);
+
+
+                            $.ajax({
+                                url: 'add_reel.php',
+                                dataType: 'text',
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                data: formData,
+                                type: 'POST',
+                                success: function(response) {
+                                    console.log(response);
+                                    if (response === "success") {
+                                        console.log("Reel added successfully");
+                                        alert("Reel added successfully");
+                                        // window.location.href = "reel.php";
+                                    } else {
+                                        console.log("Error adding reel: " + response);
+                                        alert("Error adding reel: " + response);
+                                        $('#videos').val('');
+                                    }
+                                }
+                            });
+                        } else {
+                            alert("FILL IN ALL");
+                        }
+                    } else {
+                        console.error('Failed to upload video.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
     </script>
     <script>
         // Get references to the buttons
@@ -1076,7 +1275,7 @@ $UserId = $_SESSION["UserId"];
                 const buttons = document.querySelector('.buttons');
 
                 // Clear previous previews
-                // previewItems.innerHTML = '';
+                previewItems.innerHTML = '';
 
                 // Display videos
                 for (let i = 0; i < videos.length; i++) {
@@ -1084,6 +1283,7 @@ $UserId = $_SESSION["UserId"];
                     const previewItem = document.createElement('div');
                     previewItem.className = 'preview-item';
                     previewItems.appendChild(previewItem);
+                    let isLoadedMetadataHandled = true;
 
                     const formData = new FormData();
 
@@ -1093,16 +1293,16 @@ $UserId = $_SESSION["UserId"];
                         const videoFile = videoInput.files[0];
                         console.log('VideoFile:', videoFile);
                         console.log('Uploaded file mimetype:', videoFile.type);
-
                         formData.append('Video', videoFile);
 
                         const videoElement = document.createElement('video');
                         videoElement.src = URL.createObjectURL(videoFile);
                         videoElement.id = "videopre";
+                        isLoadedMetadataHandled = false;
 
-                        let isLoadedMetadataHandled = false;
 
                         videoElement.addEventListener('loadedmetadata', () => {
+
                             if (!isLoadedMetadataHandled) {
                                 isLoadedMetadataHandled = true;
 
@@ -1167,7 +1367,7 @@ $UserId = $_SESSION["UserId"];
                             }
                         });
                         // Mute Button
-                        const muteButton = previewItems.querySelector('.mute');
+                        const muteButton = document.querySelector('.mute');
                         muteButton.addEventListener('click', function() {
                             if (videoElement.muted) {
                                 videoElement.muted = false;
@@ -1178,8 +1378,8 @@ $UserId = $_SESSION["UserId"];
                             }
                         });
 
-                        const flipButton = previewItems.querySelector('.flip');
-                        let flipState = 0; // 0: Original, 1: Flip horizontally, 2: Flip vertically, 3: Flip both
+                        const flipButton = document.querySelector('.flip');
+                        let flipState = 0;
                         flipButton.addEventListener('click', function() {
                             flipState = (flipState + 1) % 4;
 
@@ -1194,8 +1394,7 @@ $UserId = $_SESSION["UserId"];
                             }
                         });
 
-                        // Timer Button
-                        const timerButton = previewItems.querySelector('.timer');
+                        const timerButton = document.querySelector('.timer');
                         let playbackRate = 1;
                         timerButton.addEventListener('click', function() {
                             if (playbackRate === 1) {
@@ -1234,35 +1433,9 @@ $UserId = $_SESSION["UserId"];
             window.location.href = "login.php";
         }
     </script>
-    <script>
-        $(document).ready(function() {
-            $('.Submit').click(function() {
-                var videos = $('#videos').prop('files');
-
-                $.ajax({
-                    url: 'add_reel.php', // point to server-side PHP script 
-                    dataType: 'text', // what to expect back from the PHP script
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    data: form_data,
-                    type: 'post',
-                    success: function(response) {
-                        if (response === "success") {
-                            console.log("reel added successfully");
-                            alert("reel added successfully");
-                            window.location.href = "index.php";
-                        } else {
-                            console.log("Error adding reel: " + response);
-                            alert("Error adding reel: " + response);
-                            $('#photos').val('');
-                            $('#videos').val('');
-                        }
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- <script>
+       
+    </script> -->
 </body>
 
 </html>
