@@ -1031,13 +1031,19 @@ if (sqlsrv_execute($stmt)) {
       background-color: transparent;
     }
 
+    .emoji img {
+      width: 24px;
+      height: 24px;
+    }
+
     .emoji:hover {
-      background-color: green;
+      background-color: aliceblue;
       border: none;
+      transform: scaleX(1.05);
     }
 
     .emoji:focus {
-      background-color: green;
+      background-color: aliceblue;
       border: none;
     }
 
@@ -1435,9 +1441,27 @@ if (sqlsrv_execute($stmt)) {
       background-color: white;
       transform: scaleX(1.05);
     }
-    .close{
+
+    .close {
       background-color: transparent;
       border: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      background-color: #fafafa;
+      border-radius: 8px;
+      padding: 5px;
+    }
+
+    .header i {
+      color: #8e8e8e;
+      margin-right: 5px;
+    }
+
+    .custom-file input {
+      display: none;
     }
   </style>
 
@@ -1526,10 +1550,10 @@ if (sqlsrv_execute($stmt)) {
           <div class="input-group">
             <input class="form-control addnewpost" type="text" id="addnewpost" placeholder="Add New Post" title="Add New Post">
             <div class="input-group-append">
-              <button class="btn btn-outline-primary" type="button">
+              <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#imagesmodal">
                 <i class="bi bi-camera"></i>
               </button>
-              <button class="btn btn-outline-primary" type="button">
+              <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#videosmodal">
                 <i class="bi bi-film"></i>
               </button>
               <button class="btn btn-primary" id="postButton" type="button">Post</button>
@@ -1686,8 +1710,64 @@ if (sqlsrv_execute($stmt)) {
       </div>
     </div>
   </div>
+
+  <!-- //images modal -->
+  <div class="modal fade" id="imagesmodal" tabindex="-1" role="dialog" aria-labelledby="searchforLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="header">
+            <i class="bi bi-camera-fill"></i>
+            Upload your images
+          </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><img width="40" height="40" src="icons/close.png" class="icon" alt=""></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="image" name="image" accept="image/*" multiple>
+            <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Images</label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- //videos modal -->
+  <div class="modal fade" id="videosmodal" tabindex="-1" role="dialog" aria-labelledby="searchforLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="header">
+            <i class="bi bi-camera-reels-fill"></i>
+            Upload your videos
+          </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><img width="40" height="40" src="icons/close.png" class="icon" alt=""></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="video" name="video" accept="video/*" multiple>
+            <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="js/jquery.min.js"></script>
   <script src="js/owl.carousel.min.js"></script>
+  <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
   <script src="js/sweetalert2@10.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -1734,329 +1814,359 @@ if (sqlsrv_execute($stmt)) {
   </script>
 
   <script>
-    function loadNewsFeed() {
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            console.log('Response:', xhr.responseText);
-            var newsFeed = document.getElementById('newsFeed');
-            newsFeed.innerHTML = '';
+    var UserId = "<?php echo $_SESSION['UserId']; ?>";
+    var socketUrl = 'ws://localhost:8888';
+    const socket = io(socketUrl, {
+      query: {
+        UserId
+      }
+    });
 
-            response.posts.forEach(function(post) {
-              var postElement = document.createElement('section');
-              var postDiv = document.createElement('div');
-              postDiv.className = 'post';
+    socket.on('connect', () => {
+      console.log('Socket.IO connection established');
+    });
 
-              var newsFeedPostDiv = document.createElement('div');
-              newsFeedPostDiv.className = 'news-feed-post';
+    socket.on('posts', (data) => {
+      data.forEach((transformedData, index) => {
+        console.log(`Received reels data #${index + 1}:`);
+        console.log('UserId:', transformedData.UserId);
+        console.log('surname:', transformedData.surname);
+        console.log('firstName:', transformedData.firstName);
+        console.log('passport:', transformedData.passport);
+        console.log('postId:', transformedData.postId);
+        console.log('image:', transformedData.image);
+        console.log('video:', transformedData.video);
+        console.log('title:', transformedData.title);
+        console.log('content:', transformedData.content);
+        console.log('timeAgo:', transformedData.timeAgo);
+        console.log('likes:', transformedData.likes);
+        console.log('isLiking:', transformedData.isLiking);
 
-              var postHeaderDiv = document.createElement('div');
-              postHeaderDiv.className = 'post-header';
+        loadNewsFeed(transformedData);
+      });
+    });
 
-              var userPassportImg = document.createElement('img');
-              userPassportImg.className = 'UserPassport';
-              userPassportImg.src = post.passport;
+    function likepost(postId, UserId) {
+      const formData = new FormData();
+      formData.append('UserId', UserId);
+      formData.append('postId', postId);
 
-              var authorLink = document.createElement('a');
-              authorLink.href = 'user_profile.php?UserId=' + post.UserId;
-              authorLink.style.textDecoration = 'none';
-
-              var authorNameP = document.createElement('p');
-              authorNameP.className = 'post-author';
-              authorNameP.innerHTML = '<strong>' + post.surname + ' ' + post.firstName + '</strong>';
-
-              authorLink.appendChild(authorNameP);
-              postHeaderDiv.appendChild(userPassportImg);
-              postHeaderDiv.appendChild(authorLink);
-
-              var threeDotsDiv = document.createElement('div');
-              threeDotsDiv.id = 'threedots';
-
-              var dropdownButton = document.createElement('button');
-              dropdownButton.type = 'button';
-              dropdownButton.className = 'btn btn-link';
-              dropdownButton.dataset.bsToggle = 'dropdown';
-              dropdownButton.setAttribute('aria-haspopup', 'true');
-              dropdownButton.setAttribute('aria-expanded', 'false');
-              dropdownButton.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
-
-              var dropdownMenu = document.createElement('div');
-              dropdownMenu.className = 'dropdown-menu dropdown-menu-right';
-
-              var blockUserDiv = document.createElement('div');
-              var blockUserButton = document.createElement('button');
-              blockUserButton.type = 'button';
-              blockUserButton.className = 'btn btn-primary blockUser';
-              blockUserButton.id = 'blockUser-' + post.UserId;
-              blockUserButton.dataset.recipientid = post.UserId;
-              blockUserButton.dataset.bsToggle = 'modal';
-              blockUserButton.dataset.bsTarget = '#blockUserModal-' + post.UserId;
-              blockUserButton.innerHTML = 'Block User';
-
-              var blockUserInput = document.createElement('input');
-              blockUserInput.type = 'hidden';
-              blockUserInput.id = 'bu' + post.UserId;
-              blockUserInput.value = post.UserId;
-
-              blockUserDiv.appendChild(blockUserButton);
-              blockUserDiv.appendChild(blockUserInput);
-
-              var blockButtonDiv = document.createElement('div');
-              var blockButtonButton = document.createElement('button');
-              blockButtonButton.type = 'button';
-              blockButtonButton.className = 'btn btn-primary blockButton';
-              blockButtonButton.id = 'blockButton-' + post.postId;
-              blockButtonButton.dataset.postid = post.postId;
-              blockButtonButton.dataset.bsToggle = 'modal';
-              blockButtonButton.dataset.bsTarget = '#blockTypeofPostModal-' + post.postId;
-              blockButtonButton.innerHTML = 'Block this type of post';
-
-              var blockButtonInput = document.createElement('input');
-              blockButtonInput.type = 'hidden';
-              blockButtonInput.id = 'b' + post.postId;
-              blockButtonInput.value = post.postId;
-
-              blockButtonDiv.appendChild(blockButtonButton);
-              blockButtonDiv.appendChild(blockButtonInput);
-
-              dropdownMenu.appendChild(blockUserDiv);
-              dropdownMenu.appendChild(blockButtonDiv);
-              dropdownMenu.innerHTML += '<a class="dropdown-item" href="#">Report user</a>' +
-                '<a class="dropdown-item" href="#">Repost post</a>';
-
-              threeDotsDiv.appendChild(dropdownButton);
-              threeDotsDiv.appendChild(dropdownMenu);
-
-              // Update the code to handle images and videos directly without carouselItems
-              // Create a div for the post media
-              var postMediaDiv = document.createElement('div');
-              postMediaDiv.className = 'post-media';
-
-              // Check if the post has an image
-              if (post.image !== null && post.image !== '') {
-                var postItem = document.createElement('div');
-                postItem.className = 'post-item';
-                var image = document.createElement('img');
-                image.className = 'post-image';
-                image.src = post.image;
-                postItem.appendChild(image);
-                postMediaDiv.appendChild(postItem);
-              }
-
-              // Check if the post has a video
-              if (post.video !== null && post.video !== '') {
-                var postItem = document.createElement('div');
-                postItem.className = 'post-item';
-                var videoContainer = document.createElement('div');
-                videoContainer.className = 'post-video';
-                var video = document.createElement('video');
-                video.setAttribute('data-my-Video-id', post.postId);
-                video.id = 'myVideo-' + post.postId;
-                video.className = 'w-100';
-                var source = document.createElement('source');
-                source.src = post.video;
-                source.type = 'video/mp4';
-                video.appendChild(source);
-                videoContainer.appendChild(video);
-                // videoContainer.innerHTML += 'Your browser does not support the video tag.';
-                var videoControls = document.createElement('div');
-                videoControls.className = 'video-controls';
-                var rewindButton = document.createElement('button');
-                rewindButton.id = 'rewindButton-' + post.postId;
-                rewindButton.onclick = function() {
-                  rewind(post.postId);
-                };
-                rewindButton.innerHTML = '<i class="bi bi-rewind"></i>';
-                videoControls.appendChild(rewindButton);
-                var playPauseButton = document.createElement('button');
-                playPauseButton.onclick = function() {
-                  togglePlayPause(post.postId);
-                };
-                playPauseButton.innerHTML = '<span id="playPauseButton-' + post.postId + '"><i class="bi bi-play"></i></span>';
-                videoControls.appendChild(playPauseButton);
-                var fastForwardButton = document.createElement('button');
-                fastForwardButton.id = 'fastForwardButton-' + post.postId;
-                fastForwardButton.onclick = function() {
-                  fastForward(post.postId);
-                };
-                fastForwardButton.innerHTML = '<i class="bi bi-fast-forward"></i>';
-                videoControls.appendChild(fastForwardButton);
-                var volumeControl = document.createElement('div');
-                volumeControl.className = 'volume-control';
-                var volumeRange = document.createElement('input');
-                volumeRange.type = 'range';
-                volumeRange.id = 'volumeRange-' + post.postId;
-                volumeRange.min = '0';
-                volumeRange.max = '1';
-                volumeRange.step = '0.01';
-                volumeRange.value = '1';
-                volumeRange.onchange = function() {
-                  setVolume(post.postId);
-                };
-                volumeControl.appendChild(volumeRange);
-                videoControls.appendChild(volumeControl);
-                var timeControl = document.createElement('div');
-                timeControl.className = 'time-control';
-                var timeRange = document.createElement('input');
-                timeRange.type = 'range';
-                timeRange.id = 'timeRange-' + post.postId;
-                timeRange.min = '0';
-                timeRange.step = '0.01';
-                timeRange.value = '0';
-                timeRange.onchange = function() {
-                  setCurrentTime(post.postId);
-                };
-                timeControl.appendChild(timeRange);
-                var timeDisplay = document.createElement('div');
-                timeDisplay.className = 'time-display';
-                var currentTimeDisplay = document.createElement('div');
-                currentTimeDisplay.className = 'currentTimeDisplay';
-                currentTimeDisplay.id = 'currentTimeDisplay-' + post.postId;
-                currentTimeDisplay.innerHTML = '0:00';
-                timeDisplay.appendChild(currentTimeDisplay);
-                timeDisplay.innerHTML += '<div class="slash">/</div>';
-                var durationDisplay = document.createElement('div');
-                durationDisplay.className = 'durationDisplay';
-                durationDisplay.id = 'durationDisplay-' + post.postId;
-                durationDisplay.innerHTML = '0:00';
-                timeDisplay.appendChild(durationDisplay);
-                timeControl.appendChild(timeDisplay);
-                videoControls.appendChild(timeControl);
-                videoContainer.appendChild(videoControls);
-                postItem.appendChild(videoContainer);
-                postMediaDiv.appendChild(postItem);
-
-                // Create the Previous and Next buttons
-                var previousButton = document.createElement('button');
-                previousButton.className = 'previous-button';
-                previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
-
-                var nextButton = document.createElement('button');
-                nextButton.className = 'next-button';
-                nextButton.innerHTML = '<i class="bi bi-arrow-right"></i>';
-
-                var button = document.createElement('div');
-                button.className = 'button';
-
-                // Append the Previous and Next buttons to the postMediaDiv
-                button.appendChild(previousButton);
-                button.appendChild(nextButton);
-                postMediaDiv.appendChild(button);
-
-                // Get all the post items
-                var postItems = postMediaDiv.getElementsByClassName('post-item');
-                var currentIndex = 0; // Track the current index of the post item
-
-                // Add click event listeners to scroll to the previous and next post items
-                previousButton.addEventListener('click', function() {
-                  if (currentIndex > 0) {
-                    postItems[currentIndex].style.display = 'none'; // Hide the current post item
-                    currentIndex--; // Decrement the current index
-                    postItems[currentIndex].style.display = 'block'; // Show the previous post item
-                    postItems[currentIndex].scrollIntoView({
-                      behavior: 'smooth'
-                    }); // Scroll to the previous post item
-                  }
-                });
-
-                nextButton.addEventListener('click', function() {
-                  if (currentIndex < postItems.length - 1) {
-                    postItems[currentIndex].style.display = 'none'; // Hide the current post item
-                    currentIndex++; // Increment the current index
-                    postItems[currentIndex].style.display = 'block'; // Show the next post item
-                    postItems[currentIndex].scrollIntoView({
-                      behavior: 'smooth'
-                    }); // Scroll to the next post item
-                  }
-                });
-              }
-
-              // Hide all media elements except the first one
-              var mediaItems = postMediaDiv.getElementsByClassName('post-item');
-              console.log(mediaItems.length);
-              for (var i = 1; i < mediaItems.length; i++) {
-                mediaItems[i].style.display = 'none';
-              }
-
-              // Append the post media div before the post content
-              // newsFeedPostDiv.insertBefore(postMediaDiv, postContentDiv);
-
-              var postContentDiv = document.createElement('div');
-              postContentDiv.className = 'post-content';
-              postContentDiv.textContent = post.content;
-
-              var postDateDiv = document.createElement('div');
-              postDateDiv.className = 'post-date';
-              postDateDiv.textContent = post.timeAgo;
-
-              var footerDiv = document.createElement('div');
-              footerDiv.className = 'footer';
-
-              var likeButton = document.createElement('button');
-              likeButton.type = 'button';
-              likeButton.className = 'btn btn-primary like ' + (post.isLiking ? 'likeing' : 'unlike');
-              likeButton.dataset.postid = post.postId;
-              likeButton.innerHTML = '<span class="like-count">' + post.likes + '</span>' +
-                '<span class="emoji">&#x2764;</span>' +
-                (post.isLiking ? 'Unlike' : 'Like');
-
-              var shareButton = document.createElement('button');
-              shareButton.type = 'button';
-              shareButton.className = 'btn btn-primary share-button';
-              shareButton.dataset.postid = post.postId;
-              shareButton.innerHTML = '<i class="bi bi-share"></i> Share';
-
-              var commentButton = document.createElement('button');
-              commentButton.type = 'button';
-              commentButton.className = 'btn btn-primary comment-button';
-              commentButton.dataset.postid = post.postId;
-              commentButton.innerHTML = '<i class="bi bi-chat-dots"></i> Comment';
-
-              footerDiv.appendChild(likeButton);
-              footerDiv.appendChild(shareButton);
-              footerDiv.appendChild(commentButton);
-
-              postDiv.appendChild(newsFeedPostDiv);
-              newsFeedPostDiv.appendChild(postHeaderDiv);
-              postHeaderDiv.appendChild(threeDotsDiv);
-              var postTitleDiv = document.createElement('div');
-              postTitleDiv.className = 'post-title';
-
-              var postTitleH2 = document.createElement('h2');
-              postTitleH2.textContent = post.title;
-
-              postTitleDiv.appendChild(postTitleH2);
-              postDiv.appendChild(postTitleDiv);
-              // Append the post media div to the post div
-              postDiv.appendChild(postMediaDiv);
-              postDiv.appendChild(postContentDiv);
-              postDiv.appendChild(postDateDiv);
-              postDiv.appendChild(footerDiv);
-              postElement.appendChild(postDiv);
-
-              newsFeed.appendChild(postElement);
-            });
-            $('.owl-carousel').owlCarousel({
-              items: 1,
-              loop: true,
-              nav: true,
-              dots: false,
-              navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
-            })
-          } else {
-            console.log('Error: ' + xhr.status);
+      fetch('http://localhost:8888/likepost', {
+          method: 'POST',
+          body: formData,
+        })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Error liking/unliking post');
           }
-        }
-      };
-
-      xhr.open('GET', 'get_posts.php', true);
-      xhr.send();
+          return response.json();
+        })
+        .then((result) => {
+          console.log('post has been liked') 
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
 
-    // Load initial news feed
-    loadNewsFeed();
+    function loadNewsFeed(data) {
+      var postElement = document.createElement('section');
+      var postDiv = document.createElement('div');
+      postDiv.className = 'post';
+
+      var newsFeedPostDiv = document.createElement('div');
+      newsFeedPostDiv.className = 'news-feed-post';
+
+      var postHeaderDiv = document.createElement('div');
+      postHeaderDiv.className = 'post-header';
+
+      var userPassportImg = document.createElement('img');
+      userPassportImg.className = 'UserPassport';
+      userPassportImg.src = data.passport;
+
+      var authorLink = document.createElement('a');
+      authorLink.href = 'user_profile.php?UserId=' + data.UserId;
+      authorLink.style.textDecoration = 'none';
+
+      var authorNameP = document.createElement('p');
+      authorNameP.className = 'post-author';
+      authorNameP.innerHTML = '<strong>' + data.surname + ' ' + data.firstName + '</strong>';
+
+      authorLink.appendChild(authorNameP);
+      postHeaderDiv.appendChild(userPassportImg);
+      postHeaderDiv.appendChild(authorLink);
+
+      var threeDotsDiv = document.createElement('div');
+      threeDotsDiv.id = 'threedots';
+
+      var dropdownButton = document.createElement('button');
+      dropdownButton.type = 'button';
+      dropdownButton.className = 'btn btn-link';
+      dropdownButton.dataset.bsToggle = 'dropdown';
+      dropdownButton.setAttribute('aria-haspopup', 'true');
+      dropdownButton.setAttribute('aria-expanded', 'false');
+      dropdownButton.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
+
+      var dropdownMenu = document.createElement('div');
+      dropdownMenu.className = 'dropdown-menu dropdown-menu-right';
+
+      var blockUserDiv = document.createElement('div');
+      var blockUserButton = document.createElement('button');
+      blockUserButton.type = 'button';
+      blockUserButton.className = 'btn btn-primary blockUser';
+      blockUserButton.id = 'blockUser-' + data.UserId;
+      blockUserButton.dataset.recipientid = data.UserId;
+      blockUserButton.dataset.bsToggle = 'modal';
+      blockUserButton.dataset.bsTarget = '#blockUserModal-' + data.UserId;
+      blockUserButton.innerHTML = 'Block User';
+
+      var blockUserInput = document.createElement('input');
+      blockUserInput.type = 'hidden';
+      blockUserInput.id = 'bu' + data.UserId;
+      blockUserInput.value = data.UserId;
+
+      blockUserDiv.appendChild(blockUserButton);
+      blockUserDiv.appendChild(blockUserInput);
+
+      var blockButtonDiv = document.createElement('div');
+      var blockButtonButton = document.createElement('button');
+      blockButtonButton.type = 'button';
+      blockButtonButton.className = 'btn btn-primary blockButton';
+      blockButtonButton.id = 'blockButton-' + data.postId;
+      blockButtonButton.dataset.postid = data.postId;
+      blockButtonButton.dataset.bsToggle = 'modal';
+      blockButtonButton.dataset.bsTarget = '#blockTypeofPostModal-' + data.postId;
+      blockButtonButton.innerHTML = 'Block this type of post';
+
+      var blockButtonInput = document.createElement('input');
+      blockButtonInput.type = 'hidden';
+      blockButtonInput.id = 'b' + data.postId;
+      blockButtonInput.value = data.postId;
+
+      blockButtonDiv.appendChild(blockButtonButton);
+      blockButtonDiv.appendChild(blockButtonInput);
+
+      dropdownMenu.appendChild(blockUserDiv);
+      dropdownMenu.appendChild(blockButtonDiv);
+      dropdownMenu.innerHTML += '<a class="dropdown-item" href="#">Report user</a>' +
+        '<a class="dropdown-item" href="#">Repost post</a>';
+
+      threeDotsDiv.appendChild(dropdownButton);
+      threeDotsDiv.appendChild(dropdownMenu);
+
+      var postMediaDiv = document.createElement('div');
+      postMediaDiv.className = 'post-media';
+
+      // Check if the post has an image
+      if (data.image !== null && data.image !== '') {
+        var postItem = document.createElement('div');
+        postItem.className = 'post-item';
+        var image = document.createElement('img');
+        image.className = 'post-image';
+        image.src = data.image;
+        postItem.appendChild(image);
+        postMediaDiv.appendChild(postItem);
+      }
+
+      // Check if the post has a video
+      if (data.video !== null && data.video !== '') {
+        var postItem = document.createElement('div');
+        postItem.className = 'post-item';
+        var videoContainer = document.createElement('div');
+        videoContainer.className = 'post-video';
+        var video = document.createElement('video');
+        video.setAttribute('data-my-Video-id', data.postId);
+        video.id = 'myVideo-' + data.postId;
+        video.className = 'w-100';
+        var source = document.createElement('source');
+        source.src = data.video;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        videoContainer.appendChild(video);
+        // videoContainer.innerHTML += 'Your browser does not support the video tag.';
+        var videoControls = document.createElement('div');
+        videoControls.className = 'video-controls';
+        var rewindButton = document.createElement('button');
+        rewindButton.id = 'rewindButton-' + data.postId;
+        rewindButton.onclick = function() {
+          rewind(data.postId);
+        };
+        rewindButton.innerHTML = '<i class="bi bi-rewind"></i>';
+        videoControls.appendChild(rewindButton);
+        var playPauseButton = document.createElement('button');
+        playPauseButton.onclick = function() {
+          togglePlayPause(data.postId);
+        };
+        playPauseButton.innerHTML = '<span id="playPauseButton-' + data.postId + '"><i class="bi bi-play"></i></span>';
+        videoControls.appendChild(playPauseButton);
+        var fastForwardButton = document.createElement('button');
+        fastForwardButton.id = 'fastForwardButton-' + data.postId;
+        fastForwardButton.onclick = function() {
+          fastForward(data.postId);
+        };
+        fastForwardButton.innerHTML = '<i class="bi bi-fast-forward"></i>';
+        videoControls.appendChild(fastForwardButton);
+        var volumeControl = document.createElement('div');
+        volumeControl.className = 'volume-control';
+        var volumeRange = document.createElement('input');
+        volumeRange.type = 'range';
+        volumeRange.id = 'volumeRange-' + data.postId;
+        volumeRange.min = '0';
+        volumeRange.max = '1';
+        volumeRange.step = '0.01';
+        volumeRange.value = '1';
+        volumeRange.onchange = function() {
+          setVolume(data.postId);
+        };
+        volumeControl.appendChild(volumeRange);
+        videoControls.appendChild(volumeControl);
+        var timeControl = document.createElement('div');
+        timeControl.className = 'time-control';
+        var timeRange = document.createElement('input');
+        timeRange.type = 'range';
+        timeRange.id = 'timeRange-' + data.postId;
+        timeRange.min = '0';
+        timeRange.step = '0.01';
+        timeRange.value = '0';
+        timeRange.onchange = function() {
+          setCurrentTime(data.postId);
+        };
+        timeControl.appendChild(timeRange);
+        var timeDisplay = document.createElement('div');
+        timeDisplay.className = 'time-display';
+        var currentTimeDisplay = document.createElement('div');
+        currentTimeDisplay.className = 'currentTimeDisplay';
+        currentTimeDisplay.id = 'currentTimeDisplay-' + data.postId;
+        currentTimeDisplay.innerHTML = '0:00';
+        timeDisplay.appendChild(currentTimeDisplay);
+        timeDisplay.innerHTML += '<div class="slash">/</div>';
+        var durationDisplay = document.createElement('div');
+        durationDisplay.className = 'durationDisplay';
+        durationDisplay.id = 'durationDisplay-' + data.postId;
+        durationDisplay.innerHTML = '0:00';
+        timeDisplay.appendChild(durationDisplay);
+        timeControl.appendChild(timeDisplay);
+        videoControls.appendChild(timeControl);
+        videoContainer.appendChild(videoControls);
+        postItem.appendChild(videoContainer);
+        postMediaDiv.appendChild(postItem);
+
+        // Create the Previous and Next buttons
+        var previousButton = document.createElement('button');
+        previousButton.className = 'previous-button';
+        previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
+
+        var nextButton = document.createElement('button');
+        nextButton.className = 'next-button';
+        nextButton.innerHTML = '<i class="bi bi-arrow-right"></i>';
+
+        var button = document.createElement('div');
+        button.className = 'button';
+
+        button.appendChild(previousButton);
+        button.appendChild(nextButton);
+        postMediaDiv.appendChild(button);
+
+        var postItems = postMediaDiv.getElementsByClassName('post-item');
+        var currentIndex = 0;
+
+        previousButton.addEventListener('click', function() {
+          if (currentIndex > 0) {
+            postItems[currentIndex].style.display = 'none';
+            currentIndex--;
+            postItems[currentIndex].style.display = 'block';
+            postItems[currentIndex].scrollIntoView({
+              behavior: 'smooth'
+            });
+          }
+        });
+
+        nextButton.addEventListener('click', function() {
+          if (currentIndex < postItems.length - 1) {
+            postItems[currentIndex].style.display = 'none'; // Hide the current post item
+            currentIndex++; // Increment the current index
+            postItems[currentIndex].style.display = 'block'; // Show the next post item
+            postItems[currentIndex].scrollIntoView({
+              behavior: 'smooth'
+            }); // Scroll to the next post item
+          }
+        });
+      }
+
+      // Hide all media elements except the first one
+      var mediaItems = postMediaDiv.getElementsByClassName('post-item');
+      console.log(mediaItems.length);
+      for (var i = 1; i < mediaItems.length; i++) {
+        mediaItems[i].style.display = 'none';
+      }
+
+      // Append the post media div before the post content
+      // newsFeedPostDiv.insertBefore(postMediaDiv, postContentDiv);
+
+      var postContentDiv = document.createElement('div');
+      postContentDiv.className = 'post-content';
+      postContentDiv.textContent = data.content;
+
+      var postDateDiv = document.createElement('div');
+      postDateDiv.className = 'post-date';
+      postDateDiv.textContent = data.timeAgo;
+
+      var footerDiv = document.createElement('div');
+      footerDiv.className = 'footer';
+
+      var likeButton = document.createElement('button');
+      likeButton.type = 'button';
+      likeButton.className = 'btn btn-primary like ' + (data.isLiking ? 'likeing' : 'unlike');
+      likeButton.dataset.postid = data.postId;
+      likeButton.innerHTML = '<span class="like-count">' + data.likes + '</span>' +
+        (data.isLiking ? '<span class="emoji"><img src="icons/love.png"></span>' : '<span class="emoji"><img src="icons/unlove.png"></span>');
+      likeButton.addEventListener('click', function() {
+        likepost(data.postId, UserId);
+      });
+
+      var shareButton = document.createElement('button');
+      shareButton.type = 'button';
+      shareButton.className = 'btn btn-primary share-button';
+      shareButton.dataset.postid = data.postId;
+      shareButton.innerHTML = '<i class="bi bi-share"></i> Share';
+
+      var commentButton = document.createElement('button');
+      commentButton.type = 'button';
+      commentButton.className = 'btn btn-primary comment-button';
+      commentButton.dataset.postid = data.postId;
+      commentButton.innerHTML = '<i class="bi bi-chat-dots"></i> Comment';
+
+      footerDiv.appendChild(likeButton);
+      footerDiv.appendChild(shareButton);
+      footerDiv.appendChild(commentButton);
+
+      postDiv.appendChild(newsFeedPostDiv);
+      newsFeedPostDiv.appendChild(postHeaderDiv);
+      postHeaderDiv.appendChild(threeDotsDiv);
+      var postTitleDiv = document.createElement('div');
+      postTitleDiv.className = 'post-title';
+
+      var postTitleH2 = document.createElement('h2');
+      postTitleH2.textContent = data.title;
+
+      postTitleDiv.appendChild(postTitleH2);
+      postDiv.appendChild(postTitleDiv);
+      // Append the post media div to the post div
+      postDiv.appendChild(postMediaDiv);
+      postDiv.appendChild(postContentDiv);
+      postDiv.appendChild(postDateDiv);
+      postDiv.appendChild(footerDiv);
+      postElement.appendChild(postDiv);
+
+      newsFeed.appendChild(postElement);
+    }
+    $('.owl-carousel').owlCarousel({
+      items: 1,
+      loop: true,
+      nav: true,
+      dots: false,
+      navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
+    })
 
     // Add event listener to the "Post" button
     var postButton = document.getElementById('postButton');
@@ -2065,7 +2175,6 @@ if (sqlsrv_execute($stmt)) {
       // ...
 
       // After posting, reload the news feed
-      loadNewsFeed();
     });
   </script>
   <script>
@@ -2316,7 +2425,6 @@ if (sqlsrv_execute($stmt)) {
       var likeBtn = $(this);
       var islikeing = likeBtn.hasClass('likeing');
       var postId = likeBtn.data('postid');
-      // alert(postId);
 
       $.ajax({
         url: "like_posts.php",
@@ -2351,8 +2459,7 @@ if (sqlsrv_execute($stmt)) {
 </script>
 <script>
   $(document).ready(function() {
-    // Set the time after which the refresh button will appear (in milliseconds)
-    var refreshTime = 120000; // 2 minutes
+    var refreshTime = 120000;
 
     setTimeout(function() {
       // Add refresh button to the top of the page
@@ -2400,9 +2507,8 @@ if (sqlsrv_execute($stmt)) {
   function submitComment() {
     var comment = $("#commentInput").val();
     var UserId = "<?php echo $UserId ?>";
-    var postId = $("#postId").val(); // Retrieve the post ID from the hidden input field
+    var postId = $("#postId").val();
 
-    // Do something with the comment, e.g. send it to the server using AJAX
     if (comment != "") {
       $.ajax({
         url: "comment_post.php",

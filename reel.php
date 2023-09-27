@@ -123,52 +123,12 @@ $UserId = $_SESSION["UserId"];
     </ul>
   </div>
   <div class="app__videos">
-    <!-- video starts -->
-    <div class="video">
-      <video class="video__player" src="uploads/63ee18ffed0737.49776399.mp4"></video>
 
-      <!-- sidebar -->
-      <div class="videoSidebar">
-        <div class="videoSidebar__button">
-          <span class="material-icons"><i class="bi bi-bookmark"></i></span>
-          <p style="color:white;">12</p>
-        </div>
-
-        <div class="videoSidebar__button">
-          <span class="material-icons"> <i class="bi bi-chat"></i> </span>
-          <p style="color:white;">23</p>
-        </div>
-
-        <div class="videoSidebar__button">
-          <span class="material-icons"> <i class="bi bi-share-fill"></i> </span>
-          <p style="color:white;">75</p>
-        </div>
-
-        <div class="videoSidebar__button">
-          <span class="material-icons"> <i class="bi bi-download"></i> </span>
-        </div>
-      </div>
-
-      <!-- footer -->
-      <div class="videoFooter">
-        <div class="videoFooter__text">
-          <h3>Harinivas P</h3>
-          <p class="videoFooter__description">Best Video Ever</p>
-
-          <div class="videoFooter__ticker">
-            <span class="material-icons videoFooter__icon"> music_note </span>
-            <marquee>Song name</marquee>
-          </div>
-        </div>
-        <img src="icons/cd.png" alt="" class="videoFooter__record" />
-      </div>
-    </div>
-    <!-- video ends -->
   </div>
   <script src="js/jquery.min.js"></script>
   <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
 
-  <script>
+  <!-- <script>
     const videos = document.querySelectorAll('video');
 
     for (const video of videos) {
@@ -181,7 +141,7 @@ $UserId = $_SESSION["UserId"];
         }
       });
     }
-  </script>
+  </script> -->
   <script>
     var UserId = "<?php echo $_SESSION['UserId']; ?>";
     var socketUrl = 'ws://localhost:8888';
@@ -210,6 +170,65 @@ $UserId = $_SESSION["UserId"];
         console.log('visibility:', reelData.visibility);
 
         loadReels(reelData);
+        handleVideoContainers();
+      });
+    });
+
+    var likeCounts = {};
+    socket.on('reelsLike', (data) => {
+      console.log('Recieved likes');
+      data.forEach((reelsLikes) => {
+        console.log(`Received reel likes:`);
+        console.log('UserId:', reelsLikes.UserId);
+        console.log('reelId:', reelsLikes.reelId);
+
+        if (!likeCounts[reelsLikes.reelId]) {
+          likeCounts[reelsLikes.reelId] = [];
+        }
+
+        if (!likeCounts[reelsLikes.reelId].includes(reelsLikes.UserId)) {
+          likeCounts[reelsLikes.reelId].push(reelsLikes.UserId);
+        }
+
+        updateLikeCount(reelsLikes.reelId, likeCounts[reelsLikes.reelId]);
+      });
+    });
+    var bookmarkCount = {};
+    socket.on('reelsBookmark', (data) => {
+      console.log('Received bookmarks');
+      data.forEach((reelsbookmarks) => {
+        console.log(`Received reel bookmarks:`);
+        console.log('UserId:', reelsbookmarks.UserId);
+        console.log('reelId:', reelsbookmarks.reelId);
+
+        if (!bookmarkCount[reelsbookmarks.reelId]) {
+          bookmarkCount[reelsbookmarks.reelId] = [];
+        }
+
+        if (!bookmarkCount[reelsbookmarks.reelId].includes(reelsbookmarks.UserId)) {
+          bookmarkCount[reelsbookmarks.reelId].push(reelsbookmarks.UserId);
+        }
+
+        updateBookmarkCount(reelsbookmarks.reelId, bookmarkCount[reelsbookmarks.reelId]);
+      });
+    });
+
+
+    socket.on('reelsComment', (data) => {
+      data.forEach((reelsComments) => {
+        console.log(`Received reel comments:`);
+        console.log('UserId:', reelsComments.UserId);
+        console.log('reelId:', reelsComments.reelId);
+        console.log('comment:', reelsComments.comment);
+        if (!commentCount[reelsComments.reelId]) {
+          commentCount[reelsComments.reelId] = [];
+        }
+
+        if (!commentCount[reelsComments.reelId].includes(reelsComments.UserId)) {
+          commentCount[reelsComments.reelId].push(reelsComments.UserId);
+        }
+
+        updateCommentCount(reelsComments.reelId, commentCount[reelsComments.reelId]);
       });
     });
 
@@ -217,118 +236,417 @@ $UserId = $_SESSION["UserId"];
       var app__videos = document.querySelector('.app__videos');
       console.log('reels:', data);
 
-      // var UserId = data.UserId;
-      // var Video = data.Video;
-      // var audioFileNames = data.audioFileNames;
-      // var caption = data.caption;
-      // var comment = data.comment;
-      // var date_posted = data.date_posted;
-      // var download = data.download;
-      // var like = data.like;
-      // var reelId = data.reelId;
-      // var visibility = data.visibility;
       var videoContainer = document.createElement('div');
       videoContainer.className = 'video';
+
+      //creating the play button in the middle
+      var playButton = document.createElement('img');
+      playButton.src = 'icons/playLogo.png';
+      playButton.className = 'playLogo';
+      playButton.style.position = 'absolute';
+      playButton.style.display = 'none';
+      playButton.style.inset = '40%';
+      videoContainer.appendChild(playButton);
 
       // Create a video element and set its source
       var videoElement = document.createElement('video');
       videoElement.className = 'video__player';
       videoElement.src = data.Video;
+      // videoElement.autoplay = true;
       videoElement.addEventListener('click', function() {
         console.log('clicked');
         if (videoElement.paused) {
           videoElement.play();
+          playButton.style.display = 'none';
         } else {
           videoElement.pause();
+          playButton.style.display = 'block';
         }
       });
+
+      //creating comment bar
+      var commentBoxInput = document.createElement('div');
+      commentBoxInput.className = 'commentBoxInput';
+      commentBoxInput.id = 'commentBoxInput' + data.reelId;
+
+      var comments = document.createElement('div');
+      comments.className = 'comments';
+      comments.id = 'comments' + data.reelId;
+
+      var commentHeader = document.createElement('div');
+      commentHeader.className = 'commentHeader';
+      commentHeader.id = 'commentHeader' + data.reelId;
+
+      var commentHeaderP = document.createElement('p');
+      commentHeaderP.className = 'commentHeaderP';
+      commentHeaderP.textContent = 'Comments appear here';
+      commentHeaderP.id = 'commentHeaderP' + data.reelId;
+
+      var commentBox = document.createElement('div');
+      commentBox.className = 'comment-box';
+      commentBox.id = 'comment-box' + data.reelId;
+
+      var commentInput = document.createElement('input');
+      commentInput.type = 'text';
+      commentInput.placeholder = 'Add a comment...';
+      commentInput.className = 'comment-input';
+      commentInput.id = 'comment-input' + data.reelId;
+
+      var submitButton = document.createElement('button');
+      submitButton.textContent = 'Post';
+      submitButton.className = 'comment-button';
+      submitButton.id = 'comment-button' + data.reelId;
+
+      commentBox.appendChild(commentInput);
+      commentBox.appendChild(submitButton);
+
+      commentHeader.appendChild(commentHeaderP);
+      commentBoxInput.appendChild(commentHeader);
+      commentBoxInput.appendChild(comments);
+      commentBoxInput.appendChild(commentBox);
+      videoContainer.appendChild(commentBoxInput);
+
       // Create the sidebar
       var videoSidebar = document.createElement('div');
       videoSidebar.className = 'videoSidebar';
+      videoSidebar.id = 'videoSidebar' + data.reelId;
 
-      // Create sidebar buttons and append them to the sidebar
+      videoElement.addEventListener('click', function() {
+        var commentBoxInput = document.querySelector('#commentBoxInput' + data.reelId);
+        commentBoxInput.style.display = 'none';
+      });
       var buttonsData = [{
-          icon: '<i class="bi bi-heart"></i>',
-          visible: data.like === 'true'
-        }, // Check if like is 'true'
-        {
-          icon: '<i class="bi bi-bookmark"></i>',
-          count: 12
+          icon: 'bi bi-heart',
+          visible: data.like === 'true',
+          isFilled: false,
+          count: 0,
+          class: 'liked',
         },
         {
-          icon: '<i class="bi bi-chat"></i>',
-          count: 23,
-          visible: data.comment === 'true'
-        }, // Check if comment is 'true'
-        {
-          icon: '<i class="bi bi-share-fill"></i>',
-          count: 75
+          icon: 'bi bi-bookmark',
+          count: 0,
+          visible: true,
+          isFilled: false,
+          class: 'bookmarked',
         },
         {
-          icon: '<i class="bi bi-download"></i>',
-          visible: data.download === 'true'
-        }, // Check if download is 'true'
+          icon: 'bi bi-chat',
+          count: 0,
+          visible: data.comment === 'true',
+          isFilled: false,
+          class: 'commented',
+        },
+        {
+          icon: 'bi bi-share-fill',
+          count: 0,
+          visible: true,
+          isFilled: false,
+          class: 'shared',
+        },
+        {
+          icon: 'bi bi-download',
+          visible: data.download === 'true',
+          isFilled: false,
+          class: 'downloaded',
+        },
       ];
 
+      function handleButtonHover(buttonData, button, icon) {
+        if (buttonData.class == 'commented') {
+          buttonData.isFilled = !buttonData.isFilled;
+          if (buttonData.isFilled) {
+            icon.className = buttonData.icon + '-fill';
+          } else {
+            icon.className = buttonData.icon;
+          }
+        }
+      }
+
+      function handleButtonClick(buttonData, buttonElement, icon) {
+        if (buttonData.class == 'liked' || buttonData.class == 'bookmarked') {
+          buttonData.isFilled = !buttonData.isFilled;
+          var UserId = '<?php echo $_SESSION['UserId']; ?>';
+          var reelId = data.reelId;
+          if (buttonData.isFilled) {
+            icon.className = buttonData.icon + '-fill';
+          } else {
+            icon.className = buttonData.icon;
+          }
+          if (buttonData.class == 'liked') {
+            const formData = new FormData();
+            formData.append('UserId', UserId);
+            formData.append('reelId', reelId);
+
+            fetch('http://localhost:8888/likeReel', {
+                method: 'POST',
+                body: formData,
+              })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Error liking/unliking Video');
+                }
+                return response.json();
+              })
+              .then((result) => {
+                icon.className = buttonData.icon + '-fill';
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          }
+          if (buttonData.class == 'bookmarked') {
+            const formData = new FormData();
+            formData.append('UserId', UserId);
+            formData.append('reelId', reelId);
+
+            fetch('http://localhost:8888/BookMarkReel', {
+                method: 'POST',
+                body: formData,
+              })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Error liking/unliking Video');
+                }
+                return response.json();
+              })
+              .then((result) => {
+                icon.className = buttonData.icon + '-fill';
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          }
+        }
+        if (buttonData.class === 'commented') {
+          var commentBoxInput = document.querySelector('#commentBoxInput' + data.reelId);
+          commentBoxInput.style.display = 'block';
+        }
+      }
+
+      function checkIfItIsClicked(buttonData, buttonElement, icon) {
+        if (buttonData.class == 'bookmarked') {
+          var reelId = data.reelId;
+          var UserId = '<?php echo $_SESSION['UserId']; ?>';
+          console.log('This is what I brought from the bookmark before checking:', UserId , reelId);
+          const formData = new FormData();
+          formData.append('UserId', UserId);
+          formData.append('reelId', reelId);
+          fetch('http://localhost:8888/checkBookmark', {
+              method: 'POST',
+              body: formData,
+            })
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error('Error checking if the reel has been bookmarked');
+              }
+            })
+            .then((result) => {
+              if (result.Bookmarked) {
+                icon.className = 'bi bi-bookmark' + '-fill';
+              } else {
+                icon.className = 'bi bi-bookmark';
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        }
+        if (buttonData.class == 'liked') {
+          var SessionUserId = '<?php echo $_SESSION['UserId']; ?>';
+          var reelId = data.reelId;
+          const formData = new FormData();
+          formData.append('UserId', SessionUserId);
+          formData.append('reelId', reelId);
+          fetch('http://localhost:8888/checkLike', {
+              method: 'POST',
+              body: formData,
+            })
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error('Error checking if the reel has been liked');
+              }
+            })
+            .then((result) => {
+              if (result.liked) {
+                icon.className = 'bi bi-heart' + '-fill';
+              } else {
+                icon.className = 'bi bi-heart';
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        }
+      }
+
       buttonsData.forEach(function(buttonData) {
-        if (buttonData.visible || buttonData.count > 0) {
-          // Create the button only if it's visible or if count is greater than 0
+        if (buttonData.visible) {
           var button = document.createElement('div');
           button.className = 'videoSidebar__button';
-          button.id = 'videoSidebar__button' + data.reelId;
+          button.id = 'videoSidebar__button' + data.reelId + buttonData.class;
           var iconSpan = document.createElement('span');
           iconSpan.className = 'material-icons';
-          iconSpan.innerHTML = buttonData.icon;
+          var icon = document.createElement('i');
+          icon.className = buttonData.icon;
+          button.addEventListener('click', function() {
+            handleButtonClick(buttonData, button, icon);
+          });
+          button.addEventListener('hover', function() {
+            handleButtonHover(buttonData, button, icon);
+          });
+          checkIfItIsClicked(buttonData, button, icon);
           var countP = document.createElement('p');
-          countP.style.color = 'green';
+          countP.style.color = 'black';
+          countP.className = buttonData.class + 'p_text';
           countP.textContent = buttonData.count;
+          iconSpan.appendChild(icon);
           button.appendChild(iconSpan);
           button.appendChild(countP);
           videoSidebar.appendChild(button);
         }
       });
-      // Create the video footer
+
       var videoFooter = document.createElement('div');
       videoFooter.className = 'videoFooter';
 
-      // Create video footer text and append it to the video footer
-      var videoFooterText = document.createElement('div');
+      async function fetchUserProfileData(UserId) {
+        try {
+          const response = await fetch(`http://localhost:8888/getUserProfile/${UserId}`);
+          if (response.ok) {
+            const userProfileData = await response.json();
+            return userProfileData;
+          } else {
+            throw new Error('Error fetching user profile data');
+          }
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
+      }
+
+      const videoFooterText = document.createElement('div');
       videoFooterText.className = 'videoFooter__text';
-      var h3 = document.createElement('h3');
-      h3.textContent = data.UserId; // Change this to the appropriate user property
-      var descriptionP = document.createElement('p');
-      descriptionP.className = 'videoFooter__description';
-      descriptionP.textContent = data.caption; // Change this to the appropriate caption property
 
-      // Create video footer ticker and append it to the video footer text
-      var videoFooterTicker = document.createElement('div');
-      videoFooterTicker.className = 'videoFooter__ticker';
-      var tickerSpan = document.createElement('span');
-      tickerSpan.className = 'material-icons videoFooter__icon';
-      tickerSpan.textContent = 'music_note';
-      var marquee = document.createElement('marquee');
-      marquee.textContent = data.audioFileNames; // Change this to the appropriate song name property
+      async function setVideoFooterText(UserId, caption) {
+        try {
+          const userProfileData = await fetchUserProfileData(UserId);
 
-      videoFooterTicker.appendChild(tickerSpan);
-      videoFooterTicker.appendChild(marquee);
-      videoFooterText.appendChild(h3);
-      videoFooterText.appendChild(descriptionP);
-      videoFooterText.appendChild(videoFooterTicker);
+          const h3 = document.createElement('p');
+          if (userProfileData) {
+            h3.textContent = `${userProfileData.Surname} ${userProfileData.First_Name}`;
+          } else {
+            h3.textContent = UserId;
+          }
 
-      // Create the video footer record image and append it to the video footer
+          const descriptionP = document.createElement('p');
+          descriptionP.className = 'videoFooter__description';
+          descriptionP.textContent = caption;
+
+          videoFooterText.appendChild(h3);
+          videoFooterText.appendChild(descriptionP);
+          var videoFooterTicker = document.createElement('div');
+          videoFooterTicker.className = 'videoFooter__ticker';
+          var tickerSpan = document.createElement('span');
+          tickerSpan.className = 'material-icons videoFooter__icon';
+          tickerSpan.textContent = 'music_note';
+          var marquee = document.createElement('marquee');
+          marquee.textContent = data.audioFileNames;
+
+          videoFooterTicker.appendChild(tickerSpan);
+          videoFooterTicker.appendChild(marquee);
+          videoFooterText.appendChild(videoFooterTicker);
+        } catch (error) {
+          console.error('Error fetching user profile data:', error);
+        }
+      }
+
+      setVideoFooterText(data.UserId, data.caption);
+
+
+
       var recordImage = document.createElement('img');
-      recordImage.src = 'icons/cd.png'; // Change this to the appropriate image source
+      recordImage.src = 'icons/cd.png';
       recordImage.alt = '';
       recordImage.className = 'videoFooter__record';
 
       videoFooter.appendChild(videoFooterText);
       videoFooter.appendChild(recordImage);
 
-      // Append all the elements to the video container
       videoContainer.appendChild(videoElement);
       videoContainer.appendChild(videoSidebar);
       videoContainer.appendChild(videoFooter);
       app__videos.appendChild(videoContainer);
+    }
+
+    function updateLikeCount(reelId, UserId) {
+      var buttonElement = document.getElementById('videoSidebar__button' + reelId + 'liked');
+      if (buttonElement) {
+        var countP = buttonElement.querySelector('p');
+        if (UserId.length > 0) {
+          countP.textContent = UserId.length;
+        } else {
+          countP.textContent = '0';
+        }
+      } else {
+        console.log('No buttonElement found');
+      }
+    }
+
+    function updateCommentCount(reelId, commentCount) {
+      var buttonElement = document.getElementById('videoSidebar__button' + reelId + 'commented');
+      if (buttonElement) {
+        var countP = buttonElement.querySelector('p');
+        countP.textContent = commentCount.length;
+      }
+    }
+
+    function updateBookmarkCount(reelId, bookamrksCount) {
+      var UserId = '<?php echo $_SESSION['UserId']; ?>';
+      var buttonElement = document.getElementById('videoSidebar__button' + reelId + 'bookmarked');
+      if (buttonElement) {
+        var countP = buttonElement.querySelector('p');
+        countP.textContent = bookamrksCount.length;
+        console.log('Numbe of bookmarks', bookamrksCount.length);
+      }
+    }
+
+    function handleVideoContainers() {
+      // console.log('#');
+      var videoContainers = document.querySelectorAll('.video');
+      console.log(videoContainers.length);
+      videoContainers.forEach(function(videoContainer) {
+        // console.log('Video #');
+        var videoElement = videoContainer.querySelector('.video__player');
+        var playButton = videoContainer.querySelector('.playLogo');
+
+        videoElement.addEventListener('play', function() {
+          console.log('Video started playing');
+          videoContainers.forEach(function(otherContainer) {
+            if (otherContainer !== videoContainer) {
+              var otherVideo = otherContainer.querySelector('.video__player');
+              if (!otherVideo.paused) {
+                otherVideo.pause();
+                console.log('Paused other video');
+              }
+            }
+          });
+        });
+
+        videoElement.addEventListener('touchstart', function() {
+          console.log('Touch started');
+          videoElement.play();
+          playButton.style.display = 'none';
+        });
+
+        videoElement.addEventListener('touchend', function() {
+          console.log('Touch ended');
+          videoElement.pause();
+        });
+      });
     }
   </script>
 </body>

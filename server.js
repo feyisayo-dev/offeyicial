@@ -326,23 +326,24 @@ app.post("/trimVideo", (req, res) => {
 
   if (videoFile.mimetype.startsWith("video/")) {
     const progressFilePath = "progress.txt";
-    fs.writeFileSync("tempVideo.mp4", videoFile.data);
+    const tempVideo = "tempVideo" + Date.now() + ".mp4";
+    const trimmedVideo = "trimmed_video" + Date.now() + ".ismv";
+    fs.writeFileSync(tempVideo, videoFile.data);
     const inputFormat = videoFile.name.split(".").pop().toLowerCase();
     console.log("Trimming video...");
     console.log(inputFormat);
     console.log(videoFile.data);
     ffmpeg()
-      .input("tempVideo.mp4")
+      .input(tempVideo)
       .inputFormat(inputFormat)
       .outputOptions("-t 600")
       .outputFormat("ismv")
       .on("end", () => {
         console.log("Video trimming completed.");
-
-        const trimmedVideoBuffer = fs.readFileSync("trimmed_video.ismv");
+        const trimmedVideoBuffer = fs.readFileSync(trimmedVideo);
 
         // Delete the temporary file
-        fs.unlinkSync("tempVideo" + Date.now() + ".mp4");
+        fs.unlinkSync(tempVideo);
 
         res.setHeader("Content-Type", "video/ismv");
         res.setHeader("Content-Length", trimmedVideoBuffer.length);
@@ -358,7 +359,7 @@ app.post("/trimVideo", (req, res) => {
       .on("progress", (progress) => {
         console.log("trimming-progress", progress);
       })
-      .save("trimmed_video.ismv");
+      .save(trimmedVideo);
   } else {
     res.status(400).send("Invalid video file format.");
   }
@@ -561,24 +562,468 @@ async function fetchReelsData() {
   }
 }
 
-// Socket.IO event handler
+async function fetchReelLikes() {
+  let poolConnection;
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const result = await request.query("SELECT * FROM reelsLike");
+    const reelsLikes = result.recordset.map((record) => ({
+      UserId: record.UserId,
+      reelId: record.reelId,
+    }));
+    console.log("Retrieved reels like data:", reelsLikes);
+
+    return reelsLikes;
+  } catch (error) {
+    console.error("Error fetching reels data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+async function fetchReelComments() {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const result = await request.query("SELECT * FROM reelsComments");
+    const reelsComments = result.recordset.map((record) => ({
+      UserId: record.UserId,
+      reelId: record.reelId,
+      comment: record.comment,
+    }));
+
+    console.log("Retrieved reels comment data:", reelsComments);
+
+    return reelsComments;
+  } catch (error) {
+    console.error("Error fetching reels data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+async function fetchReelBookmarks() {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const result = await request.query("SELECT * FROM BookMarkReels");
+    const reelsbookmarks = result.recordset.map((record) => ({
+      UserId: record.UserId,
+      reelId: record.reelId,
+    }));
+
+    console.log("Retrieved reels bookmarks data:", reelsbookmarks);
+
+    return reelsbookmarks;
+  } catch (error) {
+    console.error("Error fetching reels data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+async function fetchPostsData() {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+
+    const request = new sql.Request(poolConnection);
+
+    const result = await request.query(
+      "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = posts.UserId THEN 1 ELSE 0 END) AS is_liking FROM posts JOIN User_Profile ON User_Profile.UserId = posts.UserId LEFT JOIN likes ON likes.PostId = posts.PostId GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted ORDER BY posts.date_posted DESC"
+    );
+
+    const transformedData = result.recordset.map((record) => {
+      const datePosted = new Date(record.date_posted);
+      const postId = record.PostId;
+      const likes = record.num_likes;
+      const isLiking = record.is_liking;
+      const currentDateTime = new Date();
+      const datePostedDateTime = new Date(datePosted);
+      const timeDifference = currentDateTime - datePostedDateTime;
+      const passport = record.Passport || "DefaultImage.png";
+      const getPassport = `UserPassport/${passport}`;
+
+      return {
+        surname: record.Surname,
+        firstName: record.First_Name,
+        UserId: record.UserId,
+        passport: getPassport,
+        postId: postId,
+        image: record.image,
+        video: record.video,
+        title: record.title,
+        content: record.content,
+        timeAgo: getTimeAgo(timeDifference),
+        likes: likes,
+        isLiking: isLiking,
+      };
+    });
+
+    console.log("Retrieved reels data:", transformedData);
+
+    return transformedData;
+  } catch (error) {
+    console.error("Error fetching reels data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+function getTimeAgo(timeDifference) {
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  if (years > 0) {
+    return years + " years ago";
+  } else if (months > 0) {
+    return months + " months ago";
+  } else if (days > 0) {
+    return days + " days ago";
+  } else if (hours > 0) {
+    return hours + " hours ago";
+  } else if (minutes > 0) {
+    return minutes + " minutes ago";
+  } else {
+    return seconds + " seconds ago";
+  }
+}
+
 io.on("connection", (socket) => {
   const { UserId } = socket.handshake.query;
   console.log("User on reels connected:" + UserId);
 
-  // Call the fetchReelsData() function to retrieve the data
   fetchReelsData()
     .then((reelsData) => {
-      io.emit("reels", reelsData);
+      socket.emit("reels", reelsData);
     })
     .catch((error) => {
       console.error("Error handling Socket.IO connection:", error);
     });
 
+  fetchPostsData()
+    .then((transformedData) => {
+      socket.emit("posts", transformedData);
+    })
+    .catch((error) => {
+      console.error("Error handling Socket.IO connection:", error);
+    });
+
+  fetchReelLikes()
+    .then((reelsLikes) => {
+      socket.emit("reelsLike", reelsLikes);
+    })
+    .catch((error) => {
+      console.error("Error handling Socket.IO connection:", error);
+    });
+
+  fetchReelComments()
+    .then((reelsComments) => {
+      socket.emit("reelsComment", reelsComments);
+    })
+    .catch((error) => {
+      console.error("Error handling Socket.IO connection:", error);
+    });
+
+  fetchReelBookmarks()
+    .then((reelsbookmarks) => {
+      socket.emit("reelsBookmark", reelsbookmarks);
+    })
+    .catch((error) => {
+      console.error("Error handling Socket.IO connection:", error);
+    });
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
 });
+
+async function insertOrRemoveLike(UserId, reelId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    // Check if the record exists
+    const checkQuery = `SELECT * FROM reelsLike WHERE UserId = '${UserId}' AND reelId = '${reelId}'`;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      // The record does not exist, so insert it
+      const insertQuery = `INSERT INTO reelsLike (UserId, reelId) VALUES ('${UserId}', '${reelId}')`;
+      await request.query(insertQuery);
+      console.log("Inserted UserId:", UserId);
+      console.log("Inserted reelId:", reelId);
+      await pool.close();
+      return true; // Indicate success (inserted)
+    } else {
+      // The record exists, so remove it
+      const removeQuery = `DELETE FROM reelsLike WHERE UserId = '${UserId}' AND reelId = '${reelId}'`;
+      await request.query(removeQuery);
+      console.log("Removed UserId:", UserId);
+      console.log("Removed reelId:", reelId);
+      await pool.close();
+      return true; // Indicate success (removed)
+    }
+  } catch (error) {
+    console.error(
+      "Error inserting/removing data into/from the database:",
+      error
+    );
+    return false;
+  }
+}
+
+async function insertOrRemoveLikefromPost(UserId, postId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT * FROM likes WHERE UserId = '${UserId}' AND postId = '${postId}'`;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      const insertQuery = `INSERT INTO likes (UserId, postId) VALUES ('${UserId}', '${postId}')`;
+      await request.query(insertQuery);
+      console.log("Inserted UserId:", UserId);
+      console.log("Inserted postId:", postId);
+      await pool.close();
+      return true; 
+    } else {
+      const removeQuery = `DELETE FROM likes WHERE UserId = '${UserId}' AND postId = '${postId}'`;
+      await request.query(removeQuery);
+      console.log("Removed UserId:", UserId);
+      console.log("Removed postId:", postId);
+      await pool.close();
+      return true; 
+    }
+  } catch (error) {
+    console.error(
+      "Error inserting/removing data into/from the database:",
+      error
+    );
+    return false;
+  }
+}
+
+app.post("/likeReel", async (req, res) => {
+  const { UserId, reelId } = req.body;
+
+  // Call the async function for inserting/removing likes
+  const actionResult = await insertOrRemoveLike(UserId, reelId);
+
+  if (actionResult) {
+    res.send("UserId and reelId processed successfully");
+  } else {
+    res.status(500).send("Error processing data into the database");
+  }
+});
+
+app.post("/likepost", async (req, res) => {
+  const { UserId, postId } = req.body;
+
+  // Call the async function for inserting/removing likes
+  const actionResult = await insertOrRemoveLikefromPost(UserId, postId);
+
+  if (actionResult) {
+    res.send("UserId and reelId processed successfully");
+  } else {
+    res.status(500).send("Error processing data into the database");
+  }
+});
+
+async function insertCommentonReel(UserId, reelId, comment) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+    const query = `INSERT INTO reelsComments (UserId, reelId, comment) VALUES ('${UserId}', '${reelId}', '${comment}')`;
+    const result = await request.query(query);
+    await pool.close();
+    console.log("Inserted UserId:", UserId);
+    console.log("Inserted reelId:", reelId);
+    console.log("Inserted comment:", comment);
+    return true;
+  } catch (error) {
+    console.error("Error inserting data into the database:", error);
+    return false;
+  }
+}
+
+app.post("/commentReel", async (req, res) => {
+  const { UserId, reelId, comment } = req.body;
+  const insertionResult = await insertCommentonReel(UserId, reelId, comment);
+  if (insertionResult) {
+    res.send("UserId and reelId inserted successfully");
+  } else {
+    res.status(500).send("Error inserting data into the database");
+  }
+});
+
+async function checkIfReelLiked(UserId, reelId) {
+  const pool = await sql.connect(config);
+  const request = new sql.Request(pool);
+
+  const query = `
+    SELECT COUNT(*) AS likeCount
+    FROM reelsLike
+    WHERE UserId = '${UserId}' AND reelId = '${reelId}'
+  `;
+
+  const result = await request.query(query);
+  await pool.close();
+
+  const likeCount = result.recordset[0].likeCount;
+  console.log(
+    `Like count for UserId ${UserId} and reelId ${reelId}: ${likeCount}`
+  );
+
+  return likeCount > 0;
+}
+
+app.post("/checkLike", async (req, res) => {
+  const { UserId, reelId } = req.body;
+
+  try {
+    const isLiked = await checkIfReelLiked(UserId, reelId);
+
+    res.json({ liked: isLiked });
+  } catch (error) {
+    console.error("Error checking if the reel has been liked:", error);
+    res
+      .status(500)
+      .json({ error: "Error checking if the reel has been liked" });
+  }
+});
+
+async function insertOrRemoveBookMark(UserId, reelId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+    const checkQuery = `SELECT * FROM BookMarkReels WHERE UserId = '${UserId}' AND reelId = '${reelId}'`;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      const insertQuery = `INSERT INTO BookMarkReels (UserId, reelId) VALUES ('${UserId}', '${reelId}')`;
+      await request.query(insertQuery);
+      console.log("Inserted UserId:", UserId);
+      console.log("Inserted reelId:", reelId);
+      await pool.close();
+      return true;
+    } else {
+      // The record exists, so remove it
+      const removeQuery = `DELETE FROM BookMarkReels WHERE UserId = '${UserId}' AND reelId = '${reelId}'`;
+      await request.query(removeQuery);
+      console.log("Removed UserId:", UserId);
+      console.log("Removed reelId:", reelId);
+      await pool.close();
+      return false;
+    }
+  } catch (error) {
+    console.error(
+      "Error inserting/removing data into/from the database:",
+      error
+    );
+    return false;
+  }
+}
+
+app.post("/BookMarkReel", async (req, res) => {
+  const { UserId, reelId } = req.body;
+  const actionResult = await insertOrRemoveBookMark(UserId, reelId);
+  if (actionResult) {
+    res.send("UserId and reelId processed successfully");
+  } else {
+    res.status(500).send("Error processing data into the database");
+  }
+});
+
+async function checkIfitisBookmarked(UserId, reelId) {
+  const pool = await sql.connect(config);
+  const request = new sql.Request(pool);
+
+  const query = `
+    SELECT COUNT(*) AS bookmarkCount
+    FROM BookMarkReels
+    WHERE UserId = '${UserId}' AND reelId = '${reelId}'
+  `;
+
+  const result = await request.query(query);
+  await pool.close();
+
+  const bookmarkCount = result.recordset[0].bookmarkCount;
+  console.log(
+    `Bookmarkcount count for UserId ${UserId} and reelId ${reelId}: ${bookmarkCount}`
+  );
+
+  return bookmarkCount > 0;
+}
+
+app.post("/checkBookmark", async (req, res) => {
+  const { UserId, reelId } = req.body;
+  console.log("This is what I recieved to check the bookmark:", UserId, reelId);
+  try {
+    const isBookmarked = await checkIfitisBookmarked(UserId, reelId);
+
+    res.json({ Bookmarked: isBookmarked });
+  } catch (error) {
+    console.error("Error checking if the reel has been bookmarked:", error);
+    res
+      .status(500)
+      .json({ error: "Error checking if the reel has been bookmarked" });
+  }
+});
+
+app.get("/getUserProfile/:UserId", async (req, res) => {
+  const { UserId } = req.params;
+
+  try {
+    const userProfileData = await getUserProfileData(UserId);
+    res.json(userProfileData);
+  } catch (error) {
+    console.error("Error fetching user profile data:", error);
+    res.status(500).json({ error: "Error fetching user profile data" });
+  }
+});
+
+async function getUserProfileData(UserId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const query = ` select Surname, First_Name, Passport FROM User_Profile WHERE UserId =  '${UserId}' `;
+
+    const result = await request.query(query);
+    await pool.close();
+
+    if (result.recordset.length > 0) {
+      return result.recordset[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
 
 // Start the server
 const port = 8888;

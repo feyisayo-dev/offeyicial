@@ -60,13 +60,13 @@ body {
 
 .videoSidebar {
   position: absolute;
-  top: 50%;
+  bottom: 5%;
   right: 10px;
 }
 
 .videoSidebar .material-icons {
   font-size: 28px;
-  color: green;
+  color: pink;
   cursor: pointer;
 }
 
@@ -83,7 +83,7 @@ body {
   position: relative;
   bottom: 150px;
   margin-left: 20px;
-  color: white;
+  color: black;
   display: flex;
 }
 
@@ -110,12 +110,15 @@ body {
   flex: 1;
 }
 
-.videoFooter__text h3 {
-  padding-bottom: 20px;
+.videoFooter__text p {
+  font-family: 'Modern-Age';
 }
 
 .videoFooter__icon {
   position: absolute;
+  border-radius: 0 10px 10px 0;
+  background-color: pink;
+  padding: 4px;
 }
 
 .videoFooter__ticker {
@@ -126,7 +129,7 @@ body {
 
 .videoFooter__ticker marquee {
   height: fit-content;
-  margin-left: 30px;
+  margin-left: 80px;
   width: 60%;
 }
 
@@ -278,4 +281,57 @@ body {
 .icon {
   margin: 0 10px 0 0;
   background-color: transparent;
+}
+
+.commentBoxInput {
+  position: absolute;
+  bottom: 0;
+  z-index: 9999;
+  height: 70%;
+  background-color: #fff;
+  display: none;
+  width: 100%;
+}
+
+.commentHeader {
+  background-color: pink;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.comment-box {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+}
+
+.comment-input {
+  width: 80%;
+  padding: 8px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  background-color: cornsilk;
+}
+
+.comment-button {
+  background-color: pink;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.comment-button:hover {
+  background-color: cornsilk;
 }
