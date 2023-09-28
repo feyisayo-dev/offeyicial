@@ -914,7 +914,8 @@ input[type="file"] {
   .profile-info {
     width: 500px;
   }
-  .profile-info p{
+
+  .profile-info p {
     font-size: 24px;
   }
 }
@@ -1439,18 +1440,37 @@ background: linear-gradient(to right, '.getRandomColor().', '.getRandomColor().'
 }
 
 .like:hover {
-  background-color: #f0f2f5;
+  border: 1px solid #dddfe2;
+  transform: scaleX(1.05);
+  color: black;
+  background-color: white;
+}
+
+.like:active,
+.like:focus {
+  background-color: white;
+  border: none;
+}
+
+.like:focus-visible {
+  border: none;
+}
+
+.like:focus {
+  box-shadow: 2px 2px green;
 }
 
 .like.likeing {
-  background-color: #1877f2;
-  color: #fff;
-  border-color: #1877f2;
+  color: black;
 }
 
 .like.likeing:hover {
-  background-color: #166fe5;
-  border-color: #166fe5;
+  border-color: aliceblue;
+  background-color: white;
+}
+
+.like-count {
+  color: black;
 }
 
 /* Share button */
@@ -1571,8 +1591,84 @@ background: linear-gradient(to right, '.getRandomColor().', '.getRandomColor().'
   }
 }
 
-.container .row{
+.container .row {
   display: flex;
   justify-content: flex-start;
   width: 100%;
+}
+
+.emoji {
+  color: black;
+  background-color: white;
+  border: none;
+  background-color: transparent;
+}
+
+.emoji img {
+  width: 24px;
+  height: 24px;
+}
+
+.emoji:hover {
+  background-color: aliceblue;
+  border-radius: 10px;
+  border: none;
+  transform: scaleX(1.05);
+}
+
+.emoji:focus {
+  background-color: aliceblue;
+  border: none;
+}
+
+.emoji-picker {
+  position: relative;
+}
+
+.emoji-table-container {
+  position: absolute;
+  top: -150px;
+  /* adjust this value to suit your needs */
+  z-index: 1;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#threedots {
+  display: flex;
+  justify-content: flex-end;
+  text-decoration: none;
+  align-items: right;
+  margin-left: auto;
+}
+
+.blockUser,
+.blockButton {
+  color: black;
+  background-color: transparent;
+  width: 100%;
+  border: none;
+}
+
+.blockUser:hover,
+.blockButton:hover {
+  transform: scale(1.05);
+  background-color: transparent;
+  color: black;
+}
+
+.btn-link:hover {
+  color: black;
+  transform: scaleX(1.05);
+}
+
+.btn-link {
+  font-weight: 400;
+  color: black;
+  text-decoration: underline;
 }

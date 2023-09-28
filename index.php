@@ -524,21 +524,37 @@ if (sqlsrv_execute($stmt)) {
     }
 
     .like:hover {
-      background-color: #f0f2f5;
       border: 1px solid #dddfe2;
       transform: scaleX(1.05);
       color: black;
+      background-color: white;
+    }
+
+    .like:active,
+    .like:focus {
+      background-color: white;
+      border: none;
+    }
+
+    .like:focus-visible {
+      border: none;
+    }
+
+    .like:focus {
+      box-shadow: 2px 2px green;
     }
 
     .like.likeing {
-      background-color: #1877f2;
-      color: #fff;
-      border-color: #1877f2;
+      color: black;
     }
 
     .like.likeing:hover {
-      background-color: #166fe5;
-      border-color: #166fe5;
+      border-color: aliceblue;
+      background-color: white;
+    }
+
+    .like-count {
+      color: black;
     }
 
     /* Share button */
@@ -1038,6 +1054,7 @@ if (sqlsrv_execute($stmt)) {
 
     .emoji:hover {
       background-color: aliceblue;
+      border-radius: 10px;
       border: none;
       transform: scaleX(1.05);
     }
@@ -1828,7 +1845,7 @@ if (sqlsrv_execute($stmt)) {
 
     socket.on('posts', (data) => {
       data.forEach((transformedData, index) => {
-        console.log(`Received reels data #${index + 1}:`);
+        console.log(`Received post data #${index + 1}:`);
         console.log('UserId:', transformedData.UserId);
         console.log('surname:', transformedData.surname);
         console.log('firstName:', transformedData.firstName);
@@ -1840,13 +1857,34 @@ if (sqlsrv_execute($stmt)) {
         console.log('content:', transformedData.content);
         console.log('timeAgo:', transformedData.timeAgo);
         console.log('likes:', transformedData.likes);
-        console.log('isLiking:', transformedData.isLiking);
 
         loadNewsFeed(transformedData);
       });
     });
+    var likeCounts = {};
 
-    function likepost(postId, UserId) {
+    socket.on('postLike', (data) => {
+      console.log('Received post likes:', data);
+      data.forEach((postlike) => {
+        console.log('UserId:', postlike.UserId);
+        console.log('postId:', postlike.postId);
+
+        if (!likeCounts[postlike.postId]) {
+          likeCounts[postlike.postId] = 0;
+        }
+
+        likeCounts[postlike.postId] += 1;
+        updateLikeCount(postlike.postId, likeCounts[postlike.postId]);
+      });
+    });
+
+
+    function likepost(postId) {
+      var post = document.getElementById(postId);
+      var UserId = '<?php echo $_SESSION['UserId']; ?>';
+      var likeBtn = post.querySelector('.like');
+      var likeCountSpan = likeBtn.querySelector('.like-count');
+      var likeCount = parseInt(likeCountSpan.textContent);
       const formData = new FormData();
       formData.append('UserId', UserId);
       formData.append('postId', postId);
@@ -1856,13 +1894,68 @@ if (sqlsrv_execute($stmt)) {
           body: formData,
         })
         .then((response) => {
+          console.log(response);
           if (!response.ok) {
             throw new Error('Error liking/unliking post');
           }
           return response.json();
         })
         .then((result) => {
-          console.log('post has been liked') 
+          const likeStatus = result.likeStatus;
+          if (likeStatus === 'like') {
+            likeBtn.classList.add('likeing');
+            likeBtn.classList.remove('unlike');
+            likeCount++;
+            likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+              '<span class="emoji"><img src="icons/love.png"></span>';
+          } else if (likeStatus === 'unlike') {
+            likeBtn.classList.add('unlike');
+            likeBtn.classList.remove('likeing');
+            likeCount--;
+            likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+              '<span class="emoji"><img src="icons/unlove.png"></span>';
+          }
+
+          likeCountSpan.textContent = likeCount;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+
+    function checkIfItIsClicked(postId) {
+      console.log('checking for post with', postId, 'and UserId', UserId);
+      var post = document.getElementById(postId);
+      var likeBtn = post.querySelector('.like');
+      var likeCountSpan = likeBtn.querySelector('.like-count');
+      var likeCount = parseInt(likeCountSpan.textContent);
+      const formData = new FormData();
+      formData.append('UserId', UserId);
+      formData.append('postId', postId);
+      fetch('http://localhost:8888/checkLikeforPost', {
+          method: 'POST',
+          body: formData,
+        })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Error checking if the post has been liked');
+          }
+        })
+        .then((result) => {
+          const likeStatus = result.likeStatus;
+          if (likeStatus === 'liked') {
+            likeBtn.classList.add('likeing');
+            likeBtn.classList.remove('unlike');
+            likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+              '<span class="emoji"><img src="icons/love.png"></span>';
+          } else if (likeStatus === 'notLiked') {
+            likeBtn.classList.add('unlike');
+            likeBtn.classList.remove('likeing');
+            likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+              '<span class="emoji"><img src="icons/unlove.png"></span>';
+          }
         })
         .catch((error) => {
           console.error(error);
@@ -1870,9 +1963,12 @@ if (sqlsrv_execute($stmt)) {
     }
 
     function loadNewsFeed(data) {
+      var newsFeed = document.getElementById('newsFeed');
+
       var postElement = document.createElement('section');
       var postDiv = document.createElement('div');
       postDiv.className = 'post';
+      postDiv.id = data.postId;
 
       var newsFeedPostDiv = document.createElement('div');
       newsFeedPostDiv.className = 'news-feed-post';
@@ -2121,7 +2217,7 @@ if (sqlsrv_execute($stmt)) {
       likeButton.innerHTML = '<span class="like-count">' + data.likes + '</span>' +
         (data.isLiking ? '<span class="emoji"><img src="icons/love.png"></span>' : '<span class="emoji"><img src="icons/unlove.png"></span>');
       likeButton.addEventListener('click', function() {
-        likepost(data.postId, UserId);
+        likepost(data.postId);
       });
 
       var shareButton = document.createElement('button');
@@ -2159,6 +2255,123 @@ if (sqlsrv_execute($stmt)) {
       postElement.appendChild(postDiv);
 
       newsFeed.appendChild(postElement);
+      checkIfItIsClicked(data.postId);
+
+      let myVideo;
+
+      function togglePlayPause(postId) {
+        const playPauseButton = document.getElementById("playPauseButton-" + postId);
+        const myVideo = document.getElementById("myVideo-" + postId);
+
+        if (myVideo.paused) {
+          myVideo.play();
+          playPauseButton.innerHTML = "<i class='bi bi-pause-circle-fill'></i>";
+        } else {
+          myVideo.pause();
+          playPauseButton.innerHTML = "<i class='bi bi-play'></i>";
+        }
+      }
+
+      function rewind(postId) {
+        const myVideo = document.getElementById("myVideo-" + postId);
+        myVideo.currentTime -= 10;
+      }
+
+      // <i class="bi bi-fast-forward"></i>
+      function fastForward(postId) {
+        const myVideo = document.getElementById("myVideo-" + postId);
+        myVideo.currentTime += 10;
+      }
+
+      // Set volume
+      function setVolume(postId) {
+        var video = document.getElementById('myVideo-' + postId);
+        var volumeRange = document.getElementById('volumeRange-' + postId);
+
+        // Set the volume of the video
+        video.volume = volumeRange.value;
+      }
+
+      window.addEventListener('DOMContentLoaded', function() {
+        var videos = document.getElementsByTagName('video');
+
+        for (var i = 0; i < videos.length; i++) {
+          var video = videos[i];
+          var postId = data.postId;
+          var volumeRange = document.getElementById('volumeRange-' + postId);
+
+          video.addEventListener('volumechange', function() {
+            volumeRange.value = video.volume;
+          });
+
+          volumeRange.oninput = function() {
+            setVolume(postId);
+          };
+        }
+      });
+
+
+      function setCurrentTime(postId) {
+        var video = document.getElementById('myVideo-' + postId);
+        var timeRange = document.getElementById('timeRange-' + postId);
+        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+        var newTime = video.duration * (timeRange.value / 100);
+
+        video.currentTime = newTime;
+
+        currentTimeDisplay.innerHTML = formatTime(video.currentTime);
+      }
+
+      // Function to format time in MM:SS format
+      function formatTime(time) {
+        var minutes = Math.floor(time / 60);
+        var seconds = Math.floor(time % 60);
+
+        minutes = String(minutes).padStart(2, '0');
+        seconds = String(seconds).padStart(2, '0');
+
+        return minutes + ':' + seconds;
+      }
+
+
+      function handleTimeUpdate(postId) {
+        var video = document.getElementById('myVideo-' + postId);
+        var timeRange = document.getElementById('timeRange-' + postId);
+        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+        var currentTime = video.currentTime;
+        var duration = video.duration;
+        var progress = (currentTime / duration) * 100;
+
+        timeRange.value = progress;
+
+        currentTimeDisplay.innerHTML = formatTime(currentTime);
+      }
+
+      var videos = document.getElementsByTagName('video');
+
+      for (var i = 0; i < videos.length; i++) {
+        var video = videos[i];
+        var postId = data.postId;
+        var timeRange = document.getElementById('timeRange-' + postId);
+        var durationDisplay = document.getElementById('durationDisplay-' + postId);
+        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+        video.addEventListener('loadedmetadata', function() {
+          durationDisplay.innerHTML = formatTime(video.duration);
+        });
+
+        video.addEventListener('timeupdate', function() {
+          handleTimeUpdate(postId);
+        });
+
+        timeRange.oninput = function() {
+          var newTime = video.duration * (timeRange.value / 100);
+          video.currentTime = newTime;
+          currentTimeDisplay.innerHTML = formatTime(newTime);
+        };
+      }
     }
     $('.owl-carousel').owlCarousel({
       items: 1,
@@ -2176,136 +2389,24 @@ if (sqlsrv_execute($stmt)) {
 
       // After posting, reload the news feed
     });
-  </script>
-  <script>
-    // Declare myVideo as a global variable
-    let myVideo;
 
-    function togglePlayPause(postId) {
-      const playPauseButton = document.getElementById("playPauseButton-" + postId);
-      const myVideo = document.getElementById("myVideo-" + postId);
-
-      if (myVideo.paused) {
-        myVideo.play();
-        playPauseButton.innerHTML = "<i class='bi bi-pause-circle-fill'></i>";
-      } else {
-        myVideo.pause();
-        playPauseButton.innerHTML = "<i class='bi bi-play'></i>";
-      }
-    }
-
-    function rewind(postId) {
-      const myVideo = document.getElementById("myVideo-" + postId);
-      myVideo.currentTime -= 10;
-    }
-
-    // <i class="bi bi-fast-forward"></i>
-    function fastForward(postId) {
-      const myVideo = document.getElementById("myVideo-" + postId);
-      myVideo.currentTime += 10;
-    }
-
-    // Set volume
-    (function() {
-      function setVolume(postId) {
-        var video = document.getElementById('myVideo-' + postId);
-        var volumeRange = document.getElementById('volumeRange-' + postId);
-
-        // Set the volume of the video
-        video.volume = volumeRange.value;
-      }
-
-      // Update the volume range when the video is loaded
-      window.addEventListener('DOMContentLoaded', function() {
-        var videos = document.getElementsByTagName('video');
-
-        for (var i = 0; i < videos.length; i++) {
-          (function() {
-            var video = videos[i];
-            var postId = video.getAttribute('data-my-Video-id');
-            var volumeRange = document.getElementById('volumeRange-' + postId);
-
-            // Update the volume range as the volume changes
-            video.addEventListener('volumechange', function() {
-              volumeRange.value = video.volume;
-            });
-
-            // Set the setVolume function with the postId argument
-            volumeRange.oninput = function() {
-              setVolume(postId);
-            };
-          })();
+    function updateLikeCount(postId, likeCount) {
+      console.log('Updating Like count for', postId);
+      var post = document.getElementById(postId);
+      if (post) {
+        console.log('post div found');
+        var likeBtn = post.querySelector('.like');
+        var likeCountSpan = likeBtn.querySelector('.like-count');
+        if (likeCountSpan) {
+          likeCountSpan.textContent = likeCount;
+        } else {
+          console.log('No buttonElement found');
         }
-      });
-    })();
-
-
-    function setCurrentTime(postId) {
-      return function() {
-        var video = document.getElementById('myVideo-' + postId);
-        var timeRange = document.getElementById('timeRange-' + postId);
-        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
-
-        // Calculate the new time based on the range value
-        var newTime = video.duration * (timeRange.value / 100);
-
-        // Set the current time of the video
-        video.currentTime = newTime;
-
-        // Update the current time display
-        currentTimeDisplay.innerHTML = formatTime(video.currentTime);
-      };
-    }
-
-    // Helper function to format time in HH:MM:SS format
-    function formatTime(time) {
-      var minutes = Math.floor(time / 60);
-      var seconds = Math.floor(time % 60);
-
-      // Add leading zeros if necessary
-      minutes = String(minutes).padStart(2, '0');
-      seconds = String(seconds).padStart(2, '0');
-
-      return minutes + ':' + seconds;
-    }
-
-    // Update the time range and duration display when the video is loaded
-    window.addEventListener('DOMContentLoaded', function() {
-      var videos = document.getElementsByTagName('video');
-
-      for (var i = 0; i < videos.length; i++) {
-        (function() {
-          var video = videos[i];
-          var postId = video.getAttribute('data-my-Video-id');
-          var timeRange = document.getElementById('timeRange-' + postId);
-          var durationDisplay = document.getElementById('durationDisplay-' + postId);
-
-          // Update the duration display
-          video.addEventListener('loadedmetadata', function() {
-            durationDisplay.innerHTML = formatTime(video.duration);
-          });
-
-          // Update the time range as the video progresses
-          video.addEventListener('timeupdate', function() {
-            var currentTime = video.currentTime;
-            var duration = video.duration;
-
-            // Calculate the percentage of progress
-            var progress = (currentTime / duration) * 100;
-
-            // Set the value of the time range
-            timeRange.value = progress;
-
-            // Update the current time display
-            var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
-            currentTimeDisplay.innerHTML = formatTime(currentTime);
-          });
-
-          // Set the setCurrentTime function with the postId argument
-          timeRange.onchange = setCurrentTime(postId);
-        })();
+      } else {
+        console.log('no post with postId found');
       }
-    });
+
+    }
   </script>
   <script>
     $(document).ready(function() {

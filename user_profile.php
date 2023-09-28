@@ -119,7 +119,7 @@ if (isset($_SESSION['UserId'])) {
                 <a class="nav-link" href="home.php"><i class="bi bi-house-door"></i>Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link custom-link" onclick="window.location.href=\'index.php\'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
+                <a class="nav-link custom-link" onclick="window.location.href=\'index.php?UserId=' . $UserId . '\'"><i class="bi bi-newspaper"></i>NEWS-FEED</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link custom-link" onclick="window.location.href=\'upload.php\'"><i class="bi bi-plus-square"></i>Add a Post</a>
@@ -480,7 +480,6 @@ if (isset($_SESSION['UserId'])) {
   </div>
 </div>';
   echo '<script src="js/jquery.min.js"></script>';
-  echo '<script src="script.js"></script>';
   echo '<script>
 //Script to load
 // user country code for selected option
@@ -702,118 +701,6 @@ $(document).ready(function() {
     });
 });
 </script>';
-  echo '<script>
-    // Declare myVideo as a global variable
-    let myVideo;
-  
-    function togglePlayPause(PostId) {
-      const playPauseButton = document.getElementById("playPauseButton-" + PostId);
-      const myVideo = document.getElementById("myVideo-" + PostId);
-  
-      if (myVideo.paused) {
-        myVideo.play();
-        playPauseButton.innerHTML = "<i class=\'bi bi-pause-circle-fill\'></i>";
-      } else {
-        myVideo.pause();
-        playPauseButton.innerHTML = "<i class=\'bi bi-play\'></i>";
-      }
-    }
-  
-    function rewind(PostId) {
-      const myVideo = document.getElementById("myVideo-" + PostId);
-      myVideo.currentTime -= 10;
-    }
-  
-    function fastForward(PostId) {
-      const myVideo = document.getElementById("myVideo-" + PostId);
-      myVideo.currentTime += 10;
-    }
-  
-    function setVolume(PostId) {
-      var video = document.getElementById("myVideo-" + PostId);
-      var volumeRange = document.getElementById("volumeRange-" + PostId);
-  
-      video.volume = volumeRange.value;
-    }
-  
-    (function() {
-      window.addEventListener("DOMContentLoaded", function() {
-        var videos = document.getElementsByTagName("video");
-  
-        for (var i = 0; i < videos.length; i++) {
-          (function() {
-            var video = videos[i];
-            var PostId = video.getAttribute("data-my-Video-id");
-            var volumeRange = document.getElementById("volumeRange-" + PostId);
-  
-            video.addEventListener("volumechange", function() {
-              volumeRange.value = video.volume;
-            });
-  
-            volumeRange.oninput = function() {
-              setVolume(PostId);
-            };
-          })();
-        }
-      });
-    })();
-  
-    function setCurrentTime(PostId) {
-      return function() {
-        var video = document.getElementById("myVideo-" + PostId);
-        var timeRange = document.getElementById("timeRange-" + PostId);
-        var currentTimeDisplay = document.getElementById("currentTimeDisplay-" + PostId);
-  
-        var newTime = video.duration * (timeRange.value / 100);
-  
-        video.currentTime = newTime;
-  
-        currentTimeDisplay.innerHTML = formatTime(video.currentTime);
-      };
-    }
-  
-    function formatTime(time) {
-      var minutes = Math.floor(time / 60);
-      var seconds = Math.floor(time % 60);
-  
-      minutes = String(minutes).padStart(2, "0");
-      seconds = String(seconds).padStart(2, "0");
-  
-      return minutes + ":" + seconds;
-    }
-  
-    window.addEventListener("DOMContentLoaded", function() {
-      var videos = document.getElementsByTagName("video");
-  
-      for (var i = 0; i < videos.length; i++) {
-        (function() {
-          var video = videos[i];
-          var PostId = video.getAttribute("data-my-Video-id");
-          console.log(PostId);
-          var timeRange = document.getElementById("timeRange-" + PostId);
-          var durationDisplay = document.getElementById("durationDisplay-" + PostId);
-  
-          video.addEventListener("loadedmetadata", function() {
-            durationDisplay.innerHTML = formatTime(video.duration);
-          });
-  
-          video.addEventListener("timeupdate", function() {
-            var currentTime = video.currentTime;
-            var duration = video.duration;
-  
-            var progress = (currentTime / duration) * 100;
-  
-            timeRange.value = progress;
-  
-            var currentTimeDisplay = document.getElementById("currentTimeDisplay-" + PostId);
-            currentTimeDisplay.innerHTML = formatTime(currentTime);
-          });
-  
-          timeRange.onchange = setCurrentTime(PostId);
-        })();
-      }
-    });
-  </script>';
 } else {
   // User is not logged in, redirect to the login page
   header('Location: login.php');
@@ -893,5 +780,587 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
   if (!userId) {
     // UserId not found, redirect to login page
     window.location.href = "login.php";
+  }
+</script>
+<script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+
+<script>
+  var UserId = "<?php echo $_SESSION['UserId']; ?>";
+  var socketUrl = 'ws://localhost:8888';
+  const socket = io(socketUrl, {
+    query: {
+      UserId
+    }
+  });
+
+  socket.on('connect', () => {
+    console.log('Socket.IO connection established');
+  });
+
+  socket.on('posts', (data) => {
+  data.forEach((transformedData, index) => {
+    if (transformedData.UserId === UserId) {
+      console.log(`Received post data for UserId ${UserId} #${index + 1}:`);
+      console.log('UserId:', transformedData.UserId);
+      console.log('surname:', transformedData.surname);
+      console.log('firstName:', transformedData.firstName);
+      console.log('passport:', transformedData.passport);
+      console.log('postId:', transformedData.postId);
+      console.log('image:', transformedData.image);
+      console.log('video:', transformedData.video);
+      console.log('title:', transformedData.title);
+      console.log('content:', transformedData.content);
+      console.log('timeAgo:', transformedData.timeAgo);
+      console.log('likes:', transformedData.likes);
+
+      loadNewsFeed(transformedData);
+    }
+  });
+});
+  var likeCounts = {};
+
+  socket.on('postLike', (data) => {
+    console.log('Received post likes:', data);
+    data.forEach((postlike) => {
+      console.log('UserId:', postlike.UserId);
+      console.log('postId:', postlike.postId);
+
+      if (!likeCounts[postlike.postId]) {
+        likeCounts[postlike.postId] = 0;
+      }
+
+      likeCounts[postlike.postId] += 1;
+      updateLikeCount(postlike.postId, likeCounts[postlike.postId]);
+    });
+  });
+
+
+  function likepost(postId) {
+    var post = document.getElementById(postId);
+    var UserId = "<?php echo $_SESSION['UserId']; ?>";
+    var likeBtn = post.querySelector('.like');
+    var likeCountSpan = likeBtn.querySelector('.like-count');
+    var likeCount = parseInt(likeCountSpan.textContent);
+    const formData = new FormData();
+    formData.append('UserId', UserId);
+    formData.append('postId', postId);
+
+    fetch('http://localhost:8888/likepost', {
+        method: 'POST',
+        body: formData,
+      })
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) {
+          throw new Error('Error liking/unliking post');
+        }
+        return response.json();
+      })
+      .then((result) => {
+        const likeStatus = result.likeStatus;
+        if (likeStatus === 'like') {
+          likeBtn.classList.add('likeing');
+          likeBtn.classList.remove('unlike');
+          likeCount++;
+          likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+            '<span class="emoji"><img src="icons/love.png"></span>';
+        } else if (likeStatus === 'unlike') {
+          likeBtn.classList.add('unlike');
+          likeBtn.classList.remove('likeing');
+          likeCount--;
+          likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+            '<span class="emoji"><img src="icons/unlove.png"></span>';
+        }
+
+        likeCountSpan.textContent = likeCount;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  function checkIfItIsClicked(postId) {
+    console.log('checking for post with', postId, 'and UserId', UserId);
+    var post = document.getElementById(postId);
+    var likeBtn = post.querySelector('.like');
+    var likeCountSpan = likeBtn.querySelector('.like-count');
+    var likeCount = parseInt(likeCountSpan.textContent);
+    const formData = new FormData();
+    formData.append('UserId', UserId);
+    formData.append('postId', postId);
+    fetch('http://localhost:8888/checkLikeforPost', {
+        method: 'POST',
+        body: formData,
+      })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Error checking if the post has been liked');
+        }
+      })
+      .then((result) => {
+        const likeStatus = result.likeStatus;
+        if (likeStatus === 'liked') {
+          likeBtn.classList.add('likeing');
+          likeBtn.classList.remove('unlike');
+          likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+            '<span class="emoji"><img src="icons/love.png"></span>';
+        } else if (likeStatus === 'notLiked') {
+          likeBtn.classList.add('unlike');
+          likeBtn.classList.remove('likeing');
+          likeBtn.innerHTML = '<span class="like-count">' + likeCount + '</span>' +
+            '<span class="emoji"><img src="icons/unlove.png"></span>';
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  function loadNewsFeed(data) {
+    var newsFeed = document.getElementById('posts');
+
+    var postElement = document.createElement('section');
+    var postDiv = document.createElement('div');
+    postDiv.className = 'post';
+    postDiv.id = data.postId;
+
+    var newsFeedPostDiv = document.createElement('div');
+    newsFeedPostDiv.className = 'news-feed-post';
+
+    var postHeaderDiv = document.createElement('div');
+    postHeaderDiv.className = 'post-header';
+
+    var userPassportImg = document.createElement('img');
+    userPassportImg.className = 'UserPassport';
+    userPassportImg.src = data.passport;
+
+    var authorLink = document.createElement('a');
+    authorLink.href = 'user_profile.php?UserId=' + data.UserId;
+    authorLink.style.textDecoration = 'none';
+
+    var authorNameP = document.createElement('p');
+    authorNameP.className = 'post-author';
+    authorNameP.innerHTML = '<strong>' + data.surname + ' ' + data.firstName + '</strong>';
+
+    authorLink.appendChild(authorNameP);
+    postHeaderDiv.appendChild(userPassportImg);
+    postHeaderDiv.appendChild(authorLink);
+
+    var threeDotsDiv = document.createElement('div');
+    threeDotsDiv.id = 'threedots';
+
+    var dropdownButton = document.createElement('button');
+    dropdownButton.type = 'button';
+    dropdownButton.className = 'btn btn-link';
+    dropdownButton.dataset.bsToggle = 'dropdown';
+    dropdownButton.setAttribute('aria-haspopup', 'true');
+    dropdownButton.setAttribute('aria-expanded', 'false');
+    dropdownButton.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
+
+    var dropdownMenu = document.createElement('div');
+    dropdownMenu.className = 'dropdown-menu dropdown-menu-right';
+
+    var blockUserDiv = document.createElement('div');
+    var blockUserButton = document.createElement('button');
+    blockUserButton.type = 'button';
+    blockUserButton.className = 'btn btn-primary blockUser';
+    blockUserButton.id = 'blockUser-' + data.UserId;
+    blockUserButton.dataset.recipientid = data.UserId;
+    blockUserButton.dataset.bsToggle = 'modal';
+    blockUserButton.dataset.bsTarget = '#blockUserModal-' + data.UserId;
+    blockUserButton.innerHTML = 'Block User';
+
+    var blockUserInput = document.createElement('input');
+    blockUserInput.type = 'hidden';
+    blockUserInput.id = 'bu' + data.UserId;
+    blockUserInput.value = data.UserId;
+
+    blockUserDiv.appendChild(blockUserButton);
+    blockUserDiv.appendChild(blockUserInput);
+
+    var blockButtonDiv = document.createElement('div');
+    var blockButtonButton = document.createElement('button');
+    blockButtonButton.type = 'button';
+    blockButtonButton.className = 'btn btn-primary blockButton';
+    blockButtonButton.id = 'blockButton-' + data.postId;
+    blockButtonButton.dataset.postid = data.postId;
+    blockButtonButton.dataset.bsToggle = 'modal';
+    blockButtonButton.dataset.bsTarget = '#blockTypeofPostModal-' + data.postId;
+    blockButtonButton.innerHTML = 'Block this type of post';
+
+    var blockButtonInput = document.createElement('input');
+    blockButtonInput.type = 'hidden';
+    blockButtonInput.id = 'b' + data.postId;
+    blockButtonInput.value = data.postId;
+
+    blockButtonDiv.appendChild(blockButtonButton);
+    blockButtonDiv.appendChild(blockButtonInput);
+
+    dropdownMenu.appendChild(blockUserDiv);
+    dropdownMenu.appendChild(blockButtonDiv);
+    dropdownMenu.innerHTML += '<a class="dropdown-item" href="#">Report user</a>' +
+      '<a class="dropdown-item" href="#">Repost post</a>';
+
+    threeDotsDiv.appendChild(dropdownButton);
+    threeDotsDiv.appendChild(dropdownMenu);
+
+    var postMediaDiv = document.createElement('div');
+    postMediaDiv.className = 'post-media';
+
+    // Check if the post has an image
+    if (data.image !== null && data.image !== '') {
+      var postItem = document.createElement('div');
+      postItem.className = 'post-item';
+      var image = document.createElement('img');
+      image.className = 'post-image';
+      image.src = data.image;
+      postItem.appendChild(image);
+      postMediaDiv.appendChild(postItem);
+    }
+
+    // Check if the post has a video
+    if (data.video !== null && data.video !== '') {
+      var postItem = document.createElement('div');
+      postItem.className = 'post-item';
+      var videoContainer = document.createElement('div');
+      videoContainer.className = 'post-video';
+      var video = document.createElement('video');
+      video.setAttribute('data-my-Video-id', data.postId);
+      video.id = 'myVideo-' + data.postId;
+      video.className = 'w-100';
+      var source = document.createElement('source');
+      source.src = data.video;
+      source.type = 'video/mp4';
+      video.appendChild(source);
+      videoContainer.appendChild(video);
+      // videoContainer.innerHTML += 'Your browser does not support the video tag.';
+      var videoControls = document.createElement('div');
+      videoControls.className = 'video-controls';
+      var rewindButton = document.createElement('button');
+      rewindButton.id = 'rewindButton-' + data.postId;
+      rewindButton.onclick = function() {
+        rewind(data.postId);
+      };
+      rewindButton.innerHTML = '<i class="bi bi-rewind"></i>';
+      videoControls.appendChild(rewindButton);
+      var playPauseButton = document.createElement('button');
+      playPauseButton.onclick = function() {
+        togglePlayPause(data.postId);
+      };
+      playPauseButton.innerHTML = '<span id="playPauseButton-' + data.postId + '"><i class="bi bi-play"></i></span>';
+      videoControls.appendChild(playPauseButton);
+      var fastForwardButton = document.createElement('button');
+      fastForwardButton.id = 'fastForwardButton-' + data.postId;
+      fastForwardButton.onclick = function() {
+        fastForward(data.postId);
+      };
+      fastForwardButton.innerHTML = '<i class="bi bi-fast-forward"></i>';
+      videoControls.appendChild(fastForwardButton);
+      var volumeControl = document.createElement('div');
+      volumeControl.className = 'volume-control';
+      var volumeRange = document.createElement('input');
+      volumeRange.type = 'range';
+      volumeRange.id = 'volumeRange-' + data.postId;
+      volumeRange.min = '0';
+      volumeRange.max = '1';
+      volumeRange.step = '0.01';
+      volumeRange.value = '1';
+      volumeRange.onchange = function() {
+        setVolume(data.postId);
+      };
+      volumeControl.appendChild(volumeRange);
+      videoControls.appendChild(volumeControl);
+      var timeControl = document.createElement('div');
+      timeControl.className = 'time-control';
+      var timeRange = document.createElement('input');
+      timeRange.type = 'range';
+      timeRange.id = 'timeRange-' + data.postId;
+      timeRange.min = '0';
+      timeRange.step = '0.01';
+      timeRange.value = '0';
+      timeRange.onchange = function() {
+        setCurrentTime(data.postId);
+      };
+      timeControl.appendChild(timeRange);
+      var timeDisplay = document.createElement('div');
+      timeDisplay.className = 'time-display';
+      var currentTimeDisplay = document.createElement('div');
+      currentTimeDisplay.className = 'currentTimeDisplay';
+      currentTimeDisplay.id = 'currentTimeDisplay-' + data.postId;
+      currentTimeDisplay.innerHTML = '0:00';
+      timeDisplay.appendChild(currentTimeDisplay);
+      timeDisplay.innerHTML += '<div class="slash">/</div>';
+      var durationDisplay = document.createElement('div');
+      durationDisplay.className = 'durationDisplay';
+      durationDisplay.id = 'durationDisplay-' + data.postId;
+      durationDisplay.innerHTML = '0:00';
+      timeDisplay.appendChild(durationDisplay);
+      timeControl.appendChild(timeDisplay);
+      videoControls.appendChild(timeControl);
+      videoContainer.appendChild(videoControls);
+      postItem.appendChild(videoContainer);
+      postMediaDiv.appendChild(postItem);
+
+      // Create the Previous and Next buttons
+      var previousButton = document.createElement('button');
+      previousButton.className = 'previous-button';
+      previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
+
+      var nextButton = document.createElement('button');
+      nextButton.className = 'next-button';
+      nextButton.innerHTML = '<i class="bi bi-arrow-right"></i>';
+
+      var button = document.createElement('div');
+      button.className = 'button';
+
+      button.appendChild(previousButton);
+      button.appendChild(nextButton);
+      postMediaDiv.appendChild(button);
+
+      var postItems = postMediaDiv.getElementsByClassName('post-item');
+      var currentIndex = 0;
+
+      previousButton.addEventListener('click', function() {
+        if (currentIndex > 0) {
+          postItems[currentIndex].style.display = 'none';
+          currentIndex--;
+          postItems[currentIndex].style.display = 'block';
+          postItems[currentIndex].scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      });
+
+      nextButton.addEventListener('click', function() {
+        if (currentIndex < postItems.length - 1) {
+          postItems[currentIndex].style.display = 'none'; // Hide the current post item
+          currentIndex++; // Increment the current index
+          postItems[currentIndex].style.display = 'block'; // Show the next post item
+          postItems[currentIndex].scrollIntoView({
+            behavior: 'smooth'
+          }); // Scroll to the next post item
+        }
+      });
+    }
+
+    // Hide all media elements except the first one
+    var mediaItems = postMediaDiv.getElementsByClassName('post-item');
+    console.log(mediaItems.length);
+    for (var i = 1; i < mediaItems.length; i++) {
+      mediaItems[i].style.display = 'none';
+    }
+
+    // Append the post media div before the post content
+    // newsFeedPostDiv.insertBefore(postMediaDiv, postContentDiv);
+
+    var postContentDiv = document.createElement('div');
+    postContentDiv.className = 'post-content';
+    postContentDiv.textContent = data.content;
+
+    var postDateDiv = document.createElement('div');
+    postDateDiv.className = 'post-date';
+    postDateDiv.textContent = data.timeAgo;
+
+    var footerDiv = document.createElement('div');
+    footerDiv.className = 'footer';
+
+    var likeButton = document.createElement('button');
+    likeButton.type = 'button';
+    likeButton.className = 'btn btn-primary like ' + (data.isLiking ? 'likeing' : 'unlike');
+    likeButton.dataset.postid = data.postId;
+    likeButton.innerHTML = '<span class="like-count">' + data.likes + '</span>' +
+      (data.isLiking ? '<span class="emoji"><img src="icons/love.png"></span>' : '<span class="emoji"><img src="icons/unlove.png"></span>');
+    likeButton.addEventListener('click', function() {
+      likepost(data.postId);
+    });
+
+    var shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'btn btn-primary share-button';
+    shareButton.dataset.postid = data.postId;
+    shareButton.innerHTML = '<i class="bi bi-share"></i> Share';
+
+    var commentButton = document.createElement('button');
+    commentButton.type = 'button';
+    commentButton.className = 'btn btn-primary comment-button';
+    commentButton.dataset.postid = data.postId;
+    commentButton.innerHTML = '<i class="bi bi-chat-dots"></i> Comment';
+
+    footerDiv.appendChild(likeButton);
+    footerDiv.appendChild(shareButton);
+    footerDiv.appendChild(commentButton);
+
+    postDiv.appendChild(newsFeedPostDiv);
+    newsFeedPostDiv.appendChild(postHeaderDiv);
+    postHeaderDiv.appendChild(threeDotsDiv);
+    var postTitleDiv = document.createElement('div');
+    postTitleDiv.className = 'post-title';
+
+    var postTitleH2 = document.createElement('h2');
+    postTitleH2.textContent = data.title;
+
+    postTitleDiv.appendChild(postTitleH2);
+    postDiv.appendChild(postTitleDiv);
+    // Append the post media div to the post div
+    postDiv.appendChild(postMediaDiv);
+    postDiv.appendChild(postContentDiv);
+    postDiv.appendChild(postDateDiv);
+    postDiv.appendChild(footerDiv);
+    postElement.appendChild(postDiv);
+
+    newsFeed.appendChild(postElement);
+    checkIfItIsClicked(data.postId);
+
+    let myVideo;
+
+    function togglePlayPause(postId) {
+      const playPauseButton = document.getElementById("playPauseButton-" + postId);
+      const myVideo = document.getElementById("myVideo-" + postId);
+
+      if (myVideo.paused) {
+        myVideo.play();
+        playPauseButton.innerHTML = "<i class='bi bi-pause-circle-fill'></i>";
+      } else {
+        myVideo.pause();
+        playPauseButton.innerHTML = "<i class='bi bi-play'></i>";
+      }
+    }
+
+    function rewind(postId) {
+      const myVideo = document.getElementById("myVideo-" + postId);
+      myVideo.currentTime -= 10;
+    }
+
+    // <i class="bi bi-fast-forward"></i>
+    function fastForward(postId) {
+      const myVideo = document.getElementById("myVideo-" + postId);
+      myVideo.currentTime += 10;
+    }
+
+    // Set volume
+    function setVolume(postId) {
+      var video = document.getElementById('myVideo-' + postId);
+      var volumeRange = document.getElementById('volumeRange-' + postId);
+
+      // Set the volume of the video
+      video.volume = volumeRange.value;
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      var videos = document.getElementsByTagName('video');
+
+      for (var i = 0; i < videos.length; i++) {
+        var video = videos[i];
+        var postId = data.postId;
+        var volumeRange = document.getElementById('volumeRange-' + postId);
+
+        video.addEventListener('volumechange', function() {
+          volumeRange.value = video.volume;
+        });
+
+        volumeRange.oninput = function() {
+          setVolume(postId);
+        };
+      }
+    });
+
+
+    function setCurrentTime(postId) {
+      var video = document.getElementById('myVideo-' + postId);
+      var timeRange = document.getElementById('timeRange-' + postId);
+      var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+      var newTime = video.duration * (timeRange.value / 100);
+
+      video.currentTime = newTime;
+
+      currentTimeDisplay.innerHTML = formatTime(video.currentTime);
+    }
+
+    // Function to format time in MM:SS format
+    function formatTime(time) {
+      var minutes = Math.floor(time / 60);
+      var seconds = Math.floor(time % 60);
+
+      minutes = String(minutes).padStart(2, '0');
+      seconds = String(seconds).padStart(2, '0');
+
+      return minutes + ':' + seconds;
+    }
+
+
+    function handleTimeUpdate(postId) {
+      var video = document.getElementById('myVideo-' + postId);
+      var timeRange = document.getElementById('timeRange-' + postId);
+      var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+      var currentTime = video.currentTime;
+      var duration = video.duration;
+      var progress = (currentTime / duration) * 100;
+
+      timeRange.value = progress;
+
+      currentTimeDisplay.innerHTML = formatTime(currentTime);
+    }
+
+    var videos = document.getElementsByTagName('video');
+
+    for (var i = 0; i < videos.length; i++) {
+      var video = videos[i];
+      var postId = data.postId;
+      var timeRange = document.getElementById('timeRange-' + postId);
+      var durationDisplay = document.getElementById('durationDisplay-' + postId);
+      var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+
+      video.addEventListener('loadedmetadata', function() {
+        durationDisplay.innerHTML = formatTime(video.duration);
+      });
+
+      video.addEventListener('timeupdate', function() {
+        handleTimeUpdate(postId);
+      });
+
+      timeRange.oninput = function() {
+        var newTime = video.duration * (timeRange.value / 100);
+        video.currentTime = newTime;
+        currentTimeDisplay.innerHTML = formatTime(newTime);
+      };
+    }
+  }
+  $('.owl-carousel').owlCarousel({
+    items: 1,
+    loop: true,
+    nav: true,
+    dots: false,
+    navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
+  })
+
+  // Add event listener to the "Post" button
+  var postButton = document.getElementById('postButton');
+  postButton.addEventListener('click', function() {
+    // Code to handle posting a new post
+    // ...
+
+    // After posting, reload the news feed
+  });
+
+  function updateLikeCount(postId, likeCount) {
+    console.log('Updating Like count for', postId);
+    var post = document.getElementById(postId);
+    if (post) {
+      console.log('post div found');
+      var likeBtn = post.querySelector('.like');
+      var likeCountSpan = likeBtn.querySelector('.like-count');
+      if (likeCountSpan) {
+        likeCountSpan.textContent = likeCount;
+      } else {
+        console.log('No buttonElement found');
+      }
+    } else {
+      console.log('no post with postId found');
+    }
+
   }
 </script>

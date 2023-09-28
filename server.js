@@ -585,6 +585,29 @@ async function fetchReelLikes() {
   }
 }
 
+async function fetchPostLikes() {
+  let poolConnection;
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const result = await request.query("SELECT * FROM likes");
+    const postlikes = result.recordset.map((record) => ({
+      UserId: record.UserId,
+      postId: record.PostId,
+    }));
+    console.log("Retrieved post like data:", postlikes);
+
+    return postlikes;
+  } catch (error) {
+    console.error("Error fetching post data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
 async function fetchReelComments() {
   let poolConnection;
 
@@ -652,7 +675,6 @@ async function fetchPostsData() {
       const datePosted = new Date(record.date_posted);
       const postId = record.PostId;
       const likes = record.num_likes;
-      const isLiking = record.is_liking;
       const currentDateTime = new Date();
       const datePostedDateTime = new Date(datePosted);
       const timeDifference = currentDateTime - datePostedDateTime;
@@ -671,15 +693,14 @@ async function fetchPostsData() {
         content: record.content,
         timeAgo: getTimeAgo(timeDifference),
         likes: likes,
-        isLiking: isLiking,
       };
     });
 
-    console.log("Retrieved reels data:", transformedData);
+    console.log("Retrieved post data:", transformedData);
 
     return transformedData;
   } catch (error) {
-    console.error("Error fetching reels data:", error);
+    console.error("Error fetching post data:", error);
     throw error;
   } finally {
     if (poolConnection) {
@@ -734,6 +755,14 @@ io.on("connection", (socket) => {
   fetchReelLikes()
     .then((reelsLikes) => {
       socket.emit("reelsLike", reelsLikes);
+    })
+    .catch((error) => {
+      console.error("Error handling Socket.IO connection:", error);
+    });
+
+  fetchPostLikes()
+    .then((postlikes) => {
+      socket.emit("postLike", postlikes);
     })
     .catch((error) => {
       console.error("Error handling Socket.IO connection:", error);
@@ -808,14 +837,14 @@ async function insertOrRemoveLikefromPost(UserId, postId) {
       console.log("Inserted UserId:", UserId);
       console.log("Inserted postId:", postId);
       await pool.close();
-      return true; 
+      return "liked";
     } else {
       const removeQuery = `DELETE FROM likes WHERE UserId = '${UserId}' AND postId = '${postId}'`;
       await request.query(removeQuery);
       console.log("Removed UserId:", UserId);
       console.log("Removed postId:", postId);
       await pool.close();
-      return true; 
+      return "unlike";
     }
   } catch (error) {
     console.error(
@@ -842,11 +871,12 @@ app.post("/likeReel", async (req, res) => {
 app.post("/likepost", async (req, res) => {
   const { UserId, postId } = req.body;
 
-  // Call the async function for inserting/removing likes
   const actionResult = await insertOrRemoveLikefromPost(UserId, postId);
 
   if (actionResult) {
-    res.send("UserId and reelId processed successfully");
+    const likeStatus = actionResult === "liked" ? "like" : "unlike";
+
+    res.status(200).json({ likeStatus, postId, UserId });
   } else {
     res.status(500).send("Error processing data into the database");
   }
@@ -899,6 +929,39 @@ async function checkIfReelLiked(UserId, reelId) {
 
   return likeCount > 0;
 }
+
+async function checkIfPostLiked(UserId, postId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT * FROM likes WHERE UserId = '${UserId}' AND postId = '${postId}'`;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      return "Notliked";
+    } else {
+      return "liked";
+    }
+  } catch (error) {
+    console.error("Error checking like from the database:", error);
+    return false;
+  }
+}
+
+app.post("/checkLikeforPost", async (req, res) => {
+  const { UserId, postId } = req.body;
+
+  const actionResult = await checkIfPostLiked(UserId, postId);
+
+  if (actionResult) {
+    const likeStatus = actionResult === "Notliked" ? "notLiked" : "liked";
+
+    res.status(200).json({ likeStatus, postId, UserId });
+  } else {
+    res.status(500).send("Error processing data from the database");
+  }
+});
 
 app.post("/checkLike", async (req, res) => {
   const { UserId, reelId } = req.body;
