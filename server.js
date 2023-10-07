@@ -68,124 +68,145 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
-// Keep track of connected users
 const connectedUsers = new Map();
+const userConnections = {};
 
-// WebSocket server event handlers
-webSocketServer.on("request", (request) => {
-  // Retrieve the UserId from the query parameters
-  const UserId = request.resourceURL.query.UserId;
-  const sessionId = request.resourceURL.query.sessionID;
-  const UserIdx = request.resourceURL.query.UserIdx;
+io.on("connection", (socket) => {
+  const { UserId, sessionId, UserIdx } = socket.handshake.query;
+  userConnections[UserIdx] = socket;
 
-  // Check if the user is already connected
   if (isUserConnected(UserId)) {
     console.log(`User with UserId ${UserId} is already connected`);
     const connection = getUserConnection(UserId);
     if (connection) {
-      // Reuse the existing session
       console.log(`Client reconnected with UserId: ${UserId}`);
       connection.sessionId = sessionId;
       sendRoomInfo();
     } else {
-      // User not found, close the connection
       console.log(`User with UserId ${UserId} not found`);
-      request.reject();
+      socket.disconnect(true);
     }
     return;
   }
-
-  // Accept the connection request
-  const connection = request.accept(null, request.origin);
 
   console.log(`Client connected with UserId: ${UserId}`);
   console.log(`Client connected with SessionId: ${sessionId}`);
   console.log(`Client connected with UserIdx: ${UserIdx}`);
 
-  // Store the connection object and session information in the connectedUsers Map
-  connection.UserId = UserId;
-  connection.UserIdx = UserIdx;
-  connection.sessionId = sessionId;
-  connectedUsers.set(UserId, connection);
+  socket.UserId = UserId;
+  socket.UserIdx = UserIdx;
+  socket.sessionId = sessionId;
+  connectedUsers.set(UserId, socket);
 
-  // Send the number of people on the server and their UserIds
   sendRoomInfo();
 
-  // Handle WebSocket messages
-  connection.on("message", (message) => {
-    if (message.type === "utf8") {
-      var receivedMessage = JSON.parse(message.utf8Data);
-
-      if (receivedMessage.type === "incoming_call") {
-        handleIncomingCall(receivedMessage);
-      } else if (receivedMessage.type === "hangup") {
-        hangupIncomingCall(receivedMessage);
-      } else if (receivedMessage.type === "offer") {
-        handleIncomingOffer(receivedMessage);
-      } else if (receivedMessage.type === "answer") {
-        hangupOutgoingAnswer(receivedMessage);
-      } else if (receivedMessage.type === "candidate") {
-        hangupOutgoingcandidate(receivedMessage);
-      } else {
-        // Process other message types
-        // console.log('Received message:', message.utf8Data);
-        if (receivedMessage.error) {
-          // Handle the error case
-          console.log("Error:", receivedMessage.error);
-          return;
-        }
-        // Send a response message
-        connection.sendUTF(message.utf8Data);
+  socket.on("message", (message) => {
+    const parsedMessage = JSON.parse(message);
+    console.log("this is the message type", parsedMessage.type);
+    if (parsedMessage.type === "incoming_call") {
+      handleIncomingCall(parsedMessage);
+    } else if (parsedMessage.type === "hangup") {
+      hangupIncomingCall(parsedMessage);
+    } else if (parsedMessage.type === "offer") {
+      handleIncomingOffer(parsedMessage);
+    } else if (parsedMessage.type === "answer") {
+      handleOutgoingAnswer(parsedMessage);
+    } else if (parsedMessage.type === "candidate") {
+      hangupOutgoingcandidate(parsedMessage);
+    } else {
+      if (parsedMessage.error) {
+        console.log("Error:", parsedMessage.error);
+        return;
       }
+      socket.emit("message", parsedMessage);
     }
   });
 
-  // Handle WebSocket connection close
-  connection.on("close", () => {
-    // Remove the connection from connectedUsers Map
+  // Handle socket disconnection
+  socket.on("disconnect", () => {
     connectedUsers.delete(UserId);
     console.log(`Client disconnected with UserId: ${UserId}`);
-
-    // Send the updated room information
+    delete userConnections[UserIdx];
     sendRoomInfo();
+  });
+
+  socket.on("fetchReels", () => {
+    fetchReelsData()
+      .then((reelsData) => {
+        socket.emit("reels", reelsData);
+      })
+      .catch((error) => {
+        console.error("Error fetching reels data:", error);
+      });
+  });
+
+  socket.on("fetchPosts", () => {
+    fetchPostsData()
+      .then((transformedData) => {
+        socket.emit("posts", transformedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching posts data:", error);
+      });
+  });
+
+  socket.on("reelsLike", () => {
+    fetchReelLikes()
+      .then((reelsLikes) => {
+        socket.emit("reelsLike", reelsLikes);
+      })
+      .catch((error) => {
+        console.error("Error fetching reels like data:", error);
+      });
+  });
+
+  socket.on("postLike", () => {
+    fetchPostLikes()
+      .then((postlikes) => {
+        socket.emit("postLike", postlikes);
+      })
+      .catch((error) => {
+        console.error("Error fetching posts likes data:", error);
+      });
+  });
+
+  socket.on("reelsComment", () => {
+    fetchReelComments()
+      .then((reelsComments) => {
+        socket.emit("reelsComment", reelsComments);
+      })
+      .catch((error) => {
+        console.error("Error fetching reels comment data:", error);
+      });
+  });
+
+  socket.on("reelsBookmark", () => {
+    fetchReelBookmarks()
+      .then((reelsbookmarks) => {
+        socket.emit("reelsBookmark", reelsbookmarks);
+      })
+      .catch((error) => {
+        console.error("Error fetching reels bookmark data:", error);
+      });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
   });
 });
 
-// Function to get the connection of a user by their UserId
-function getUserConnection(UserId) {
-  return connectedUsers.get(UserId);
-}
-
-// Function to check if a user is already connected
 function isUserConnected(UserId) {
   return connectedUsers.has(UserId);
 }
 
+function getUserConnection(UserId) {
+  return connectedUsers.get(UserId);
+}
+
 function sendRoomInfo() {
-  const roomInfo = Array.from(connectedUsers.values()).map((connection) => ({
-    UserId: connection.UserId,
-    sessionId: connection.sessionId,
-  }));
-
-  console.log("Number of people on the server:", roomInfo.length);
-  if (roomInfo.length >= 1) {
-    console.log(
-      "UserIds:",
-      roomInfo.map((user) => user.UserId)
-    );
-  } else {
-    console.log("No user on server");
-  }
-
-  // Send the room information to all connected clients
-  connectedUsers.forEach((connection) => {
-    connection.sendUTF(
-      JSON.stringify({
-        count: roomInfo.length,
-        ids: roomInfo,
-      })
-    );
-  });
+  const numUsers = connectedUsers.size;
+  const userIds = Array.from(connectedUsers.keys());
+  io.emit("roomInfo", { numUsers, userIds });
 }
 
 function handleIncomingCall(message) {
@@ -196,8 +217,8 @@ function handleIncomingCall(message) {
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
-    // console.log('Sending signaling message:', signalingMessage);
-    recipientConnection.sendUTF(JSON.stringify(signalingMessage));
+    // Emit an event to the recipient's socket
+    recipientConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("Incoming message sent to UserB:", message.callerUserId);
   } else {
     console.log("Incoming connection not found:", message.callerUserId);
@@ -212,23 +233,28 @@ function handleIncomingOffer(message) {
       type: "offer",
       offer: message.offer,
       mediaConstraints: message.mediaConstraints,
-      callerUserId: message.callerUserId, // Include the recipient's ID
-      callertoUserId: message.callertoUserId, // Include the recipient's ID
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
       sessionId: message.sessionId,
     };
-    recipientConnection.sendUTF(JSON.stringify(signalingMessage));
-
+    recipientConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("Offer message sent to UserB:", message.callerUserId);
   } else {
     console.log("UserB connection not found:", message.callerUserId);
+    const sameConnection = getUserConnection(message.callerUserId);
+    const signalingMessage = {
+      type: "notAvailable",
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+      sessionId: message.sessionId,
+    };
+    sameConnection.emit("message", JSON.stringify(signalingMessage));
   }
 }
 
 function hangupIncomingCall(message) {
-  // Perform actions for hangup message
   console.log("Hangup message received:", message);
 
-  // Send the hangup message to UserA
   const userAConnection = getUserConnection(message.callertoUserId);
   if (userAConnection) {
     const signalingMessage = {
@@ -236,28 +262,26 @@ function hangupIncomingCall(message) {
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
-    userAConnection.sendUTF(JSON.stringify(signalingMessage));
+    userAConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("Hangup message sent to UserA:", message.callertoUserId);
   } else {
     console.log("UserA connection not found:", message.callertoUserId);
   }
 }
 
-function hangupOutgoingAnswer(message) {
-  // Perform actions for hangup message
+function handleOutgoingAnswer(message) {
   console.log("Answer message received:", message);
 
-  // Send the hangup message to UserA
   const userAConnection = getRecipientConnection(message.callertoUserId);
   if (userAConnection) {
     const signalingMessage = {
       type: "answer",
-      answer: message.answer, // Update to access the sdp property correctly
+      answer: message.answer,
       mediaConstraints: message.mediaConstraints,
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
-    userAConnection.sendUTF(JSON.stringify(signalingMessage));
+    userAConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("Answer message sent to UserA:", message.callertoUserId);
   } else {
     console.log("UserA connection not found:", message.callertoUserId);
@@ -265,19 +289,18 @@ function hangupOutgoingAnswer(message) {
 }
 
 function hangupOutgoingcandidate(message) {
-  // Perform actions for hangup message
   console.log("candidate message received:", message);
+  console.log("candidate message received:", message.callertoUserId);
 
-  // Send the hangup message to UserA
   const userAConnection = getRecipientConnection(message.callertoUserId);
   if (userAConnection) {
     const signalingMessage = {
       type: "candidate",
-      candidate: message.candidate, // Update to access the sdp property correctly
+      candidate: message.candidates,
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
-    userAConnection.sendUTF(JSON.stringify(signalingMessage));
+    userAConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("candidate message sent to UserA:", message.callertoUserId);
   } else {
     console.log("UserA connection not found:", message.callertoUserId);
@@ -285,20 +308,13 @@ function hangupOutgoingcandidate(message) {
 }
 
 function getRecipientConnection(UserIdx) {
-  for (const connection of connectedUsers.values()) {
-    if (connection.UserIdx === UserIdx) {
-      return connection;
-    }
-  }
-  return null;
+  return userConnections[UserIdx] || null;
 }
 
 app.get("/start", (req, res) => {
-  // Send the response
   res.send("starting........");
 });
 app.post("/start", (req, res) => {
-  // Send the response
   res.send("Room set up");
 });
 
@@ -709,6 +725,132 @@ async function fetchPostsData() {
   }
 }
 
+async function fetchPostForEachUser(UserId) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+
+    const request = new sql.Request(poolConnection);
+    request.input("UserId", sql.VarChar, UserId);
+    const result = await request.query(`
+    SELECT
+      User_Profile.Surname,
+      User_Profile.First_Name,
+      User_Profile.Passport,
+      posts.UserId,
+      posts.PostId,
+      posts.title,
+      posts.content,
+      posts.image,
+      posts.video,
+      posts.date_posted,
+      COUNT(likes.PostId) AS num_likes,
+      MAX(CASE WHEN likes.UserId = posts.UserId THEN 1 ELSE 0 END) AS is_liking
+    FROM
+      posts
+    JOIN
+      User_Profile ON User_Profile.UserId = posts.UserId
+    LEFT JOIN
+      likes ON likes.PostId = posts.PostId
+    WHERE
+      posts.UserId = @UserId
+    GROUP BY
+      User_Profile.Surname,
+      User_Profile.First_Name,
+      User_Profile.Passport,
+      posts.UserId,
+      posts.PostId,
+      posts.title,
+      posts.content,
+      posts.image,
+      posts.video,
+      posts.date_posted
+    ORDER BY
+      posts.date_posted DESC
+  `);
+
+    const transformedData = result.recordset.map((record) => {
+      const datePosted = new Date(record.date_posted);
+      const postId = record.PostId;
+      const likes = record.num_likes;
+      const currentDateTime = new Date();
+      const datePostedDateTime = new Date(datePosted);
+      const timeDifference = currentDateTime - datePostedDateTime;
+      const passport = record.Passport || "DefaultImage.png";
+      const getPassport = `UserPassport/${passport}`;
+
+      return {
+        surname: record.Surname,
+        firstName: record.First_Name,
+        UserId: record.UserId,
+        passport: getPassport,
+        postId: postId,
+        image: record.image,
+        video: record.video,
+        title: record.title,
+        content: record.content,
+        timeAgo: getTimeAgo(timeDifference),
+        likes: likes,
+      };
+    });
+
+    console.log("Retrieved post data:", transformedData);
+
+    return transformedData;
+  } catch (error) {
+    console.error("Error fetching post data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+async function fetchMessageForEachUser(UserId, UserIdx) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+
+    const request = new sql.Request(poolConnection);
+    request.input("UserId", sql.VarChar, UserId);
+    request.input("UserIdx", sql.VarChar, UserIdx);
+    const result = await request.query(
+      ` SELECT * FROM chats WHERE (UserId = @UserId AND recipientId = @UserIdx) OR (UserId = @UserIdx AND recipientId = @UserId) ORDER BY time_sent ASC; `
+    );
+
+    const transformedData = result.recordset.map((record) => {
+      const datePosted = new Date(record.time_sent);
+      const currentDateTime = new Date();
+      const datePostedDateTime = new Date(datePosted);
+      const timeDifference = currentDateTime - datePostedDateTime;
+
+      return {
+        chatId: record.chatId,
+        senderId: record.senderId,
+        sentimage: record.sentimage,
+        voice_notes: record.voice_notes,
+        sentvideo: record.sentvideo,
+        time_sent: record.time_sent,
+        message: record.Sent,
+      };
+    });
+
+    console.log("Retrieved message data:", transformedData);
+
+    return transformedData;
+  } catch (error) {
+    console.error("Error fetching message data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
 function getTimeAgo(timeDifference) {
   const seconds = Math.floor(timeDifference / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -731,62 +873,6 @@ function getTimeAgo(timeDifference) {
     return seconds + " seconds ago";
   }
 }
-
-io.on("connection", (socket) => {
-  const { UserId } = socket.handshake.query;
-  console.log("User on reels connected:" + UserId);
-
-  fetchReelsData()
-    .then((reelsData) => {
-      socket.emit("reels", reelsData);
-    })
-    .catch((error) => {
-      console.error("Error handling Socket.IO connection:", error);
-    });
-
-  fetchPostsData()
-    .then((transformedData) => {
-      socket.emit("posts", transformedData);
-    })
-    .catch((error) => {
-      console.error("Error handling Socket.IO connection:", error);
-    });
-
-  fetchReelLikes()
-    .then((reelsLikes) => {
-      socket.emit("reelsLike", reelsLikes);
-    })
-    .catch((error) => {
-      console.error("Error handling Socket.IO connection:", error);
-    });
-
-  fetchPostLikes()
-    .then((postlikes) => {
-      socket.emit("postLike", postlikes);
-    })
-    .catch((error) => {
-      console.error("Error handling Socket.IO connection:", error);
-    });
-
-  fetchReelComments()
-    .then((reelsComments) => {
-      socket.emit("reelsComment", reelsComments);
-    })
-    .catch((error) => {
-      console.error("Error handling Socket.IO connection:", error);
-    });
-
-  fetchReelBookmarks()
-    .then((reelsbookmarks) => {
-      socket.emit("reelsBookmark", reelsbookmarks);
-    })
-    .catch((error) => {
-      console.error("Error handling Socket.IO connection:", error);
-    });
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-});
 
 async function insertOrRemoveLike(UserId, reelId) {
   try {
@@ -858,13 +944,39 @@ async function insertOrRemoveLikefromPost(UserId, postId) {
 app.post("/likeReel", async (req, res) => {
   const { UserId, reelId } = req.body;
 
-  // Call the async function for inserting/removing likes
   const actionResult = await insertOrRemoveLike(UserId, reelId);
 
   if (actionResult) {
     res.send("UserId and reelId processed successfully");
   } else {
     res.status(500).send("Error processing data into the database");
+  }
+});
+
+app.post("/fetchPostForEachUser", async (req, res) => {
+  const { UserId } = req.body;
+
+  try {
+    const actionResult = await fetchPostForEachUser(UserId);
+    io.emit("posts", actionResult);
+    res.status(200).json(actionResult);
+  } catch (error) {
+    console.error("Error processing data from the database", error);
+    res.status(500).send("Error processing data from the database");
+  }
+});
+
+app.post("/fetchMessageForEachUser", async (req, res) => {
+  const { UserId, UserIdx } = req.body;
+  console.log("Recived data to check chat", UserId, "and", UserIdx);
+
+  try {
+    const actionResult = await fetchMessageForEachUser(UserId, UserIdx);
+    io.emit("messages", actionResult);
+    res.status(200).json(actionResult);
+  } catch (error) {
+    console.error("Error processing data from the database", error);
+    res.status(500).send("Error processing data from the database");
   }
 });
 

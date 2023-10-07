@@ -1,3 +1,24 @@
+<!-- <script>
+          $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const UserIdx = urlParams.get('UserIdx');
+            const sessionId = "<?php echo $sessionID ?>";
+            console.log('data to be sent to sever for chat', UserIdx, 'and',sessionId);
+
+            $.post('sendsession.php', {
+                UserIdx: UserIdx,
+                sessionId: sessionId
+              })
+              .done(function(response) {
+                console.log('response gotten back from server from chat',response);
+              })
+              .fail(function(xhr, status, error) {
+                console.error(error);
+              });
+
+          });
+        </script> -->
+
 <?php
 // Start the PHP session
 session_start();
@@ -8,7 +29,7 @@ $UserIdx = $_POST['UserIdx'];
 $sessionId = $_POST['sessionId'];
 
 // Return a response
-echo 'UserIdx received: ' . $UserIdx;
+// echo 'UserIdx received: ' . $UserIdx;
 
 // Set the URL of the Node.js server
 $url = 'http://localhost:8888/start';

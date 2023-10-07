@@ -207,7 +207,6 @@ if (isset($_SESSION['UserId'])) {
                 <div class="col-md-12">
                     <h3 class="text-center text-uppercase text-success">Posts</h3>
                     <div id="posts" class="posts">
-                        <!-- Your posts content goes here -->
                     </div>
                 </div>
             </div>
@@ -289,9 +288,7 @@ if (isset($_SESSION['UserId'])) {
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/owl.carousel.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/owl.theme.default.min.css">
-    <script src="js/owl.carousel.min.js"></script>
     <script src="js/sweetalert2@10.js"></script>';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<script src="country-states.js"></script>';
@@ -783,6 +780,7 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
   }
 </script>
 <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+<script src="js/owl.carousel.min.js"></script>
 
 <script>
   var UserId = "<?php echo $_SESSION['UserId']; ?>";
@@ -795,44 +793,29 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
 
   socket.on('connect', () => {
     console.log('Socket.IO connection established');
+    const formData = new FormData();
+    formData.append('UserId', UserId);
+
+    fetch('http://localhost:8888/fetchPostForEachUser', {
+        method: 'POST',
+        body: formData,
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error finding post');
+        }
+        return response.json();
+      })
+      .then((result) => {
+        result.forEach((post) => {
+          loadNewsFeed(post);
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   });
 
-  socket.on('posts', (data) => {
-  data.forEach((transformedData, index) => {
-    if (transformedData.UserId === UserId) {
-      console.log(`Received post data for UserId ${UserId} #${index + 1}:`);
-      console.log('UserId:', transformedData.UserId);
-      console.log('surname:', transformedData.surname);
-      console.log('firstName:', transformedData.firstName);
-      console.log('passport:', transformedData.passport);
-      console.log('postId:', transformedData.postId);
-      console.log('image:', transformedData.image);
-      console.log('video:', transformedData.video);
-      console.log('title:', transformedData.title);
-      console.log('content:', transformedData.content);
-      console.log('timeAgo:', transformedData.timeAgo);
-      console.log('likes:', transformedData.likes);
-
-      loadNewsFeed(transformedData);
-    }
-  });
-});
-  var likeCounts = {};
-
-  socket.on('postLike', (data) => {
-    console.log('Received post likes:', data);
-    data.forEach((postlike) => {
-      console.log('UserId:', postlike.UserId);
-      console.log('postId:', postlike.postId);
-
-      if (!likeCounts[postlike.postId]) {
-        likeCounts[postlike.postId] = 0;
-      }
-
-      likeCounts[postlike.postId] += 1;
-      updateLikeCount(postlike.postId, likeCounts[postlike.postId]);
-    });
-  });
 
 
   function likepost(postId) {
