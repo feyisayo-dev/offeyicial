@@ -80,7 +80,6 @@ sqlsrv_close($conn);
 <?php
 include 'db.php';
 $UserId = $_SESSION['UserId'];
-// Get the surname and first name of the user with the UserId from the database
 $rsql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
 $rstmt = sqlsrv_prepare($conn, $rsql);
 if (sqlsrv_execute($rstmt)) {
@@ -95,7 +94,6 @@ $sql = "SELECT * FROM User_Profile WHERE UserId = ?";
 $params = array($recipientId);
 $stmt = sqlsrv_query($conn, $sql, $params);
 if ($stmt === false || !sqlsrv_has_rows($stmt)) {
-  // UserId not found, redirect to 404 error page
   header("Location: error404.php");
   exit();
 }
@@ -195,43 +193,37 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         </ul>
       </div>
       <div class="chat-header">
-        <h1>
-          <?php
-          include 'db.php';
+        <?php
+        include 'db.php';
+        $recipientId = $_GET['UserIdx'];
 
-          // Get the UserId of the user you are talking to
-          $recipientId = $_GET['UserIdx'];
-
-          // Get the name of the user you are talking to
-          $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-          $stmt = sqlsrv_prepare($conn, $sql);
-          if (sqlsrv_execute($stmt)) {
-            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-              $recipientSurname = $row['Surname'];
-              $recipientFirstName = $row['First_Name'];
-              $Passport = $row['Passport'];
-              if (empty($Passport)) {
-                $recipientPassport = "UserPassport/DefaultImage.png";
-              } else {
-                $recipientPassport = "UserPassport/" . $Passport;
-              }
+        $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+        $stmt = sqlsrv_prepare($conn, $sql);
+        if (sqlsrv_execute($stmt)) {
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $recipientSurname = $row['Surname'];
+            $recipientFirstName = $row['First_Name'];
+            $Passport = $row['Passport'];
+            if (empty($Passport)) {
+              $recipientPassport = "UserPassport/DefaultImage.png";
+            } else {
+              $recipientPassport = "UserPassport/" . $Passport;
             }
           }
+        }
 
-          $UserId = $_SESSION['UserId'];
+        $UserId = $_SESSION['UserId'];
 
-          // Get the surname and first name of the user with the UserId from the database
-          $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
-          $stmt = sqlsrv_prepare($conn, $sql);
-          if (sqlsrv_execute($stmt)) {
-            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-              $Surname = $row['Surname'];
-              $First_Name = $row['First_Name'];
-            }
-            echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
-            echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
-            // Add the reset button
-            echo '<div class="dropdown">
+        $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+        $stmt = sqlsrv_prepare($conn, $sql);
+        if (sqlsrv_execute($stmt)) {
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $Surname = $row['Surname'];
+            $First_Name = $row['First_Name'];
+          }
+          echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
+          echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
+          echo '<div class="dropdown">
             <button class="dropdown-toggle custom-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#chtheme" aria-controls="chtheme">
               <span class="dots"></span>
               <span class="dots"></span>
@@ -242,115 +234,118 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
             </ul>
           </div>';
-            echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
-          }
-          echo '</div>';
-          ?>
-          <div class="chatbox">
-            <div id="video-preview"></div>
-            <div class="form-group">
-              <div class="row">
-                <div class="foot">
-                  <div class="emoji-picker">
-                    <!-- emoji table code goes here -->
-                    <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
-                      <i class="fas fa-smile"></i>
-                    </button>
-                    <div class="emoji-table-container" style="display:none">
-                      <table>
-                        <tr>
-                          <td onclick="insertEmoji('&#x1F600;')">😀</td>
-                          <td onclick="insertEmoji('&#x1F601;')">😁</td>
-                          <td onclick="insertEmoji('&#x1F602;')">😂</td>
-                          <td onclick="insertEmoji('&#x1F603;')">😃</td>
-                          <td onclick="insertEmoji('&#x1F604;')">😄</td>
-                          <td onclick="insertEmoji('&#x1F605;')">😅</td>
-                        </tr>
-                        <tr>
-                          <td onclick="insertEmoji('&#x1F606;')">😆</td>
-                          <td onclick="insertEmoji('&#x1F607;')">😇</td>
-                          <td onclick="insertEmoji('&#x1F608;')">😈</td>
-                          <td onclick="insertEmoji('&#x1F609;')">😉</td>
-                          <td onclick="insertEmoji('&#x1F610;')">😐</td>
-                          <td onclick="insertEmoji('&#x1F611;')">😑</td>
-                        </tr>
-                        <!-- Add more rows and columns for additional emojis -->
-                        <tr>
-                          <td onclick="insertEmoji('&#x1F60A;')">😊</td>
-                          <td onclick="insertEmoji('&#x1F60B;')">😋</td>
-                          <td onclick="insertEmoji('&#x1F60C;')">😌</td>
-                          <td onclick="insertEmoji('&#x1F60D;')">😍</td>
-                          <td onclick="insertEmoji('&#x1F60E;')">😎</td>
-                          <td onclick="insertEmoji('&#x1F60F;')">😏</td>
-                        </tr>
-                        <tr>
-                          <td onclick="insertEmoji('&#x1F612;')">😒</td>
-                          <td onclick="insertEmoji('&#x1F613;')">😓</td>
-                          <td onclick="insertEmoji('&#x1F616;')">😖</td>
-                          <td onclick="insertEmoji('&#x1F615;')">😕</td>
-                          <td onclick="insertEmoji('&#x1F617;')">😗</td>
-                          <td onclick="insertEmoji('&#x1F618;')">😘</td>
-                        </tr>
-                        <tr>
-                          <td onclick="insertEmoji('&#x1F619;')">😙</td>
-                          <td onclick="insertEmoji('&#x1F61A;')">😚</td>
-                          <td onclick="insertEmoji('&#x1F61B;')">😛</td>
-                          <td onclick="insertEmoji('&#x1F61C;')">😜</td>
-                          <td onclick="insertEmoji('&#x1F61D;')">😝</td>
-                          <td onclick="insertEmoji('&#x1F61E;')">😞</td>
-                        </tr>
-                      </table>
-                    </div>
+          echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
+        }
+        echo '</div>';
+        ?>
+        <div class="chatbox">
+          <div id="video-preview"></div>
+          <div class="form-group">
+            <div class="row">
+              <div class="foot">
+                <div class="emoji-picker">
+                  <!-- emoji table code goes here -->
+                  <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
+                    <i class="fas fa-smile"></i>
+                  </button>
+                  <div class="emoji-table-container" style="display:none">
+                    <table>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F600;')">😀</td>
+                        <td onclick="insertEmoji('&#x1F601;')">😁</td>
+                        <td onclick="insertEmoji('&#x1F602;')">😂</td>
+                        <td onclick="insertEmoji('&#x1F603;')">😃</td>
+                        <td onclick="insertEmoji('&#x1F604;')">😄</td>
+                        <td onclick="insertEmoji('&#x1F605;')">😅</td>
+                      </tr>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F606;')">😆</td>
+                        <td onclick="insertEmoji('&#x1F607;')">😇</td>
+                        <td onclick="insertEmoji('&#x1F608;')">😈</td>
+                        <td onclick="insertEmoji('&#x1F609;')">😉</td>
+                        <td onclick="insertEmoji('&#x1F610;')">😐</td>
+                        <td onclick="insertEmoji('&#x1F611;')">😑</td>
+                      </tr>
+                      <!-- Add more rows and columns for additional emojis -->
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                        <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                        <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                        <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                        <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                        <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                      </tr>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                        <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                        <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                        <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                        <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                        <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                      </tr>
+                      <tr>
+                        <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                        <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                        <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                        <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                        <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                        <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                      </tr>
+                    </table>
                   </div>
-                  <div class="custom-file">
-                    <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
-                    <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
-                  </div>
-                  <div class="custom-file">
-                    <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
-                    <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
-                  </div>
+                </div>
+                <div class="custom-file">
+                  <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
+                  <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
+                </div>
+                <div class="custom-file">
+                  <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
+                  <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
+                </div>
 
 
-                  <div class="d-flex">
-                    <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
-                    <div class="button-container">
-                      <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
-                        <i class="bi bi-mic"></i>
-                      </button>
-                      <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
-                        <i class="bi bi-camera-video"></i>
-                      </button>
-                      <!-- Add any other buttons if needed -->
-                    </div>
-                    <div id="sound-visualizer" class="boxContainer">
-                      <div class="box box1"></div>
-                      <div class="box box2"></div>
-                      <div class="box box3"></div>
-                      <div class="box box4"></div>
-                      <div class="box box5"></div>
-                    </div>
-                    <button type="submit" class="submit" id="send-button" style="display: none;">
-                      <i class="bi bi-send"></i>
+                <div class="d-flex">
+                  <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
+                  <div class="button-container">
+                    <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                      <i class="bi bi-mic"></i>
                     </button>
+                    <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                      <i class="bi bi-camera-video"></i>
+                    </button>
+                    <!-- Add any other buttons if needed -->
                   </div>
+                  <div id="sound-visualizer" class="boxContainer">
+                    <div class="box box1"></div>
+                    <div class="box box2"></div>
+                    <div class="box box3"></div>
+                    <div class="box box4"></div>
+                    <div class="box box5"></div>
+                  </div>
+                  <div id="video-box" class="video-box">
+                    <video></video>
+                  </div>
+                  <button type="submit" class="submit" id="send-button" style="display: none;">
+                    <i class="bi bi-send"></i>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="footer">
-            <?php
+        <div class="footer">
+          <?php
 
-            // Retrieve all the chats of the current user
-            $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-            $stmt = sqlsrv_query($conn, $sql);
-            if ($stmt === false) {
-              die(print_r(sqlsrv_errors(), true));
-            }
+          // Retrieve all the chats of the current user
+          $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+          $stmt = sqlsrv_query($conn, $sql);
+          if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+          }
 
-            // Display the chats in a list on the sidebar
-            echo '<!-- Button to open the sidebar -->
+          // Display the chats in a list on the sidebar
+          echo '<!-- Button to open the sidebar -->
 <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
 <i class="bi bi-chat"></i></button>
 
@@ -363,66 +358,64 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 <div class="offcanvas-body">
     <ul class="list-unstyled">';
 
-            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-              $recipientId = $row['recipientId'];
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $recipientId = $row['recipientId'];
 
-              // Get the name of the recipient
-              $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-              $stmt2 = sqlsrv_query($conn, $sql2);
-              if ($stmt2 === false) {
-                die(print_r(sqlsrv_errors(), true));
-              }
-
-              $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-              $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-              $Passport = $row2['Passport'];
-              if (empty($Passport)) {
-                $passportImage = "UserPassport/DefaultImage.png";
-              } else {
-                $passportImage = "UserPassport/" . $Passport;
-              }
-
-              // Display the recipient name and passport image in the list
-              echo '<li>';
-              echo '<div class="passport">';
-              echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
-              echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-              echo '</a>';
-              echo '</div>';
-              echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-              echo '</li>';
+            $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+            $stmt2 = sqlsrv_query($conn, $sql2);
+            if ($stmt2 === false) {
+              die(print_r(sqlsrv_errors(), true));
             }
 
-            echo '</ul>
+            $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+            $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+            $Passport = $row2['Passport'];
+            if (empty($Passport)) {
+              $passportImage = "UserPassport/DefaultImage.png";
+            } else {
+              $passportImage = "UserPassport/" . $Passport;
+            }
+
+            echo '<li>';
+            echo '<div class="passport">';
+            echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
+            echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
+            echo '</a>';
+            echo '</div>';
+            echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
+            echo '</li>';
+          }
+
+          echo '</ul>
 </div>
 </div>';
 
-            ?>
-          </div>
-          <!-- Ringing Box -->
-          <div class="ringing-box" id="ringingBox">
-            <div class="main">
-              <div class="profilering">
-                <div class="nameDiv">
-                  <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
-                </div>
-                <div class="status">
-                  <h2>Incoming Call</h2>
-                </div>
-                <div class="imageDiv">
-                  <img src="<?php echo $recipientPassport ?>" alt="profile pic">
-                </div>
+          ?>
+        </div>
+        <!-- Ringing Box -->
+        <div class="ringing-box" id="ringingBox">
+          <div class="main">
+            <div class="profilering">
+              <div class="nameDiv">
+                <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
               </div>
-              <div class="buttons">
-                <div class="reject">
-                  <button id="hangup_button_pop" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
-                </div>
-                <div class="answer">
-                  <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
-                </div>
+              <div class="status">
+                <h2>Incoming Call</h2>
+              </div>
+              <div class="imageDiv">
+                <img src="<?php echo $recipientPassport ?>" alt="profile pic">
+              </div>
+            </div>
+            <div class="buttons">
+              <div class="reject">
+                <button id="hangup_button_pop" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
+              </div>
+              <div class="answer">
+                <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
               </div>
             </div>
           </div>
+        </div>
       </div>
     </div>
     <div id="callInterface" style="display: none;">
@@ -487,191 +480,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         <!-- <script></script> -->
 
 
-        <script>
-          let mediaRecorder;
-          let isRecording = false;
-          let soundVisualizerInterval;
-          let soundVisualizer = document.getElementById('sound-visualizer');
-          let recordingType = 'voice';
-          let chunks = [];
-
-
-          function toggleButtons() {
-            var message = document.getElementById('message').value.trim();
-            var voiceButton = document.querySelector('.voice-note');
-            var videoButton = document.querySelector('.video-note');
-            var sendButton = document.getElementById('send-button');
-
-            if (message === '') {
-              voiceButton.style.display = 'inline-block';
-              videoButton.style.display = 'inline-block';
-              sendButton.style.display = 'none';
-            } else {
-              voiceButton.style.display = 'none';
-              videoButton.style.display = 'none';
-              sendButton.style.display = 'inline-block';
-            }
-          }
-          let startRecordingTime;
-
-          let maxRetries = 7; // Maximum number of retries
-          let retryDelay = 1000; // Delay between retries in milliseconds
-          function startRecording(type) {
-            if (isRecording) return;
-            isRecording = true;
-            startRecordingTime = Date.now();
-
-            if (type === 'voice') {
-              soundVisualizer.style.display = 'block';
-              soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
-            } else if (type === 'video') {
-              videoPreview.style.display = 'block';
-            }
-
-            function getMediaStreamWithRetry(retriesLeft) {
-              navigator.mediaDevices.getUserMedia({
-                  audio: true,
-                  video: type === 'video'
-                })
-                .then(function(stream) {
-                  if (stream.getAudioTracks().length === 0) {
-                    console.error('Microphone not providing audio data.');
-                    return;
-                  }
-
-                  mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm'
-                  });
-
-                  mediaRecorder.addEventListener("dataavailable", event => {
-                    console.log("Data available:", event.data);
-                    chunks.push(event.data);
-                  });
-
-                  mediaRecorder.onstop = async function() {
-                    isRecording = false;
-                    const blob = new Blob(chunks, {
-                      type: mediaRecorder.mimeType
-                    });
-                    console.log('Recording stopped. Blob created:', blob);
-                    const recordingDuration = (Date.now() - startRecordingTime) / 1000;
-
-                    console.log('Recording duration:', recordingDuration.toFixed(2), 'seconds');
-                    if (type === 'voice') {
-                      soundVisualizer.style.display = 'none';
-                      clearInterval(soundVisualizerInterval);
-                    }
-
-                    // Continue with async submission
-                    await submitVoiceNote(blob);
-
-                    chunks = [];
-                  };
-
-                  mediaRecorder.start();
-                  console.log('Recording started:', type);
-                })
-                .catch(function(error) {
-                  if (retriesLeft > 0) {
-                    console.error('Error accessing media devices. Retrying...', error);
-                    setTimeout(function() {
-                      getMediaStreamWithRetry(retriesLeft - 1);
-                    }, retryDelay);
-                  } else {
-                    console.error('Failed to access media devices after multiple retries:', error);
-                  }
-                });
-            }
-            getMediaStreamWithRetry(maxRetries);
-          }
-
-          function updateSoundVisualizer(loudness) {
-            const spikeContainers = document.querySelectorAll('.boxContainer .box');
-
-            spikeContainers.forEach((spike, index) => {
-              const animation = getAnimationForLoudness(loudness, index);
-              spike.style.animationName = animation;
-            });
-          }
-
-          function getAnimationForLoudness(loudness, index) {
-            if (loudness < 30) return 'quiet';
-            if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
-            const boxContainer = document.getElementById('sound-visualizer');
-            boxContainer.style.display = "flex"
-            return 'loud';
-          }
-
-          function stopRecording(type) {
-            if (mediaRecorder && isRecording) {
-              mediaRecorder.stop();
-            }
-          };
-
-
-          function cancelRecording() {
-            if (mediaRecorder && isRecording) {
-              mediaRecorder.stop();
-              isRecording = false;
-              deleteVoiceNote(); // Call the function to delete the voice note
-              console.log("To be deleted");
-            }
-            soundVisualizer.style.display = 'none';
-            clearInterval(soundVisualizerInterval);
-          }
-
-          async function deleteVoiceNote() {
-            const formData = new FormData();
-            formData.append('filename', voiceNoteFilename); // Provide the filename to delete
-
-            try {
-              const response = await fetch('delete_voice_note.php', {
-                method: 'POST',
-                body: formData
-              });
-              const result = await response.text();
-              console.log('Voice note deleted:', result);
-            } catch (error) {
-              console.error('Error deleting voice note:', error);
-            }
-          }
-
-          function submitRecordedNote() {
-            if (mediaRecorder && isRecording) {
-              mediaRecorder.stop();
-            }
-            if (isRecording && recordingType) {
-              isRecording = false;
-              if (recordingType === 'voice' && mediaRecorder && mediaRecorder.state === 'inactive') {
-                // submitVoiceNote(blob);
-              } else if (recordingType === 'video') {
-                // Handle video recording
-                isRecording = false;
-                if (recordingType === 'video' && mediaRecorder && mediaRecorder.state === 'inactive') {}
-              }
-              recordingType = null;
-            }
-          }
-
-          async function submitVoiceNote(blob) {
-            console.log('Blob to be submitted:', blob);
-            const recipientId = encodeURIComponent('<?php echo $_GET["UserIdx"]; ?>');
-            const formData = new FormData();
-            formData.append('voicenote', blob);
-            formData.append('recipientId', recipientId);
-
-            try {
-              const response = await fetch('send_voice_note.php', {
-                method: 'POST',
-                body: formData
-              });
-              const result = await response.text();
-              console.log('Voice note saved successfully:', result);
-            } catch (error) {
-              console.error('Error saving voice note:', error);
-            }
-          }
-        </script>
+        <!-- <script> </script> -->
 
         <script>
           var userB = '<?php echo $_GET["UserIdx"]; ?>';
@@ -700,11 +509,9 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           var sidebarToggle = document.getElementById('sidebar-toggle');
 
           sidebarToggle.addEventListener('mousedown', function(e) {
-            // get the current position of the button
             var posX = e.clientX - sidebarToggle.offsetLeft;
             var posY = e.clientY - sidebarToggle.offsetTop;
 
-            // make the button draggable
             document.addEventListener('mousemove', moveButton);
 
             function moveButton(e) {
@@ -712,39 +519,31 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               sidebarToggle.style.top = (e.clientY - posY) + 'px';
             }
 
-            // stop dragging the button when the mouse button is released
             document.addEventListener('mouseup', function() {
               document.removeEventListener('mousemove', moveButton);
             });
           });
         </script>
         <script>
-          // Function to save the theme settings to localStorage
           function savechatheaderTheme(theme) {
             localStorage.setItem('dropHeaderTheme', theme);
           }
 
-          // Function to apply the theme settings to the chatbox
           function applychatheaderTheme(theme) {
             var chatheader = document.querySelector('.chat-header');
             chatheader.style.backgroundColor = theme;
           }
 
-          // Check if there are previously saved theme settings in localStorage
           var savedDropdownTheme = localStorage.getItem('dropHeaderTheme');
           if (savedDropdownTheme) {
-            // Apply the saved theme settings
             applychatheaderTheme(savedDropdownTheme);
           }
 
-          // Get the chat-header element
           var chatHeader = document.querySelector('.chat-header');
 
-          // Event listener for right-click on chat-header
           chatHeader.addEventListener('contextmenu', function(event) {
-            event.preventDefault(); // Prevent the default contextmenu behavior
+            event.preventDefault();
 
-            // Remove any existing dropdown menus except the one within the clicked .chat-header element
             var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
             existingDropdownMenus.forEach(function(dropdownMenu) {
               if (dropdownMenu !== chatHeader.querySelector('.dropdown-menu')) {
@@ -760,7 +559,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             dropdownMenu.classList.add('dropdown-menu', 'change');
             dropdownMenu.appendChild(changeThemeOption);
 
-            // Append the dropdown menu to the clicked .chat-header element
             chatHeader.appendChild(dropdownMenu);
 
             var rect = event.target.getBoundingClientRect();
@@ -773,18 +571,13 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               var newColor = prompt('Enter a background color:');
               if (newColor !== null && newColor.trim() !== '') {
                 chatHeader.style.backgroundColor = newColor;
-                // Save the new theme settings
                 savechatheaderTheme(newColor);
-                // Apply the new theme settings
                 applychatheaderTheme(newColor);
               }
             });
 
-            // Event listener for clicks on the document
             document.addEventListener('click', function(event) {
-              // Check if the clicked element is within the dropdown menu or chat-header
               if (!dropdownMenu.contains(event.target) && !chatHeader.contains(event.target)) {
-                // If the clicked element is outside both, remove the dropdown from the DOM
                 dropdownMenu.remove();
               }
             });
@@ -792,12 +585,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         </script>
 
         <script>
-          // Function to save the theme settings to localStorage
           function savebackgroundTheme(theme) {
             localStorage.setItem('chatboxTheme', theme);
           }
 
-          // Function to apply the theme settings to the chatbox
           function applybackgroundTheme(theme) {
             var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
 
@@ -806,10 +597,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             });
           }
 
-          // Check if there are previously saved theme settings in localStorage
           var savedChatboxTheme = localStorage.getItem('chatboxTheme');
           if (savedChatboxTheme) {
-            // Apply the saved theme settings
             applybackgroundTheme(savedChatboxTheme);
           }
 
@@ -819,11 +608,9 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
             var clickedElement = event.target;
 
-            // Check if the clicked element is within a .chatbox element
             var chatbox = document.querySelector('.chatbox');
             var chatcontainer = document.querySelector('.chat-container');
 
-            // If the right-click is on the chatbox, run the second script's logic
             if (chatbox) {
               event.preventDefault();
 
@@ -835,7 +622,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               backgrounds.classList.add('changebackground');
               backgrounds.appendChild(changeThemeOption);
 
-              // Append the dropdown menu to the clicked .chatbox element
               chatbox.appendChild(backgrounds);
 
               var rect = event.target.getBoundingClientRect();
@@ -847,14 +633,11 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                 if (newColor !== null && newColor.trim() !== '') {
                   chatbox.style.backgroundColor = newColor;
                   chatcontainer.style.backgroundColor = newColor;
-                  // Save the new theme settings
                   savebackgroundTheme(newColor);
-                  // Apply the new theme settings
                   applybackgroundTheme(newColor);
                 }
               });
 
-              // Remove the popup when the user clicks outside of it
               document.addEventListener('click', function(e) {
                 if (!backgrounds.contains(e.target)) {
                   backgrounds.remove();
@@ -866,17 +649,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
 
         <script>
-          // Function to save the theme settings to localStorage
           function saveSentmessagebackgroundTheme(theme) {
             localStorage.setItem('messageSentcolor', theme);
           }
 
-          // Function to save the theme settings to localStorage
           function saveReceivedmessagebackgroundTheme(theme) {
             localStorage.setItem('messageReceivedcolor', theme);
           }
 
-          // Function to apply the theme settings to the chatbox
           function applySentmessagesbackgroundTheme(theme) {
             var sentbackground = document.querySelectorAll('.Sent');
             sentbackground.forEach(function(message) {
@@ -884,7 +664,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             });
           }
 
-          // Function to apply the theme settings to the chatbox
           function applyReceivedmessagesbackgroundTheme(theme) {
             var receivedbackground = document.querySelectorAll('.received');
             receivedbackground.forEach(function(message) {
@@ -892,19 +671,16 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             });
           }
 
-          // Function to save the theme settings to localStorage
           function saveSentmessageTheme(theme) {
             localStorage.setItem('messageSentTheme', theme);
             console.log('saved');
           }
 
-          // Function to save the theme settings to localStorage
           function saveReceivedmessageTheme(theme) {
             localStorage.setItem('messageReceivedTheme', theme);
             console.log('saved');
           }
 
-          // Function to apply the theme settings to the chatbox
           function applySentmessagesTheme(theme) {
             var sent = document.querySelectorAll('.Sent');
             sent.forEach(function(message) {
@@ -912,7 +688,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             });
           }
 
-          // Function to apply the theme settings to the chatbox
           function applyReceivedmessagesTheme(theme) {
             var received = document.querySelectorAll('.received');
             received.forEach(function(message) {
@@ -959,63 +734,236 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           });
           socket.on('connect', () => {
             console.log('Socket.IO connection established');
-            const formData = new FormData();
-            formData.append('UserId', UserId);
-            formData.append('UserIdx', UserIdx);
-
-            fetch('http://localhost:8888/fetchMessageForEachUser', {
-                method: 'POST',
-                body: formData,
-              })
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('Error finding messages');
-                }
-                return response.json();
-              })
-              .then((result) => {
-                result.forEach((messages) => {
-                  checkForNewMessages(messages);
-                });
-              })
-              .catch((error) => {
-                console.error(error);
-              });
+            socket.emit('userConnected', UserId);
+            socket.emit('fetchMessageForEachUser', {
+              UserId,
+              UserIdx
+            });
           });
+
+          socket.on('disconnect', () => {
+            socket.emit('userDisconnected', UserId);
+          });
+          socket.on('messageRead', (messageId) => {
+            console.log('This message has been read', messageId);
+          });
+
+          var icon = document.querySelector('.icon');
+
+          var onlineStatus = document.createElement('div');
+          onlineStatus.className = 'onlineStatus';
+          onlineStatus.id = 'online-status-' + UserIdx;
+          icon.appendChild(onlineStatus);
+          socket.on('userStatus', ({
+            UserIdx,
+            status
+          }) => {
+            console.log('this is the status for User', UserIdx, ':', status);
+            if (status === 'online') {
+              onlineStatus.style.boxShadow = 'rgb(11, 220, 77)';
+              onlineStatus.style.backgroundColor = 'green';
+            } else if (status === 'offline') {
+              onlineStatus.style.boxShadow = 'rgb(187, 27, 27)';
+              onlineStatus.style.backgroundColor = 'red';
+            } else {
+              onlineStatus.style.display = 'none';
+            }
+          });
+          let unreadMessageCount = 0;
+
+          socket.on('fetchMessageForEachUser', (data) => {
+            console.log('Received messages for each user:');
+            const hasUnreadMessages = data.some((result) => result.isRead === 0);
+
+            if (hasUnreadMessages) {
+              unreadMessageCount = data.filter((result) => result.isRead === 0).length;
+
+              if (unreadMessageCount === 1) {
+                const unreadMessageDiv = document.createElement('div');
+                unreadMessageDiv.classsName = 'unread-message';
+                unreadMessageDiv.textContent = 'Unread Message';
+                chatbox.appendChild(unreadMessageDiv);
+              } else {
+                const unreadMessageDiv = document.querySelector('.unread-message');
+                unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
+              }
+            }
+            // Continue with your existing logic for processing the messages
+            data.forEach((result, index) => {
+              console.log(`Received result #${index + 1}:`);
+              checkForNewMessages(result);
+            });
+          });
+
+
           var chatbox = document.querySelector('.chatbox');
 
+          var messages = document.getElementById('message');
+          var icon = document.querySelector('.icon');
 
+          var isTypingElement = null;
+          messages.addEventListener('keyup', function() {
+            socket.emit('typing', {
+              UserId,
+              UserIdx
+            });
+          });
+
+          socket.on('typing', (data) => {
+            console.log(`${data.UserId} is typing`);
+            if (isTypingElement) {
+              icon.removeChild(isTypingElement);
+              isTypingElement = null;
+            }
+            typingTimeout = setTimeout(function() {
+              if (isTypingElement) {
+                icon.removeChild(isTypingElement);
+                isTypingElement = null;
+              }
+            }, 1000);
+            isTypingElement = document.createElement('p');
+            isTypingElement.className = 'isTyping';
+            isTypingElement.innerHTML = `is typing`;
+            icon.appendChild(isTypingElement);
+          });
+
+          let debouncedMarkMessagesAsRead = debounce(markMessagesAsRead, 500);
+
+          chatbox.addEventListener('scroll', debouncedMarkMessagesAsRead);
+
+          function markMessagesAsRead() {
+            const messages = document.querySelectorAll('.message');
+            const chatbox = document.getElementById('chatbox');
+
+            messages.forEach((message) => {
+              const rect = message.getBoundingClientRect();
+
+              if (rect.top >= 0 && rect.bottom <= chatbox.clientHeight && rect.height / message.clientHeight >= 0.5) {
+                const messageId = message.id;
+                socket.emit('messageRead', {
+                  messageId
+                });
+              }
+            });
+          }
+
+          function debounce(func, delay) {
+            let timeout;
+            return function() {
+              const context = this;
+              const args = arguments;
+              clearTimeout(timeout);
+              timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+          }
+
+
+          async function getLastMessageIdFromChatHistory() {
+            return new Promise((resolve, reject) => {
+              const formData = new FormData();
+              formData.append('UserId', UserId);
+              formData.append('UserIdx', UserIdx);
+
+              fetch('http://localhost:8888/LastIdSeen', {
+                  method: 'POST',
+                  body: formData,
+                })
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error('Error checking last seen message');
+                  }
+                  return response.json();
+                })
+                .then((result) => {
+                  resolve(result.lastId);
+                })
+                .catch((error) => {
+                  reject(error);
+                });
+            });
+          }
+
+          async function setChatboxScrollPositionToLastSeen(lastSeenMessageId) {
+            const chatbox = document.querySelector('.chatbox');
+
+            function waitForElementToExist(elementId, maxAttempts, interval, callback) {
+              let attempts = 0;
+
+              function checkElement() {
+                console.log('this is the element Id', elementId);
+                const element = document.getElementById(elementId);
+                attempts++;
+
+                if (element) {
+                  callback(element);
+                } else if (attempts < maxAttempts) {
+                  setTimeout(checkElement, interval);
+                } else {
+                  console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
+                }
+              }
+
+              checkElement();
+            }
+
+            waitForElementToExist(lastSeenMessageId, 10, 1000, (lastSeenMessage) => {
+              if (lastSeenMessage) {
+                const position = lastSeenMessage.offsetTop + lastSeenMessage.clientHeight;
+                chatbox.scrollTop = position;
+                console.log(position, lastSeenMessage.offsetTop, lastSeenMessage.clientHeight);
+
+                // const redLine = document.createElement('div');
+                // redLine.style.width = '100%';
+                // redLine.style.height = '2px';
+                // redLine.style.backgroundColor = 'red';
+                // redLine.style.position = 'absolute';
+                // redLine.style.top = position + 'px';
+                // chatbox.appendChild(redLine);
+              } else {
+                console.log('Message container not found');
+              }
+            });
+
+          }
+
+          async function fetchLastSeenMessageId() {
+            try {
+              const lastSeenMessageId = await getLastMessageIdFromChatHistory();
+              console.log(lastSeenMessageId);
+
+              setChatboxScrollPositionToLastSeen(lastSeenMessageId);
+            } catch (error) {
+              console.log('Error finding last seen message ID', error);
+            }
+          }
+
+          fetchLastSeenMessageId();
 
           function checkForNewMessages(message) {
             var div = document.createElement('div');
             var timestamp = new Date(message.time_sent);
 
             div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
-            // Handle received messages
             var sender = message.senderId
             if (div.className === 'received') {
               var chatId = message.chatId;
               var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
               if (deletedReceivedMessage === 'true') {
-                div.innerHTML = '<div id="' + chatId + '" class="message">' + 'You deleted the message' + '</div>';
+                div.innerHTML = '<div id="' + chatId + '" class="message" data-isRead = "' + message.isRead + '">' + 'You deleted the message' + '</div>';
                 div.style.color = 'red';
               }
             }
 
-            // Check if the message contains a video link
             var videoLinkRegex = /(https?:\/\/[^\s]+)/i;
             if (videoLinkRegex.test(message.message)) {
               var videoURL = message.message.match(videoLinkRegex)[0];
 
-              // Create a link to the video
               var videoLink = '<a href="' + videoURL + '" target="_blank">' + videoURL + '</a>';
 
-              // Create a download link for the video
               var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
 
-              // Create the message container with video link and download button
               div.innerHTML = '<div class="message-container">' +
-                '<div class="message" id="' + message.chatId + '">' + videoLink + '<br>' +
+                '<div class="message" data-isRead = "' + message.isRead + '" id="' + message.chatId + '">' + videoLink + '<br>' +
                 '<img src="' + videoURL + '" alt="Thumbnail" class="thumbnail">' + '<br>' +
                 downloadLink + '</div>' +
                 '</div>';
@@ -1026,7 +974,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               });
               div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
             } else if (message.message !== null) {
-              div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">' + message.message + '</div>';
+              div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + message.message + '</div>';
               var timestamp = new Date(message.time_sent);
               var formattedTime = timestamp.toLocaleTimeString('en-US', {
                 hour: '2-digit',
@@ -1046,7 +994,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             }
             if (message.sent_video) {
               div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
-              // Add event listener to play the video when the "Watch Video" button is clicked
               var videoPlayer = div.querySelector('video');
               var playButton = div.querySelector('#buttonplay');
               playButton.addEventListener('click', function() {
@@ -1062,7 +1009,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
             }
             if (message.voice_notes) {
-              div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
+              div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
               const chatId = message.chatId;
 
               function waitForElementToExist(elementId, maxAttempts, interval, callback) {
@@ -1104,7 +1051,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
                   audio.addEventListener("canplaythrough", () => {
                     totalTime.innerHTML = formatTime(audio.duration);
-                    // console.log(totalTime.innerHTML);
                     audio.volume = 0.75;
                     volumePercentage.style.width = audio.volume * 100 + "%";
                   });
@@ -1205,65 +1151,46 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
             lastDisplayedDate = timestamp;
 
-            // Check if there are previously saved theme settings in localStorage
             var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
             if (savedSentmessagecolorTheme) {
-              // Apply the saved theme settings
               applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
             }
-            // Check if there are previously saved theme settings in localStorage
             var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
             if (savedReceivedmessagecolorTheme) {
-              // Apply the saved theme settings
               applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
             }
-            // Check if there are previously saved theme settings in localStorage
             var SavedmessageSentTheme = localStorage.getItem('messageSentTheme');
             if (SavedmessageSentTheme) {
-              // Apply the saved theme settings
               applySentmessagesTheme(SavedmessageSentTheme);
             }
-            // Check if there are previously saved theme settings in localStorage
             var SavedmessageReceivedTheme = localStorage.getItem('messageReceivedTheme');
             if (SavedmessageReceivedTheme) {
-              // Apply the saved theme settings
               applyReceivedmessagesTheme(SavedmessageReceivedTheme);
             }
 
-
-            chatbox.scrollTop = chatbox.scrollHeight; // Scroll to bottom
-
-            // Add right-click event listener to each message div
             var messageDivs = document.querySelectorAll('.message');
             messageDivs.forEach(function(div) {
               div.addEventListener('contextmenu', function(e) {
-                // Prevent default right-click menu from showing
                 e.preventDefault();
-                // Get the class of the clicked message
                 var clickedClass = e.target.parentNode.className;
                 var clickedId = e.target.parentNode.id;
-                // Remove any existing popup
                 var existingPopups = document.querySelectorAll('.popup');
                 existingPopups.forEach(function(popup) {
                   popup.remove();
                 });
 
-                // Get the class of the clicked message
                 var clickedClass = e.target.parentNode.className;
 
 
-                // Create new popup and position it beside the clicked message
                 var popup = document.createElement('div');
                 popup.className = 'popup';
                 popup.setAttribute('data-chat-id', div.id);
                 popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
                 var chatId = popup.getAttribute('data-chat-id');
                 // alert(div.id);
-                // Position the popup beside the clicked message
                 var messageRect = e.target.getBoundingClientRect();
                 var chatboxRect = chatbox.getBoundingClientRect();
 
-                // Calculate the popup's top and left positions
                 var popupTop = messageRect.top - chatboxRect.top + messageRect.height / 2 - popup.offsetHeight / 2;
                 var popupLeft;
                 if (clickedClass === 'Sent') {
@@ -1273,7 +1200,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                 }
                 popup.style.top = popupTop + 'px';
                 popup.style.left = popupLeft + 'px';
-                // Add event listeners to delete, reply, and change theme options
                 var deleteBtn = popup.querySelector('.delete');
                 deleteBtn.addEventListener('click', function() {
                   var chatId = popup.getAttribute('data-chat-id');
@@ -1283,7 +1209,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   var isSentMessage = senderId === currentUserId;
 
                   if (isSentMessage = true) {
-                    // Send an AJAX request to delete the message from the database
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', 'delete_message.php', true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -1296,7 +1221,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                         var response = JSON.parse(xhr.responseText);
                         var message = response.message;
 
-                        // Message deleted successfully from database, update UI for sent message
                         var deletedMessage = document.getElementById(chatId);
                         deletedMessage.innerHTML = 'You deleted this message';
                         deletedMessage.class = 'message';
@@ -1308,7 +1232,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
                     xhr.send(formData);
                   } else {
-                    // Update UI for received message
                     var deletedMessage = document.getElementById(chatId);
                     deletedMessage.innerHTML = 'You deleted the message';
                     deletedMessage.style.color = 'red';
@@ -1345,18 +1268,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                           var sentElements = document.querySelectorAll('.Sent');
                           sentElements.forEach(function(element) {
                             element.style.background = newColor;
-                            // Save the new theme settings
                             saveSentmessageTheme(newColor);
-                            // Apply the new theme settings
                             applySentmessagesTheme(newColor);
                           });
                         } else if (clickedClass === 'received') {
                           var receivedElements = document.querySelectorAll('.received');
                           receivedElements.forEach(function(element) {
                             element.style.background = newColor;
-                            // Save the new theme settings
                             saveReceivedmessageTheme(newColor);
-                            // Apply the new theme settings
                             applyReceivedmessagesTheme(newColor);
                           });
                         }
@@ -1373,18 +1292,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                           var sentElements = document.querySelectorAll('.Sent');
                           sentElements.forEach(function(element) {
                             element.style.backgroundColor = newColor;
-                            // Save the new theme settings
                             saveSentmessagebackgroundTheme(newColor);
-                            // Apply the new theme settings
                             applySentmessagesbackgroundTheme(newColor);
                           });
                         } else if (clickedClass === 'received') {
                           var receivedElements = document.querySelectorAll('.received');
                           receivedElements.forEach(function(element) {
                             element.style.backgroundColor = newColor;
-                            // Save the new theme settings
                             saveRecievedmessagebackgroundTheme(newColor);
-                            // Apply the new theme settings
                             applyReceivedmessagesbackgroundTheme(newColor);
                           });
                         }
@@ -1392,10 +1307,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                     });
                   }
                 });
-                // Add the popup to the chatbox
                 chatbox.appendChild(popup);
 
-                // Remove the popup when the user clicks outside of it
                 document.addEventListener('click', function(e) {
                   if (popup && !popup.contains(e.target)) {
                     popup.remove();
@@ -1404,6 +1317,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               });
             });
           }
+
 
           // calling aspect
           const hangupButtonpop = document.getElementById('hangup_button_pop');
@@ -1426,7 +1340,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           var chatInterface = document.getElementById('chatbox');
           var callInterface = document.getElementById('callInterface');
           var callbtn = document.getElementById('callbtn');
-          const iceCandidates = [];
           var pendingCandidates = [];
           var ringtone = document.createElement('audio');
           ringtone.id = "ringtone";
@@ -1436,7 +1349,12 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           ringtone.autoplay = false;
           chatInterface.appendChild(ringtone);
 
-
+          function resetCallUI() {
+            hangupButton.disabled = false;
+            callerStatusElement.textContent = 'Calling...';
+            ringtone.pause();
+            ringtone.currentTime = 0;
+          }
           callbtn.addEventListener('click', function() {
             chatInterface.style.display = 'none';
             callInterface.style.display = 'block';
@@ -1518,6 +1436,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             ringtone.pause();
             chatInterface.style.display = 'none';
             callInterface.style.display = 'block';
+            callerStatusElement.textContent = 'Joining Call';
 
             var offer = new RTCSessionDescription(message.offer);
 
@@ -1673,7 +1592,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
               .then(function(stream) {
                 localStream = stream;
-                // var iceCandidates = []; // Initialize the iceCandidates array
                 peerConnection = new RTCPeerConnection();
                 startPeerConnection();
                 stream.getTracks().forEach(function(track) {
@@ -1839,17 +1757,12 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
           function showRingingBox() {
             ringingBox.style.display = 'block';
-
-            if (typeof ringtone.play === 'function' && ringtone.paused) {
-              console.log('ringing tone trying to play');
-              document.addEventListener('click', playRingtoneOnce);
-            }
+            playRingtoneOnce();
           }
 
           function playRingtoneOnce() {
             ringtone.play();
             console.log('ringing tone played');
-            document.removeEventListener('click', playRingtoneOnce);
           }
 
           function handleIncomingCall(message) {
@@ -1860,6 +1773,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             showRingingBox();
           }
 
+          function resetAudio() {
+            ringtone.currentTime = 0;
+          }
+
           function handleIncomingOffer(message) {
             var callerUserId = message.callerUserId;
             console.log('Incoming offer from:', callerUserId);
@@ -1868,6 +1785,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             timeoutID = setTimeout(function() {
               console.log('calltime is over');
               hangUpCallChatUI();
+              resetAudio();
               ringtone.pause();
             }, callTimeout);
 
@@ -1878,17 +1796,16 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               let jointimeId;
               jointimeId = setTimeout(function() {
                 joinCall(message);
+                resetAudio();
               }, joinTimeout);
             }
-
-            // function handleRejectButtonClick() {
-
-            // }
 
             hangupButtonpop.addEventListener('click', function() {
               console.log('hangup button clicked');
               ringingBox.style.display = 'none';
+              clearTimeout(timeoutID);
               hangUpCallChatUI();
+              resetAudio();
               ringtone.pause();
             });
             answerButton.addEventListener('click', handleAnswerButtonClick);
@@ -1907,6 +1824,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             });
             ringingBox.style.display = 'none';
             ringtone.autoplay = false;
+            ringtone.pause();
           }
           hangupButton.addEventListener('click', function() {
             hangUpCallChatUI();
@@ -1931,8 +1849,241 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
             callerStatusElement.textContent = 'Call Ended';
             chatInterface.style.display = "block";
             callInterface.style.display = "none";
+            resetCallUI();
           }
           initSignaling();
+
+
+          //sending message
+          var SendMessageBtn = document.getElementById('send-button');
+
+          SendMessageBtn.addEventListener('click', function() {
+            var MessageToBeSent = $('#message').val() || null;
+            var imageInput = document.querySelector('.image-input');
+            var videoInput = document.getElementById('video');
+
+            var image = null;
+            if (imageInput.files.length > 0) {
+              image = imageInput.files;
+            }
+
+            var video = null;
+            if (videoInput.files.length > 0) {
+              video = videoInput.files;
+            }
+
+            socket.emit('newMessages', {
+              UserId,
+              UserIdx,
+              MessageToBeSent,
+              image,
+              video,
+            });
+            $('#message').val('');
+            $('.image-input').val('');
+            $('#video').val('');
+          });
+
+          socket.on('newMessage', (result) => {
+            console.log('Received data:', result);
+            console.log('UserId:', result.UserId);
+            checkForNewMessages(result);
+          });
+
+          //voice Notes
+          let mediaRecorder;
+          let isRecording = false;
+          let soundVisualizerInterval;
+          let soundVisualizer = document.getElementById('sound-visualizer');
+          var videoBox = document.getElementById('video-box');
+          let recordingType = 'voice';
+          let chunks = [];
+
+
+          function toggleButtons() {
+            var message = document.getElementById('message').value.trim();
+            var voiceButton = document.querySelector('.voice-note');
+            var videoButton = document.querySelector('.video-note');
+            var sendButton = document.getElementById('send-button');
+
+            if (message === '') {
+              voiceButton.style.display = 'inline-block';
+              videoButton.style.display = 'inline-block';
+              sendButton.style.display = 'none';
+            } else {
+              voiceButton.style.display = 'none';
+              videoButton.style.display = 'none';
+              sendButton.style.display = 'inline-block';
+            }
+          }
+          toggleButtons();
+          let startRecordingTime;
+
+          let maxRetries = 7;
+          let retryDelay = 1000;
+
+          function startRecording(type) {
+            if (isRecording) return;
+            isRecording = true;
+            startRecordingTime = Date.now();
+
+            if (type === 'voice') {
+              soundVisualizer.style.display = 'block';
+              soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
+            } else if (type === 'video') {
+              videoBox.style.display = 'block';
+            }
+
+            function getMediaStreamWithRetry(retriesLeft) {
+              navigator.mediaDevices.getUserMedia({
+                  audio: true,
+                  video: type === 'video'
+                })
+                .then(function(stream) {
+                  if (stream.getAudioTracks().length === 0) {
+                    console.error('Microphone not providing audio data.');
+                    return;
+                  }
+
+                  mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm'
+                  });
+
+                  mediaRecorder.addEventListener("dataavailable", event => {
+                    console.log("Data available:", event.data);
+                    if (event.data.size > 0) {
+                      chunks.push(event.data);
+                    }
+                  });
+
+                  mediaRecorder.onstop = async function() {
+                    isRecording = false;
+                    const blob = new Blob(chunks, {
+                      type: mediaRecorder.mimeType
+                    });
+                    console.log('Recording stopped. Blob created:', blob);
+                    const recordingDuration = (Date.now() - startRecordingTime) / 1000;
+
+                    console.log('Recording duration:', recordingDuration.toFixed(2), 'seconds');
+                    if (type === 'voice') {
+                      soundVisualizer.style.display = 'none';
+                      clearInterval(soundVisualizerInterval);
+                    }
+
+                    await submitVoiceNote(blob, UserId, UserIdx);
+
+                    chunks = [];
+                  };
+
+                  mediaRecorder.start();
+                  console.log('Recording started:', type);
+                })
+                .catch(function(error) {
+                  if (retriesLeft > 0) {
+                    console.error('Error accessing media devices. Retrying...', error);
+                    setTimeout(function() {
+                      getMediaStreamWithRetry(retriesLeft - 1);
+                    }, retryDelay);
+                  } else {
+                    console.error('Failed to access media devices after multiple retries:', error);
+                  }
+                });
+            }
+            getMediaStreamWithRetry(maxRetries);
+          }
+
+          function updateSoundVisualizer(loudness) {
+            const spikeContainers = document.querySelectorAll('.boxContainer .box');
+
+            spikeContainers.forEach((spike, index) => {
+              const animation = getAnimationForLoudness(loudness, index);
+              spike.style.animationName = animation;
+            });
+          }
+
+          function getAnimationForLoudness(loudness, index) {
+            if (loudness < 30) return 'quiet';
+            if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
+            const boxContainer = document.getElementById('sound-visualizer');
+            boxContainer.style.display = "flex"
+            return 'loud';
+          }
+
+          function stopRecording(type) {
+            if (mediaRecorder && isRecording) {
+              mediaRecorder.stop();
+            }
+          };
+
+
+          function cancelRecording() {
+            if (mediaRecorder && isRecording) {
+              mediaRecorder.stop();
+              isRecording = false;
+              deleteVoiceNote();
+              console.log("To be deleted");
+            }
+            soundVisualizer.style.display = 'none';
+            clearInterval(soundVisualizerInterval);
+          }
+
+          async function deleteVoiceNote() {
+            const formData = new FormData();
+            formData.append('filename', voiceNoteFilename);
+
+            try {
+              const response = await fetch('delete_voice_note.php', {
+                method: 'POST',
+                body: formData
+              });
+              const result = await response.text();
+              console.log('Voice note deleted:', result);
+            } catch (error) {
+              console.error('Error deleting voice note:', error);
+            }
+          }
+
+          function submitRecordedNote() {
+            if (mediaRecorder && isRecording) {
+              mediaRecorder.stop();
+            }
+            if (isRecording && recordingType) {
+              isRecording = false;
+              if (recordingType === 'voice' && mediaRecorder && mediaRecorder.state === 'inactive') {
+                // submitVoiceNote(blob);
+              } else if (recordingType === 'video') {
+                // Handle video recording
+                isRecording = false;
+                if (recordingType === 'video' && mediaRecorder && mediaRecorder.state === 'inactive') {}
+              }
+              recordingType = null;
+            }
+          }
+
+          async function submitVoiceNote(blob, UserId, UserIdx) {
+            console.log('Blob to be submitted:', blob);
+            const formData = new FormData();
+            formData.append('voicenote', blob);
+            formData.append('recipientId', UserIdx);
+            formData.append('UserId', UserId);
+
+            try {
+              const response = await fetch('http://localhost:8888/sendVoiceNote', {
+                method: 'POST',
+                body: formData
+              });
+
+              if (response.ok) {
+                const result = await response.json();
+                console.log('Voice note saved successfully:', result);
+                // checkForNewMessages(result);
+              } else {
+                console.error('Voice note submission failed:', response.statusText);
+              }
+            } catch (error) {
+              console.error('Error saving voice note:', error);
+            }
+          }
         </script>
 
         <script>
@@ -1964,18 +2115,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
         <script>
           function previewImage() {
-            // Get the selected file
             var file = document.getElementById('image').files[0];
-            // Create a FileReader object
             var reader = new FileReader();
-            // Set the image source when the file is loaded
             reader.onload = function(e) {
               var imgModal = document.getElementById('image-modal');
               var imgPreview = document.getElementById('image-preview');
               imgPreview.src = e.target.result;
               imgModal.style.display = "block";
             }
-            // Load the file as a data URL
             reader.readAsDataURL(file);
           }
 
@@ -1999,49 +2146,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               videoPreview.src = '';
             });
           }
-          $(document).ready(function() {
-            // Send the message
-            $('.submit').click(function() {
-
-              var message = $('#message').val();
-              var image = $('.image-input').prop('files')[0];
-              // var videonote = $('.video-note').prop('files')[0];
-              // var voicenote = $('.voice-note').prop('files')[0];
-              var UserId = '<?php echo $UserId; ?>';
-              var recipientId = '<?php echo $_GET['UserIdx']; ?>';
-              var video = $('#video').prop('files')[0];
-              var formData = new FormData();
-              formData.append('message', message);
-              formData.append('image', image);
-              // formData.append('voicenote', voicenote);
-              // formData.append('videonote', videonote);
-              formData.append('UserId', UserId);
-              formData.append('recipientId', recipientId);
-              formData.append('video', video);
-              // Send the AJAX request
-              $.ajax({
-                url: 'send_message.php',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                  console.log(response);
-                  $('#message').val('');
-                }
-              });
-            });
-          });
         </script>
         <script>
           $(document).ready(function() {
             $("#search").on("keyup", function() {
               var value = $(this).val().toLowerCase();
               if (value === "") {
-                // Clear the table if the search box is empty
                 $("#user_table").html("");
               } else {
-                // Run the search function if the search box is not empty
                 $("#user_table tr").filter(function() {
                   $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
                 });
@@ -2054,12 +2166,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           const resultsDiv = document.getElementById('user_table');
           searchBox.addEventListener('input', function() {
             const searchTerm = this.value;
-            // Clear the results if the search box is empty
             if (!searchTerm.trim()) {
               resultsDiv.innerHTML = '';
               return;
             }
-            // Your search function here
             $("#search").on("keyup", function() {
               var search_query = $(this).val();
               $.ajax({
@@ -2069,7 +2179,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   search_query: search_query
                 },
                 success: function(data) {
-                  // Update the table with the returned results
                   $("#user_table").html(data);
                 }
               });
@@ -2080,9 +2189,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
 
         <script>
-          var sessionID = "<?php echo $sessionID ?>"; // Retrieve the sessionId from PHP
+          var sessionID = "<?php echo $sessionID ?>";
 
-          // Pass the sessionId to call.js
           sessionStorage.setItem('sessionId', sessionID);
         </script>
 

@@ -926,9 +926,7 @@ session_start();
 </script>
 
 <script>
-    // bind a function to the input event on the phone input field
     $('#phone').on('keyup', function() {
-        // remove all non-numeric characters from the input value
         $(this).val($(this).val().replace(/[^0-9]/g, ''));
     });
 </script>

@@ -16,7 +16,7 @@ const { Server } = require("socket.io");
 const sql = require("mssql");
 // Create an Express app
 const app = express();
-
+const { Readable } = require("stream");
 // Enable CORS for all routes
 app.use(cors());
 // Enable parsing of JSON bodies
@@ -67,7 +67,7 @@ pool
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
-
+const onlineUsers = {};
 const connectedUsers = new Map();
 const userConnections = {};
 
@@ -89,6 +89,14 @@ io.on("connection", (socket) => {
     return;
   }
 
+  const isUserAOnline = getRecipientConnection(UserId);
+
+  if (isUserAOnline) {
+    io.emit("userStatus", { UserIdx, status: "online" });
+  } else {
+    io.emit("userStatus", { UserIdx, status: "offline" });
+  }
+
   console.log(`Client connected with UserId: ${UserId}`);
   console.log(`Client connected with SessionId: ${sessionId}`);
   console.log(`Client connected with UserIdx: ${UserIdx}`);
@@ -99,7 +107,18 @@ io.on("connection", (socket) => {
   connectedUsers.set(UserId, socket);
 
   sendRoomInfo();
-
+  socket.on("userConnected", (UserId) => {
+    onlineUsers[UserId] = true;
+  });
+  socket.on("messageRead", async ({ messageId }) => {
+    try {
+      await MessageIsRead(messageId);
+      io.emit("messageRead", { messageId });
+    } catch (error) {
+      console.error("Error updating chat isRead status:", error);
+      res.status(500).json({ error: "Error inserting chat isRead status" });
+    }
+  });
   socket.on("message", (message) => {
     const parsedMessage = JSON.parse(message);
     console.log("this is the message type", parsedMessage.type);
@@ -121,13 +140,62 @@ io.on("connection", (socket) => {
       socket.emit("message", parsedMessage);
     }
   });
+  socket.on("typing", (data) => {
+    socket.broadcast.emit("typing", data);
+  });
 
-  // Handle socket disconnection
+  socket.on("fetchMessageForEachUser", (data) => {
+    const UserId = data.UserId;
+    const UserIdx = data.UserIdx;
+    console.log("Recived data to check chat", UserId, "and", UserIdx);
+
+    fetchNewMessage(UserId, UserIdx)
+      .then((result) => {
+        socket.emit("fetchMessageForEachUser", result);
+      })
+      .catch((error) => {
+        console.error("Error fetching new Messages:", error);
+      });
+  });
+
   socket.on("disconnect", () => {
     connectedUsers.delete(UserId);
     console.log(`Client disconnected with UserId: ${UserId}`);
     delete userConnections[UserIdx];
+    if (UserId) {
+      onlineUsers[UserId] = false;
+    }
+    io.emit("userStatus", { UserIdx, status: "offline" });
     sendRoomInfo();
+  });
+
+  socket.on("newMessages", (data) => {
+    console.log(
+      "This is the data recieved from client: UserId",
+      data.UserId,
+      ",UserIdx",
+      data.UserIdx,
+      ",Message",
+      data.MessageToBeSent,
+      ",image",
+      data.image,
+      ",video",
+      data.video
+    );
+    submitNewMessage(
+      data.UserId,
+      data.UserIdx,
+      data.MessageToBeSent,
+      data.image,
+      data.video
+    )
+      .then((result) => {
+        console.log("final result", result);
+        io.emit("newMessage", result);
+      })
+      .catch((error) => {
+        console.error("Error fetching reels data:", error);
+      });
   });
 
   socket.on("fetchReels", () => {
@@ -188,10 +256,6 @@ io.on("connection", (socket) => {
       .catch((error) => {
         console.error("Error fetching reels bookmark data:", error);
       });
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
   });
 });
 
@@ -725,6 +789,148 @@ async function fetchPostsData() {
   }
 }
 
+async function insertChatMessage(
+  UserId,
+  recipientId,
+  message,
+  sentImage,
+  sentVideo,
+  chatId,
+  date_posted,
+  voiceNote,
+  videoNote,
+  isRead,
+) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+
+    const request = new sql.Request(poolConnection);
+
+    const query = `
+      INSERT INTO chats (UserId, recipientId, Sent, sentimage, sentvideo, chatId, senderId, time_sent, voice_notes, video_notes, isRead)
+      VALUES (@UserId, @recipientId, @message, @sentImage, @sentVideo, @chatId, @UserId, @date_posted, @voiceNote, @videoNote, @isRead)
+    `;
+
+    request.input("UserId", sql.VarChar, UserId);
+    request.input("recipientId", sql.VarChar, recipientId);
+    request.input("message", sql.VarChar, message);
+    request.input("sentImage", sql.VarChar, sentImage);
+    request.input("sentVideo", sql.VarChar, sentVideo);
+    request.input("chatId", sql.VarChar, chatId);
+    request.input("date_posted", sql.VarChar, date_posted);
+    request.input("voiceNote", sql.VarChar, voiceNote);
+    request.input("videoNote", sql.VarChar, videoNote);
+    request.input("isRead", sql.VarChar, isRead);
+
+    const res = await request.query(query);
+    const Newmessage = {
+      UserId,
+      recipientId,
+      message: message,
+      sent_image: sentImage,
+      sent_video: sentVideo,
+      chatId,
+      senderId: UserId,
+      time_sent: date_posted,
+      voice_notes: voiceNote,
+      video_notes: videoNote,
+    };
+    return Newmessage;
+  } catch (error) {
+    console.error("Error inserting chat message:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+async function generateChatId(UserId, recipientId) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+
+    const request = new sql.Request(poolConnection);
+
+    const query = "SELECT COUNT(chatId) AS chatCount FROM chats";
+    const result = await request.query(query);
+
+    const chatCount = result.recordset[0].chatCount;
+    const num = chatCount + 1;
+    const num_padded = num.toString().padStart(5, "0");
+    const chatId = `CHAT${UserId}${recipientId}${num_padded}`;
+
+    return chatId;
+  } catch (err) {
+    console.error("Error generating chatId:", err);
+    throw err;
+  } finally {
+    if (poolConnection) {
+      await poolConnection.close();
+    }
+  }
+}
+
+async function moveAndStoreFile(file, folder) {
+  if (!file) {
+    return null;
+  }
+
+  const fileName = `${Date.now()}_${file.name}`;
+  const filePath = `${folder}${fileName}`;
+
+  await fs.promises.rename(file.path, filePath);
+
+  return fileName;
+}
+async function datePosted() {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const day = String(currentDate.getDate()).padStart(2, "0");
+  const hours = String(currentDate.getHours()).padStart(2, "0");
+  const minutes = String(currentDate.getMinutes()).padStart(2, "0");
+  const seconds = String(currentDate.getSeconds()).padStart(2, "0");
+  const date_posted = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return date_posted;
+}
+async function submitNewMessage(
+  UserId,
+  recipientId,
+  message,
+  sentImage,
+  sentVideo
+) {
+  try {
+    const date_posted = await datePosted();
+    const imageUploadFolder = "sentimages";
+    const videoUploadFolder = "sentVidoes";
+    const imageName = await moveAndStoreFile(sentImage, imageUploadFolder);
+    const videoName = await moveAndStoreFile(sentVideo, videoUploadFolder);
+    const chatId = await generateChatId(UserId, recipientId);
+    const result = await insertChatMessage(
+      UserId,
+      recipientId,
+      message,
+      imageName,
+      videoName,
+      chatId,
+      date_posted,
+      null,
+      null,
+      0
+    );
+    console.log("second level", result);
+    return result;
+  } catch (error) {
+    console.error("Error submitting chat message:", error);
+    throw error;
+  }
+}
+
 async function fetchPostForEachUser(UserId) {
   let poolConnection;
 
@@ -835,6 +1041,7 @@ async function fetchMessageForEachUser(UserId, UserIdx) {
         sentvideo: record.sentvideo,
         time_sent: record.time_sent,
         message: record.Sent,
+        isRead: record.isRead,
       };
     });
 
@@ -966,19 +1173,15 @@ app.post("/fetchPostForEachUser", async (req, res) => {
   }
 });
 
-app.post("/fetchMessageForEachUser", async (req, res) => {
-  const { UserId, UserIdx } = req.body;
-  console.log("Recived data to check chat", UserId, "and", UserIdx);
-
+async function fetchNewMessage(UserId, UserIdx) {
   try {
     const actionResult = await fetchMessageForEachUser(UserId, UserIdx);
-    io.emit("messages", actionResult);
-    res.status(200).json(actionResult);
+    return actionResult;
   } catch (error) {
     console.error("Error processing data from the database", error);
     res.status(500).send("Error processing data from the database");
   }
-});
+}
 
 app.post("/likepost", async (req, res) => {
   const { UserId, postId } = req.body;
@@ -1168,6 +1371,64 @@ app.post("/checkBookmark", async (req, res) => {
   }
 });
 
+async function sendVoiceNote(UserId, UserIdx, blob) {
+  const date_posted = await datePosted();
+  const chatId = await generateChatId(UserId, UserIdx);
+  const formattedDate = date_posted.replace(/[\s:]/g, "_");
+  const voiceNotePath = `voiceNote/${chatId}_${formattedDate}.webm`;
+
+  const buffer = blob.data;
+
+  fs.writeFileSync(voiceNotePath, buffer);
+  const result = await insertChatMessage(
+    UserId,
+    UserIdx,
+    null,
+    null,
+    null,
+    chatId,
+    date_posted,
+    voiceNotePath,
+    null,
+    0
+  );
+  return {
+    chatId,
+    senderId: UserId,
+    UserId,
+    UserIdx,
+    message: null,
+    time_sent: date_posted,
+    voice_notes: voiceNotePath,
+    isRead: 0,
+  };
+}
+
+function streamToBuffer(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+  });
+}
+app.post("/sendVoiceNote", async (req, res) => {
+  const UserId = req.body.UserId;
+  const UserIdx = req.body.recipientId;
+  const blob = req.files.voicenote;
+  console.log(blob.data);
+  console.log(UserIdx, UserId);
+
+  try {
+    const SentVN = await sendVoiceNote(UserId, UserIdx, blob);
+    // res.status(200).json(SentVN);
+    io.emit("newMessage", SentVN);
+  } catch (error) {
+    console.error("Error sending VN:", error);
+    res.status(500).json({ error: "Error sending VN" });
+  }
+});
+
 app.get("/getUserProfile/:UserId", async (req, res) => {
   const { UserId } = req.params;
 
@@ -1199,6 +1460,65 @@ async function getUserProfileData(UserId) {
     throw error;
   }
 }
+
+async function getLastMessageId(UserId, UserIdx) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT TOP 1 chatId FROM chats WHERE ((UserId = '${UserId}' AND recipientId = '${UserIdx}') OR (UserId = '${UserIdx}' AND recipientId = '${UserId}')) AND isRead = 1 ORDER BY time_sent DESC; `;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      await pool.close();
+      return null;
+    } else {
+      return checkResult.recordset[0].chatId;
+    }
+  } catch (error) {
+    console.error("Error fetching last seen message:", error);
+    return null;
+  }
+}
+
+app.post("/LastIdSeen", async (req, res) => {
+  const { UserId, UserIdx } = req.body;
+
+  try {
+    const lastId = await getLastMessageId(UserId, UserIdx);
+    res.status(200).json({ lastId, UserId, UserIdx });
+  } catch (error) {
+    console.error("error checking last seen message:", error);
+    res.status(500).json({ error: "error checking last seen message" });
+  }
+});
+
+async function MessageIsRead(messageId) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const query = `UPDATE chats SET isRead = 1 WHERE chatId = @chatId AND isRead = 0; `;
+    request.input("chatId", sql.VarChar, messageId);
+
+    const res = await request.query(query);
+
+    // if (res.rowsAffected[0] === 0) {
+    //   console.log(`isRead for chat ${messageId} is already 1.`);
+    // } else {
+    //   console.log(`isRead for chat ${messageId} has been set to 1.`);
+    // }
+  } catch (error) {
+    console.error("Error updating chat isRead status:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
 
 // Start the server
 const port = 8888;

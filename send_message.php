@@ -121,3 +121,25 @@ echo "Error: " . sqlsrv_errors();
 
 
 ?>
+            const formData = new FormData();
+            formData.append('UserId', UserId);
+            formData.append('UserIdx', UserIdx);
+
+            fetch('http://localhost:8888/fetchMessageForEachUser', {
+                method: 'POST',
+                body: formData,
+              })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Error finding messages');
+                }
+                return response.json();
+              })
+              .then((result) => {
+                result.forEach((messages) => {
+                  checkForNewMessages(messages);
+                });
+              })
+              .catch((error) => {
+                console.error(error);
+              });

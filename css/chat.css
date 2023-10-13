@@ -14,13 +14,16 @@
     flex-direction: column;
     align-items: center;
 }
-.nameDiv{
+
+.nameDiv {
     display: flex;
     text-align: center;
 }
-#ringtone{
+
+#ringtone {
     display: none;
 }
+
 .nameDiv h2 {
     font-size: 24px;
     margin-bottom: 8px;
@@ -127,12 +130,32 @@ nav .profile-name {
 
 .chat-header {
     text-align: left;
-    /* height: 70px; */
     border: 1px solid #ccc;
     background-color: white;
     color: black;
+    display: flex;
+    align-items: center;
     margin-left: 80px;
-    padding: 6px;
+    padding: 10px;
+}
+
+.isTyping {
+    position: absolute;
+    bottom: -28px;
+    right: 0;
+    font-size: 12px;
+    color: #777;
+}
+
+.onlineStatus {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    font-size: 12px;
+    border: white;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
 }
 
 .recipientPassport {
@@ -171,7 +194,7 @@ nav .profile-name {
     margin-left: 80px;
     background-color: white;
     height: calc(100vh - 200px);
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 10px;
     position: relative;
     /* width: 100%; */
@@ -183,9 +206,7 @@ nav .profile-name {
     /* background: linear-gradient(to bottom, darkturquoise 0%, aliceblue 100%); */
     /* color: #444; */
     background-color: #d6e8ff;
-    /* Light Blue */
     color: #000;
-    /* Text color */
     padding: 8px;
     border-radius: 10px;
     margin-top: 10px;
@@ -325,12 +346,19 @@ button[type="submit"] {
     text-transform: capitalize;
 }
 
+.icon:hover {
+    color: #000;
+}
+
 .call-icon {
     float: right;
-    margin-top: 20px;
     font-size: 20px;
+    position: absolute;
     font-weight: bold;
+    justify-content: center;
+    display: flex;
     text-decoration: none;
+    right: 0;
     color: black;
     margin-right: 30px;
 }
@@ -394,31 +422,36 @@ button[type="submit"] {
     background-color: #f5f5f5;
 }
 
-/* Define the scrollbar width and color */
 .chatbox::-webkit-scrollbar {
     width: 8px;
     background-color: #f5f5f5;
 }
 
-/* Define the scrollbar thumb color */
 .chatbox::-webkit-scrollbar-thumb {
     background-color: #888;
     border-radius: 10px;
 }
 
 
-/* On hover, darken the scrollbar thumb color */
 .chatbox::-webkit-scrollbar-thumb:hover {
     background-color: aliceblue;
 }
 
-/* #videoPlayer {
-max-width: 100%;
-max-height: 100%;
-margin: auto;
-} */
-
-
+.video-box {
+    border-radius: 50%;
+    z-index: 999;
+    display: flex;
+    height: 80px;
+    width: 80px;
+    position: absolute;
+    inset: 50%;
+    --boxSize: 8px;
+    --gutter: 4px;
+    width: calc((var(--boxSize) + var(--gutter)) * 5);
+    transform: translate(-50%, -50%);
+    opacity: 0.7;
+    display: none;
+}
 
 /* Chat button */
 button[data-bs-target="#sidebar"] {
@@ -434,9 +467,7 @@ button[data-bs-target="#sidebar"] {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease-in-out;
     width: 100px;
-    /* set a fixed width */
     height: 50px;
-    /* set a fixed height */
 }
 
 
@@ -531,7 +562,6 @@ li a {
 /* Modal styles */
 .modal {
     display: none;
-    /* Hide the modal by default */
     position: fixed;
     z-index: 9999;
     left: 0;
@@ -556,7 +586,6 @@ li a {
     border-radius: 5px;
 }
 
-/* Show the modal when the passport image is clicked */
 .passport img:hover {
     cursor: pointer;
 }
@@ -613,7 +642,6 @@ nav .logo {
 .emoji-table-container {
     position: absolute;
     top: -200px;
-    /* adjust this value to suit your needs */
     z-index: 1;
     background-color: #fff;
     border: 1px solid #ccc;
@@ -715,10 +743,10 @@ textarea {
     margin-left: 10px;
 }
 
-/* You can adjust the margin or padding as needed */
 .button-container button:first-child {
     margin-left: 0;
 }
+
 .preview img {
     max-width: 100%;
     /* max-height: 200px; */
@@ -729,23 +757,17 @@ textarea {
 /* The Modal (background) */
 .modal {
     width: 100%;
-    /* Full width */
     height: 100%;
-    /* Full height */
     overflow: auto;
-    /* Enable scroll if needed */
     background-color: rgba(0, 0, 0, 0.4);
-    /* Black w/ opacity */
 }
 
 /* Modal Content/Box */
 .modal-content {
     margin: 15% auto;
-    /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
-    /* Could be more or less, depending on screen size */
 }
 
 /* Close Button */
@@ -805,11 +827,11 @@ textarea {
     text-decoration: none;
 }
 
-/* 
+
 .Sent,
 .received {
-    position: relative;
-} */
+    margin-bottom: 25px;
+}
 
 .Sent .popup {
     left: -70px;
@@ -1172,12 +1194,12 @@ svg text {
     display: none;
 }
 
-.message-container {
+/* .message-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px;
-}
+} */
 
 /* .message {
     background-color: #f0f0f0;
@@ -1201,7 +1223,6 @@ svg text {
     cursor: pointer;
 }
 
-/* Adjust the timestamp positioning for sent and received messages */
 .Sent .timestamp {
     float: right;
     font-size: 0.75rem;
@@ -1212,11 +1233,9 @@ svg text {
 
 .received .timestamp {
     float: left;
-    /* Change float to left for received messages */
     font-size: 0.75rem;
     color: #999;
     text-align: left;
-    /* Change text-align to left for received messages */
     margin-top: 0.2rem;
 }
 
@@ -1225,7 +1244,6 @@ svg text {
     color: #999;
     font-size: 0.75rem;
     margin: 10px auto;
-    /* Center horizontally using auto margins */
     clear: both;
     display: block;
     width: 150px;
@@ -1235,6 +1253,19 @@ svg text {
     padding: 4px 8px;
 }
 
+.unread-message {
+    text-align: center;
+    color: #999;
+    font-size: 0.75rem;
+    margin: 10px auto;
+    clear: both;
+    display: block;
+    width: 150px;
+    font-family: 'Modern-Age';
+    background-color: #d6e8ff;
+    border-radius: 10px;
+    padding: 4px 8px;
+}
 
 
 @keyframes quiet {
@@ -1371,9 +1402,6 @@ svg text {
     cursor: pointer;
 }
 
-/* Your existing styles for progress */
-
-
 .progress {
     height: 100%;
     background-color: #007bff;
@@ -1506,11 +1534,8 @@ svg text {
 
 .message-container {
     display: flex;
-    /* Use flex display for easy alignment */
     flex-direction: column;
-    /* Stack message and timestamp vertically */
     align-items: flex-start;
-    /* Align contents to the left edge */
 }
 
 @media(max-width=900px) {}
