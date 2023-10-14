@@ -3,7 +3,6 @@ session_start();
 include 'db.php';
 $UserId = $_SESSION['UserId'];
 $UserIdx = $_GET['UserIdx'];
-// Get the name of the user you are talking to
 $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$UserIdx'";
 $stmt = sqlsrv_prepare($conn, $sql);
 if (sqlsrv_execute($stmt)) {
@@ -18,10 +17,6 @@ if (sqlsrv_execute($stmt)) {
     }
   }
 }
-
-?>
-
-<?php
 
 function generateSessionID($length = 10)
 {
@@ -42,7 +37,6 @@ include('db.php');
 $UserId = $_SESSION['UserId'];
 $UserIdx = $_GET['UserIdx'];
 
-// Prepare and execute the SQL query to check if the combination of UserId and UserIdx already exists
 $tsql = "SELECT sessionID FROM sessionID WHERE (UserId = '$UserId' AND UserIdx = '$UserIdx') OR (UserId = '$UserIdx' AND UserIdx = '$UserId')";
 $getResults = sqlsrv_query($conn, $tsql);
 
@@ -50,16 +44,12 @@ if ($getResults === false) {
   die(json_encode(array("status" => "error", "message" => "Error querying the database.")));
 }
 
-// Check if the combination of UserId and UserIdx already exists
 if (sqlsrv_has_rows($getResults)) {
-  // If the combination exists, fetch the sessionID from the result set
   $row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC);
   $sessionID = $row['sessionID'];
 } else {
-  // If the combination does not exist, generate a new sessionID
   $sessionID = generateSessionID();
 
-  // Prepare and execute the SQL query to insert the new sessionID into the database
   $tsql = "INSERT INTO sessionID (sessionID, UserId, UserIdx) VALUES ('$sessionID', '$UserId', '$UserIdx')";
   $insertResult = sqlsrv_query($conn, $tsql);
 
@@ -68,15 +58,12 @@ if (sqlsrv_has_rows($getResults)) {
   }
 }
 
-// Free statement and connection resources
 sqlsrv_free_stmt($getResults);
 sqlsrv_close($conn);
 ?>
 
 
-<?php
-// Check if user is logged in
-?>
+
 <?php
 include 'db.php';
 $UserId = $_SESSION['UserId'];
@@ -193,704 +180,850 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         </ul>
       </div>
       <div class="chat-header">
-        <?php
-        include 'db.php';
-        $recipientId = $_GET['UserIdx'];
+        <img class="recipientPassport">
+        <a class="icon"></a>
+        <div class="dropdown">
+          <button class="dropdown-toggle custom-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#chtheme" aria-controls="chtheme">
+            <span class="dots"></span>
+            <span class="dots"></span>
+            <span class="dots"></span>
+          </button>
 
-        $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-        $stmt = sqlsrv_prepare($conn, $sql);
-        if (sqlsrv_execute($stmt)) {
-          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $recipientSurname = $row['Surname'];
-            $recipientFirstName = $row['First_Name'];
-            $Passport = $row['Passport'];
-            if (empty($Passport)) {
-              $recipientPassport = "UserPassport/DefaultImage.png";
-            } else {
-              $recipientPassport = "UserPassport/" . $Passport;
-            }
-          }
+          <ul class="dropdown-menu reset" id="chtheme" aria-labelledby="dropdownMenuButton">
+            <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
+          </ul>
+        </div>
+        <a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>
+      </div>
+      <div class="chatbox">
+        <button id="scrollToBottomBtn"><i class="bi bi-arrow-down"></i></button>
+        <div id="video-preview"></div>
+        <div class="form-group">
+          <div class="row">
+            <div class="foot">
+              <div class="emoji-picker">
+                <!-- emoji table code goes here -->
+                <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
+                  <i class="fas fa-smile"></i>
+                </button>
+                <div class="emoji-table-container" style="display:none">
+                  <table>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F600;')">😀</td>
+                      <td onclick="insertEmoji('&#x1F601;')">😁</td>
+                      <td onclick="insertEmoji('&#x1F602;')">😂</td>
+                      <td onclick="insertEmoji('&#x1F603;')">😃</td>
+                      <td onclick="insertEmoji('&#x1F604;')">😄</td>
+                      <td onclick="insertEmoji('&#x1F605;')">😅</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F606;')">😆</td>
+                      <td onclick="insertEmoji('&#x1F607;')">😇</td>
+                      <td onclick="insertEmoji('&#x1F608;')">😈</td>
+                      <td onclick="insertEmoji('&#x1F609;')">😉</td>
+                      <td onclick="insertEmoji('&#x1F610;')">😐</td>
+                      <td onclick="insertEmoji('&#x1F611;')">😑</td>
+                    </tr>
+                    <!-- Add more rows and columns for additional emojis -->
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                      <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                      <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                      <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                      <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                      <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                      <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                      <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                      <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                      <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                      <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                      <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                      <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                      <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                      <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                      <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
+                <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
+                <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
+              </div>
+
+
+              <div class="d-flex">
+                <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
+                <div class="button-container">
+                  <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                    <i class="bi bi-mic"></i>
+                  </button>
+                  <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                    <i class="bi bi-camera-video"></i>
+                  </button>
+                  <!-- Add any other buttons if needed -->
+                </div>
+                <div id="sound-visualizer" class="boxContainer">
+                  <div class="box box1"></div>
+                  <div class="box box2"></div>
+                  <div class="box box3"></div>
+                  <div class="box box4"></div>
+                  <div class="box box5"></div>
+                </div>
+                <div id="video-box" class="video-box">
+                  <video></video>
+                </div>
+                <button type="submit" class="submit" id="send-button" style="display: none;">
+                  <i class="bi bi-send"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <?php
+
+        $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
+        $stmt = sqlsrv_query($conn, $sql);
+        if ($stmt === false) {
+          die(print_r(sqlsrv_errors(), true));
         }
+        ?>
+        <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+          <i class="bi bi-chat"></i>
+        </button>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+            <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <ul class="list-unstyled">
+              <?php
+
+              while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $recipientId = $row['recipientId'];
+
+                $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
+                $stmt2 = sqlsrv_query($conn, $sql2);
+                if ($stmt2 === false) {
+                  die(print_r(sqlsrv_errors(), true));
+                }
+
+                $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+                $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
+                $Passport = $row2['Passport'];
+                if (empty($Passport)) {
+                  $passportImage = "UserPassport/DefaultImage.png";
+                } else {
+                  $passportImage = "UserPassport/" . $Passport;
+                }
+              }
+              ?>
+              <li>
+                <div class="passport">
+                  <a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">
+                    <img>
+                  </a>
+                </div>
+                <div class="name">
+                  <span>
+                    <a></a>
+                  </span>
+                </div>
+              </li>
+
+            </ul>
+          </div>
+        </div>
+
+      </div>
+      <!-- Ringing Box -->
+      <div class="ringing-box" id="ringingBox">
+        <div class="main">
+          <div class="profilering">
+            <div class="nameDiv">
+              <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
+            </div>
+            <div class="status">
+              <h2>Incoming Call</h2>
+            </div>
+            <div class="imageDiv">
+              <img src="<?php echo $recipientPassport ?>" alt="profile pic">
+            </div>
+          </div>
+          <div class="buttons">
+            <div class="reject">
+              <button id="hangup_button_pop" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
+            </div>
+            <div class="answer">
+              <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="callInterface" style="display: none;">
+    <div class="callmain" id="callmain">
+      <div class="info-container">
+        <?php
+        // Connect to the database
+        include 'db.php';
 
         $UserId = $_SESSION['UserId'];
 
-        $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
+        // Get the surname and first name of the user with the UserId from the database
+        $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserIdx'";
         $stmt = sqlsrv_prepare($conn, $sql);
         if (sqlsrv_execute($stmt)) {
           while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             $Surname = $row['Surname'];
             $First_Name = $row['First_Name'];
           }
-          echo '<img class="recipientPassport" src="' . $recipientPassport . '">';
-          echo '<a class="icon" href="user_profile.php?UserId=' . $recipientId . '">' . $recipientSurname . ' ' . $recipientFirstName . '</a>';
-          echo '<div class="dropdown">
-            <button class="dropdown-toggle custom-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#chtheme" aria-controls="chtheme">
-              <span class="dots"></span>
-              <span class="dots"></span>
-              <span class="dots"></span>
-            </button>
-
-            <ul class="dropdown-menu reset" id="chtheme" aria-labelledby="dropdownMenuButton">
-              <li><a class="dropdown-item" href="#" onclick="resetTheme()">Reset Theme</a></li>
-            </ul>
-          </div>';
-          echo '<a class="call-icon" id="callbtn"><i class="bi bi-telephone"></i></a>';
         }
-        echo '</div>';
+
         ?>
-        <div class="chatbox">
-          <div id="video-preview"></div>
-          <div class="form-group">
-            <div class="row">
-              <div class="foot">
-                <div class="emoji-picker">
-                  <!-- emoji table code goes here -->
-                  <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
-                    <i class="fas fa-smile"></i>
-                  </button>
-                  <div class="emoji-table-container" style="display:none">
-                    <table>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F600;')">😀</td>
-                        <td onclick="insertEmoji('&#x1F601;')">😁</td>
-                        <td onclick="insertEmoji('&#x1F602;')">😂</td>
-                        <td onclick="insertEmoji('&#x1F603;')">😃</td>
-                        <td onclick="insertEmoji('&#x1F604;')">😄</td>
-                        <td onclick="insertEmoji('&#x1F605;')">😅</td>
-                      </tr>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F606;')">😆</td>
-                        <td onclick="insertEmoji('&#x1F607;')">😇</td>
-                        <td onclick="insertEmoji('&#x1F608;')">😈</td>
-                        <td onclick="insertEmoji('&#x1F609;')">😉</td>
-                        <td onclick="insertEmoji('&#x1F610;')">😐</td>
-                        <td onclick="insertEmoji('&#x1F611;')">😑</td>
-                      </tr>
-                      <!-- Add more rows and columns for additional emojis -->
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F60A;')">😊</td>
-                        <td onclick="insertEmoji('&#x1F60B;')">😋</td>
-                        <td onclick="insertEmoji('&#x1F60C;')">😌</td>
-                        <td onclick="insertEmoji('&#x1F60D;')">😍</td>
-                        <td onclick="insertEmoji('&#x1F60E;')">😎</td>
-                        <td onclick="insertEmoji('&#x1F60F;')">😏</td>
-                      </tr>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F612;')">😒</td>
-                        <td onclick="insertEmoji('&#x1F613;')">😓</td>
-                        <td onclick="insertEmoji('&#x1F616;')">😖</td>
-                        <td onclick="insertEmoji('&#x1F615;')">😕</td>
-                        <td onclick="insertEmoji('&#x1F617;')">😗</td>
-                        <td onclick="insertEmoji('&#x1F618;')">😘</td>
-                      </tr>
-                      <tr>
-                        <td onclick="insertEmoji('&#x1F619;')">😙</td>
-                        <td onclick="insertEmoji('&#x1F61A;')">😚</td>
-                        <td onclick="insertEmoji('&#x1F61B;')">😛</td>
-                        <td onclick="insertEmoji('&#x1F61C;')">😜</td>
-                        <td onclick="insertEmoji('&#x1F61D;')">😝</td>
-                        <td onclick="insertEmoji('&#x1F61E;')">😞</td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-                <div class="custom-file">
-                  <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
-                  <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
-                </div>
-                <div class="custom-file">
-                  <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
-                  <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
-                </div>
-
-
-                <div class="d-flex">
-                  <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
-                  <div class="button-container">
-                    <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
-                      <i class="bi bi-mic"></i>
-                    </button>
-                    <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
-                      <i class="bi bi-camera-video"></i>
-                    </button>
-                    <!-- Add any other buttons if needed -->
-                  </div>
-                  <div id="sound-visualizer" class="boxContainer">
-                    <div class="box box1"></div>
-                    <div class="box box2"></div>
-                    <div class="box box3"></div>
-                    <div class="box box4"></div>
-                    <div class="box box5"></div>
-                  </div>
-                  <div id="video-box" class="video-box">
-                    <video></video>
-                  </div>
-                  <button type="submit" class="submit" id="send-button" style="display: none;">
-                    <i class="bi bi-send"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div id="videos">
+          <video class="video-player local" id="<?php echo $UserId; ?>" autoplay playsinline></video>
+          <video class="video-player remote" id="<?php echo $UserIdx; ?>" autoplay playsinline></video>
         </div>
 
-        <div class="footer">
-          <?php
-
-          // Retrieve all the chats of the current user
-          $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-          $stmt = sqlsrv_query($conn, $sql);
-          if ($stmt === false) {
-            die(print_r(sqlsrv_errors(), true));
-          }
-
-          // Display the chats in a list on the sidebar
-          echo '<!-- Button to open the sidebar -->
-<button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-<i class="bi bi-chat"></i></button>
-
-<!-- Sidebar -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
-<div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
-    <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-</div>
-<div class="offcanvas-body">
-    <ul class="list-unstyled">';
-
-          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $recipientId = $row['recipientId'];
-
-            $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-            $stmt2 = sqlsrv_query($conn, $sql2);
-            if ($stmt2 === false) {
-              die(print_r(sqlsrv_errors(), true));
-            }
-
-            $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-            $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-            $Passport = $row2['Passport'];
-            if (empty($Passport)) {
-              $passportImage = "UserPassport/DefaultImage.png";
-            } else {
-              $passportImage = "UserPassport/" . $Passport;
-            }
-
-            echo '<li>';
-            echo '<div class="passport">';
-            echo '<a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">';
-            echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-            echo '</a>';
-            echo '</div>';
-            echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-            echo '</li>';
-          }
-
-          echo '</ul>
-</div>
-</div>';
-
-          ?>
+        <div class="over" id="over">
+          <img id="recipientPassport" height="50" width="50" src="<?php echo $recipientPassport ?>">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">
+              <tspan class="recipientName" dy="0"><?php echo $Surname ?></tspan>
+              <tspan class="recipientName" x="50%" dy="1.5em"><?php echo $First_Name ?></tspan>
+              <!-- <a id="recipientName" x="50%" dy="1.5em"><?php echo $First_Name . '' . $Surname ?></a> -->
+            </text>
+          </svg>
+          <div id="status" class="status">Calling...</div>
         </div>
-        <!-- Ringing Box -->
-        <div class="ringing-box" id="ringingBox">
-          <div class="main">
-            <div class="profilering">
-              <div class="nameDiv">
-                <h2><?php echo $recipientFirstName . ' ' . $recipientSurname; ?></h2>
-              </div>
-              <div class="status">
-                <h2>Incoming Call</h2>
-              </div>
-              <div class="imageDiv">
-                <img src="<?php echo $recipientPassport ?>" alt="profile pic">
-              </div>
-            </div>
-            <div class="buttons">
-              <div class="reject">
-                <button id="hangup_button_pop" class="rejectBtn"><i class="bi bi-telephone-x"></i></button>
-              </div>
-              <div class="answer">
-                <button id="answer_button" class="answerBtn"><i class="bi bi-telephone"></i></button>
-              </div>
+
+
+        <div id="controls">
+
+          <div class="control-container" id="video_call_button">
+            <img src="icons/camera.png" />
+          </div>
+
+          <div class="control-container" id="audio_call_button">
+            <img src="icons/mic.png" />
+          </div>
+
+          <div id="hang">
+            <div class="control-container hang" href="" id="hangup_button">
+              <img src="icons/phone.png" />
             </div>
           </div>
+
         </div>
       </div>
-    </div>
-    <div id="callInterface" style="display: none;">
-      <div class="callmain" id="callmain">
-        <div class="info-container">
-          <?php
-          // Connect to the database
-          include 'db.php';
+      <script src="js/jquery.min.js"></script>
+      <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+      <script src="js/bootstrap.min.js"></script>
+      <!-- <script></script> -->
 
-          $UserId = $_SESSION['UserId'];
 
-          // Get the surname and first name of the user with the UserId from the database
-          $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserIdx'";
-          $stmt = sqlsrv_prepare($conn, $sql);
-          if (sqlsrv_execute($stmt)) {
-            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-              $Surname = $row['Surname'];
-              $First_Name = $row['First_Name'];
-            }
+      <!-- <script> </script> -->
+
+      <script>
+        var userB = '<?php echo $_GET["UserIdx"]; ?>';
+        console.log(userB);
+        var UserId = '<?php echo $_SESSION["UserId"]; ?>';
+        console.log(UserId);
+      </script>
+
+      <script>
+
+      </script>
+
+
+      <script>
+        function resetTheme() {
+          localStorage.removeItem('messageSentcolor');
+          localStorage.removeItem('messageReceivedcolor');
+          localStorage.removeItem('messageSentTheme');
+          localStorage.removeItem('messageReceivedTheme');
+          localStorage.removeItem('dropHeaderTheme');
+          localStorage.removeItem('chatboxTheme');
+          location.reload(); // Reload the page to apply the default theme
+        }
+      </script>
+      <script>
+        var sidebarToggle = document.getElementById('sidebar-toggle');
+
+        sidebarToggle.addEventListener('mousedown', function(e) {
+          var posX = e.clientX - sidebarToggle.offsetLeft;
+          var posY = e.clientY - sidebarToggle.offsetTop;
+
+          document.addEventListener('mousemove', moveButton);
+
+          function moveButton(e) {
+            sidebarToggle.style.left = (e.clientX - posX) + 'px';
+            sidebarToggle.style.top = (e.clientY - posY) + 'px';
           }
 
-          ?>
-          <div id="videos">
-            <video class="video-player local" id="<?php echo $UserId; ?>" autoplay playsinline></video>
-            <video class="video-player remote" id="<?php echo $UserIdx; ?>" autoplay playsinline></video>
-          </div>
-
-          <div class="over" id="over">
-            <img id="recipientPassport" height="50" width="50" src="<?php echo $recipientPassport ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
-              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">
-                <tspan class="recipientName" dy="0"><?php echo $Surname ?></tspan>
-                <tspan class="recipientName" x="50%" dy="1.5em"><?php echo $First_Name ?></tspan>
-                <!-- <a id="recipientName" x="50%" dy="1.5em"><?php echo $First_Name . '' . $Surname ?></a> -->
-              </text>
-            </svg>
-            <div id="status" class="status">Calling...</div>
-          </div>
-
-
-          <div id="controls">
-
-            <div class="control-container" id="video_call_button">
-              <img src="icons/camera.png" />
-            </div>
-
-            <div class="control-container" id="audio_call_button">
-              <img src="icons/mic.png" />
-            </div>
-
-            <div id="hang">
-              <div class="control-container hang" href="" id="hangup_button">
-                <img src="icons/phone.png" />
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <script src="js/jquery.min.js"></script>
-        <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
-        <script src="js/bootstrap.min.js"></script>
-        <!-- <script></script> -->
-
-
-        <!-- <script> </script> -->
-
-        <script>
-          var userB = '<?php echo $_GET["UserIdx"]; ?>';
-          console.log(userB);
-          var UserId = '<?php echo $_SESSION["UserId"]; ?>';
-          console.log(UserId);
-        </script>
-
-        <script>
-
-        </script>
-
-
-        <script>
-          function resetTheme() {
-            localStorage.removeItem('messageSentcolor');
-            localStorage.removeItem('messageReceivedcolor');
-            localStorage.removeItem('messageSentTheme');
-            localStorage.removeItem('messageReceivedTheme');
-            localStorage.removeItem('dropHeaderTheme');
-            localStorage.removeItem('chatboxTheme');
-            location.reload(); // Reload the page to apply the default theme
-          }
-        </script>
-        <script>
-          var sidebarToggle = document.getElementById('sidebar-toggle');
-
-          sidebarToggle.addEventListener('mousedown', function(e) {
-            var posX = e.clientX - sidebarToggle.offsetLeft;
-            var posY = e.clientY - sidebarToggle.offsetTop;
-
-            document.addEventListener('mousemove', moveButton);
-
-            function moveButton(e) {
-              sidebarToggle.style.left = (e.clientX - posX) + 'px';
-              sidebarToggle.style.top = (e.clientY - posY) + 'px';
-            }
-
-            document.addEventListener('mouseup', function() {
-              document.removeEventListener('mousemove', moveButton);
-            });
+          document.addEventListener('mouseup', function() {
+            document.removeEventListener('mousemove', moveButton);
           });
-        </script>
-        <script>
-          function savechatheaderTheme(theme) {
-            localStorage.setItem('dropHeaderTheme', theme);
-          }
+        });
+      </script>
+      <script>
+        function savechatheaderTheme(theme) {
+          localStorage.setItem('dropHeaderTheme', theme);
+        }
 
-          function applychatheaderTheme(theme) {
-            var chatheader = document.querySelector('.chat-header');
-            chatheader.style.backgroundColor = theme;
-          }
+        function applychatheaderTheme(theme) {
+          var chatheader = document.querySelector('.chat-header');
+          chatheader.style.backgroundColor = theme;
+        }
 
-          var savedDropdownTheme = localStorage.getItem('dropHeaderTheme');
-          if (savedDropdownTheme) {
-            applychatheaderTheme(savedDropdownTheme);
-          }
+        var savedDropdownTheme = localStorage.getItem('dropHeaderTheme');
+        if (savedDropdownTheme) {
+          applychatheaderTheme(savedDropdownTheme);
+        }
 
-          var chatHeader = document.querySelector('.chat-header');
+        var chatHeader = document.querySelector('.chat-header');
 
-          chatHeader.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
+        chatHeader.addEventListener('contextmenu', function(event) {
+          event.preventDefault();
 
-            var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
-            existingDropdownMenus.forEach(function(dropdownMenu) {
-              if (dropdownMenu !== chatHeader.querySelector('.dropdown-menu')) {
-                dropdownMenu.remove();
-              }
-            });
-
-            var changeThemeOption = document.createElement('div');
-            changeThemeOption.textContent = 'Change header Theme';
-            changeThemeOption.classList.add('dropdown-option');
-
-            var dropdownMenu = document.createElement('div');
-            dropdownMenu.classList.add('dropdown-menu', 'change');
-            dropdownMenu.appendChild(changeThemeOption);
-
-            chatHeader.appendChild(dropdownMenu);
-
-            var rect = event.target.getBoundingClientRect();
-            dropdownMenu.style.top = '130px';
-            dropdownMenu.style.right = '400px';
-            dropdownMenu.style.zIndex = '9999';
-            dropdownMenu.style.display = 'block';
-
-            changeThemeOption.addEventListener('click', function() {
-              var newColor = prompt('Enter a background color:');
-              if (newColor !== null && newColor.trim() !== '') {
-                chatHeader.style.backgroundColor = newColor;
-                savechatheaderTheme(newColor);
-                applychatheaderTheme(newColor);
-              }
-            });
-
-            document.addEventListener('click', function(event) {
-              if (!dropdownMenu.contains(event.target) && !chatHeader.contains(event.target)) {
-                dropdownMenu.remove();
-              }
-            });
-          });
-        </script>
-
-        <script>
-          function savebackgroundTheme(theme) {
-            localStorage.setItem('chatboxTheme', theme);
-          }
-
-          function applybackgroundTheme(theme) {
-            var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
-
-            chatboxes.forEach(function(chatbox) {
-              chatbox.style.backgroundColor = theme;
-            });
-          }
-
-          var savedChatboxTheme = localStorage.getItem('chatboxTheme');
-          if (savedChatboxTheme) {
-            applybackgroundTheme(savedChatboxTheme);
-          }
-
-          document.addEventListener('contextmenu', function(event) {
-            if (event.target.closest('.chat-header')) {
-              return;
-            }
-            var clickedElement = event.target;
-
-            var chatbox = document.querySelector('.chatbox');
-            var chatcontainer = document.querySelector('.chat-container');
-
-            if (chatbox) {
-              event.preventDefault();
-
-              var changeThemeOption = document.createElement('div');
-              changeThemeOption.textContent = 'Change Theme';
-              changeThemeOption.classList.add('theme-option');
-
-              var backgrounds = document.createElement('div');
-              backgrounds.classList.add('changebackground');
-              backgrounds.appendChild(changeThemeOption);
-
-              chatbox.appendChild(backgrounds);
-
-              var rect = event.target.getBoundingClientRect();
-              backgrounds.style.top = '130px';
-              backgrounds.style.right = '600px';
-
-              changeThemeOption.addEventListener('click', function() {
-                var newColor = prompt('Enter a new background color:');
-                if (newColor !== null && newColor.trim() !== '') {
-                  chatbox.style.backgroundColor = newColor;
-                  chatcontainer.style.backgroundColor = newColor;
-                  savebackgroundTheme(newColor);
-                  applybackgroundTheme(newColor);
-                }
-              });
-
-              document.addEventListener('click', function(e) {
-                if (!backgrounds.contains(e.target)) {
-                  backgrounds.remove();
-                }
-              });
+          var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
+          existingDropdownMenus.forEach(function(dropdownMenu) {
+            if (dropdownMenu !== chatHeader.querySelector('.dropdown-menu')) {
+              dropdownMenu.remove();
             }
           });
-        </script>
 
+          var changeThemeOption = document.createElement('div');
+          changeThemeOption.textContent = 'Change header Theme';
+          changeThemeOption.classList.add('dropdown-option');
 
-        <script>
-          function saveSentmessagebackgroundTheme(theme) {
-            localStorage.setItem('messageSentcolor', theme);
-          }
+          var dropdownMenu = document.createElement('div');
+          dropdownMenu.classList.add('dropdown-menu', 'change');
+          dropdownMenu.appendChild(changeThemeOption);
 
-          function saveReceivedmessagebackgroundTheme(theme) {
-            localStorage.setItem('messageReceivedcolor', theme);
-          }
+          chatHeader.appendChild(dropdownMenu);
 
-          function applySentmessagesbackgroundTheme(theme) {
-            var sentbackground = document.querySelectorAll('.Sent');
-            sentbackground.forEach(function(message) {
-              message.style.backgroundColor = theme;
-            });
-          }
+          var rect = event.target.getBoundingClientRect();
+          dropdownMenu.style.top = '130px';
+          dropdownMenu.style.right = '400px';
+          dropdownMenu.style.zIndex = '9999';
+          dropdownMenu.style.display = 'block';
 
-          function applyReceivedmessagesbackgroundTheme(theme) {
-            var receivedbackground = document.querySelectorAll('.received');
-            receivedbackground.forEach(function(message) {
-              message.style.backgroundColor = theme;
-            });
-          }
-
-          function saveSentmessageTheme(theme) {
-            localStorage.setItem('messageSentTheme', theme);
-            console.log('saved');
-          }
-
-          function saveReceivedmessageTheme(theme) {
-            localStorage.setItem('messageReceivedTheme', theme);
-            console.log('saved');
-          }
-
-          function applySentmessagesTheme(theme) {
-            var sent = document.querySelectorAll('.Sent');
-            sent.forEach(function(message) {
-              message.style.background = theme;
-            });
-          }
-
-          function applyReceivedmessagesTheme(theme) {
-            var received = document.querySelectorAll('.received');
-            received.forEach(function(message) {
-              message.style.background = theme;
-            });
-          }
-
-
-          var lastTimestamp = Date.now();
-
-          function isSameDay(date1, date2) {
-            return (
-              date1.getDate() === date2.getDate() &&
-              date1.getMonth() === date2.getMonth() &&
-              date1.getFullYear() === date2.getFullYear()
-            );
-          }
-
-          function getFormattedDate(date) {
-            return date.toDateString();
-          }
-
-          function formatTime(time) {
-            var minutes = Math.floor(time / 60);
-            var seconds = Math.floor(time % 60);
-
-            minutes = String(minutes).padStart(2, "0");
-            seconds = String(seconds).padStart(2, "0");
-
-            return minutes + ":" + seconds;
-          }
-          // isToday(date);
-          var lastDisplayedDate = null;
-          var UserIdx = '<?php echo $_GET['UserIdx']; ?>';
-          const sessionId = "<?php echo $sessionID ?>";
-          var UserId = "<?php echo $_SESSION['UserId']; ?>";
-          var socketUrl = 'ws://localhost:8888';
-          const socket = io(socketUrl, {
-            query: {
-              UserId,
-              UserIdx,
-              sessionId,
+          changeThemeOption.addEventListener('click', function() {
+            var newColor = prompt('Enter a background color:');
+            if (newColor !== null && newColor.trim() !== '') {
+              chatHeader.style.backgroundColor = newColor;
+              savechatheaderTheme(newColor);
+              applychatheaderTheme(newColor);
             }
           });
-          socket.on('connect', () => {
-            console.log('Socket.IO connection established');
-            socket.emit('userConnected', UserId);
-            socket.emit('fetchMessageForEachUser', {
-              UserId,
-              UserIdx
-            });
-          });
 
-          socket.on('disconnect', () => {
-            socket.emit('userDisconnected', UserId);
-          });
-          socket.on('messageRead', (messageId) => {
-            console.log('This message has been read', messageId);
-          });
-
-          var icon = document.querySelector('.icon');
-
-          var onlineStatus = document.createElement('div');
-          onlineStatus.className = 'onlineStatus';
-          onlineStatus.id = 'online-status-' + UserIdx;
-          icon.appendChild(onlineStatus);
-          socket.on('userStatus', ({
-            UserIdx,
-            status
-          }) => {
-            console.log('this is the status for User', UserIdx, ':', status);
-            if (status === 'online') {
-              onlineStatus.style.boxShadow = 'rgb(11, 220, 77)';
-              onlineStatus.style.backgroundColor = 'green';
-            } else if (status === 'offline') {
-              onlineStatus.style.boxShadow = 'rgb(187, 27, 27)';
-              onlineStatus.style.backgroundColor = 'red';
-            } else {
-              onlineStatus.style.display = 'none';
+          document.addEventListener('click', function(event) {
+            if (!dropdownMenu.contains(event.target) && !chatHeader.contains(event.target)) {
+              dropdownMenu.remove();
             }
           });
-          let unreadMessageCount = 0;
+        });
+      </script>
 
-          socket.on('fetchMessageForEachUser', (data) => {
-            console.log('Received messages for each user:');
-            const hasUnreadMessages = data.some((result) => result.isRead === 0);
+      <script>
+        function savebackgroundTheme(theme) {
+          localStorage.setItem('chatboxTheme', theme);
+        }
 
-            if (hasUnreadMessages) {
-              unreadMessageCount = data.filter((result) => result.isRead === 0).length;
+        function applybackgroundTheme(theme) {
+          var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
 
-              if (unreadMessageCount === 1) {
-                const unreadMessageDiv = document.createElement('div');
-                unreadMessageDiv.classsName = 'unread-message';
-                unreadMessageDiv.textContent = 'Unread Message';
-                chatbox.appendChild(unreadMessageDiv);
-              } else {
-                const unreadMessageDiv = document.querySelector('.unread-message');
-                unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
-              }
-            }
-            // Continue with your existing logic for processing the messages
-            data.forEach((result, index) => {
-              console.log(`Received result #${index + 1}:`);
-              checkForNewMessages(result);
-            });
+          chatboxes.forEach(function(chatbox) {
+            chatbox.style.backgroundColor = theme;
           });
+        }
 
+        var savedChatboxTheme = localStorage.getItem('chatboxTheme');
+        if (savedChatboxTheme) {
+          applybackgroundTheme(savedChatboxTheme);
+        }
+
+        document.addEventListener('contextmenu', function(event) {
+          if (event.target.closest('.chat-header')) {
+            return;
+          }
+          var clickedElement = event.target;
 
           var chatbox = document.querySelector('.chatbox');
+          var chatcontainer = document.querySelector('.chat-container');
 
-          var messages = document.getElementById('message');
-          var icon = document.querySelector('.icon');
+          if (chatbox) {
+            event.preventDefault();
 
-          var isTypingElement = null;
-          messages.addEventListener('keyup', function() {
-            socket.emit('typing', {
-              UserId,
-              UserIdx
+            var changeThemeOption = document.createElement('div');
+            changeThemeOption.textContent = 'Change Theme';
+            changeThemeOption.classList.add('theme-option');
+
+            var backgrounds = document.createElement('div');
+            backgrounds.classList.add('changebackground');
+            backgrounds.appendChild(changeThemeOption);
+
+            chatbox.appendChild(backgrounds);
+
+            var rect = event.target.getBoundingClientRect();
+            backgrounds.style.top = '130px';
+            backgrounds.style.right = '600px';
+
+            changeThemeOption.addEventListener('click', function() {
+              var newColor = prompt('Enter a new background color:');
+              if (newColor !== null && newColor.trim() !== '') {
+                chatbox.style.backgroundColor = newColor;
+                chatcontainer.style.backgroundColor = newColor;
+                savebackgroundTheme(newColor);
+                applybackgroundTheme(newColor);
+              }
             });
+
+            document.addEventListener('click', function(e) {
+              if (!backgrounds.contains(e.target)) {
+                backgrounds.remove();
+              }
+            });
+          }
+        });
+      </script>
+
+
+      <script>
+        function saveSentmessagebackgroundTheme(theme) {
+          localStorage.setItem('messageSentcolor', theme);
+        }
+
+        function saveReceivedmessagebackgroundTheme(theme) {
+          localStorage.setItem('messageReceivedcolor', theme);
+        }
+
+        function applySentmessagesbackgroundTheme(theme) {
+          var sentbackground = document.querySelectorAll('.Sent');
+          sentbackground.forEach(function(message) {
+            message.style.backgroundColor = theme;
+          });
+        }
+
+        function applyReceivedmessagesbackgroundTheme(theme) {
+          var receivedbackground = document.querySelectorAll('.received');
+          receivedbackground.forEach(function(message) {
+            message.style.backgroundColor = theme;
+          });
+        }
+
+        function saveSentmessageTheme(theme) {
+          localStorage.setItem('messageSentTheme', theme);
+          console.log('saved');
+        }
+
+        function saveReceivedmessageTheme(theme) {
+          localStorage.setItem('messageReceivedTheme', theme);
+          console.log('saved');
+        }
+
+        function applySentmessagesTheme(theme) {
+          var sent = document.querySelectorAll('.Sent');
+          sent.forEach(function(message) {
+            message.style.background = theme;
+          });
+        }
+
+        function applyReceivedmessagesTheme(theme) {
+          var received = document.querySelectorAll('.received');
+          received.forEach(function(message) {
+            message.style.background = theme;
+          });
+        }
+
+
+        var lastTimestamp = Date.now();
+
+        function isSameDay(date1, date2) {
+          return (
+            date1.getDate() === date2.getDate() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getFullYear() === date2.getFullYear()
+          );
+        }
+
+        function getFormattedDate(date) {
+          return date.toDateString();
+        }
+
+        function formatTime(time) {
+          var minutes = Math.floor(time / 60);
+          var seconds = Math.floor(time % 60);
+
+          minutes = String(minutes).padStart(2, "0");
+          seconds = String(seconds).padStart(2, "0");
+
+          return minutes + ":" + seconds;
+        }
+        // isToday(date);
+        var lastDisplayedDate = null;
+        var UserIdx = '<?php echo $_GET['UserIdx']; ?>';
+        const sessionId = "<?php echo $sessionID ?>";
+        var UserId = "<?php echo $_SESSION['UserId']; ?>";
+        var socketUrl = 'ws://localhost:8888';
+        const socket = io(socketUrl, {
+          query: {
+            UserId,
+            UserIdx,
+            sessionId,
+          }
+        });
+        socket.on('connect', () => {
+          console.log('Socket.IO connection established');
+          socket.emit('userConnected', UserId);
+          socket.emit('fetchMessageForEachUser', {
+            UserId,
+            UserIdx
+          });
+          fetchLastSeenMessageId();
+          fetchUserProfileData(UserIdx);
+          fetchPoeple(UserId);
+        });
+
+        socket.on('disconnect', () => {
+          socket.emit('userDisconnected', UserId);
+        });
+        socket.on('messageRead', (chatId, UserIdx) => {
+          console.log('This message has been read', chatId);
+        });
+        async function getLastMessageIdFromChatHistory() {
+          return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('UserId', UserId);
+            formData.append('UserIdx', UserIdx);
+
+            fetch('http://localhost:8888/LastIdSeen', {
+                method: 'POST',
+                body: formData,
+              })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Error checking last seen message');
+                }
+                return response.json();
+              })
+              .then((result) => {
+                resolve(result.lastId);
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          });
+        }
+
+        async function setChatboxScrollPositionToLastSeen(lastSeenMessageId) {
+          const chatbox = document.querySelector('.chatbox');
+
+          function waitForElementToExist(elementId, maxAttempts, interval, callback) {
+            let attempts = 0;
+
+            function checkElement() {
+              console.log('this is the element Id', elementId);
+              const element = document.getElementById(elementId);
+              attempts++;
+
+              if (element) {
+                callback(element);
+              } else if (attempts < maxAttempts) {
+                setTimeout(checkElement, interval);
+              } else {
+                console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
+              }
+            }
+
+            checkElement();
+          }
+
+          waitForElementToExist(lastSeenMessageId, 10, 1000, (lastSeenMessage) => {
+            if (lastSeenMessage) {
+              const position = lastSeenMessage.offsetTop + lastSeenMessage.clientHeight;
+              chatbox.scrollTop = position;
+              console.log(position, lastSeenMessage.offsetTop, lastSeenMessage.clientHeight);
+
+              // const redLine = document.createElement('div');
+              // redLine.style.width = '100%';
+              // redLine.style.height = '2px';
+              // redLine.style.backgroundColor = 'red';
+              // redLine.style.position = 'absolute';
+              // redLine.style.top = position + 'px';
+              // chatbox.appendChild(redLine);
+            } else {
+              console.log('Message container not found');
+            }
           });
 
-          socket.on('typing', (data) => {
-            console.log(`${data.UserId} is typing`);
+        }
+        let lastSeenMessageId = 'CHAT' + UserId + UserIdx;
+        async function fetchLastSeenMessageId() {
+          try {
+            const lastSeenMessageIdFromServer = await getLastMessageIdFromChatHistory();
+            console.log(lastSeenMessageIdFromServer);
+
+            if (lastSeenMessageIdFromServer && lastSeenMessageId) {
+              const lastSeenMessageIdNum = parseInt(lastSeenMessageId);
+              const lastSeenMessageIdFromServerNum = parseInt(lastSeenMessageIdFromServer);
+
+              lastSeenMessageId = lastSeenMessageIdFromServer;
+            }
+
+            setChatboxScrollPositionToLastSeen(lastSeenMessageId);
+          } catch (error) {
+            console.log('Error finding last seen message ID', error);
+          }
+        }
+        var recipientPassport = document.querySelector('.recipientPassport');
+        var icon = document.querySelector('.icon');
+
+        async function fetchUserProfileData(UserIdx) {
+          try {
+            const response = await fetch(`http://localhost:8888/getUserProfile/${UserIdx}`);
+            if (response.ok) {
+              const userProfileData = await response.json();
+              recipientPassport.src = userProfileData.Passport;
+              icon.textContent = userProfileData.Surname + " " + userProfileData.First_Name;
+              icons.href = 'user_profile.php?UserId=' + UserIdx;
+            } else {
+              throw new Error('Error fetching user profile data');
+            }
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
+        }
+        var passport = document.querySelector('.passport');
+        var passportModal = passport.querySelector('a');
+        var passportModalImg = passportModal.querySelector('img');
+
+        var NameOfP = document.querySelector('.name');
+        var NameOfPSpan = NameOfP.querySelector('span');
+        var NameOfPSpanA = NameOfPSpan.querySelector('a');
+
+        async function fetchPoeple(UserId) {
+          try {
+            const response = await fetch(`http://localhost:8888/getPeople/${UserId}`);
+            if (response.ok) {
+              const peopleData = await response.json();
+              passportModalImg.src = peopleData.Passport;
+              passportModalImg.alt = peopleData.UserId;
+              NameOfPSpanA.textContent = peopleData.Surname + " " + peopleData.First_Name;
+            } else {
+              throw new Error('Error fetching other people');
+            }
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
+        }
+
+        var onlineStatus = document.createElement('div');
+        onlineStatus.className = 'onlineStatus';
+        onlineStatus.id = 'online-status-' + UserIdx;
+        icon.appendChild(onlineStatus);
+        socket.on('userStatus', ({
+          UserIdx,
+          status
+        }) => {
+          console.log('this is the status for User', UserIdx, ':', status);
+          if (status === 'online') {
+            onlineStatus.style.boxShadow = 'rgb(11, 220, 77)';
+            onlineStatus.style.backgroundColor = 'green';
+          } else if (status === 'offline') {
+            onlineStatus.style.boxShadow = 'rgb(187, 27, 27)';
+            onlineStatus.style.backgroundColor = 'red';
+          } else {
+            onlineStatus.style.display = 'none';
+          }
+        });
+        let unreadMessageCount = 0;
+
+        socket.on('fetchMessageForEachUser', (data) => {
+          console.log('Received messages for each user:');
+          const hasUnreadMessages = data.some((result) => result.isRead === 0 && result.senderId === UserIdx);
+
+          if (hasUnreadMessages) {
+            unreadMessageCount = data.filter((result) => result.isRead === 0 && result.senderId === UserIdx).length;
+            console.log('This is the unread status before oepning the page', unreadMessageCount);
+            if (unreadMessageCount === 1) {
+              const unreadMessageDiv = document.createElement('div');
+              unreadMessageDiv.className = 'unread-message';
+              unreadMessageDiv.textContent = 'Unread Message';
+              chatbox.appendChild(unreadMessageDiv);
+            } else {
+              const unreadMessageDiv = document.querySelector('.unread-message');
+              unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
+            }
+          } else {
+            console.log('No unread messages');
+          }
+          data.forEach((result, index) => {
+            console.log(`Received result #${index + 1}:`);
+            checkForNewMessages(result);
+          });
+        });
+
+
+        var chatbox = document.querySelector('.chatbox');
+
+        var messages = document.getElementById('message');
+        var icon = document.querySelector('.icon');
+
+        var isTypingElement = null;
+        messages.addEventListener('keyup', function() {
+          socket.emit('typing', {
+            UserId,
+            UserIdx
+          });
+        });
+
+        socket.on('typing', (data) => {
+          console.log(`${data.UserId} is typing`);
+          if (isTypingElement) {
+            icon.removeChild(isTypingElement);
+            isTypingElement = null;
+          }
+          typingTimeout = setTimeout(function() {
             if (isTypingElement) {
               icon.removeChild(isTypingElement);
               isTypingElement = null;
             }
-            typingTimeout = setTimeout(function() {
-              if (isTypingElement) {
-                icon.removeChild(isTypingElement);
-                isTypingElement = null;
-              }
-            }, 1000);
-            isTypingElement = document.createElement('p');
-            isTypingElement.className = 'isTyping';
-            isTypingElement.innerHTML = `is typing`;
-            icon.appendChild(isTypingElement);
+          }, 1000);
+          isTypingElement = document.createElement('p');
+          isTypingElement.className = 'isTyping';
+          isTypingElement.innerHTML = `is typing`;
+          icon.appendChild(isTypingElement);
+        });
+
+        let debouncedMarkMessagesAsRead = debounce(markMessagesAsRead, 500);
+
+        chatbox.addEventListener('scroll', debouncedMarkMessagesAsRead);
+
+        function markMessagesAsRead() {
+          const messages = document.querySelectorAll('.message');
+          const chatbox = document.getElementById('chatbox');
+
+          messages.forEach((message) => {
+            const rect = message.getBoundingClientRect();
+
+            if (rect.top >= 0 && rect.bottom <= chatbox.clientHeight && rect.height / message.clientHeight >= 0.5) {
+              const messageId = message.id;
+              socket.emit('messageRead', {
+                messageId,
+                UserIdx
+              });
+            }
           });
+        }
 
-          let debouncedMarkMessagesAsRead = debounce(markMessagesAsRead, 500);
+        function debounce(func, delay) {
+          let timeout;
+          return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+          };
+        }
 
-          chatbox.addEventListener('scroll', debouncedMarkMessagesAsRead);
+        function checkForNewMessages(message) {
+          var div = document.createElement('div');
+          var timestamp = new Date(message.time_sent);
 
-          function markMessagesAsRead() {
-            const messages = document.querySelectorAll('.message');
-            const chatbox = document.getElementById('chatbox');
+          div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
+          var sender = message.senderId
+          if (div.className === 'received') {
+            var chatId = message.chatId;
+            var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
+            if (deletedReceivedMessage === 'true') {
+              div.innerHTML = '<div id="' + chatId + '" class="message" data-isRead = "' + message.isRead + '">' + 'You deleted the message' + '</div>';
+              div.style.color = 'red';
+            }
+          }
 
-            messages.forEach((message) => {
-              const rect = message.getBoundingClientRect();
+          var videoLinkRegex = /(https?:\/\/[^\s]+)/i;
+          if (videoLinkRegex.test(message.message)) {
+            var videoURL = message.message.match(videoLinkRegex)[0];
 
-              if (rect.top >= 0 && rect.bottom <= chatbox.clientHeight && rect.height / message.clientHeight >= 0.5) {
-                const messageId = message.id;
-                socket.emit('messageRead', {
-                  messageId
-                });
-              }
+            var videoLink = '<a href="' + videoURL + '" target="_blank">' + videoURL + '</a>';
+
+            var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
+
+            div.innerHTML = '<div class="message-container">' +
+              '<div class="message" data-isRead = "' + message.isRead + '" id="' + message.chatId + '">' + videoLink + '<br>' +
+              '<img src="' + videoURL + '" alt="Thumbnail" class="thumbnail">' + '<br>' +
+              downloadLink + '</div>' +
+              '</div>';
+            var timestamp = new Date(message.time_sent);
+            var formattedTime = timestamp.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit'
             });
-          }
-
-          function debounce(func, delay) {
-            let timeout;
-            return function() {
-              const context = this;
-              const args = arguments;
-              clearTimeout(timeout);
-              timeout = setTimeout(() => func.apply(context, args), delay);
-            };
-          }
-
-
-          async function getLastMessageIdFromChatHistory() {
-            return new Promise((resolve, reject) => {
-              const formData = new FormData();
-              formData.append('UserId', UserId);
-              formData.append('UserIdx', UserIdx);
-
-              fetch('http://localhost:8888/LastIdSeen', {
-                  method: 'POST',
-                  body: formData,
-                })
-                .then((response) => {
-                  if (!response.ok) {
-                    throw new Error('Error checking last seen message');
-                  }
-                  return response.json();
-                })
-                .then((result) => {
-                  resolve(result.lastId);
-                })
-                .catch((error) => {
-                  reject(error);
-                });
+            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+          } else if (message.message !== null) {
+            div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + message.message + '</div>';
+            var timestamp = new Date(message.time_sent);
+            var formattedTime = timestamp.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit'
             });
+            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
           }
 
-          async function setChatboxScrollPositionToLastSeen(lastSeenMessageId) {
-            const chatbox = document.querySelector('.chatbox');
+          if (message.sent_image) {
+            div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div>';
+            var timestamp = new Date(message.time_sent);
+            var formattedTime = timestamp.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+          }
+          if (message.sent_video) {
+            div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
+            var videoPlayer = div.querySelector('video');
+            var playButton = div.querySelector('#buttonplay');
+            playButton.addEventListener('click', function() {
+              videoPlayer.style.display = 'block';
+              videoPlayer.play();
+              playButton.style.display = 'none';
+            });
+            var timestamp = new Date(message.time_sent);
+            var formattedTime = timestamp.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+          }
+          if (message.voice_notes) {
+            div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
+            const chatId = message.chatId;
 
             function waitForElementToExist(elementId, maxAttempts, interval, callback) {
               let attempts = 0;
 
               function checkElement() {
-                console.log('this is the element Id', elementId);
                 const element = document.getElementById(elementId);
                 attempts++;
 
@@ -906,1365 +1039,1300 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               checkElement();
             }
 
-            waitForElementToExist(lastSeenMessageId, 10, 1000, (lastSeenMessage) => {
-              if (lastSeenMessage) {
-                const position = lastSeenMessage.offsetTop + lastSeenMessage.clientHeight;
-                chatbox.scrollTop = position;
-                console.log(position, lastSeenMessage.offsetTop, lastSeenMessage.clientHeight);
+            waitForElementToExist(chatId, 10, 1000, (messageContainer) => {
+              const voiceNoteContainer = messageContainer.querySelector(".voiceNote");
+              if (voiceNoteContainer) {
+                const audio = voiceNoteContainer.querySelector("#audio-" + chatId);
+                const timeline = voiceNoteContainer.querySelector(".timeline-" + chatId);
+                const progress = voiceNoteContainer.querySelector(".progress-" + chatId);
+                const playPause = voiceNoteContainer.querySelector(".play-pause-" + chatId);
+                const timelineSlider = voiceNoteContainer.querySelector(".timeline-slider-" + chatId);
+                const currentTime = voiceNoteContainer.querySelector(".current-time-" + chatId);
+                const totalTime = voiceNoteContainer.querySelector(".total-time-" + chatId);
+                const volumeButton = voiceNoteContainer.querySelector(".volume-button-" + chatId);
+                const volumeSlider = voiceNoteContainer.querySelector(".volume-slider-" + chatId);
+                const volumePercentage = voiceNoteContainer.querySelector(".volume-percentage-" + chatId);
+                const speedButton = voiceNoteContainer.querySelector(".speed-" + chatId);
+                const speedLabel = voiceNoteContainer.querySelector("#speed-label-" + chatId);
+                const speedOptions = [1, 1.5, 2];
+                let currentSpeedIndex = 0;
 
-                // const redLine = document.createElement('div');
-                // redLine.style.width = '100%';
-                // redLine.style.height = '2px';
-                // redLine.style.backgroundColor = 'red';
-                // redLine.style.position = 'absolute';
-                // redLine.style.top = position + 'px';
-                // chatbox.appendChild(redLine);
-              } else {
-                console.log('Message container not found');
-              }
-            });
+                audio.addEventListener("canplaythrough", () => {
+                  totalTime.innerHTML = formatTime(audio.duration);
+                  audio.volume = 0.75;
+                  volumePercentage.style.width = audio.volume * 100 + "%";
+                });
+                audio.addEventListener("ended", () => {
+                  audio.currentTime = 0;
+                  playPause.classList.remove("paused");
+                  progress.style.width = "0";
+                  currentTime.textContent = formatTime(audio.currentTime);
+                });
 
-          }
+                timeline.addEventListener("input", () => {
+                  const timeToSeek = (timeline.value / 100) * audio.duration;
+                  audio.currentTime = timeToSeek;
+                });
 
-          async function fetchLastSeenMessageId() {
-            try {
-              const lastSeenMessageId = await getLastMessageIdFromChatHistory();
-              console.log(lastSeenMessageId);
-
-              setChatboxScrollPositionToLastSeen(lastSeenMessageId);
-            } catch (error) {
-              console.log('Error finding last seen message ID', error);
-            }
-          }
-
-          fetchLastSeenMessageId();
-
-          function checkForNewMessages(message) {
-            var div = document.createElement('div');
-            var timestamp = new Date(message.time_sent);
-
-            div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
-            var sender = message.senderId
-            if (div.className === 'received') {
-              var chatId = message.chatId;
-              var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
-              if (deletedReceivedMessage === 'true') {
-                div.innerHTML = '<div id="' + chatId + '" class="message" data-isRead = "' + message.isRead + '">' + 'You deleted the message' + '</div>';
-                div.style.color = 'red';
-              }
-            }
-
-            var videoLinkRegex = /(https?:\/\/[^\s]+)/i;
-            if (videoLinkRegex.test(message.message)) {
-              var videoURL = message.message.match(videoLinkRegex)[0];
-
-              var videoLink = '<a href="' + videoURL + '" target="_blank">' + videoURL + '</a>';
-
-              var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
-
-              div.innerHTML = '<div class="message-container">' +
-                '<div class="message" data-isRead = "' + message.isRead + '" id="' + message.chatId + '">' + videoLink + '<br>' +
-                '<img src="' + videoURL + '" alt="Thumbnail" class="thumbnail">' + '<br>' +
-                downloadLink + '</div>' +
-                '</div>';
-              var timestamp = new Date(message.time_sent);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
-            } else if (message.message !== null) {
-              div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + message.message + '</div>';
-              var timestamp = new Date(message.time_sent);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-            }
-
-            if (message.sent_image) {
-              div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div>';
-              var timestamp = new Date(message.time_sent);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-            }
-            if (message.sent_video) {
-              div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
-              var videoPlayer = div.querySelector('video');
-              var playButton = div.querySelector('#buttonplay');
-              playButton.addEventListener('click', function() {
-                videoPlayer.style.display = 'block';
-                videoPlayer.play();
-                playButton.style.display = 'none';
-              });
-              var timestamp = new Date(message.time_sent);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-            }
-            if (message.voice_notes) {
-              div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
-              const chatId = message.chatId;
-
-              function waitForElementToExist(elementId, maxAttempts, interval, callback) {
-                let attempts = 0;
-
-                function checkElement() {
-                  const element = document.getElementById(elementId);
-                  attempts++;
-
-                  if (element) {
-                    callback(element);
-                  } else if (attempts < maxAttempts) {
-                    setTimeout(checkElement, interval);
+                playPause.addEventListener("click", () => {
+                  if (audio.paused) {
+                    audio.play();
+                    playPause.classList.add("paused");
                   } else {
-                    console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
-                  }
-                }
-
-                checkElement();
-              }
-
-              waitForElementToExist(chatId, 10, 1000, (messageContainer) => {
-                const voiceNoteContainer = messageContainer.querySelector(".voiceNote");
-                if (voiceNoteContainer) {
-                  const audio = voiceNoteContainer.querySelector("#audio-" + chatId);
-                  const timeline = voiceNoteContainer.querySelector(".timeline-" + chatId);
-                  const progress = voiceNoteContainer.querySelector(".progress-" + chatId);
-                  const playPause = voiceNoteContainer.querySelector(".play-pause-" + chatId);
-                  const timelineSlider = voiceNoteContainer.querySelector(".timeline-slider-" + chatId);
-                  const currentTime = voiceNoteContainer.querySelector(".current-time-" + chatId);
-                  const totalTime = voiceNoteContainer.querySelector(".total-time-" + chatId);
-                  const volumeButton = voiceNoteContainer.querySelector(".volume-button-" + chatId);
-                  const volumeSlider = voiceNoteContainer.querySelector(".volume-slider-" + chatId);
-                  const volumePercentage = voiceNoteContainer.querySelector(".volume-percentage-" + chatId);
-                  const speedButton = voiceNoteContainer.querySelector(".speed-" + chatId);
-                  const speedLabel = voiceNoteContainer.querySelector("#speed-label-" + chatId);
-                  const speedOptions = [1, 1.5, 2];
-                  let currentSpeedIndex = 0;
-
-                  audio.addEventListener("canplaythrough", () => {
-                    totalTime.innerHTML = formatTime(audio.duration);
-                    audio.volume = 0.75;
-                    volumePercentage.style.width = audio.volume * 100 + "%";
-                  });
-                  audio.addEventListener("ended", () => {
-                    audio.currentTime = 0;
+                    audio.pause();
                     playPause.classList.remove("paused");
-                    progress.style.width = "0";
-                    currentTime.textContent = formatTime(audio.currentTime);
-                  });
-
-                  timeline.addEventListener("input", () => {
-                    const timeToSeek = (timeline.value / 100) * audio.duration;
-                    audio.currentTime = timeToSeek;
-                  });
-
-                  playPause.addEventListener("click", () => {
-                    if (audio.paused) {
-                      audio.play();
-                      playPause.classList.add("paused");
-                    } else {
-                      audio.pause();
-                      playPause.classList.remove("paused");
-                    }
-                  });
-
-                  audio.addEventListener("timeupdate", () => {
-                    const percent = (audio.currentTime / audio.duration) * 100;
-                    progress.style.width = percent + "%";
-                    // console.log('Progess', percent);
-                    currentTime.textContent = formatTime(audio.currentTime);
-                    timelineSlider.value = percent;
-                  });
-
-                  timelineSlider.addEventListener("input", () => {
-                    const percent = timelineSlider.value;
-                    const timeToSeek = (percent / 100) * audio.duration;
-                    audio.currentTime = timeToSeek;
-                  });
-                  volumeButton.addEventListener("click", () => {
-                    audio.muted = !audio.muted;
-                    updateVolumeIcon();
-                  });
-
-                  volumeSlider.addEventListener("click", e => {
-                    const sliderWidth = window.getComputedStyle(volumeSlider).width;
-                    const newVolume = e.offsetX / parseInt(sliderWidth);
-                    audio.volume = newVolume;
-                    volumePercentage.style.width = newVolume * 100 + "%";
-                    updateVolumeIcon();
-                  });
-
-                  speedButton.addEventListener("click", () => {
-                    currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
-                    audio.playbackRate = speedOptions[currentSpeedIndex];
-                    speedLabel.textContent = speedOptions[currentSpeedIndex] + "x";
-                  });
-
-                  function updateVolumeIcon() {
-                    volumeButton.classList.remove("volume-off", "volume-low", "volume-high");
-                    if (audio.muted) {
-                      volumeButton.classList.add("volume-off");
-                    } else if (audio.volume < 0.5) {
-                      volumeButton.classList.add("volume-low");
-                    } else {
-                      volumeButton.classList.add("volume-high");
-                    }
                   }
-
-                  function getTimeCodeFromNum(num) {
-                    const hours = Math.floor(num / 3600);
-                    const minutes = Math.floor((num % 3600) / 60);
-                    const seconds = Math.floor(num % 60);
-                    return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
-                  }
-                } else {
-                  console.log("Voice note container not found");
-                }
-              });
-
-              var timestamp = new Date(message.time_sent);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-            }
-
-            if (!lastDisplayedDate || !isSameDay(timestamp, lastDisplayedDate)) {
-              var dateDiv = document.createElement('div');
-              dateDiv.className = 'date';
-              dateDiv.textContent = getFormattedDate(timestamp);
-              chatbox.appendChild(dateDiv);
-              lastDisplayedDate = timestamp;
-            }
-
-            chatbox.appendChild(div);
-
-
-            lastDisplayedDate = timestamp;
-
-            var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
-            if (savedSentmessagecolorTheme) {
-              applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
-            }
-            var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
-            if (savedReceivedmessagecolorTheme) {
-              applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
-            }
-            var SavedmessageSentTheme = localStorage.getItem('messageSentTheme');
-            if (SavedmessageSentTheme) {
-              applySentmessagesTheme(SavedmessageSentTheme);
-            }
-            var SavedmessageReceivedTheme = localStorage.getItem('messageReceivedTheme');
-            if (SavedmessageReceivedTheme) {
-              applyReceivedmessagesTheme(SavedmessageReceivedTheme);
-            }
-
-            var messageDivs = document.querySelectorAll('.message');
-            messageDivs.forEach(function(div) {
-              div.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                var clickedClass = e.target.parentNode.className;
-                var clickedId = e.target.parentNode.id;
-                var existingPopups = document.querySelectorAll('.popup');
-                existingPopups.forEach(function(popup) {
-                  popup.remove();
                 });
 
-                var clickedClass = e.target.parentNode.className;
+                audio.addEventListener("timeupdate", () => {
+                  const percent = (audio.currentTime / audio.duration) * 100;
+                  progress.style.width = percent + "%";
+                  // console.log('Progess', percent);
+                  currentTime.textContent = formatTime(audio.currentTime);
+                  timelineSlider.value = percent;
+                });
 
+                timelineSlider.addEventListener("input", () => {
+                  const percent = timelineSlider.value;
+                  const timeToSeek = (percent / 100) * audio.duration;
+                  audio.currentTime = timeToSeek;
+                });
+                volumeButton.addEventListener("click", () => {
+                  audio.muted = !audio.muted;
+                  updateVolumeIcon();
+                });
 
-                var popup = document.createElement('div');
-                popup.className = 'popup';
-                popup.setAttribute('data-chat-id', div.id);
-                popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
-                var chatId = popup.getAttribute('data-chat-id');
-                // alert(div.id);
-                var messageRect = e.target.getBoundingClientRect();
-                var chatboxRect = chatbox.getBoundingClientRect();
+                volumeSlider.addEventListener("click", e => {
+                  const sliderWidth = window.getComputedStyle(volumeSlider).width;
+                  const newVolume = e.offsetX / parseInt(sliderWidth);
+                  audio.volume = newVolume;
+                  volumePercentage.style.width = newVolume * 100 + "%";
+                  updateVolumeIcon();
+                });
 
-                var popupTop = messageRect.top - chatboxRect.top + messageRect.height / 2 - popup.offsetHeight / 2;
-                var popupLeft;
-                if (clickedClass === 'Sent') {
-                  popupLeft = messageRect.left - chatboxRect.left - popup.offsetWidth;
-                } else if (clickedClass === 'received') {
-                  popupLeft = messageRect.left - chatboxRect.left + messageRect.width;
-                }
-                popup.style.top = popupTop + 'px';
-                popup.style.left = popupLeft + 'px';
-                var deleteBtn = popup.querySelector('.delete');
-                deleteBtn.addEventListener('click', function() {
-                  var chatId = popup.getAttribute('data-chat-id');
-                  var senderId = message.senderId;
-                  var currentUserId = "<?php echo $UserId; ?>";
-                  console.log(currentUserId)
-                  var isSentMessage = senderId === currentUserId;
+                speedButton.addEventListener("click", () => {
+                  currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
+                  audio.playbackRate = speedOptions[currentSpeedIndex];
+                  speedLabel.textContent = speedOptions[currentSpeedIndex] + "x";
+                });
 
-                  if (isSentMessage = true) {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'delete_message.php', true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                    var formData = 'chatId=' + encodeURIComponent(chatId);
-
-                    xhr.onreadystatechange = function() {
-                      if (xhr.readyState === 4 && xhr.status === 200) {
-                        console.log('Response:', xhr.responseText);
-                        var response = JSON.parse(xhr.responseText);
-                        var message = response.message;
-
-                        var deletedMessage = document.getElementById(chatId);
-                        deletedMessage.innerHTML = 'You deleted this message';
-                        deletedMessage.class = 'message';
-                        deletedMessage.style.color = 'red';
-                        alert(message);
-                        popup.style.display = 'none';
-                      }
-                    };
-
-                    xhr.send(formData);
+                function updateVolumeIcon() {
+                  volumeButton.classList.remove("volume-off", "volume-low", "volume-high");
+                  if (audio.muted) {
+                    volumeButton.classList.add("volume-off");
+                  } else if (audio.volume < 0.5) {
+                    volumeButton.classList.add("volume-low");
                   } else {
-                    var deletedMessage = document.getElementById(chatId);
-                    deletedMessage.innerHTML = 'You deleted the message';
-                    deletedMessage.style.color = 'red';
-                    localStorage.setItem('deletedReceivedMessage_' + chatId, 'true'); // Save the setting
-                    popup.style.display = 'none';
+                    volumeButton.classList.add("volume-high");
                   }
-                });
+                }
 
-
-                var replyBtn = popup.querySelector('.reply');
-                replyBtn.addEventListener('click', function() {
-                  // TODO: Implement reply functionality
-                  // Show a reply form for the user to enter a reply message
-                });
-
-                var changeThemeBtn = popup.querySelector('.change-theme');
-                changeThemeBtn.addEventListener('click', function() {
-                  // Check if change theme options already exist
-                  var changeThemeOptions = popup.querySelector('.change-theme-options');
-                  if (changeThemeOptions) {
-                    // If change theme options already exist, remove them
-                    changeThemeOptions.remove();
-                  } else {
-                    var changeThemeOptions = document.createElement('div');
-                    changeThemeOptions.className = 'change-theme-options';
-                    changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
-                    popup.appendChild(changeThemeOptions);
-
-                    var backgroundBtn = popup.querySelector('.background-gradient');
-                    backgroundBtn.addEventListener('click', function(e) {
-                      var newColor = prompt('Enter a new background gradient:');
-                      if (newColor !== null && newColor.trim() !== '') {
-                        if (clickedClass === 'Sent') {
-                          var sentElements = document.querySelectorAll('.Sent');
-                          sentElements.forEach(function(element) {
-                            element.style.background = newColor;
-                            saveSentmessageTheme(newColor);
-                            applySentmessagesTheme(newColor);
-                          });
-                        } else if (clickedClass === 'received') {
-                          var receivedElements = document.querySelectorAll('.received');
-                          receivedElements.forEach(function(element) {
-                            element.style.background = newColor;
-                            saveReceivedmessageTheme(newColor);
-                            applyReceivedmessagesTheme(newColor);
-                          });
-                        }
-                      }
-                    });
-
-
-
-                    var backgroundcolorBtn = popup.querySelector('.background-color');
-                    backgroundcolorBtn.addEventListener('click', function(e) {
-                      var newColor = prompt('Enter a new background color:');
-                      if (newColor !== null && newColor.trim() !== '') {
-                        if (clickedClass === 'Sent') {
-                          var sentElements = document.querySelectorAll('.Sent');
-                          sentElements.forEach(function(element) {
-                            element.style.backgroundColor = newColor;
-                            saveSentmessagebackgroundTheme(newColor);
-                            applySentmessagesbackgroundTheme(newColor);
-                          });
-                        } else if (clickedClass === 'received') {
-                          var receivedElements = document.querySelectorAll('.received');
-                          receivedElements.forEach(function(element) {
-                            element.style.backgroundColor = newColor;
-                            saveRecievedmessagebackgroundTheme(newColor);
-                            applyReceivedmessagesbackgroundTheme(newColor);
-                          });
-                        }
-                      }
-                    });
-                  }
-                });
-                chatbox.appendChild(popup);
-
-                document.addEventListener('click', function(e) {
-                  if (popup && !popup.contains(e.target)) {
-                    popup.remove();
-                  }
-                });
-              });
-            });
-          }
-
-
-          // calling aspect
-          const hangupButtonpop = document.getElementById('hangup_button_pop');
-          const answerButton = document.getElementById('answer_button');
-          const ringingBox = document.getElementById('ringingBox');
-          var UserId = "<?php echo $UserId ?>";
-          var UserIdx = "<?php echo $UserIdx ?>";
-          var peerConnection;
-          console.log(sessionId);
-          console.log(UserId);
-          console.log(UserIdx);
-          var localStream;
-          var remoteStream;
-          var localVideo = document.getElementById("<?php echo $UserId; ?>");
-          var remoteVideo = document.getElementById("<?php echo $UserIdx; ?>");
-          var hangupButton = document.getElementById('hangup_button');
-          var audioCallButton = document.getElementById('audio_call_button');
-          var videoCallButton = document.getElementById('video_call_button');
-          var callerStatusElement = document.getElementById('status');
-          var chatInterface = document.getElementById('chatbox');
-          var callInterface = document.getElementById('callInterface');
-          var callbtn = document.getElementById('callbtn');
-          var pendingCandidates = [];
-          var ringtone = document.createElement('audio');
-          ringtone.id = "ringtone";
-          ringtone.loop = true;
-          ringtone.src = "ringingtone/ringtone.mp3";
-          ringtone.type = "audio/mpeg";
-          ringtone.autoplay = false;
-          chatInterface.appendChild(ringtone);
-
-          function resetCallUI() {
-            hangupButton.disabled = false;
-            callerStatusElement.textContent = 'Calling...';
-            ringtone.pause();
-            ringtone.currentTime = 0;
-          }
-          callbtn.addEventListener('click', function() {
-            chatInterface.style.display = 'none';
-            callInterface.style.display = 'block';
-            startVideoCall();
-          });
-          audioCallButton.addEventListener('click', toggleAudio);
-          videoCallButton.addEventListener('click', toggleVideo);
-
-          function toggleAudio() {
-            localStream.getAudioTracks().forEach(function(track) {
-              track.enabled = !track.enabled;
-            });
-          }
-
-          function toggleVideo() {
-            localStream.getVideoTracks().forEach(function(track) {
-              track.enabled = !track.enabled;
-            });
-          }
-
-          function startPeerConnection() {
-            if (!peerConnection) {
-              console.error('peerConnection is not initialized');
-              return;
-            }
-
-            var iceCandidates = [];
-
-            peerConnection.addEventListener('icecandidate', event => {
-              console.log('Finding ICE candidate:', event);
-              if (event.candidate) {
-                console.log('ICE candidate found:', event.candidate);
-                iceCandidates.push(event.candidate);
-                sendIceCandidates(iceCandidates);
+                function getTimeCodeFromNum(num) {
+                  const hours = Math.floor(num / 3600);
+                  const minutes = Math.floor((num % 3600) / 60);
+                  const seconds = Math.floor(num % 60);
+                  return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+                }
               } else {
-                console.log('ICE candidate gathering complete.');
+                console.log("Voice note container not found");
               }
             });
 
-            peerConnection.addEventListener('icegatheringstatechange', function() {
-              console.log('ICE gathering state:', peerConnection.iceGatheringState);
-              if (peerConnection.iceGatheringState === 'gathering') {
-                console.log('Gathering ICE candidate gathering:', event);
-              }
-              if (peerConnection.iceGatheringState === 'complete') {
-                console.log('Gathering ICE candidate complete:', event);
-                console.log('ICE gathering complete. All candidates:', iceCandidates);
-                if (iceCandidates.length === 0) {
-                  console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
-                } else {
-                  sendIceCandidates(iceCandidates);
-                }
-              }
+            var timestamp = new Date(message.time_sent);
+            var formattedTime = timestamp.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit'
             });
-
-            peerConnection.addEventListener('iceconnectionstatechange', function() {
-              console.log('ICE connection state:', peerConnection.iceConnectionState);
-              if (peerConnection.iceConnectionState === 'failed') {
-                // Handle ICE connection failure if needed.
-              }
-            });
-
-            peerConnection.addEventListener('datachannel', function(event) {
-              // Handle data channel events if needed.
-            });
-
-            function sendIceCandidates(iceCandidates) {
-              console.log('Sending ICE candidates:', iceCandidates);
-              sendMessage({
-                type: 'candidate',
-                candidates: iceCandidates,
-                callerUserId: UserIdx,
-                callertoUserId: UserId,
-              });
-            }
+            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
           }
 
-          function joinCall(message) {
-            ringtone.pause();
-            chatInterface.style.display = 'none';
-            callInterface.style.display = 'block';
-            callerStatusElement.textContent = 'Joining Call';
+          if (!lastDisplayedDate || !isSameDay(timestamp, lastDisplayedDate)) {
+            var dateDiv = document.createElement('div');
+            dateDiv.className = 'date';
+            dateDiv.textContent = getFormattedDate(timestamp);
+            chatbox.appendChild(dateDiv);
+            lastDisplayedDate = timestamp;
+          }
 
-            var offer = new RTCSessionDescription(message.offer);
+          chatbox.appendChild(div);
 
-            var retryCount = 0;
 
-            function getUserMediaWithRetry(maxRetries, delay) {
-              return new Promise(function(resolve, reject) {
-                function attempt() {
-                  navigator.mediaDevices
-                    .getUserMedia(mediaConstraints)
-                    .then(resolve)
-                    .catch(function(error) {
-                      if (retryCount < maxRetries) {
-                        console.log('Failed to access camera and microphone. Retrying...');
-                        retryCount++;
+          lastDisplayedDate = timestamp;
 
-                        if (retryCount === 7) {
-                          mediaConstraints = {
-                            audio: true,
-                            video: false
-                          };
-                          console.log('Switching to audio-only mode.');
-                        }
+          var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
+          if (savedSentmessagecolorTheme) {
+            applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
+          }
+          var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
+          if (savedReceivedmessagecolorTheme) {
+            applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
+          }
+          var SavedmessageSentTheme = localStorage.getItem('messageSentTheme');
+          if (SavedmessageSentTheme) {
+            applySentmessagesTheme(SavedmessageSentTheme);
+          }
+          var SavedmessageReceivedTheme = localStorage.getItem('messageReceivedTheme');
+          if (SavedmessageReceivedTheme) {
+            applyReceivedmessagesTheme(SavedmessageReceivedTheme);
+          }
 
-                        setTimeout(attempt, delay);
-                      } else {
-                        reject(error);
-                      }
-                    });
-                }
-                attempt();
+          var messageDivs = document.querySelectorAll('.message');
+          messageDivs.forEach(function(div) {
+            div.addEventListener('contextmenu', function(e) {
+              e.preventDefault();
+              var clickedClass = e.target.parentNode.className;
+              var clickedId = e.target.parentNode.id;
+              var existingPopups = document.querySelectorAll('.popup');
+              existingPopups.forEach(function(popup) {
+                popup.remove();
               });
-            }
 
-            var mediaConstraints = {
-              audio: true,
-              video: true
-            }; // Initial constraints
+              var clickedClass = e.target.parentNode.className;
 
-            getUserMediaWithRetry(7, 1000)
-              .then(function(stream) {
-                localStream = stream;
-                peerConnection = new RTCPeerConnection();
-                startPeerConnection();
-                stream.getTracks().forEach(function(track) {
-                  peerConnection.addTrack(track, stream);
-                });
-                console.log('Local stream added to peer connection');
 
-                peerConnection
-                  .setRemoteDescription(offer)
-                  .then(function() {
-                    console.log('Remote description set successfully.');
+              var popup = document.createElement('div');
+              popup.className = 'popup';
+              popup.setAttribute('data-chat-id', div.id);
+              popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
+              var chatId = popup.getAttribute('data-chat-id');
+              // alert(div.id);
+              var messageRect = e.target.getBoundingClientRect();
+              var chatboxRect = chatbox.getBoundingClientRect();
 
-                    if (
-                      peerConnection.signalingState === 'have-remote-offer' ||
-                      peerConnection.signalingState === 'have-local-pranswer'
-                    ) {
-                      return peerConnection.createAnswer();
-                    } else {
-                      throw new Error('Invalid signaling state for creating an answer.');
+              var popupTop = messageRect.top - chatboxRect.top + messageRect.height / 2 - popup.offsetHeight / 2;
+              var popupLeft;
+              if (clickedClass === 'Sent') {
+                popupLeft = messageRect.left - chatboxRect.left - popup.offsetWidth;
+              } else if (clickedClass === 'received') {
+                popupLeft = messageRect.left - chatboxRect.left + messageRect.width;
+              }
+              popup.style.top = popupTop + 'px';
+              popup.style.left = popupLeft + 'px';
+              var deleteBtn = popup.querySelector('.delete');
+              deleteBtn.addEventListener('click', function() {
+                var chatId = popup.getAttribute('data-chat-id');
+                var senderId = message.senderId;
+                var currentUserId = "<?php echo $UserId; ?>";
+                console.log(currentUserId)
+                var isSentMessage = senderId === currentUserId;
+
+                if (isSentMessage = true) {
+                  var xhr = new XMLHttpRequest();
+                  xhr.open('POST', 'delete_message.php', true);
+                  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                  var formData = 'chatId=' + encodeURIComponent(chatId);
+
+                  xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                      console.log('Response:', xhr.responseText);
+                      var response = JSON.parse(xhr.responseText);
+                      var message = response.message;
+
+                      var deletedMessage = document.getElementById(chatId);
+                      deletedMessage.innerHTML = 'You deleted this message';
+                      deletedMessage.class = 'message';
+                      deletedMessage.style.color = 'red';
+                      alert(message);
+                      popup.style.display = 'none';
                     }
-                  })
-                  .then(function(answer) {
-                    return peerConnection.setLocalDescription(answer);
-                  })
-                  .then(function() {
-                    console.log('ICE gathering state:', peerConnection.iceGatheringState);
-                    console.log('Local description set successfully.');
-
-                    var sdpAnswer = peerConnection.localDescription;
-                    console.log('SDP Answer:', sdpAnswer);
-
-                    sendMessage({
-                      type: 'answer',
-                      answer: sdpAnswer,
-                      mediaConstraints: mediaConstraints,
-                      callerUserId: UserIdx,
-                      callertoUserId: UserId,
-                    });
-                  })
-                  .catch(function(error) {
-                    console.log('Error handling call offer:', error);
-                  });
-                localVideo.srcObject = localStream;
-                callerStatusElement.textContent = 'Exchanging Stream';
-
-                peerConnection.ontrack = function(event) {
-                  if (event.streams && event.streams[0]) {
-                    console.log('Received remote stream:', event.streams[0]);
-                    remoteVideo.srcObject = event.streams[0];
-                  }
-                };
-
-                console.log('Sending local stream as remote stream');
-              })
-              .catch(function(error) {
-                console.log('Error accessing camera and microphone:', error);
-              });
-          }
-
-
-
-          function initSignaling() {
-
-            socket.on('message', function(data) {
-              var message = JSON.parse(data);
-              console.log(message);
-
-              if (message.type === 'offer') {
-                handleIncomingOffer(message);
-              } else if (message.type === 'incoming_call') {
-                handleIncomingCall(message);
-              } else if (message.type === 'answer') {
-                handleAnswerMessage(message);
-              } else if (message.type === 'hangup') {
-                handleHangupMessage(message);
-              } else if (message.type === 'candidate') {
-                handleCandidateMessage(message);
-              } else if (message.type === 'notAvailable') {
-                handleNotAvailable(message);
-              }
-            });
-          }
-
-          function startVideoCall() {
-            function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
-              return new Promise(function(resolve, reject) {
-                function attempt() {
-                  navigator.mediaDevices.getUserMedia(mediaConstraints)
-                    .then(resolve)
-                    .catch(function(error) {
-                      if (maxRetries > 0) {
-                        console.log('Failed to access camera and microphone. Retrying...');
-                        maxRetries--;
-                        setTimeout(attempt, delay);
-                      } else {
-                        reject(error);
-                      }
-                    });
-                }
-                attempt();
-              });
-            }
-
-            var mediaConstraints = {
-              video: true,
-              audio: true
-            };
-            var maxRetries = 7;
-            var delay = 1000; // 1 second
-
-            getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
-              .then(function(stream) {
-                localStream = stream;
-                peerConnection = new RTCPeerConnection();
-                startPeerConnection();
-                stream.getTracks().forEach(function(track) {
-                  peerConnection.addTrack(track, stream);
-                });
-                sendCallOffer(mediaConstraints, UserIdx);
-
-                hangupButton.disabled = false;
-                audioCallButton.disabled = false;
-                videoCallButton.disabled = false;
-
-                localVideo.style.display = 'block';
-                remoteVideo.style.display = 'block';
-                localVideo.srcObject = stream;
-              })
-              .catch(function(error) {
-                console.log('Error accessing camera and microphone:', error);
-              });
-
-            function sendIncomingCallSignal() {
-              ringtone.play();
-              var message = {
-                type: 'incoming_call',
-                callerUserId: UserId,
-                callertoUserId: UserIdx,
-              };
-              sendMessage(message);
-            }
-
-            function sendCallOffer(mediaConstraints, UserIdx) {
-              console.log('Call is to be sent to', UserIdx);
-              callerStatusElement.textContent = 'Sending Call Offer';
-              var offerOptions = {
-                offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
-                offerToReceiveVideo: mediaConstraints.video ? 1 : 0
-              };
-
-              peerConnection.createOffer(offerOptions)
-                .then(function(offer) {
-                  return peerConnection.setLocalDescription(offer);
-                })
-                .then(function() {
-                  // console.log('ICE gathering state:', peerConnection.iceGatheringState);
-                  var sdpOffer = peerConnection.localDescription;
-                  console.log("SDP Offer:", sdpOffer);
-
-                  sendMessage({
-                    type: 'offer',
-                    offer: sdpOffer,
-                    mediaConstraints: mediaConstraints,
-                    callerUserId: UserId,
-                    callertoUserId: UserIdx,
-                    sessionId: sessionId
-                  });
-                  sendIncomingCallSignal();
-                  callerStatusElement.textContent = 'Sent Call Offer';
-                })
-                .catch(function(error) {
-                  console.log('Error creating call offer:', error);
-                });
-            }
-          }
-
-          function handleAnswerMessage(message) {
-            var answer = new RTCSessionDescription(message.answer);
-            var UserId = message.callerUserId;
-            console.log(UserId);
-
-            if (peerConnection.signalingState === 'have-local-offer') {
-              peerConnection.setRemoteDescription(answer)
-                .then(function() {
-                  if (pendingCandidates.length > 0) {
-                    pendingCandidates.forEach(function(candidate) {
-                      peerConnection.addIceCandidate(candidate)
-                        .catch(function(error) {
-                          console.log('Error handling pending ICE candidate:', error);
-                        });
-                    });
-                    pendingCandidates = [];
-                  }
-                })
-                .catch(function(error) {
-                  console.log('Error handling call answer:', error);
-                });
-            } else {
-              peerConnection.addEventListener('signalingstatechange', function() {
-                if (peerConnection.signalingState === 'have-local-offer') {
-                  peerConnection.setRemoteDescription(answer)
-                    .then(function() {
-                      if (pendingCandidates.length > 0) {
-                        pendingCandidates.forEach(function(candidate) {
-                          peerConnection.addIceCandidate(candidate)
-                            .catch(function(error) {
-                              console.log('Error handling pending ICE candidate:', error);
-                            });
-                        });
-                        pendingCandidates = [];
-                      }
-                    })
-                    .catch(function(error) {
-                      console.log('Error handling call answer:', error);
-                    });
-                }
-              });
-            }
-
-            peerConnection.ontrack = function(event) {
-              if (event.streams && event.streams[0]) {
-                remoteVideo.srcObject = event.streams[0];
-                callerStatusElement.textContent = 'Exchanging Stream';
-                ringtone.pause();
-                console.log('Received remote stream:', event.streams[0]);
-              }
-            };
-
-          }
-
-
-          function handleCandidateMessage(message) {
-            console.log('Received candidate:', message.candidate);
-
-            if (!Array.isArray(message.candidate) || message.candidate.length === 0) {
-              console.log('Invalid ICE candidate data:', message.candidate);
-              return;
-            }
-
-            var callerUserId = message.callerUserId;
-            console.log('Incoming candidate from:', callerUserId);
-
-            for (var i = 0; i < message.candidate.length; i++) {
-              var rtcCandidate = new RTCIceCandidate(message.candidate[i]);
-              peerConnAdd(rtcCandidate);
-            }
-          }
-
-          function peerConnAdd(rtcCandidate) {
-            peerConnection
-              .addIceCandidate(rtcCandidate)
-              .catch(function(error) {
-                console.log('Error handling ICE candidate:', error);
-              });
-          }
-
-
-          function handleHangupMessage(message) {
-            var callerUserId = message.callerUserId;
-            console.log("Call has been ended from:", callerUserId)
-            hangUpCall();
-            ringtone.pause();
-          }
-
-          function handleNotAvailable(message) {
-            var callertoUserId = message.callertoUserId;
-            console.log("User not available:", callertoUserId)
-            callerStatusElement.textContent = 'User not available';
-            const busyTimeout = 5000;
-            let busyId;
-            busyId = setTimeout(function() {
-              hangUpCall();
-              ringtone.pause();
-            }, busyTimeout);
-          }
-
-          function showRingingBox() {
-            ringingBox.style.display = 'block';
-            playRingtoneOnce();
-          }
-
-          function playRingtoneOnce() {
-            ringtone.play();
-            console.log('ringing tone played');
-          }
-
-          function handleIncomingCall(message) {
-            var callerUserId = message.callerUserId;
-            var callertoUserId = message.callertoUserId;
-            console.log('Incoming call from:', callerUserId);
-
-            showRingingBox();
-          }
-
-          function resetAudio() {
-            ringtone.currentTime = 0;
-          }
-
-          function handleIncomingOffer(message) {
-            var callerUserId = message.callerUserId;
-            console.log('Incoming offer from:', callerUserId);
-            const callTimeout = 30000;
-            let timeoutID;
-            timeoutID = setTimeout(function() {
-              console.log('calltime is over');
-              hangUpCallChatUI();
-              resetAudio();
-              ringtone.pause();
-            }, callTimeout);
-
-            function handleAnswerButtonClick() {
-              clearTimeout(timeoutID);
-              ringtone.pause();
-              const joinTimeout = 1000;
-              let jointimeId;
-              jointimeId = setTimeout(function() {
-                joinCall(message);
-                resetAudio();
-              }, joinTimeout);
-            }
-
-            hangupButtonpop.addEventListener('click', function() {
-              console.log('hangup button clicked');
-              ringingBox.style.display = 'none';
-              clearTimeout(timeoutID);
-              hangUpCallChatUI();
-              resetAudio();
-              ringtone.pause();
-            });
-            answerButton.addEventListener('click', handleAnswerButtonClick);
-          }
-
-          function sendMessage(message) {
-            console.log('Message to be sent', message);
-            socket.emit('message', JSON.stringify(message));
-          }
-
-          function hangUpCallChatUI() {
-            sendMessage({
-              type: 'hangup',
-              callerUserId: UserId,
-              callertoUserId: UserIdx,
-            });
-            ringingBox.style.display = 'none';
-            ringtone.autoplay = false;
-            ringtone.pause();
-          }
-          hangupButton.addEventListener('click', function() {
-            hangUpCallChatUI();
-            hangUpCall();
-          });
-
-          function hangUpCall() {
-            localStream.getTracks().forEach(function(track) {
-              track.stop();
-            });
-
-            if (peerConnection) {
-              peerConnection.close();
-              peerConnection = null;
-            }
-
-            hangupButton.disabled = true;
-            audioCallButton.disabled = false;
-            videoCallButton.disabled = false;
-            localVideo.srcObject = null;
-            remoteVideo.srcObject = null;
-            callerStatusElement.textContent = 'Call Ended';
-            chatInterface.style.display = "block";
-            callInterface.style.display = "none";
-            resetCallUI();
-          }
-          initSignaling();
-
-
-          //sending message
-          var SendMessageBtn = document.getElementById('send-button');
-
-          SendMessageBtn.addEventListener('click', function() {
-            var MessageToBeSent = $('#message').val() || null;
-            var imageInput = document.querySelector('.image-input');
-            var videoInput = document.getElementById('video');
-
-            var image = null;
-            if (imageInput.files.length > 0) {
-              image = imageInput.files;
-            }
-
-            var video = null;
-            if (videoInput.files.length > 0) {
-              video = videoInput.files;
-            }
-
-            socket.emit('newMessages', {
-              UserId,
-              UserIdx,
-              MessageToBeSent,
-              image,
-              video,
-            });
-            $('#message').val('');
-            $('.image-input').val('');
-            $('#video').val('');
-          });
-
-          socket.on('newMessage', (result) => {
-            console.log('Received data:', result);
-            console.log('UserId:', result.UserId);
-            checkForNewMessages(result);
-          });
-
-          //voice Notes
-          let mediaRecorder;
-          let isRecording = false;
-          let soundVisualizerInterval;
-          let soundVisualizer = document.getElementById('sound-visualizer');
-          var videoBox = document.getElementById('video-box');
-          let recordingType = 'voice';
-          let chunks = [];
-
-
-          function toggleButtons() {
-            var message = document.getElementById('message').value.trim();
-            var voiceButton = document.querySelector('.voice-note');
-            var videoButton = document.querySelector('.video-note');
-            var sendButton = document.getElementById('send-button');
-
-            if (message === '') {
-              voiceButton.style.display = 'inline-block';
-              videoButton.style.display = 'inline-block';
-              sendButton.style.display = 'none';
-            } else {
-              voiceButton.style.display = 'none';
-              videoButton.style.display = 'none';
-              sendButton.style.display = 'inline-block';
-            }
-          }
-          toggleButtons();
-          let startRecordingTime;
-
-          let maxRetries = 7;
-          let retryDelay = 1000;
-
-          function startRecording(type) {
-            if (isRecording) return;
-            isRecording = true;
-            startRecordingTime = Date.now();
-
-            if (type === 'voice') {
-              soundVisualizer.style.display = 'block';
-              soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
-            } else if (type === 'video') {
-              videoBox.style.display = 'block';
-            }
-
-            function getMediaStreamWithRetry(retriesLeft) {
-              navigator.mediaDevices.getUserMedia({
-                  audio: true,
-                  video: type === 'video'
-                })
-                .then(function(stream) {
-                  if (stream.getAudioTracks().length === 0) {
-                    console.error('Microphone not providing audio data.');
-                    return;
-                  }
-
-                  mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm'
-                  });
-
-                  mediaRecorder.addEventListener("dataavailable", event => {
-                    console.log("Data available:", event.data);
-                    if (event.data.size > 0) {
-                      chunks.push(event.data);
-                    }
-                  });
-
-                  mediaRecorder.onstop = async function() {
-                    isRecording = false;
-                    const blob = new Blob(chunks, {
-                      type: mediaRecorder.mimeType
-                    });
-                    console.log('Recording stopped. Blob created:', blob);
-                    const recordingDuration = (Date.now() - startRecordingTime) / 1000;
-
-                    console.log('Recording duration:', recordingDuration.toFixed(2), 'seconds');
-                    if (type === 'voice') {
-                      soundVisualizer.style.display = 'none';
-                      clearInterval(soundVisualizerInterval);
-                    }
-
-                    await submitVoiceNote(blob, UserId, UserIdx);
-
-                    chunks = [];
                   };
 
-                  mediaRecorder.start();
-                  console.log('Recording started:', type);
-                })
-                .catch(function(error) {
-                  if (retriesLeft > 0) {
-                    console.error('Error accessing media devices. Retrying...', error);
-                    setTimeout(function() {
-                      getMediaStreamWithRetry(retriesLeft - 1);
-                    }, retryDelay);
-                  } else {
-                    console.error('Failed to access media devices after multiple retries:', error);
-                  }
-                });
-            }
-            getMediaStreamWithRetry(maxRetries);
+                  xhr.send(formData);
+                } else {
+                  var deletedMessage = document.getElementById(chatId);
+                  deletedMessage.innerHTML = 'You deleted the message';
+                  deletedMessage.style.color = 'red';
+                  localStorage.setItem('deletedReceivedMessage_' + chatId, 'true'); // Save the setting
+                  popup.style.display = 'none';
+                }
+              });
+
+
+              var replyBtn = popup.querySelector('.reply');
+              replyBtn.addEventListener('click', function() {
+                // TODO: Implement reply functionality
+                // Show a reply form for the user to enter a reply message
+              });
+
+              var changeThemeBtn = popup.querySelector('.change-theme');
+              changeThemeBtn.addEventListener('click', function() {
+                // Check if change theme options already exist
+                var changeThemeOptions = popup.querySelector('.change-theme-options');
+                if (changeThemeOptions) {
+                  // If change theme options already exist, remove them
+                  changeThemeOptions.remove();
+                } else {
+                  var changeThemeOptions = document.createElement('div');
+                  changeThemeOptions.className = 'change-theme-options';
+                  changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
+                  popup.appendChild(changeThemeOptions);
+
+                  var backgroundBtn = popup.querySelector('.background-gradient');
+                  backgroundBtn.addEventListener('click', function(e) {
+                    var newColor = prompt('Enter a new background gradient:');
+                    if (newColor !== null && newColor.trim() !== '') {
+                      if (clickedClass === 'Sent') {
+                        var sentElements = document.querySelectorAll('.Sent');
+                        sentElements.forEach(function(element) {
+                          element.style.background = newColor;
+                          saveSentmessageTheme(newColor);
+                          applySentmessagesTheme(newColor);
+                        });
+                      } else if (clickedClass === 'received') {
+                        var receivedElements = document.querySelectorAll('.received');
+                        receivedElements.forEach(function(element) {
+                          element.style.background = newColor;
+                          saveReceivedmessageTheme(newColor);
+                          applyReceivedmessagesTheme(newColor);
+                        });
+                      }
+                    }
+                  });
+
+
+
+                  var backgroundcolorBtn = popup.querySelector('.background-color');
+                  backgroundcolorBtn.addEventListener('click', function(e) {
+                    var newColor = prompt('Enter a new background color:');
+                    if (newColor !== null && newColor.trim() !== '') {
+                      if (clickedClass === 'Sent') {
+                        var sentElements = document.querySelectorAll('.Sent');
+                        sentElements.forEach(function(element) {
+                          element.style.backgroundColor = newColor;
+                          saveSentmessagebackgroundTheme(newColor);
+                          applySentmessagesbackgroundTheme(newColor);
+                        });
+                      } else if (clickedClass === 'received') {
+                        var receivedElements = document.querySelectorAll('.received');
+                        receivedElements.forEach(function(element) {
+                          element.style.backgroundColor = newColor;
+                          saveRecievedmessagebackgroundTheme(newColor);
+                          applyReceivedmessagesbackgroundTheme(newColor);
+                        });
+                      }
+                    }
+                  });
+                }
+              });
+              chatbox.appendChild(popup);
+
+              document.addEventListener('click', function(e) {
+                if (popup && !popup.contains(e.target)) {
+                  popup.remove();
+                }
+              });
+            });
+          });
+        }
+
+
+        // calling aspect
+        const hangupButtonpop = document.getElementById('hangup_button_pop');
+        const answerButton = document.getElementById('answer_button');
+        const ringingBox = document.getElementById('ringingBox');
+        var UserId = "<?php echo $UserId ?>";
+        var UserIdx = "<?php echo $UserIdx ?>";
+        var peerConnection;
+        console.log(sessionId);
+        console.log(UserId);
+        console.log(UserIdx);
+        var localStream;
+        var remoteStream;
+        var localVideo = document.getElementById("<?php echo $UserId; ?>");
+        var remoteVideo = document.getElementById("<?php echo $UserIdx; ?>");
+        var hangupButton = document.getElementById('hangup_button');
+        var audioCallButton = document.getElementById('audio_call_button');
+        var videoCallButton = document.getElementById('video_call_button');
+        var callerStatusElement = document.getElementById('status');
+        var chatInterface = document.getElementById('chatbox');
+        var callInterface = document.getElementById('callInterface');
+        var callbtn = document.getElementById('callbtn');
+        var pendingCandidates = [];
+        var ringtone = document.createElement('audio');
+        ringtone.id = "ringtone";
+        ringtone.loop = true;
+        ringtone.src = "ringingtone/ringtone.mp3";
+        ringtone.type = "audio/mpeg";
+        ringtone.autoplay = false;
+        chatInterface.appendChild(ringtone);
+
+        function resetCallUI() {
+          hangupButton.disabled = false;
+          callerStatusElement.textContent = 'Calling...';
+          ringtone.pause();
+          ringtone.currentTime = 0;
+        }
+        callbtn.addEventListener('click', function() {
+          chatInterface.style.display = 'none';
+          callInterface.style.display = 'block';
+          startVideoCall();
+        });
+        audioCallButton.addEventListener('click', toggleAudio);
+        videoCallButton.addEventListener('click', toggleVideo);
+
+        function toggleAudio() {
+          localStream.getAudioTracks().forEach(function(track) {
+            track.enabled = !track.enabled;
+          });
+        }
+
+        function toggleVideo() {
+          localStream.getVideoTracks().forEach(function(track) {
+            track.enabled = !track.enabled;
+          });
+        }
+
+        function startPeerConnection() {
+          if (!peerConnection) {
+            console.error('peerConnection is not initialized');
+            return;
           }
 
-          function updateSoundVisualizer(loudness) {
-            const spikeContainers = document.querySelectorAll('.boxContainer .box');
+          var iceCandidates = [];
 
-            spikeContainers.forEach((spike, index) => {
-              const animation = getAnimationForLoudness(loudness, index);
-              spike.style.animationName = animation;
+          peerConnection.addEventListener('icecandidate', event => {
+            console.log('Finding ICE candidate:', event);
+            if (event.candidate) {
+              console.log('ICE candidate found:', event.candidate);
+              iceCandidates.push(event.candidate);
+              sendIceCandidates(iceCandidates);
+            } else {
+              console.log('ICE candidate gathering complete.');
+            }
+          });
+
+          peerConnection.addEventListener('icegatheringstatechange', function() {
+            console.log('ICE gathering state:', peerConnection.iceGatheringState);
+            if (peerConnection.iceGatheringState === 'gathering') {
+              console.log('Gathering ICE candidate gathering:', event);
+            }
+            if (peerConnection.iceGatheringState === 'complete') {
+              console.log('Gathering ICE candidate complete:', event);
+              console.log('ICE gathering complete. All candidates:', iceCandidates);
+              if (iceCandidates.length === 0) {
+                console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
+              } else {
+                sendIceCandidates(iceCandidates);
+              }
+            }
+          });
+
+          peerConnection.addEventListener('iceconnectionstatechange', function() {
+            console.log('ICE connection state:', peerConnection.iceConnectionState);
+            if (peerConnection.iceConnectionState === 'failed') {
+              // Handle ICE connection failure if needed.
+            }
+          });
+
+          peerConnection.addEventListener('datachannel', function(event) {
+            // Handle data channel events if needed.
+          });
+
+          function sendIceCandidates(iceCandidates) {
+            console.log('Sending ICE candidates:', iceCandidates);
+            sendMessage({
+              type: 'candidate',
+              candidates: iceCandidates,
+              callerUserId: UserIdx,
+              callertoUserId: UserId,
+            });
+          }
+        }
+
+        function joinCall(message) {
+          ringtone.pause();
+          chatInterface.style.display = 'none';
+          callInterface.style.display = 'block';
+          callerStatusElement.textContent = 'Joining Call';
+
+          var offer = new RTCSessionDescription(message.offer);
+
+          var retryCount = 0;
+
+          function getUserMediaWithRetry(maxRetries, delay) {
+            return new Promise(function(resolve, reject) {
+              function attempt() {
+                navigator.mediaDevices
+                  .getUserMedia(mediaConstraints)
+                  .then(resolve)
+                  .catch(function(error) {
+                    if (retryCount < maxRetries) {
+                      console.log('Failed to access camera and microphone. Retrying...');
+                      retryCount++;
+
+                      if (retryCount === 7) {
+                        mediaConstraints = {
+                          audio: true,
+                          video: false
+                        };
+                        console.log('Switching to audio-only mode.');
+                      }
+
+                      setTimeout(attempt, delay);
+                    } else {
+                      reject(error);
+                    }
+                  });
+              }
+              attempt();
             });
           }
 
-          function getAnimationForLoudness(loudness, index) {
-            if (loudness < 30) return 'quiet';
-            if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
-            const boxContainer = document.getElementById('sound-visualizer');
-            boxContainer.style.display = "flex"
-            return 'loud';
+          var mediaConstraints = {
+            audio: true,
+            video: true
+          }; // Initial constraints
+
+          getUserMediaWithRetry(7, 1000)
+            .then(function(stream) {
+              localStream = stream;
+              peerConnection = new RTCPeerConnection();
+              startPeerConnection();
+              stream.getTracks().forEach(function(track) {
+                peerConnection.addTrack(track, stream);
+              });
+              console.log('Local stream added to peer connection');
+
+              peerConnection
+                .setRemoteDescription(offer)
+                .then(function() {
+                  console.log('Remote description set successfully.');
+
+                  if (
+                    peerConnection.signalingState === 'have-remote-offer' ||
+                    peerConnection.signalingState === 'have-local-pranswer'
+                  ) {
+                    return peerConnection.createAnswer();
+                  } else {
+                    throw new Error('Invalid signaling state for creating an answer.');
+                  }
+                })
+                .then(function(answer) {
+                  return peerConnection.setLocalDescription(answer);
+                })
+                .then(function() {
+                  console.log('ICE gathering state:', peerConnection.iceGatheringState);
+                  console.log('Local description set successfully.');
+
+                  var sdpAnswer = peerConnection.localDescription;
+                  console.log('SDP Answer:', sdpAnswer);
+
+                  sendMessage({
+                    type: 'answer',
+                    answer: sdpAnswer,
+                    mediaConstraints: mediaConstraints,
+                    callerUserId: UserIdx,
+                    callertoUserId: UserId,
+                  });
+                })
+                .catch(function(error) {
+                  console.log('Error handling call offer:', error);
+                });
+              localVideo.srcObject = localStream;
+              callerStatusElement.textContent = 'Exchanging Stream';
+
+              peerConnection.ontrack = function(event) {
+                if (event.streams && event.streams[0]) {
+                  console.log('Received remote stream:', event.streams[0]);
+                  remoteVideo.srcObject = event.streams[0];
+                }
+              };
+
+              console.log('Sending local stream as remote stream');
+            })
+            .catch(function(error) {
+              console.log('Error accessing camera and microphone:', error);
+            });
+        }
+
+
+
+        function initSignaling() {
+
+          socket.on('message', function(data) {
+            var message = JSON.parse(data);
+            console.log(message);
+
+            if (message.type === 'offer') {
+              handleIncomingOffer(message);
+            } else if (message.type === 'incoming_call') {
+              handleIncomingCall(message);
+            } else if (message.type === 'answer') {
+              handleAnswerMessage(message);
+            } else if (message.type === 'hangup') {
+              handleHangupMessage(message);
+            } else if (message.type === 'candidate') {
+              handleCandidateMessage(message);
+            } else if (message.type === 'notAvailable') {
+              handleNotAvailable(message);
+            }
+          });
+        }
+
+        function startVideoCall() {
+          function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
+            return new Promise(function(resolve, reject) {
+              function attempt() {
+                navigator.mediaDevices.getUserMedia(mediaConstraints)
+                  .then(resolve)
+                  .catch(function(error) {
+                    if (maxRetries > 0) {
+                      console.log('Failed to access camera and microphone. Retrying...');
+                      maxRetries--;
+                      setTimeout(attempt, delay);
+                    } else {
+                      reject(error);
+                    }
+                  });
+              }
+              attempt();
+            });
           }
 
-          function stopRecording(type) {
-            if (mediaRecorder && isRecording) {
-              mediaRecorder.stop();
+          var mediaConstraints = {
+            video: true,
+            audio: true
+          };
+          var maxRetries = 7;
+          var delay = 1000; // 1 second
+
+          getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
+            .then(function(stream) {
+              localStream = stream;
+              peerConnection = new RTCPeerConnection();
+              startPeerConnection();
+              stream.getTracks().forEach(function(track) {
+                peerConnection.addTrack(track, stream);
+              });
+              sendCallOffer(mediaConstraints, UserIdx);
+
+              hangupButton.disabled = false;
+              audioCallButton.disabled = false;
+              videoCallButton.disabled = false;
+
+              localVideo.style.display = 'block';
+              remoteVideo.style.display = 'block';
+              localVideo.srcObject = stream;
+            })
+            .catch(function(error) {
+              console.log('Error accessing camera and microphone:', error);
+            });
+
+          function sendIncomingCallSignal() {
+            ringtone.play();
+            var message = {
+              type: 'incoming_call',
+              callerUserId: UserId,
+              callertoUserId: UserIdx,
+            };
+            sendMessage(message);
+          }
+
+          function sendCallOffer(mediaConstraints, UserIdx) {
+            console.log('Call is to be sent to', UserIdx);
+            callerStatusElement.textContent = 'Sending Call Offer';
+            var offerOptions = {
+              offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
+              offerToReceiveVideo: mediaConstraints.video ? 1 : 0
+            };
+
+            peerConnection.createOffer(offerOptions)
+              .then(function(offer) {
+                return peerConnection.setLocalDescription(offer);
+              })
+              .then(function() {
+                // console.log('ICE gathering state:', peerConnection.iceGatheringState);
+                var sdpOffer = peerConnection.localDescription;
+                console.log("SDP Offer:", sdpOffer);
+
+                sendMessage({
+                  type: 'offer',
+                  offer: sdpOffer,
+                  mediaConstraints: mediaConstraints,
+                  callerUserId: UserId,
+                  callertoUserId: UserIdx,
+                  sessionId: sessionId
+                });
+                sendIncomingCallSignal();
+                callerStatusElement.textContent = 'Sent Call Offer';
+              })
+              .catch(function(error) {
+                console.log('Error creating call offer:', error);
+              });
+          }
+        }
+
+        function handleAnswerMessage(message) {
+          var answer = new RTCSessionDescription(message.answer);
+          var UserId = message.callerUserId;
+          console.log(UserId);
+
+          if (peerConnection.signalingState === 'have-local-offer') {
+            peerConnection.setRemoteDescription(answer)
+              .then(function() {
+                if (pendingCandidates.length > 0) {
+                  pendingCandidates.forEach(function(candidate) {
+                    peerConnection.addIceCandidate(candidate)
+                      .catch(function(error) {
+                        console.log('Error handling pending ICE candidate:', error);
+                      });
+                  });
+                  pendingCandidates = [];
+                }
+              })
+              .catch(function(error) {
+                console.log('Error handling call answer:', error);
+              });
+          } else {
+            peerConnection.addEventListener('signalingstatechange', function() {
+              if (peerConnection.signalingState === 'have-local-offer') {
+                peerConnection.setRemoteDescription(answer)
+                  .then(function() {
+                    if (pendingCandidates.length > 0) {
+                      pendingCandidates.forEach(function(candidate) {
+                        peerConnection.addIceCandidate(candidate)
+                          .catch(function(error) {
+                            console.log('Error handling pending ICE candidate:', error);
+                          });
+                      });
+                      pendingCandidates = [];
+                    }
+                  })
+                  .catch(function(error) {
+                    console.log('Error handling call answer:', error);
+                  });
+              }
+            });
+          }
+
+          peerConnection.ontrack = function(event) {
+            if (event.streams && event.streams[0]) {
+              remoteVideo.srcObject = event.streams[0];
+              callerStatusElement.textContent = 'Exchanging Stream';
+              ringtone.pause();
+              console.log('Received remote stream:', event.streams[0]);
             }
           };
 
+        }
 
-          function cancelRecording() {
-            if (mediaRecorder && isRecording) {
-              mediaRecorder.stop();
-              isRecording = false;
-              deleteVoiceNote();
-              console.log("To be deleted");
-            }
-            soundVisualizer.style.display = 'none';
-            clearInterval(soundVisualizerInterval);
+
+        function handleCandidateMessage(message) {
+          console.log('Received candidate:', message.candidate);
+
+          if (!Array.isArray(message.candidate) || message.candidate.length === 0) {
+            console.log('Invalid ICE candidate data:', message.candidate);
+            return;
           }
 
-          async function deleteVoiceNote() {
-            const formData = new FormData();
-            formData.append('filename', voiceNoteFilename);
+          var callerUserId = message.callerUserId;
+          console.log('Incoming candidate from:', callerUserId);
 
-            try {
-              const response = await fetch('delete_voice_note.php', {
-                method: 'POST',
-                body: formData
-              });
-              const result = await response.text();
-              console.log('Voice note deleted:', result);
-            } catch (error) {
-              console.error('Error deleting voice note:', error);
-            }
+          for (var i = 0; i < message.candidate.length; i++) {
+            var rtcCandidate = new RTCIceCandidate(message.candidate[i]);
+            peerConnAdd(rtcCandidate);
           }
+        }
 
-          function submitRecordedNote() {
-            if (mediaRecorder && isRecording) {
-              mediaRecorder.stop();
-            }
-            if (isRecording && recordingType) {
-              isRecording = false;
-              if (recordingType === 'voice' && mediaRecorder && mediaRecorder.state === 'inactive') {
-                // submitVoiceNote(blob);
-              } else if (recordingType === 'video') {
-                // Handle video recording
-                isRecording = false;
-                if (recordingType === 'video' && mediaRecorder && mediaRecorder.state === 'inactive') {}
-              }
-              recordingType = null;
-            }
-          }
-
-          async function submitVoiceNote(blob, UserId, UserIdx) {
-            console.log('Blob to be submitted:', blob);
-            const formData = new FormData();
-            formData.append('voicenote', blob);
-            formData.append('recipientId', UserIdx);
-            formData.append('UserId', UserId);
-
-            try {
-              const response = await fetch('http://localhost:8888/sendVoiceNote', {
-                method: 'POST',
-                body: formData
-              });
-
-              if (response.ok) {
-                const result = await response.json();
-                console.log('Voice note saved successfully:', result);
-                // checkForNewMessages(result);
-              } else {
-                console.error('Voice note submission failed:', response.statusText);
-              }
-            } catch (error) {
-              console.error('Error saving voice note:', error);
-            }
-          }
-        </script>
-
-        <script>
-          var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
-
-          // Check if the UserId exists
-          if (!UserId) {
-            // UserId not found, redirect to login page
-            window.location.href = "login.php";
-          }
-        </script>
-
-        <script>
-          function insertEmoji(emoji) {
-            var textarea = document.querySelector("#message");
-            textarea.value += emoji;
-          }
-        </script>
-        <script>
-          function toggleEmojiPicker() {
-            var container = document.querySelector(".emoji-table-container");
-            if (container.style.display === "none") {
-              container.style.display = "block";
-            } else {
-              container.style.display = "none";
-            }
-          }
-        </script>
-
-        <script>
-          function previewImage() {
-            var file = document.getElementById('image').files[0];
-            var reader = new FileReader();
-            reader.onload = function(e) {
-              var imgModal = document.getElementById('image-modal');
-              var imgPreview = document.getElementById('image-preview');
-              imgPreview.src = e.target.result;
-              imgModal.style.display = "block";
-            }
-            reader.readAsDataURL(file);
-          }
-
-          function previewVideo() {
-            let fileInput = document.querySelector('.video-input');
-            let file = fileInput.files[0];
-            let videoPreview = document.querySelector('#video-preview');
-            let videoModal = document.querySelector('#video-modal');
-            let closeModal = videoModal.querySelector('.close');
-            let reader = new FileReader();
-            reader.addEventListener('load', function() {
-              videoPreview.src = reader.result;
-              videoModal.style.display = 'block';
-            }, false);
-
-            if (file) {
-              reader.readAsDataURL(file);
-            }
-            closeModal.addEventListener('click', function() {
-              videoModal.style.display = 'none';
-              videoPreview.src = '';
+        function peerConnAdd(rtcCandidate) {
+          peerConnection
+            .addIceCandidate(rtcCandidate)
+            .catch(function(error) {
+              console.log('Error handling ICE candidate:', error);
             });
+        }
+
+
+        function handleHangupMessage(message) {
+          var callerUserId = message.callerUserId;
+          console.log("Call has been ended from:", callerUserId)
+          hangUpCall();
+          ringtone.pause();
+        }
+
+        function handleNotAvailable(message) {
+          var callertoUserId = message.callertoUserId;
+          console.log("User not available:", callertoUserId)
+          callerStatusElement.textContent = 'User not available';
+          const busyTimeout = 5000;
+          let busyId;
+          busyId = setTimeout(function() {
+            hangUpCall();
+            ringtone.pause();
+          }, busyTimeout);
+        }
+
+        function showRingingBox() {
+          ringingBox.style.display = 'block';
+          playRingtoneOnce();
+        }
+
+        function playRingtoneOnce() {
+          ringtone.play();
+          console.log('ringing tone played');
+        }
+
+        function handleIncomingCall(message) {
+          var callerUserId = message.callerUserId;
+          var callertoUserId = message.callertoUserId;
+          console.log('Incoming call from:', callerUserId);
+
+          showRingingBox();
+        }
+
+        function resetAudio() {
+          ringtone.currentTime = 0;
+        }
+
+        function handleIncomingOffer(message) {
+          var callerUserId = message.callerUserId;
+          console.log('Incoming offer from:', callerUserId);
+          const callTimeout = 30000;
+          let timeoutID;
+          timeoutID = setTimeout(function() {
+            console.log('calltime is over');
+            hangUpCallChatUI();
+            resetAudio();
+            ringtone.pause();
+          }, callTimeout);
+
+          function handleAnswerButtonClick() {
+            clearTimeout(timeoutID);
+            ringtone.pause();
+            const joinTimeout = 1000;
+            let jointimeId;
+            jointimeId = setTimeout(function() {
+              joinCall(message);
+              resetAudio();
+            }, joinTimeout);
           }
-        </script>
-        <script>
-          $(document).ready(function() {
-            $("#search").on("keyup", function() {
-              var value = $(this).val().toLowerCase();
-              if (value === "") {
-                $("#user_table").html("");
-              } else {
-                $("#user_table tr").filter(function() {
-                  $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
-              }
-            });
+
+          hangupButtonpop.addEventListener('click', function() {
+            console.log('hangup button clicked');
+            ringingBox.style.display = 'none';
+            clearTimeout(timeoutID);
+            hangUpCallChatUI();
+            resetAudio();
+            ringtone.pause();
           });
-        </script>
-        <script>
-          const searchBox = document.getElementById('search');
-          const resultsDiv = document.getElementById('user_table');
-          searchBox.addEventListener('input', function() {
-            const searchTerm = this.value;
-            if (!searchTerm.trim()) {
-              resultsDiv.innerHTML = '';
-              return;
+          answerButton.addEventListener('click', handleAnswerButtonClick);
+        }
+
+        function sendMessage(message) {
+          console.log('Message to be sent', message);
+          socket.emit('message', JSON.stringify(message));
+        }
+
+        function hangUpCallChatUI() {
+          sendMessage({
+            type: 'hangup',
+            callerUserId: UserId,
+            callertoUserId: UserIdx,
+          });
+          ringingBox.style.display = 'none';
+          ringtone.autoplay = false;
+          ringtone.pause();
+        }
+        hangupButton.addEventListener('click', function() {
+          hangUpCallChatUI();
+          hangUpCall();
+        });
+
+        function hangUpCall() {
+          localStream.getTracks().forEach(function(track) {
+            track.stop();
+          });
+
+          if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+          }
+
+          hangupButton.disabled = true;
+          audioCallButton.disabled = false;
+          videoCallButton.disabled = false;
+          localVideo.srcObject = null;
+          remoteVideo.srcObject = null;
+          callerStatusElement.textContent = 'Call Ended';
+          chatInterface.style.display = "block";
+          callInterface.style.display = "none";
+          resetCallUI();
+        }
+        initSignaling();
+
+
+        //sending message
+        var SendMessageBtn = document.getElementById('send-button');
+
+        SendMessageBtn.addEventListener('click', function() {
+          var MessageToBeSent = $('#message').val() || null;
+          var imageInput = document.querySelector('.image-input');
+          var videoInput = document.getElementById('video');
+
+          var image = null;
+          if (imageInput.files.length > 0) {
+            image = imageInput.files;
+          }
+
+          var video = null;
+          if (videoInput.files.length > 0) {
+            video = videoInput.files;
+          }
+
+          socket.emit('newMessages', {
+            UserId,
+            UserIdx,
+            MessageToBeSent,
+            image,
+            video,
+          });
+          $('#message').val('');
+          $('.image-input').val('');
+          $('#video').val('');
+        });
+
+        socket.on('newMessage', (newMessage) => {
+          console.log('Received data:', newMessage);
+          console.log('UserId:', newMessage.UserId);
+
+          const hasUnreadMessages = newMessage.isRead === 0 && newMessage.senderId === UserIdx;
+
+          if (hasUnreadMessages) {
+            unreadMessageCount++;
+
+            if (unreadMessageCount === 1) {
+              const unreadMessageDiv = document.createElement('div');
+              unreadMessageDiv.className = 'unread-message';
+              unreadMessageDiv.textContent = 'Unread Message';
+              chatbox.appendChild(unreadMessageDiv);
+            } else {
+              const unreadMessageDiv = document.querySelector('.unread-message');
+              unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
             }
-            $("#search").on("keyup", function() {
-              var search_query = $(this).val();
-              $.ajax({
-                url: "searchbackend.php",
-                method: "POST",
-                data: {
-                  search_query: search_query
-                },
-                success: function(data) {
-                  $("#user_table").html(data);
+          }
+          if (newMessage.UserId === UserId) {
+            chatbox.scrollTop = chatbox.scrollHeight;
+          }
+          checkForNewMessages(newMessage);
+        });
+
+        socket.on('ReadStatus', (messageId) => {
+          console.log('Received data:', messageId);
+          var message = document.getElementById(messageId);
+          if (unreadMessageCount > 0) {
+            unreadMessageCount--;
+          }
+
+          if (unreadMessageCount === 0) {
+            var unreadMessageDiv = document.querySelector('.unread-message');
+            if (unreadMessageDiv) {
+              chatbox.removeChild(unreadMessageDiv);
+            }
+          }
+        });
+        document.getElementById('message').addEventListener('keydown', function(event) {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById("send-button").click();
+          }
+        });
+
+
+        $(chatbox).scroll(function() {
+          const distanceFromBottom = $(chatbox)[0].scrollHeight - ($(chatbox).scrollTop() + $(chatbox).outerHeight());
+
+          if (distanceFromBottom > 100) {
+            $('#scrollToBottomBtn').fadeIn();
+          } else {
+            $('#scrollToBottomBtn').fadeOut();
+          }
+        });
+
+        $('#scrollToBottomBtn').click(function() {
+          $(chatbox).animate({
+            scrollTop: $(chatbox)[0].scrollHeight
+          }, 500);
+          return false;
+        });
+
+
+
+        //voice Notes
+        let mediaRecorder;
+        let isRecording = false;
+        let soundVisualizerInterval;
+        let soundVisualizer = document.getElementById('sound-visualizer');
+        var videoBox = document.getElementById('video-box');
+        let recordingType = 'voice';
+        let chunks = [];
+
+
+        function toggleButtons() {
+          var message = document.getElementById('message').value.trim();
+          var voiceButton = document.querySelector('.voice-note');
+          var videoButton = document.querySelector('.video-note');
+          var sendButton = document.getElementById('send-button');
+
+          if (message === '') {
+            voiceButton.style.display = 'inline-block';
+            videoButton.style.display = 'inline-block';
+            sendButton.style.display = 'none';
+          } else {
+            voiceButton.style.display = 'none';
+            videoButton.style.display = 'none';
+            sendButton.style.display = 'inline-block';
+          }
+        }
+        toggleButtons();
+        let startRecordingTime;
+
+        let maxRetries = 7;
+        let retryDelay = 1000;
+
+        function startRecording(type) {
+          if (isRecording) return;
+          isRecording = true;
+          startRecordingTime = Date.now();
+
+          if (type === 'voice') {
+            soundVisualizer.style.display = 'block';
+            soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
+          } else if (type === 'video') {
+            videoBox.style.display = 'block';
+          }
+
+          function getMediaStreamWithRetry(retriesLeft) {
+            navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: type === 'video'
+              })
+              .then(function(stream) {
+                if (stream.getAudioTracks().length === 0) {
+                  console.error('Microphone not providing audio data.');
+                  return;
+                }
+
+                mediaRecorder = new MediaRecorder(stream, {
+                  mimeType: 'audio/webm'
+                });
+
+                mediaRecorder.addEventListener("dataavailable", event => {
+                  console.log("Data available:", event.data);
+                  if (event.data.size > 0) {
+                    chunks.push(event.data);
+                  }
+                });
+
+                mediaRecorder.onstop = async function() {
+                  isRecording = false;
+                  const blob = new Blob(chunks, {
+                    type: mediaRecorder.mimeType
+                  });
+                  console.log('Recording stopped. Blob created:', blob);
+                  const recordingDuration = (Date.now() - startRecordingTime) / 1000;
+
+                  console.log('Recording duration:', recordingDuration.toFixed(2), 'seconds');
+                  if (type === 'voice') {
+                    soundVisualizer.style.display = 'none';
+                    clearInterval(soundVisualizerInterval);
+                  }
+
+                  await submitVoiceNote(blob, UserId, UserIdx);
+
+                  chunks = [];
+                };
+
+                mediaRecorder.start();
+                console.log('Recording started:', type);
+              })
+              .catch(function(error) {
+                if (retriesLeft > 0) {
+                  console.error('Error accessing media devices. Retrying...', error);
+                  setTimeout(function() {
+                    getMediaStreamWithRetry(retriesLeft - 1);
+                  }, retryDelay);
+                } else {
+                  console.error('Failed to access media devices after multiple retries:', error);
                 }
               });
+          }
+          getMediaStreamWithRetry(maxRetries);
+        }
+
+        function updateSoundVisualizer(loudness) {
+          const spikeContainers = document.querySelectorAll('.boxContainer .box');
+
+          spikeContainers.forEach((spike, index) => {
+            const animation = getAnimationForLoudness(loudness, index);
+            spike.style.animationName = animation;
+          });
+        }
+
+        function getAnimationForLoudness(loudness, index) {
+          if (loudness < 30) return 'quiet';
+          if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
+          const boxContainer = document.getElementById('sound-visualizer');
+          boxContainer.style.display = "flex"
+          return 'loud';
+        }
+
+        function stopRecording(type) {
+          if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+          }
+        };
+
+
+        function cancelRecording() {
+          if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            deleteVoiceNote();
+            console.log("To be deleted");
+          }
+          soundVisualizer.style.display = 'none';
+          clearInterval(soundVisualizerInterval);
+        }
+
+        async function deleteVoiceNote() {
+          const formData = new FormData();
+          formData.append('filename', voiceNoteFilename);
+
+          try {
+            const response = await fetch('delete_voice_note.php', {
+              method: 'POST',
+              body: formData
+            });
+            const result = await response.text();
+            console.log('Voice note deleted:', result);
+          } catch (error) {
+            console.error('Error deleting voice note:', error);
+          }
+        }
+
+        function submitRecordedNote() {
+          if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+          }
+          if (isRecording && recordingType) {
+            isRecording = false;
+            if (recordingType === 'voice' && mediaRecorder && mediaRecorder.state === 'inactive') {
+              // submitVoiceNote(blob);
+            } else if (recordingType === 'video') {
+              // Handle video recording
+              isRecording = false;
+              if (recordingType === 'video' && mediaRecorder && mediaRecorder.state === 'inactive') {}
+            }
+            recordingType = null;
+          }
+        }
+
+        async function submitVoiceNote(blob, UserId, UserIdx) {
+          console.log('Blob to be submitted:', blob);
+          const formData = new FormData();
+          formData.append('voicenote', blob);
+          formData.append('recipientId', UserIdx);
+          formData.append('UserId', UserId);
+
+          try {
+            const response = await fetch('http://localhost:8888/sendVoiceNote', {
+              method: 'POST',
+              body: formData
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              console.log('Voice note saved successfully:', result);
+              // checkForNewMessages(result);
+            } else {
+              console.error('Voice note submission failed:', response.statusText);
+            }
+          } catch (error) {
+            console.error('Error saving voice note:', error);
+          }
+        }
+      </script>
+
+      <script>
+        var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
+
+        // Check if the UserId exists
+        if (!UserId) {
+          // UserId not found, redirect to login page
+          window.location.href = "login.php";
+        }
+      </script>
+
+      <script>
+        function insertEmoji(emoji) {
+          var textarea = document.querySelector("#message");
+          textarea.value += emoji;
+        }
+      </script>
+      <script>
+        function toggleEmojiPicker() {
+          var container = document.querySelector(".emoji-table-container");
+          if (container.style.display === "none") {
+            container.style.display = "block";
+          } else {
+            container.style.display = "none";
+          }
+        }
+      </script>
+
+      <script>
+        function previewImage() {
+          var file = document.getElementById('image').files[0];
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var imgModal = document.getElementById('image-modal');
+            var imgPreview = document.getElementById('image-preview');
+            imgPreview.src = e.target.result;
+            imgModal.style.display = "block";
+          }
+          reader.readAsDataURL(file);
+        }
+
+        function previewVideo() {
+          let fileInput = document.querySelector('.video-input');
+          let file = fileInput.files[0];
+          let videoPreview = document.querySelector('#video-preview');
+          let videoModal = document.querySelector('#video-modal');
+          let closeModal = videoModal.querySelector('.close');
+          let reader = new FileReader();
+          reader.addEventListener('load', function() {
+            videoPreview.src = reader.result;
+            videoModal.style.display = 'block';
+          }, false);
+
+          if (file) {
+            reader.readAsDataURL(file);
+          }
+          closeModal.addEventListener('click', function() {
+            videoModal.style.display = 'none';
+            videoPreview.src = '';
+          });
+        }
+      </script>
+      <script>
+        $(document).ready(function() {
+          $("#search").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            if (value === "") {
+              $("#user_table").html("");
+            } else {
+              $("#user_table tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+              });
+            }
+          });
+        });
+      </script>
+      <script>
+        const searchBox = document.getElementById('search');
+        const resultsDiv = document.getElementById('user_table');
+        searchBox.addEventListener('input', function() {
+          const searchTerm = this.value;
+          if (!searchTerm.trim()) {
+            resultsDiv.innerHTML = '';
+            return;
+          }
+          $("#search").on("keyup", function() {
+            var search_query = $(this).val();
+            $.ajax({
+              url: "searchbackend.php",
+              method: "POST",
+              data: {
+                search_query: search_query
+              },
+              success: function(data) {
+                $("#user_table").html(data);
+              }
             });
           });
-        </script>
+        });
+      </script>
 
 
 
-        <script>
-          var sessionID = "<?php echo $sessionID ?>";
+      <script>
+        var sessionID = "<?php echo $sessionID ?>";
 
-          sessionStorage.setItem('sessionId', sessionID);
-        </script>
+        sessionStorage.setItem('sessionId', sessionID);
+      </script>
 
-        <!-- Modal -->
-        <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
+      <!-- Modal -->
+      <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <?php
+              include 'db.php';
+              // Get the UserId of the user you are talking to
+              $recipientId = $_GET['UserIdx'];
+              // Fetch the passport image
+              $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
+              $stmt = sqlsrv_query($conn, $sql);
+              if ($stmt === false) {
+                die(print_r(sqlsrv_errors(), true));
+              }
+
+              $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+              $Passport = $row['Passport'];
+              if (empty($Passport)) {
+                $passportImage = "UserPassport/DefaultImage.png";
+              } else {
+                $passportImage = "UserPassport/" . $Passport;
+              }
+              echo '<img id="modalImg" src="' . $passportImage . '">';
+
+              ?>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="preview">
+        <div id="image-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="image-modal-label" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
+                <h5 class="modal-title" id="image-modal-label">Image Preview</h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div class="modal-body">
-                <?php
-                include 'db.php';
-                // Get the UserId of the user you are talking to
-                $recipientId = $_GET['UserIdx'];
-                // Fetch the passport image
-                $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
-                $stmt = sqlsrv_query($conn, $sql);
-                if ($stmt === false) {
-                  die(print_r(sqlsrv_errors(), true));
-                }
-
-                $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-                $Passport = $row['Passport'];
-                if (empty($Passport)) {
-                  $passportImage = "UserPassport/DefaultImage.png";
-                } else {
-                  $passportImage = "UserPassport/" . $Passport;
-                }
-                echo '<img id="modalImg" src="' . $passportImage . '">';
-
-                ?>
-
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <img id="image-preview" src="#" alt="Image Preview">
               </div>
             </div>
           </div>
         </div>
-        <div class="preview">
-          <div id="image-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="image-modal-label" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="image-modal-label">Image Preview</h5>
-                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <img id="image-preview" src="#" alt="Image Preview">
-                </div>
+        <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
               </div>
-            </div>
-          </div>
-          <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
-                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <video id="video-preview" src="#"></video>
-                </div>
+              <div class="modal-body">
+                <video id="video-preview" src="#"></video>
               </div>
             </div>
           </div>
         </div>
+      </div>
 </body>
 
 </html>

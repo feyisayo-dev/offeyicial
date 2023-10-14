@@ -2777,7 +2777,6 @@ if (sqlsrv_execute($stmt)) {
 
 <script>
   $(document).ready(function() {
-    // Show or hide the button depending on the scroll position
     $(window).scroll(function() {
       if ($(this).scrollTop() > 100) {
         $('#scrollToTopBtn').fadeIn();
@@ -2786,7 +2785,6 @@ if (sqlsrv_execute($stmt)) {
       }
     });
 
-    // Scroll to top when the button is clicked
     $('#scrollToTopBtn').click(function() {
       $('html, body').animate({
         scrollTop: 0

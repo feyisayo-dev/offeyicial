@@ -3,32 +3,26 @@ session_start();
 // Check if user is logged in
 
 if (isset($_SESSION['UserId'])) {
-  // Get the user ID of the profile owner from the URL
   $profileOwnerId = $_GET['UserId'];
   $UserId = $_SESSION["UserId"];
   include('db.php');
   // echo $profileOwnerId;
   // echo $UserId;
-  // Check if the user viewing the profile is the same as the profile owner
   $isProfileOwner = ($UserId == $profileOwnerId);
 
-  // Query the database to get the user's profile information
-  // ...
+
   $stmt = sqlsrv_prepare($conn, "SELECT [UserId], [Surname], [First_Name], [gender], [email], [Password], [phone], [dob], [countryId], [stateId], [Passport], [bio] FROM User_Profile WHERE UserId = ?", array(&$profileOwnerId));
 
   if (!$stmt) {
-    die(print_r(sqlsrv_errors(), true)); // handle the error
+    die(print_r(sqlsrv_errors(), true)); 
   }
 
-  // execute the prepared statement
   $FetchStatement = sqlsrv_execute($stmt);
 
-  // handle the result set
   if ($FetchStatement === false) {
-    die(print_r(sqlsrv_errors(), true)); // handle the error
+    die(print_r(sqlsrv_errors(), true)); 
   }
 
-  // fetch the data from the result set
   $record = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
   $Surname = $record['Surname'];
   $First_Name = $record['First_Name'];
@@ -81,10 +75,7 @@ if (isset($_SESSION['UserId'])) {
   $stmt = sqlsrv_query($conn, $sql, $params);
   $isFollowing = sqlsrv_has_rows($stmt);
 
-  // If $isProfileOwner is true, display all the information
 
-
-  // Check if user ID is equal to profile owner ID
   if ($UserId == $isProfileOwner) {
     echo '<title>Profile ~ ' . $Surname . ' ' . $First_Name . '</title>
     <link rel="stylesheet" href="css/all.min.css" />
@@ -1227,7 +1218,6 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
       var video = document.getElementById('myVideo-' + postId);
       var volumeRange = document.getElementById('volumeRange-' + postId);
 
-      // Set the volume of the video
       video.volume = volumeRange.value;
     }
 

@@ -110,10 +110,12 @@ io.on("connection", (socket) => {
   socket.on("userConnected", (UserId) => {
     onlineUsers[UserId] = true;
   });
-  socket.on("messageRead", async ({ messageId }) => {
+  socket.on("messageRead", async ({ messageId, UserIdx }) => {
     try {
-      await MessageIsRead(messageId);
-      io.emit("messageRead", { messageId });
+      var chatId = await MessageIsRead(messageId, UserIdx);
+      if(chatId != null){
+        io.emit("messageRead", { chatId });
+      }
     } catch (error) {
       console.error("Error updating chat isRead status:", error);
       res.status(500).json({ error: "Error inserting chat isRead status" });
@@ -810,7 +812,7 @@ async function insertChatMessage(
 
     const query = `
       INSERT INTO chats (UserId, recipientId, Sent, sentimage, sentvideo, chatId, senderId, time_sent, voice_notes, video_notes, isRead)
-      VALUES (@UserId, @recipientId, @message, @sentImage, @sentVideo, @chatId, @UserId, @date_posted, @voiceNote, @videoNote, @isRead)
+      VALUES (@UserId, @recipientId, @message, @sentImage, @sentVideo, @chatId, @UserId, @date_posted, @voiceNote, @videoNote, '${isRead}')
     `;
 
     request.input("UserId", sql.VarChar, UserId);
@@ -822,7 +824,7 @@ async function insertChatMessage(
     request.input("date_posted", sql.VarChar, date_posted);
     request.input("voiceNote", sql.VarChar, voiceNote);
     request.input("videoNote", sql.VarChar, videoNote);
-    request.input("isRead", sql.VarChar, isRead);
+
 
     const res = await request.query(query);
     const Newmessage = {
@@ -836,6 +838,7 @@ async function insertChatMessage(
       time_sent: date_posted,
       voice_notes: voiceNote,
       video_notes: videoNote,
+      isRead: 0,
     };
     return Newmessage;
   } catch (error) {
@@ -1434,7 +1437,11 @@ app.get("/getUserProfile/:UserId", async (req, res) => {
 
   try {
     const userProfileData = await getUserProfileData(UserId);
-    res.json(userProfileData);
+    if (userProfileData) {
+      res.json(userProfileData);
+    } else {
+      res.status(404).json({ error: "User profile not found" });
+    }
   } catch (error) {
     console.error("Error fetching user profile data:", error);
     res.status(500).json({ error: "Error fetching user profile data" });
@@ -1447,6 +1454,41 @@ async function getUserProfileData(UserId) {
     const request = new sql.Request(pool);
 
     const query = ` select Surname, First_Name, Passport FROM User_Profile WHERE UserId =  '${UserId}' `;
+
+    const result = await request.query(query);
+    await pool.close();
+
+    if (result.recordset.length > 0) {
+      return result.recordset[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+app.get("/getPeople/:UserId", async (req, res) => {
+  const { UserId } = req.params;
+
+  try {
+    const userProfileData = await getUser(UserId);
+    if (userProfileData) {
+      res.json(userProfileData);
+    } else {
+      res.status(404).json({ error: "User profile not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching user profile data:", error);
+    res.status(500).json({ error: "Error fetching user profile data" });
+  }
+});
+
+async function getUser(UserId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const query = ` select UserId, Surname, First_Name, Passport FROM User_Profile WHERE UserId =  '${UserId}' `;
 
     const result = await request.query(query);
     await pool.close();
@@ -1486,6 +1528,7 @@ app.post("/LastIdSeen", async (req, res) => {
 
   try {
     const lastId = await getLastMessageId(UserId, UserIdx);
+    console.log('last checked message by User', UserIdx, 'is', lastId);
     res.status(200).json({ lastId, UserId, UserIdx });
   } catch (error) {
     console.error("error checking last seen message:", error);
@@ -1493,22 +1536,24 @@ app.post("/LastIdSeen", async (req, res) => {
   }
 });
 
-async function MessageIsRead(messageId) {
+async function MessageIsRead(messageId, UserIdx) {
   let poolConnection;
 
   try {
     poolConnection = await pool.connect();
     const request = new sql.Request(poolConnection);
-    const query = `UPDATE chats SET isRead = 1 WHERE chatId = @chatId AND isRead = 0; `;
+    const query = `UPDATE chats SET isRead = 1 WHERE chatId = @chatId AND senderId = @UserIdx AND isRead = 0;`;
     request.input("chatId", sql.VarChar, messageId);
+    request.input("UserIdx", sql.VarChar, UserIdx);
 
     const res = await request.query(query);
 
-    // if (res.rowsAffected[0] === 0) {
-    //   console.log(`isRead for chat ${messageId} is already 1.`);
-    // } else {
-    //   console.log(`isRead for chat ${messageId} has been set to 1.`);
-    // }
+    if (res.rowsAffected[0] === 0) {
+      return null;
+    } else {
+      io.emit("ReadStatus", messageId);
+      return messageId;
+    }
   } catch (error) {
     console.error("Error updating chat isRead status:", error);
     throw error;
