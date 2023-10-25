@@ -113,7 +113,7 @@ io.on("connection", (socket) => {
   socket.on("messageRead", async ({ messageId, UserIdx }) => {
     try {
       var chatId = await MessageIsRead(messageId, UserIdx);
-      if(chatId != null){
+      if (chatId != null) {
         io.emit("messageRead", { chatId });
       }
     } catch (error) {
@@ -134,6 +134,8 @@ io.on("connection", (socket) => {
       handleOutgoingAnswer(parsedMessage);
     } else if (parsedMessage.type === "candidate") {
       hangupOutgoingcandidate(parsedMessage);
+    } else if (parsedMessage.type === "missed") {
+      handleMissedCalls(parsedMessage);
     } else {
       if (parsedMessage.error) {
         console.log("Error:", parsedMessage.error);
@@ -316,6 +318,19 @@ function handleIncomingOffer(message) {
     };
     sameConnection.emit("message", JSON.stringify(signalingMessage));
   }
+}
+
+async function handleMissedCalls(message) {
+  console.log("Missed Call from:", message.callerUserId);
+  const UserProfile = await getUserProfileData(message.callerUserId);
+  const UserName = UserProfile.Surname + "" + UserProfile.FirstName;
+  const signalingMessage = {
+    missedCall: "Missed call from" + UserName,
+    UserId: message.callerUserId,
+    UserIdx: message.callertoUserId,
+    sessionId: message.sessionId,
+  };
+  io.emit("newMessage", signalingMessage);
 }
 
 function hangupIncomingCall(message) {
@@ -801,7 +816,7 @@ async function insertChatMessage(
   date_posted,
   voiceNote,
   videoNote,
-  isRead,
+  isRead
 ) {
   let poolConnection;
 
@@ -824,7 +839,6 @@ async function insertChatMessage(
     request.input("date_posted", sql.VarChar, date_posted);
     request.input("voiceNote", sql.VarChar, voiceNote);
     request.input("videoNote", sql.VarChar, videoNote);
-
 
     const res = await request.query(query);
     const Newmessage = {
@@ -1001,6 +1015,7 @@ async function fetchPostForEachUser(UserId) {
         content: record.content,
         timeAgo: getTimeAgo(timeDifference),
         likes: likes,
+        isRead: isRead,
       };
     });
 
@@ -1041,6 +1056,7 @@ async function fetchMessageForEachUser(UserId, UserIdx) {
         senderId: record.senderId,
         sentimage: record.sentimage,
         voice_notes: record.voice_notes,
+        video_notes: record.video_notes,
         sentvideo: record.sentvideo,
         time_sent: record.time_sent,
         message: record.Sent,
@@ -1373,7 +1389,43 @@ app.post("/checkBookmark", async (req, res) => {
       .json({ error: "Error checking if the reel has been bookmarked" });
   }
 });
-
+async function overwrite(voiceNotePath, chatId, UserId, UserIdx, format) {
+  return new Promise((resolve, reject) => {
+    console.log("started");
+    let type;
+    let location;
+    if (format === "video") {
+      type = ".ismv";
+      location = "VideoNote/";
+    } else {
+      type = ".mp3";
+      location = "voiceNote/";
+    }
+    const trimmedVideo = location + chatId + Date.now() + UserId + UserIdx + type;
+    const inputFormat = voiceNotePath.split(".").pop().toLowerCase();
+    console.log("Trimming video...");
+    console.log(inputFormat);
+    ffmpeg()
+      .input(voiceNotePath)
+      .inputFormat(inputFormat)
+      .outputFormat("ismv")
+      .on("end", () => {
+        console.log(" trimming completed.");
+        fs.unlinkSync(voiceNotePath);
+        resolve(trimmedVideo);
+      })
+      .on("error", (err, stdout, stderr) => {
+        console.error("Error trimming video:", err);
+        console.error("FFmpeg stdout:", stdout);
+        console.error("FFmpeg stderr:", stderr);
+        reject(err);
+      })
+      .on("progress", (progress) => {
+        console.log("trimming-progress", progress);
+      })
+      .save(trimmedVideo);
+  });
+}
 async function sendVoiceNote(UserId, UserIdx, blob) {
   const date_posted = await datePosted();
   const chatId = await generateChatId(UserId, UserIdx);
@@ -1381,8 +1433,14 @@ async function sendVoiceNote(UserId, UserIdx, blob) {
   const voiceNotePath = `voiceNote/${chatId}_${formattedDate}.webm`;
 
   const buffer = blob.data;
-
   fs.writeFileSync(voiceNotePath, buffer);
+  const writing = await overwrite(
+    voiceNotePath,
+    chatId,
+    UserId,
+    UserIdx,
+    "voice"
+  );
   const result = await insertChatMessage(
     UserId,
     UserIdx,
@@ -1391,7 +1449,7 @@ async function sendVoiceNote(UserId, UserIdx, blob) {
     null,
     chatId,
     date_posted,
-    voiceNotePath,
+    writing,
     null,
     0
   );
@@ -1402,7 +1460,47 @@ async function sendVoiceNote(UserId, UserIdx, blob) {
     UserIdx,
     message: null,
     time_sent: date_posted,
-    voice_notes: voiceNotePath,
+    voice_notes: writing,
+    isRead: 0,
+  };
+}
+
+async function sendVideoNote(UserId, UserIdx, blob) {
+  const date_posted = await datePosted();
+  const chatId = await generateChatId(UserId, UserIdx);
+  const formattedDate = date_posted.replace(/[\s:]/g, "_");
+  const videoNotePath = `VideoNote/${chatId}_${formattedDate}.webm`;
+
+  const buffer = blob.data;
+
+  fs.writeFileSync(videoNotePath, buffer);
+  const writing = await overwrite(
+    videoNotePath,
+    chatId,
+    UserId,
+    UserIdx,
+    "video"
+  );
+  const result = await insertChatMessage(
+    UserId,
+    UserIdx,
+    null,
+    null,
+    null,
+    chatId,
+    date_posted,
+    null,
+    writing,
+    0
+  );
+  return {
+    chatId,
+    senderId: UserId,
+    UserId,
+    UserIdx,
+    message: null,
+    time_sent: date_posted,
+    video_notes: writing,
     isRead: 0,
   };
 }
@@ -1418,12 +1516,29 @@ function streamToBuffer(stream) {
 app.post("/sendVoiceNote", async (req, res) => {
   const UserId = req.body.UserId;
   const UserIdx = req.body.recipientId;
-  const blob = req.files.voicenote;
+  const blob = req.files.audio;
   console.log(blob.data);
   console.log(UserIdx, UserId);
 
   try {
     const SentVN = await sendVoiceNote(UserId, UserIdx, blob);
+    // res.status(200).json(SentVN);
+    io.emit("newMessage", SentVN);
+  } catch (error) {
+    console.error("Error sending VN:", error);
+    res.status(500).json({ error: "Error sending VN" });
+  }
+});
+
+app.post("/sendVideoNote", async (req, res) => {
+  const UserId = req.body.UserId;
+  const UserIdx = req.body.recipientId;
+  const blob = req.files.video;
+  console.log(blob.data);
+  console.log(UserIdx, UserId);
+
+  try {
+    const SentVN = await sendVideoNote(UserId, UserIdx, blob);
     // res.status(200).json(SentVN);
     io.emit("newMessage", SentVN);
   } catch (error) {
@@ -1469,37 +1584,56 @@ async function getUserProfileData(UserId) {
 }
 app.get("/getPeople/:UserId", async (req, res) => {
   const { UserId } = req.params;
-
+  var maxRetries = 3;
+  var retryDelay = 2000;
   try {
-    const userProfileData = await getUser(UserId);
+    const userProfileData = await getUser(UserId, maxRetries, retryDelay);
+    console.log("This is the profile data", userProfileData);
     if (userProfileData) {
       res.json(userProfileData);
     } else {
-      res.status(404).json({ error: "User profile not found" });
+      res.json(null);
     }
   } catch (error) {
-    console.error("Error fetching user profile data:", error);
-    res.status(500).json({ error: "Error fetching user profile data" });
+    console.error("User data not found:", error);
+    res.status(500).json({ error: "User data not found" });
   }
 });
 
-async function getUser(UserId) {
-  try {
-    const pool = await sql.connect(config);
-    const request = new sql.Request(pool);
+async function getUser(UserId, maxRetries, delay) {
+  let retries = 0;
+  while (retries <= maxRetries) {
+    try {
+      const pool = await sql.connect(config);
+      const request = new sql.Request(pool);
 
-    const query = ` select UserId, Surname, First_Name, Passport FROM User_Profile WHERE UserId =  '${UserId}' `;
+      const query = `SELECT DISTINCT up.UserId, up.Surname, up.First_Name, up.Passport FROM user_profile up JOIN chats c ON up.UserId = c.UserId OR up.UserId = c.recipientId WHERE up.UserId = @UserId OR c.recipientId = @UserId;`;
+      request.input("UserId", sql.VarChar, UserId);
+      const result = await request.query(query);
+      await pool.close();
 
-    const result = await request.query(query);
-    await pool.close();
+      const UserDetail = result.recordset.map((record) => ({
+        UserId: record.UserId,
+        Surname: record.Surname,
+        FirstName: record.First_Name,
+        Passport: record.Passport,
+      }));
 
-    if (result.recordset.length > 0) {
-      return result.recordset[0];
-    } else {
-      return null;
+      if (result.recordset.length > 0) {
+        return UserDetail;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      retries++;
+      if (retries <= maxRetries) {
+        console.log(`Retry ${retries}: Error fetching user data - ${error}`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        console.error(`Failed after ${retries} retries: ${error}`);
+        throw error;
+      }
     }
-  } catch (error) {
-    throw error;
   }
 }
 
@@ -1528,8 +1662,12 @@ app.post("/LastIdSeen", async (req, res) => {
 
   try {
     const lastId = await getLastMessageId(UserId, UserIdx);
-    console.log('last checked message by User', UserIdx, 'is', lastId);
-    res.status(200).json({ lastId, UserId, UserIdx });
+    console.log("last checked message by User", UserIdx, "is", lastId);
+    if (lastId) {
+      res.status(200).json({ lastId, UserId, UserIdx });
+    } else {
+      res.json(null);
+    }
   } catch (error) {
     console.error("error checking last seen message:", error);
     res.status(500).json({ error: "error checking last seen message" });
@@ -1563,7 +1701,6 @@ async function MessageIsRead(messageId, UserIdx) {
     }
   }
 }
-
 
 // Start the server
 const port = 8888;

@@ -148,10 +148,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         <a href="user_profile.php?UserId=<?php echo $UserId ?>" class="profile-name"><i class="bi bi-person"></i><?php echo $Surname . " " . $First_Name; ?></a>
       </div>
     </nav>
-
-
-
-
     <div class="chat-container">
       <div class="sidebar">
         <ul class="sidebar-nav">
@@ -224,7 +220,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       <td onclick="insertEmoji('&#x1F610;')">😐</td>
                       <td onclick="insertEmoji('&#x1F611;')">😑</td>
                     </tr>
-                    <!-- Add more rows and columns for additional emojis -->
                     <tr>
                       <td onclick="insertEmoji('&#x1F60A;')">😊</td>
                       <td onclick="insertEmoji('&#x1F60B;')">😋</td>
@@ -265,13 +260,12 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               <div class="d-flex">
                 <textarea placeholder="Type in your message" class="form-control" id="message" rows="3" oninput="toggleButtons()"></textarea>
                 <div class="button-container">
-                  <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                  <button type="button" class="voice-note" onmousedown="startRecording('voice')" onmouseleave="cancelRecording()">
                     <i class="bi bi-mic"></i>
                   </button>
-                  <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseup="submitRecordedNote()" onmouseleave="cancelRecording()">
+                  <button type="button" class="video-note" onmousedown="startRecording('video')" onmouseleave="cancelRecording()">
                     <i class="bi bi-camera-video"></i>
                   </button>
-                  <!-- Add any other buttons if needed -->
                 </div>
                 <div id="sound-visualizer" class="boxContainer">
                   <div class="box box1"></div>
@@ -281,7 +275,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   <div class="box box5"></div>
                 </div>
                 <div id="video-box" class="video-box">
-                  <video></video>
+                  <video id="video-stream"></video>
+                </div>
+                <div id="loader" class="loader">
+                  <img src="icons/internet.gif">
                 </div>
                 <button type="submit" class="submit" id="send-button" style="display: none;">
                   <i class="bi bi-send"></i>
@@ -293,14 +290,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       </div>
 
       <div class="footer">
-        <?php
-
-        $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-        $stmt = sqlsrv_query($conn, $sql);
-        if ($stmt === false) {
-          die(print_r(sqlsrv_errors(), true));
-        }
-        ?>
         <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
           <i class="bi bi-chat"></i>
         </button>
@@ -312,27 +301,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           </div>
           <div class="offcanvas-body">
             <ul class="list-unstyled">
-              <?php
-
-              while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                $recipientId = $row['recipientId'];
-
-                $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-                $stmt2 = sqlsrv_query($conn, $sql2);
-                if ($stmt2 === false) {
-                  die(print_r(sqlsrv_errors(), true));
-                }
-
-                $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-                $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-                $Passport = $row2['Passport'];
-                if (empty($Passport)) {
-                  $passportImage = "UserPassport/DefaultImage.png";
-                } else {
-                  $passportImage = "UserPassport/" . $Passport;
-                }
-              }
-              ?>
               <li>
                 <div class="passport">
                   <a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">
@@ -381,12 +349,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
     <div class="callmain" id="callmain">
       <div class="info-container">
         <?php
-        // Connect to the database
         include 'db.php';
 
         $UserId = $_SESSION['UserId'];
 
-        // Get the surname and first name of the user with the UserId from the database
         $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserIdx'";
         $stmt = sqlsrv_prepare($conn, $sql);
         if (sqlsrv_execute($stmt)) {
@@ -433,1241 +399,1400 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
         </div>
       </div>
-      <script src="js/jquery.min.js"></script>
-      <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
-      <script src="js/bootstrap.min.js"></script>
-      <!-- <script></script> -->
+    </div>
+  </div>
+  <script src="js/jquery.min.js"></script>
+  <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <!-- <script></script> -->
 
 
-      <!-- <script> </script> -->
+  <!-- <script> </script> -->
 
-      <script>
-        var userB = '<?php echo $_GET["UserIdx"]; ?>';
-        console.log(userB);
-        var UserId = '<?php echo $_SESSION["UserId"]; ?>';
-        console.log(UserId);
-      </script>
+  <script>
+    var userB = '<?php echo $_GET["UserIdx"]; ?>';
+    console.log(userB);
+    var UserId = '<?php echo $_SESSION["UserId"]; ?>';
+    console.log(UserId);
+  </script>
 
-      <script>
+  <script>
 
-      </script>
+  </script>
 
 
-      <script>
-        function resetTheme() {
-          localStorage.removeItem('messageSentcolor');
-          localStorage.removeItem('messageReceivedcolor');
-          localStorage.removeItem('messageSentTheme');
-          localStorage.removeItem('messageReceivedTheme');
-          localStorage.removeItem('dropHeaderTheme');
-          localStorage.removeItem('chatboxTheme');
-          location.reload(); // Reload the page to apply the default theme
+  <script>
+    function resetTheme() {
+      localStorage.removeItem('messageSentcolor');
+      localStorage.removeItem('messageReceivedcolor');
+      localStorage.removeItem('messageSentTheme');
+      localStorage.removeItem('messageReceivedTheme');
+      localStorage.removeItem('dropHeaderTheme');
+      localStorage.removeItem('chatboxTheme');
+      location.reload(); // Reload the page to apply the default theme
+    }
+  </script>
+  <script>
+    var sidebarToggle = document.getElementById('sidebar-toggle');
+
+    sidebarToggle.addEventListener('mousedown', function(e) {
+      var posX = e.clientX - sidebarToggle.offsetLeft;
+      var posY = e.clientY - sidebarToggle.offsetTop;
+
+      document.addEventListener('mousemove', moveButton);
+
+      function moveButton(e) {
+        sidebarToggle.style.left = (e.clientX - posX) + 'px';
+        sidebarToggle.style.top = (e.clientY - posY) + 'px';
+      }
+
+      document.addEventListener('mouseup', function() {
+        document.removeEventListener('mousemove', moveButton);
+      });
+    });
+  </script>
+  <script>
+    function savechatheaderTheme(theme) {
+      localStorage.setItem('dropHeaderTheme', theme);
+    }
+
+    function applychatheaderTheme(theme) {
+      var chatheader = document.querySelector('.chat-header');
+      chatheader.style.backgroundColor = theme;
+    }
+
+    var savedDropdownTheme = localStorage.getItem('dropHeaderTheme');
+    if (savedDropdownTheme) {
+      applychatheaderTheme(savedDropdownTheme);
+    }
+
+    var chatHeader = document.querySelector('.chat-header');
+
+    chatHeader.addEventListener('contextmenu', function(event) {
+      event.preventDefault();
+
+      var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
+      existingDropdownMenus.forEach(function(dropdownMenu) {
+        if (dropdownMenu !== chatHeader.querySelector('.dropdown-menu')) {
+          dropdownMenu.remove();
         }
-      </script>
-      <script>
-        var sidebarToggle = document.getElementById('sidebar-toggle');
+      });
 
-        sidebarToggle.addEventListener('mousedown', function(e) {
-          var posX = e.clientX - sidebarToggle.offsetLeft;
-          var posY = e.clientY - sidebarToggle.offsetTop;
+      var changeThemeOption = document.createElement('div');
+      changeThemeOption.textContent = 'Change header Theme';
+      changeThemeOption.classList.add('dropdown-option');
 
-          document.addEventListener('mousemove', moveButton);
+      var dropdownMenu = document.createElement('div');
+      dropdownMenu.classList.add('dropdown-menu', 'change');
+      dropdownMenu.appendChild(changeThemeOption);
 
-          function moveButton(e) {
-            sidebarToggle.style.left = (e.clientX - posX) + 'px';
-            sidebarToggle.style.top = (e.clientY - posY) + 'px';
+      chatHeader.appendChild(dropdownMenu);
+
+      var rect = event.target.getBoundingClientRect();
+      dropdownMenu.style.top = '130px';
+      dropdownMenu.style.right = '400px';
+      dropdownMenu.style.zIndex = '9999';
+      dropdownMenu.style.display = 'block';
+
+      changeThemeOption.addEventListener('click', function() {
+        var newColor = prompt('Enter a background color:');
+        if (newColor !== null && newColor.trim() !== '') {
+          chatHeader.style.backgroundColor = newColor;
+          savechatheaderTheme(newColor);
+          applychatheaderTheme(newColor);
+        }
+      });
+
+      document.addEventListener('click', function(event) {
+        if (!dropdownMenu.contains(event.target) && !chatHeader.contains(event.target)) {
+          dropdownMenu.remove();
+        }
+      });
+    });
+  </script>
+
+  <script>
+    function savebackgroundTheme(theme) {
+      localStorage.setItem('chatboxTheme', theme);
+    }
+
+    function applybackgroundTheme(theme) {
+      var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
+
+      chatboxes.forEach(function(chatbox) {
+        chatbox.style.backgroundColor = theme;
+      });
+    }
+
+    var savedChatboxTheme = localStorage.getItem('chatboxTheme');
+    if (savedChatboxTheme) {
+      applybackgroundTheme(savedChatboxTheme);
+    }
+
+    document.addEventListener('contextmenu', function(event) {
+      if (event.target.closest('.chat-header')) {
+        return;
+      }
+      var clickedElement = event.target;
+
+      var chatbox = document.querySelector('.chatbox');
+      var chatcontainer = document.querySelector('.chat-container');
+
+      if (chatbox) {
+        event.preventDefault();
+
+        var changeThemeOption = document.createElement('div');
+        changeThemeOption.textContent = 'Change Theme';
+        changeThemeOption.classList.add('theme-option');
+
+        var backgrounds = document.createElement('div');
+        backgrounds.classList.add('changebackground');
+        backgrounds.appendChild(changeThemeOption);
+
+        chatbox.appendChild(backgrounds);
+
+        var rect = event.target.getBoundingClientRect();
+        backgrounds.style.top = '130px';
+        backgrounds.style.right = '600px';
+
+        changeThemeOption.addEventListener('click', function() {
+          var newColor = prompt('Enter a new background color:');
+          if (newColor !== null && newColor.trim() !== '') {
+            chatbox.style.backgroundColor = newColor;
+            chatcontainer.style.backgroundColor = newColor;
+            savebackgroundTheme(newColor);
+            applybackgroundTheme(newColor);
           }
-
-          document.addEventListener('mouseup', function() {
-            document.removeEventListener('mousemove', moveButton);
-          });
         });
-      </script>
-      <script>
-        function savechatheaderTheme(theme) {
-          localStorage.setItem('dropHeaderTheme', theme);
-        }
 
-        function applychatheaderTheme(theme) {
-          var chatheader = document.querySelector('.chat-header');
-          chatheader.style.backgroundColor = theme;
-        }
-
-        var savedDropdownTheme = localStorage.getItem('dropHeaderTheme');
-        if (savedDropdownTheme) {
-          applychatheaderTheme(savedDropdownTheme);
-        }
-
-        var chatHeader = document.querySelector('.chat-header');
-
-        chatHeader.addEventListener('contextmenu', function(event) {
-          event.preventDefault();
-
-          var existingDropdownMenus = document.querySelectorAll('.dropdown-menu');
-          existingDropdownMenus.forEach(function(dropdownMenu) {
-            if (dropdownMenu !== chatHeader.querySelector('.dropdown-menu')) {
-              dropdownMenu.remove();
-            }
-          });
-
-          var changeThemeOption = document.createElement('div');
-          changeThemeOption.textContent = 'Change header Theme';
-          changeThemeOption.classList.add('dropdown-option');
-
-          var dropdownMenu = document.createElement('div');
-          dropdownMenu.classList.add('dropdown-menu', 'change');
-          dropdownMenu.appendChild(changeThemeOption);
-
-          chatHeader.appendChild(dropdownMenu);
-
-          var rect = event.target.getBoundingClientRect();
-          dropdownMenu.style.top = '130px';
-          dropdownMenu.style.right = '400px';
-          dropdownMenu.style.zIndex = '9999';
-          dropdownMenu.style.display = 'block';
-
-          changeThemeOption.addEventListener('click', function() {
-            var newColor = prompt('Enter a background color:');
-            if (newColor !== null && newColor.trim() !== '') {
-              chatHeader.style.backgroundColor = newColor;
-              savechatheaderTheme(newColor);
-              applychatheaderTheme(newColor);
-            }
-          });
-
-          document.addEventListener('click', function(event) {
-            if (!dropdownMenu.contains(event.target) && !chatHeader.contains(event.target)) {
-              dropdownMenu.remove();
-            }
-          });
-        });
-      </script>
-
-      <script>
-        function savebackgroundTheme(theme) {
-          localStorage.setItem('chatboxTheme', theme);
-        }
-
-        function applybackgroundTheme(theme) {
-          var chatboxes = document.querySelectorAll('.chatbox, .chat-container');
-
-          chatboxes.forEach(function(chatbox) {
-            chatbox.style.backgroundColor = theme;
-          });
-        }
-
-        var savedChatboxTheme = localStorage.getItem('chatboxTheme');
-        if (savedChatboxTheme) {
-          applybackgroundTheme(savedChatboxTheme);
-        }
-
-        document.addEventListener('contextmenu', function(event) {
-          if (event.target.closest('.chat-header')) {
-            return;
+        document.addEventListener('click', function(e) {
+          if (!backgrounds.contains(e.target)) {
+            backgrounds.remove();
           }
-          var clickedElement = event.target;
+        });
+      }
+    });
+  </script>
 
-          var chatbox = document.querySelector('.chatbox');
-          var chatcontainer = document.querySelector('.chat-container');
 
-          if (chatbox) {
-            event.preventDefault();
+  <script>
+    function saveSentmessagebackgroundTheme(theme) {
+      localStorage.setItem('messageSentcolor', theme);
+    }
 
-            var changeThemeOption = document.createElement('div');
-            changeThemeOption.textContent = 'Change Theme';
-            changeThemeOption.classList.add('theme-option');
+    function saveReceivedmessagebackgroundTheme(theme) {
+      localStorage.setItem('messageReceivedcolor', theme);
+    }
 
-            var backgrounds = document.createElement('div');
-            backgrounds.classList.add('changebackground');
-            backgrounds.appendChild(changeThemeOption);
+    function applySentmessagesbackgroundTheme(theme) {
+      var sentbackground = document.querySelectorAll('.Sent');
+      sentbackground.forEach(function(message) {
+        message.style.backgroundColor = theme;
+      });
+    }
 
-            chatbox.appendChild(backgrounds);
+    function applyReceivedmessagesbackgroundTheme(theme) {
+      var receivedbackground = document.querySelectorAll('.received');
+      receivedbackground.forEach(function(message) {
+        message.style.backgroundColor = theme;
+      });
+    }
 
-            var rect = event.target.getBoundingClientRect();
-            backgrounds.style.top = '130px';
-            backgrounds.style.right = '600px';
+    function saveSentmessageTheme(theme) {
+      localStorage.setItem('messageSentTheme', theme);
+      console.log('saved');
+    }
 
-            changeThemeOption.addEventListener('click', function() {
-              var newColor = prompt('Enter a new background color:');
-              if (newColor !== null && newColor.trim() !== '') {
-                chatbox.style.backgroundColor = newColor;
-                chatcontainer.style.backgroundColor = newColor;
-                savebackgroundTheme(newColor);
-                applybackgroundTheme(newColor);
+    function saveReceivedmessageTheme(theme) {
+      localStorage.setItem('messageReceivedTheme', theme);
+      console.log('saved');
+    }
+
+    function applySentmessagesTheme(theme) {
+      var sent = document.querySelectorAll('.Sent');
+      sent.forEach(function(message) {
+        message.style.background = theme;
+      });
+    }
+
+    function applyReceivedmessagesTheme(theme) {
+      var received = document.querySelectorAll('.received');
+      received.forEach(function(message) {
+        message.style.background = theme;
+      });
+    }
+
+
+    var lastTimestamp = Date.now();
+
+    function isSameDay(date1, date2) {
+      return (
+        date1.getDate() === date2.getDate() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getFullYear() === date2.getFullYear()
+      );
+    }
+
+    function getFormattedDate(date) {
+      return date.toDateString();
+    }
+
+    function formatTime(time) {
+      var minutes = Math.floor(time / 60);
+      var seconds = Math.floor(time % 60);
+
+      minutes = String(minutes).padStart(2, "0");
+      seconds = String(seconds).padStart(2, "0");
+
+      return minutes + ":" + seconds;
+    }
+    // isToday(date);
+    var lastDisplayedDate = null;
+    var UserIdx = '<?php echo $_GET['UserIdx']; ?>';
+    const sessionId = "<?php echo $sessionID ?>";
+    var UserId = "<?php echo $_SESSION['UserId']; ?>";
+    var socketUrl = 'http://localhost:8888';
+    const socket = io(socketUrl, {
+      query: {
+        UserId,
+        UserIdx,
+        sessionId,
+      }
+    });
+    socket.on('connect', () => {
+      console.log('Socket.IO connection established');
+      socket.emit('userConnected', UserId);
+      socket.emit('fetchMessageForEachUser', {
+        UserId,
+        UserIdx
+      });
+      fetchLastSeenMessageId();
+      fetchUserProfileData(UserIdx);
+      fetchPoeple(UserId);
+    });
+
+    socket.on('disconnect', () => {
+      socket.emit('userDisconnected', UserId);
+    });
+    socket.on('messageRead', (chatId, UserIdx) => {
+      console.log('This message has been read', chatId);
+    });
+    async function getLastMessageIdFromChatHistory() {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('UserId', UserId);
+        formData.append('UserIdx', UserIdx);
+
+        fetch('http://localhost:8888/LastIdSeen', {
+            method: 'POST',
+            body: formData,
+          })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Error checking last seen message');
+            }
+            return response.json();
+          })
+          .then((result) => {
+            if (result) {
+              resolve(result.lastId);
+            } else {
+              return null;
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    }
+
+    async function setChatboxScrollPositionToLastSeen(lastSeenMessageId) {
+      const chatbox = document.querySelector('.chatbox');
+
+      function waitForElementToExist(elementId, maxAttempts, interval, callback) {
+        let attempts = 0;
+
+        function checkElement() {
+          console.log('this is the element Id', elementId);
+          const element = document.getElementById(elementId);
+          attempts++;
+
+          if (element) {
+            callback(element);
+          } else if (attempts < maxAttempts) {
+            setTimeout(checkElement, interval);
+          } else {
+            console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
+          }
+        }
+
+        checkElement();
+      }
+
+      waitForElementToExist(lastSeenMessageId, 10, 1000, (lastSeenMessage) => {
+        if (lastSeenMessage) {
+          const position = lastSeenMessage.offsetTop + lastSeenMessage.clientHeight;
+          chatbox.scrollTop = position;
+          console.log(position, lastSeenMessage.offsetTop, lastSeenMessage.clientHeight);
+
+          // const redLine = document.createElement('div');
+          // redLine.style.width = '100%';
+          // redLine.style.height = '2px';
+          // redLine.style.backgroundColor = 'red';
+          // redLine.style.position = 'absolute';
+          // redLine.style.top = position + 'px';
+          // chatbox.appendChild(redLine);
+        } else {
+          console.log('Message container not found');
+        }
+      });
+
+    }
+    let lastSeenMessageId = 'CHAT' + UserId + UserIdx;
+    async function fetchLastSeenMessageId() {
+      try {
+        const lastSeenMessageIdFromServer = await getLastMessageIdFromChatHistory();
+        console.log('This is the last Id', lastSeenMessageIdFromServer);
+
+        if (lastSeenMessageIdFromServer && lastSeenMessageId) {
+          const lastSeenMessageIdNum = parseInt(lastSeenMessageId);
+          const lastSeenMessageIdFromServerNum = parseInt(lastSeenMessageIdFromServer);
+
+          lastSeenMessageId = lastSeenMessageIdFromServer;
+          setChatboxScrollPositionToLastSeen(lastSeenMessageId);
+
+        }
+
+      } catch (error) {
+        console.log('Error finding last seen message ID', error);
+      }
+    }
+    var recipientPassport = document.querySelector('.recipientPassport');
+    var icon = document.querySelector('.icon');
+
+    async function fetchUserProfileData(UserIdx) {
+      try {
+        const response = await fetch(`http://localhost:8888/getUserProfile/${UserIdx}`);
+        if (response.ok) {
+          const userProfileData = await response.json();
+          if (userProfileData.Passport != null) {
+            var passDef = 'UserPassport/' + userProfileData.Passport;
+          } else {
+            passDef = 'UserPassport/DefaultImage.png'
+          }
+          recipientPassport.src = passDef;
+          icon.textContent = userProfileData.Surname + " " + userProfileData.First_Name;
+          icon.href = 'user_profile.php?UserId=' + UserIdx;
+        } else {
+          throw new Error('Error fetching user profile data');
+        }
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
+    }
+    var passport = document.querySelector('.passport');
+    var passportModal = passport.querySelector('a');
+    var passportModalImg = passportModal.querySelector('img');
+
+    var NameOfP = document.querySelector('.name');
+    var NameOfPSpan = NameOfP.querySelector('span');
+    var NameOfPSpanA = NameOfPSpan.querySelector('a');
+
+    async function fetchPoeple(UserId) {
+      try {
+        const response = await fetch(`http://localhost:8888/getPeople/${UserId}`);
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('This are the users data', userData);
+          if (userData) {
+            userData.forEach((result) => {
+              if (result.Passport != null) {
+                var passUser = 'UserPassport/' + result.Passport;
+              } else {
+                passUser = 'UserPassport/DefaultImage.png';
               }
-            });
 
-            document.addEventListener('click', function(e) {
-              if (!backgrounds.contains(e.target)) {
-                backgrounds.remove();
+              passportModalImg.src = passUser;
+              passportModalImg.alt = result.UserId;
+              NameOfPSpanA.textContent = `${result.Surname} ${result.FirstName}`;
+              NameOfPSpanA.href = 'chat.php?UserId=', result.UserId;
+            });
+          } else {
+            passUser = 'UserPassport/DefaultImage.png';
+            passportModalImg.src = passUser;
+            passportModalImg.alt = 'New User';
+            NameOfPSpanA.textContent = `Talk to new people`;
+          }
+
+        } else {
+          throw new Error('Error fetching user data');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    function playpauseVoiceNotes() {
+      var VideoNotes = document.querySelectorAll('.video_note');
+      console.log('this is the length of the notes', VideoNotes.length);
+      VideoNotes.forEach(function(VideoNote) {
+        var videoElement = VideoNote.querySelector('video');
+        videoElement.addEventListener('play', function() {
+          console.log('Video started playing');
+          VideoNotes.forEach(function(otherContainer) {
+            if (otherContainer !== VideoNote) {
+              var otherVideo = otherContainer.querySelector('video');
+              if (!otherVideo.paused) {
+                otherVideo.pause();
+                console.log('Paused other video');
               }
-            });
-          }
+            }
+          });
         });
-      </script>
+      });
+    }
 
+    function onlineStats(status) {
+      var onlineStatus = document.createElement('div');
+      onlineStatus.className = 'onlineStatus';
+      onlineStatus.id = 'online-status-' + UserIdx;
+      icon.appendChild(onlineStatus);
+      if (status === 'online') {
+        onlineStatus.style.boxShadow = 'rgb(11, 220, 77)';
+        onlineStatus.style.backgroundColor = 'green';
+      } else if (status === 'offline') {
+        onlineStatus.style.boxShadow = 'rgb(187, 27, 27)';
+        onlineStatus.style.backgroundColor = 'red';
+      } else {
+        onlineStatus.style.display = 'none';
+      }
+    }
+    socket.on('userStatus', ({
+      UserIdx,
+      status
+    }) => {
+      console.log('this is the status for User', UserIdx, ':', status);
+      onlineStats(status);
+    });
+    let unreadMessageCount = 0;
 
-      <script>
-        function saveSentmessagebackgroundTheme(theme) {
-          localStorage.setItem('messageSentcolor', theme);
+    socket.on('fetchMessageForEachUser', (data) => {
+      console.log('Received messages for each user:');
+      const hasUnreadMessages = data.some((result) => result.isRead === 0 && result.senderId === UserIdx);
+
+      if (hasUnreadMessages) {
+        unreadMessageCount = data.filter((result) => result.isRead === 0 && result.senderId === UserIdx).length;
+        console.log('This is the unread status before oepning the page', unreadMessageCount);
+        if (unreadMessageCount === 1) {
+          const unreadMessageDiv = document.createElement('div');
+          unreadMessageDiv.className = 'unread-message';
+          unreadMessageDiv.textContent = 'Unread Message';
+          chatbox.appendChild(unreadMessageDiv);
+        } else {
+          const unreadMessageDiv = document.querySelector('.unread-message');
+          unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
         }
+      } else {
+        console.log('No unread messages');
+      }
+      data.forEach((result, index) => {
+        console.log(`Received result #${index + 1}:`);
+        checkForNewMessages(result);
+        playpauseVoiceNotes();
+      });
+    });
 
-        function saveReceivedmessagebackgroundTheme(theme) {
-          localStorage.setItem('messageReceivedcolor', theme);
+
+    var chatbox = document.querySelector('.chatbox');
+
+    var messages = document.getElementById('message');
+    var icon = document.querySelector('.icon');
+
+    var isTypingElement = null;
+    messages.addEventListener('keyup', function() {
+      socket.emit('typing', {
+        UserId,
+        UserIdx
+      });
+    });
+
+    socket.on('typing', (data) => {
+      console.log(`${data.UserId} is typing`);
+      if (isTypingElement) {
+        icon.removeChild(isTypingElement);
+        isTypingElement = null;
+      }
+      typingTimeout = setTimeout(function() {
+        if (isTypingElement) {
+          icon.removeChild(isTypingElement);
+          isTypingElement = null;
         }
+      }, 1000);
+      isTypingElement = document.createElement('p');
+      isTypingElement.className = 'isTyping';
+      isTypingElement.innerHTML = `is typing`;
+      icon.appendChild(isTypingElement);
+    });
 
-        function applySentmessagesbackgroundTheme(theme) {
-          var sentbackground = document.querySelectorAll('.Sent');
-          sentbackground.forEach(function(message) {
-            message.style.backgroundColor = theme;
-          });
-        }
+    let debouncedMarkMessagesAsRead = debounce(markMessagesAsRead, 500);
 
-        function applyReceivedmessagesbackgroundTheme(theme) {
-          var receivedbackground = document.querySelectorAll('.received');
-          receivedbackground.forEach(function(message) {
-            message.style.backgroundColor = theme;
-          });
-        }
+    chatbox.addEventListener('scroll', debouncedMarkMessagesAsRead);
 
-        function saveSentmessageTheme(theme) {
-          localStorage.setItem('messageSentTheme', theme);
-          console.log('saved');
-        }
+    function markMessagesAsRead() {
+      const messages = document.querySelectorAll('.message');
+      const chatbox = document.getElementById('chatbox');
 
-        function saveReceivedmessageTheme(theme) {
-          localStorage.setItem('messageReceivedTheme', theme);
-          console.log('saved');
-        }
+      messages.forEach((message) => {
+        const rect = message.getBoundingClientRect();
 
-        function applySentmessagesTheme(theme) {
-          var sent = document.querySelectorAll('.Sent');
-          sent.forEach(function(message) {
-            message.style.background = theme;
-          });
-        }
-
-        function applyReceivedmessagesTheme(theme) {
-          var received = document.querySelectorAll('.received');
-          received.forEach(function(message) {
-            message.style.background = theme;
-          });
-        }
-
-
-        var lastTimestamp = Date.now();
-
-        function isSameDay(date1, date2) {
-          return (
-            date1.getDate() === date2.getDate() &&
-            date1.getMonth() === date2.getMonth() &&
-            date1.getFullYear() === date2.getFullYear()
-          );
-        }
-
-        function getFormattedDate(date) {
-          return date.toDateString();
-        }
-
-        function formatTime(time) {
-          var minutes = Math.floor(time / 60);
-          var seconds = Math.floor(time % 60);
-
-          minutes = String(minutes).padStart(2, "0");
-          seconds = String(seconds).padStart(2, "0");
-
-          return minutes + ":" + seconds;
-        }
-        // isToday(date);
-        var lastDisplayedDate = null;
-        var UserIdx = '<?php echo $_GET['UserIdx']; ?>';
-        const sessionId = "<?php echo $sessionID ?>";
-        var UserId = "<?php echo $_SESSION['UserId']; ?>";
-        var socketUrl = 'ws://localhost:8888';
-        const socket = io(socketUrl, {
-          query: {
-            UserId,
-            UserIdx,
-            sessionId,
-          }
-        });
-        socket.on('connect', () => {
-          console.log('Socket.IO connection established');
-          socket.emit('userConnected', UserId);
-          socket.emit('fetchMessageForEachUser', {
-            UserId,
+        if (rect.top >= 0 && rect.bottom <= chatbox.clientHeight && rect.height / message.clientHeight >= 0.5) {
+          const messageId = message.id;
+          socket.emit('messageRead', {
+            messageId,
             UserIdx
           });
-          fetchLastSeenMessageId();
-          fetchUserProfileData(UserIdx);
-          fetchPoeple(UserId);
-        });
+        }
+      });
+    }
 
-        socket.on('disconnect', () => {
-          socket.emit('userDisconnected', UserId);
-        });
-        socket.on('messageRead', (chatId, UserIdx) => {
-          console.log('This message has been read', chatId);
-        });
-        async function getLastMessageIdFromChatHistory() {
-          return new Promise((resolve, reject) => {
-            const formData = new FormData();
-            formData.append('UserId', UserId);
-            formData.append('UserIdx', UserIdx);
+    function debounce(func, delay) {
+      let timeout;
+      return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+      };
+    }
 
-            fetch('http://localhost:8888/LastIdSeen', {
-                method: 'POST',
-                body: formData,
-              })
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('Error checking last seen message');
-                }
-                return response.json();
-              })
-              .then((result) => {
-                resolve(result.lastId);
-              })
-              .catch((error) => {
-                reject(error);
-              });
-          });
+    function checkForNewMessages(message) {
+      var div = document.createElement('div');
+      var timestamp = new Date(message.time_sent);
+
+      div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
+      var sender = message.senderId
+      if (div.className === 'received') {
+        var chatId = message.chatId;
+        var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
+        if (deletedReceivedMessage === 'true') {
+          div.innerHTML = '<div id="' + chatId + '" class="message" data-isRead = "' + message.isRead + '">' + 'You deleted the message' + '</div>';
+          div.style.color = 'red';
+        }
+      }
+
+      var videoLinkRegex = /(https?:\/\/[^\s]+)/i;
+      if (videoLinkRegex.test(message.message)) {
+        var videoURL = message.message.match(videoLinkRegex)[0];
+        var videoLink = '<a href="' + videoURL + '" target="_blank">' + videoURL + '</a>';
+        var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
+        var iframeContent = ` <!DOCTYPE html> <html> <head> </head> <body> <a href="${videoURL}" target="_blank">${videoURL}</a> <br> <img src="${videoURL}" alt="Thumbnail" class="thumbnail"> <br> <a href="${videoURL}" download class="download-button">Download Video</a> </body> </html> `;
+        div.innerHTML = ` <div class="message-container"> <div class="message" data-isRead="${message.isRead}" id="${message.chatId}"> <iframe srcdoc="${iframeContent}"></iframe> </div> </div>`;
+
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
+      } else if (message.message !== null) {
+        div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + message.message + '</div>';
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+      }
+
+
+      if (message.sent_image) {
+        div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">'+ '<div id="image-' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div></div>';
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+      }
+      if (message.sent_video) {
+        div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message"><div id="video-container-' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div></div>';
+        var videoPlayer = div.querySelector('video');
+        var playButton = div.querySelector('#buttonplay');
+        playButton.addEventListener('click', function() {
+          videoPlayer.style.display = 'block';
+          videoPlayer.play();
+          playButton.style.display = 'none';
+        });
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+      }
+      if (message.missedCall) {
+        div.innerHTML += '<div class="message-container">' + '<div class="message"><div id="missedCall">' + '<p>' + message.missedCall + '</p>' + '</div></div></div>';
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+      }
+      if (message.voice_notes) {
+        div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
+        const chatId = message.chatId;
+
+        function waitForElementToExist(elementId, maxAttempts, interval, callback) {
+          let attempts = 0;
+
+          function checkElement() {
+            const element = document.getElementById(elementId);
+            attempts++;
+
+            if (element) {
+              callback(element);
+            } else if (attempts < maxAttempts) {
+              setTimeout(checkElement, interval);
+            } else {
+              console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
+            }
+          }
+
+          checkElement();
         }
 
-        async function setChatboxScrollPositionToLastSeen(lastSeenMessageId) {
-          const chatbox = document.querySelector('.chatbox');
+        waitForElementToExist(chatId, 10, 1000, (messageContainer) => {
+          const voiceNoteContainer = messageContainer.querySelector(".voiceNote");
+          if (voiceNoteContainer) {
+            const audio = voiceNoteContainer.querySelector("#audio-" + chatId);
+            const timeline = voiceNoteContainer.querySelector(".timeline-" + chatId);
+            const progress = voiceNoteContainer.querySelector(".progress-" + chatId);
+            const playPause = voiceNoteContainer.querySelector(".play-pause-" + chatId);
+            const timelineSlider = voiceNoteContainer.querySelector(".timeline-slider-" + chatId);
+            const currentTime = voiceNoteContainer.querySelector(".current-time-" + chatId);
+            const totalTime = voiceNoteContainer.querySelector(".total-time-" + chatId);
+            const volumeButton = voiceNoteContainer.querySelector(".volume-button-" + chatId);
+            const volumeSlider = voiceNoteContainer.querySelector(".volume-slider-" + chatId);
+            const volumePercentage = voiceNoteContainer.querySelector(".volume-percentage-" + chatId);
+            const speedButton = voiceNoteContainer.querySelector(".speed-" + chatId);
+            const speedLabel = voiceNoteContainer.querySelector("#speed-label-" + chatId);
+            const speedOptions = [1, 1.5, 2];
+            let currentSpeedIndex = 0;
 
-          function waitForElementToExist(elementId, maxAttempts, interval, callback) {
-            let attempts = 0;
+            audio.addEventListener("loadedmetadata", () => {
+              totalTime.innerHTML = formatTime(audio.duration);
+              audio.volume = 0.75;
+              volumePercentage.style.width = audio.volume * 100 + "%";
+            });
+            audio.addEventListener("canplaythrough", () => {
+              totalTime.innerHTML = formatTime(audio.duration);
+            });
+            audio.addEventListener("ended", () => {
+              audio.currentTime = 0;
+              playPause.classList.remove("paused");
+              progress.style.width = "0";
+              currentTime.textContent = formatTime(audio.currentTime);
+            });
 
-            function checkElement() {
-              console.log('this is the element Id', elementId);
-              const element = document.getElementById(elementId);
-              attempts++;
+            timeline.addEventListener("input", () => {
+              const timeToSeek = (timeline.value / 100) * audio.duration;
+              audio.currentTime = timeToSeek;
+            });
 
-              if (element) {
-                callback(element);
-              } else if (attempts < maxAttempts) {
-                setTimeout(checkElement, interval);
+            playPause.addEventListener("click", () => {
+              if (audio.paused) {
+                audio.play();
+                playPause.classList.add("paused");
               } else {
-                console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
+                audio.pause();
+                playPause.classList.remove("paused");
               }
-            }
-
-            checkElement();
-          }
-
-          waitForElementToExist(lastSeenMessageId, 10, 1000, (lastSeenMessage) => {
-            if (lastSeenMessage) {
-              const position = lastSeenMessage.offsetTop + lastSeenMessage.clientHeight;
-              chatbox.scrollTop = position;
-              console.log(position, lastSeenMessage.offsetTop, lastSeenMessage.clientHeight);
-
-              // const redLine = document.createElement('div');
-              // redLine.style.width = '100%';
-              // redLine.style.height = '2px';
-              // redLine.style.backgroundColor = 'red';
-              // redLine.style.position = 'absolute';
-              // redLine.style.top = position + 'px';
-              // chatbox.appendChild(redLine);
-            } else {
-              console.log('Message container not found');
-            }
-          });
-
-        }
-        let lastSeenMessageId = 'CHAT' + UserId + UserIdx;
-        async function fetchLastSeenMessageId() {
-          try {
-            const lastSeenMessageIdFromServer = await getLastMessageIdFromChatHistory();
-            console.log(lastSeenMessageIdFromServer);
-
-            if (lastSeenMessageIdFromServer && lastSeenMessageId) {
-              const lastSeenMessageIdNum = parseInt(lastSeenMessageId);
-              const lastSeenMessageIdFromServerNum = parseInt(lastSeenMessageIdFromServer);
-
-              lastSeenMessageId = lastSeenMessageIdFromServer;
-            }
-
-            setChatboxScrollPositionToLastSeen(lastSeenMessageId);
-          } catch (error) {
-            console.log('Error finding last seen message ID', error);
-          }
-        }
-        var recipientPassport = document.querySelector('.recipientPassport');
-        var icon = document.querySelector('.icon');
-
-        async function fetchUserProfileData(UserIdx) {
-          try {
-            const response = await fetch(`http://localhost:8888/getUserProfile/${UserIdx}`);
-            if (response.ok) {
-              const userProfileData = await response.json();
-              recipientPassport.src = userProfileData.Passport;
-              icon.textContent = userProfileData.Surname + " " + userProfileData.First_Name;
-              icons.href = 'user_profile.php?UserId=' + UserIdx;
-            } else {
-              throw new Error('Error fetching user profile data');
-            }
-          } catch (error) {
-            console.error(error);
-            return null;
-          }
-        }
-        var passport = document.querySelector('.passport');
-        var passportModal = passport.querySelector('a');
-        var passportModalImg = passportModal.querySelector('img');
-
-        var NameOfP = document.querySelector('.name');
-        var NameOfPSpan = NameOfP.querySelector('span');
-        var NameOfPSpanA = NameOfPSpan.querySelector('a');
-
-        async function fetchPoeple(UserId) {
-          try {
-            const response = await fetch(`http://localhost:8888/getPeople/${UserId}`);
-            if (response.ok) {
-              const peopleData = await response.json();
-              passportModalImg.src = peopleData.Passport;
-              passportModalImg.alt = peopleData.UserId;
-              NameOfPSpanA.textContent = peopleData.Surname + " " + peopleData.First_Name;
-            } else {
-              throw new Error('Error fetching other people');
-            }
-          } catch (error) {
-            console.error(error);
-            return null;
-          }
-        }
-
-        var onlineStatus = document.createElement('div');
-        onlineStatus.className = 'onlineStatus';
-        onlineStatus.id = 'online-status-' + UserIdx;
-        icon.appendChild(onlineStatus);
-        socket.on('userStatus', ({
-          UserIdx,
-          status
-        }) => {
-          console.log('this is the status for User', UserIdx, ':', status);
-          if (status === 'online') {
-            onlineStatus.style.boxShadow = 'rgb(11, 220, 77)';
-            onlineStatus.style.backgroundColor = 'green';
-          } else if (status === 'offline') {
-            onlineStatus.style.boxShadow = 'rgb(187, 27, 27)';
-            onlineStatus.style.backgroundColor = 'red';
-          } else {
-            onlineStatus.style.display = 'none';
-          }
-        });
-        let unreadMessageCount = 0;
-
-        socket.on('fetchMessageForEachUser', (data) => {
-          console.log('Received messages for each user:');
-          const hasUnreadMessages = data.some((result) => result.isRead === 0 && result.senderId === UserIdx);
-
-          if (hasUnreadMessages) {
-            unreadMessageCount = data.filter((result) => result.isRead === 0 && result.senderId === UserIdx).length;
-            console.log('This is the unread status before oepning the page', unreadMessageCount);
-            if (unreadMessageCount === 1) {
-              const unreadMessageDiv = document.createElement('div');
-              unreadMessageDiv.className = 'unread-message';
-              unreadMessageDiv.textContent = 'Unread Message';
-              chatbox.appendChild(unreadMessageDiv);
-            } else {
-              const unreadMessageDiv = document.querySelector('.unread-message');
-              unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
-            }
-          } else {
-            console.log('No unread messages');
-          }
-          data.forEach((result, index) => {
-            console.log(`Received result #${index + 1}:`);
-            checkForNewMessages(result);
-          });
-        });
-
-
-        var chatbox = document.querySelector('.chatbox');
-
-        var messages = document.getElementById('message');
-        var icon = document.querySelector('.icon');
-
-        var isTypingElement = null;
-        messages.addEventListener('keyup', function() {
-          socket.emit('typing', {
-            UserId,
-            UserIdx
-          });
-        });
-
-        socket.on('typing', (data) => {
-          console.log(`${data.UserId} is typing`);
-          if (isTypingElement) {
-            icon.removeChild(isTypingElement);
-            isTypingElement = null;
-          }
-          typingTimeout = setTimeout(function() {
-            if (isTypingElement) {
-              icon.removeChild(isTypingElement);
-              isTypingElement = null;
-            }
-          }, 1000);
-          isTypingElement = document.createElement('p');
-          isTypingElement.className = 'isTyping';
-          isTypingElement.innerHTML = `is typing`;
-          icon.appendChild(isTypingElement);
-        });
-
-        let debouncedMarkMessagesAsRead = debounce(markMessagesAsRead, 500);
-
-        chatbox.addEventListener('scroll', debouncedMarkMessagesAsRead);
-
-        function markMessagesAsRead() {
-          const messages = document.querySelectorAll('.message');
-          const chatbox = document.getElementById('chatbox');
-
-          messages.forEach((message) => {
-            const rect = message.getBoundingClientRect();
-
-            if (rect.top >= 0 && rect.bottom <= chatbox.clientHeight && rect.height / message.clientHeight >= 0.5) {
-              const messageId = message.id;
-              socket.emit('messageRead', {
-                messageId,
-                UserIdx
-              });
-            }
-          });
-        }
-
-        function debounce(func, delay) {
-          let timeout;
-          return function() {
-            const context = this;
-            const args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), delay);
-          };
-        }
-
-        function checkForNewMessages(message) {
-          var div = document.createElement('div');
-          var timestamp = new Date(message.time_sent);
-
-          div.className = message.senderId == "<?php echo $UserId; ?>" ? 'Sent' : 'received';
-          var sender = message.senderId
-          if (div.className === 'received') {
-            var chatId = message.chatId;
-            var deletedReceivedMessage = localStorage.getItem('deletedReceivedMessage_' + chatId);
-            if (deletedReceivedMessage === 'true') {
-              div.innerHTML = '<div id="' + chatId + '" class="message" data-isRead = "' + message.isRead + '">' + 'You deleted the message' + '</div>';
-              div.style.color = 'red';
-            }
-          }
-
-          var videoLinkRegex = /(https?:\/\/[^\s]+)/i;
-          if (videoLinkRegex.test(message.message)) {
-            var videoURL = message.message.match(videoLinkRegex)[0];
-
-            var videoLink = '<a href="' + videoURL + '" target="_blank">' + videoURL + '</a>';
-
-            var downloadLink = '<a href="' + videoURL + '" download class="download-button">Download Video</a>';
-
-            div.innerHTML = '<div class="message-container">' +
-              '<div class="message" data-isRead = "' + message.isRead + '" id="' + message.chatId + '">' + videoLink + '<br>' +
-              '<img src="' + videoURL + '" alt="Thumbnail" class="thumbnail">' + '<br>' +
-              downloadLink + '</div>' +
-              '</div>';
-            var timestamp = new Date(message.time_sent);
-            var formattedTime = timestamp.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
             });
-            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>';
-          } else if (message.message !== null) {
-            div.innerHTML = '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + message.message + '</div>';
-            var timestamp = new Date(message.time_sent);
-            var formattedTime = timestamp.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
+
+            audio.addEventListener("timeupdate", () => {
+              const percent = (audio.currentTime / audio.duration) * 100;
+              progress.style.width = percent + "%";
+              // console.log('Progess', percent);
+              currentTime.textContent = formatTime(audio.currentTime);
+              timelineSlider.value = percent;
             });
-            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-          }
 
-          if (message.sent_image) {
-            div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div>';
-            var timestamp = new Date(message.time_sent);
-            var formattedTime = timestamp.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
+            timelineSlider.addEventListener("input", () => {
+              const percent = timelineSlider.value;
+              const timeToSeek = (percent / 100) * audio.duration;
+              audio.currentTime = timeToSeek;
             });
-            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-          }
-          if (message.sent_video) {
-            div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="video-container"><div id="videoplayer"><video width="400" height="400" class="iframe" preload="none" controls autoplay="false"><source src="' + message.sent_video + '" type="video/mp4"></video><button type="button" id="buttonplay" class="btn btn-primary">Watch Video</button></div></div>';
-            var videoPlayer = div.querySelector('video');
-            var playButton = div.querySelector('#buttonplay');
-            playButton.addEventListener('click', function() {
-              videoPlayer.style.display = 'block';
-              videoPlayer.play();
-              playButton.style.display = 'none';
+            volumeButton.addEventListener("click", () => {
+              audio.muted = !audio.muted;
+              updateVolumeIcon();
             });
-            var timestamp = new Date(message.time_sent);
-            var formattedTime = timestamp.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
+
+            volumeSlider.addEventListener("click", e => {
+              const sliderWidth = window.getComputedStyle(volumeSlider).width;
+              const newVolume = e.offsetX / parseInt(sliderWidth);
+              audio.volume = newVolume;
+              volumePercentage.style.width = newVolume * 100 + "%";
+              updateVolumeIcon();
             });
-            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-          }
-          if (message.voice_notes) {
-            div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
-            const chatId = message.chatId;
 
-            function waitForElementToExist(elementId, maxAttempts, interval, callback) {
-              let attempts = 0;
+            speedButton.addEventListener("click", () => {
+              currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
+              audio.playbackRate = speedOptions[currentSpeedIndex];
+              speedLabel.textContent = speedOptions[currentSpeedIndex] + "x";
+            });
 
-              function checkElement() {
-                const element = document.getElementById(elementId);
-                attempts++;
-
-                if (element) {
-                  callback(element);
-                } else if (attempts < maxAttempts) {
-                  setTimeout(checkElement, interval);
-                } else {
-                  console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
-                }
-              }
-
-              checkElement();
-            }
-
-            waitForElementToExist(chatId, 10, 1000, (messageContainer) => {
-              const voiceNoteContainer = messageContainer.querySelector(".voiceNote");
-              if (voiceNoteContainer) {
-                const audio = voiceNoteContainer.querySelector("#audio-" + chatId);
-                const timeline = voiceNoteContainer.querySelector(".timeline-" + chatId);
-                const progress = voiceNoteContainer.querySelector(".progress-" + chatId);
-                const playPause = voiceNoteContainer.querySelector(".play-pause-" + chatId);
-                const timelineSlider = voiceNoteContainer.querySelector(".timeline-slider-" + chatId);
-                const currentTime = voiceNoteContainer.querySelector(".current-time-" + chatId);
-                const totalTime = voiceNoteContainer.querySelector(".total-time-" + chatId);
-                const volumeButton = voiceNoteContainer.querySelector(".volume-button-" + chatId);
-                const volumeSlider = voiceNoteContainer.querySelector(".volume-slider-" + chatId);
-                const volumePercentage = voiceNoteContainer.querySelector(".volume-percentage-" + chatId);
-                const speedButton = voiceNoteContainer.querySelector(".speed-" + chatId);
-                const speedLabel = voiceNoteContainer.querySelector("#speed-label-" + chatId);
-                const speedOptions = [1, 1.5, 2];
-                let currentSpeedIndex = 0;
-
-                audio.addEventListener("canplaythrough", () => {
-                  totalTime.innerHTML = formatTime(audio.duration);
-                  audio.volume = 0.75;
-                  volumePercentage.style.width = audio.volume * 100 + "%";
-                });
-                audio.addEventListener("ended", () => {
-                  audio.currentTime = 0;
-                  playPause.classList.remove("paused");
-                  progress.style.width = "0";
-                  currentTime.textContent = formatTime(audio.currentTime);
-                });
-
-                timeline.addEventListener("input", () => {
-                  const timeToSeek = (timeline.value / 100) * audio.duration;
-                  audio.currentTime = timeToSeek;
-                });
-
-                playPause.addEventListener("click", () => {
-                  if (audio.paused) {
-                    audio.play();
-                    playPause.classList.add("paused");
-                  } else {
-                    audio.pause();
-                    playPause.classList.remove("paused");
-                  }
-                });
-
-                audio.addEventListener("timeupdate", () => {
-                  const percent = (audio.currentTime / audio.duration) * 100;
-                  progress.style.width = percent + "%";
-                  // console.log('Progess', percent);
-                  currentTime.textContent = formatTime(audio.currentTime);
-                  timelineSlider.value = percent;
-                });
-
-                timelineSlider.addEventListener("input", () => {
-                  const percent = timelineSlider.value;
-                  const timeToSeek = (percent / 100) * audio.duration;
-                  audio.currentTime = timeToSeek;
-                });
-                volumeButton.addEventListener("click", () => {
-                  audio.muted = !audio.muted;
-                  updateVolumeIcon();
-                });
-
-                volumeSlider.addEventListener("click", e => {
-                  const sliderWidth = window.getComputedStyle(volumeSlider).width;
-                  const newVolume = e.offsetX / parseInt(sliderWidth);
-                  audio.volume = newVolume;
-                  volumePercentage.style.width = newVolume * 100 + "%";
-                  updateVolumeIcon();
-                });
-
-                speedButton.addEventListener("click", () => {
-                  currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
-                  audio.playbackRate = speedOptions[currentSpeedIndex];
-                  speedLabel.textContent = speedOptions[currentSpeedIndex] + "x";
-                });
-
-                function updateVolumeIcon() {
-                  volumeButton.classList.remove("volume-off", "volume-low", "volume-high");
-                  if (audio.muted) {
-                    volumeButton.classList.add("volume-off");
-                  } else if (audio.volume < 0.5) {
-                    volumeButton.classList.add("volume-low");
-                  } else {
-                    volumeButton.classList.add("volume-high");
-                  }
-                }
-
-                function getTimeCodeFromNum(num) {
-                  const hours = Math.floor(num / 3600);
-                  const minutes = Math.floor((num % 3600) / 60);
-                  const seconds = Math.floor(num % 60);
-                  return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
-                }
+            function updateVolumeIcon() {
+              volumeButton.classList.remove("volume-off", "volume-low", "volume-high");
+              if (audio.muted) {
+                volumeButton.classList.add("volume-off");
+              } else if (audio.volume < 0.5) {
+                volumeButton.classList.add("volume-low");
               } else {
-                console.log("Voice note container not found");
+                volumeButton.classList.add("volume-high");
               }
-            });
+            }
 
-            var timestamp = new Date(message.time_sent);
-            var formattedTime = timestamp.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+            function getTimeCodeFromNum(num) {
+              const hours = Math.floor(num / 3600);
+              const minutes = Math.floor((num % 3600) / 60);
+              const seconds = Math.floor(num % 60);
+              return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+            }
+          } else {
+            console.log("Voice note container not found");
+          }
+        });
+
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+      }
+      if (message.video_notes) {
+        const videoNoteContainer = document.createElement("div");
+        videoNoteContainer.classList.add("message-container");
+        const messageDIV = document.createElement("div");
+        messageDIV.id = message.chatId;
+        messageDIV.classList.add("message");
+        messageDIV.setAttribute("data-isRead", message.isRead);
+        const videoNote = document.createElement("div");
+        videoNote.classList.add("video_note");
+        videoNote.id = message.chatId;
+        const videoElement = document.createElement("video");
+        videoElement.id = "video-note-" + message.chatId;
+        videoElement.src = message.video_notes;
+
+        videoNote.appendChild(videoElement);
+
+        videoNoteContainer.appendChild(messageDIV);
+        messageDIV.appendChild(videoNote);
+        const totalTime = document.createElement("div");
+        totalTime.classList.add("totalTimeVN");
+        const totalTimeP = document.createElement('p');
+        totalTime.appendChild(totalTimeP);
+        videoNote.appendChild(totalTime);
+        div.appendChild(videoNoteContainer);
+
+        videoElement.addEventListener("loadedmetadata", function() {
+          const duration = videoElement.duration;
+          console.log('This is the duration of Vn', duration);
+          let currentTime = 0;
+          const updateInterval = 1000;
+
+          function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
           }
 
-          if (!lastDisplayedDate || !isSameDay(timestamp, lastDisplayedDate)) {
-            var dateDiv = document.createElement('div');
-            dateDiv.className = 'date';
-            dateDiv.textContent = getFormattedDate(timestamp);
-            chatbox.appendChild(dateDiv);
-            lastDisplayedDate = timestamp;
+          setInterval(function() {
+            currentTime += updateInterval / 1000;
+            if (currentTime > duration) {
+              currentTime = duration;
+            }
+            totalTime.textContent = formatTime(currentTime) + " / " + formatTime(duration);
+          }, updateInterval);
+        });
+
+        let isPlaying = false;
+
+        videoElement.addEventListener('click', () => {
+          console.log('clicked');
+          if (!isPlaying) {
+            videoElement.play();
+            videoElement.muted = false;
+            console.log('Video started playing');
+          } else {
+            videoElement.pause();
+            console.log('Video paused');
           }
 
-          chatbox.appendChild(div);
+          isPlaying = !isPlaying;
+        });
+
+        var timestamp = new Date(message.time_sent);
+        var formattedTime = timestamp.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+      }
 
 
-          lastDisplayedDate = timestamp;
 
-          var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
-          if (savedSentmessagecolorTheme) {
-            applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
+      if (!lastDisplayedDate || !isSameDay(timestamp, lastDisplayedDate)) {
+        var dateDiv = document.createElement('div');
+        dateDiv.className = 'date';
+        dateDiv.textContent = getFormattedDate(timestamp);
+        chatbox.appendChild(dateDiv);
+        lastDisplayedDate = timestamp;
+      }
+
+      chatbox.appendChild(div);
+
+
+      lastDisplayedDate = timestamp;
+
+      var savedSentmessagecolorTheme = localStorage.getItem('messageSentcolor');
+      if (savedSentmessagecolorTheme) {
+        applySentmessagesbackgroundTheme(savedSentmessagecolorTheme);
+      }
+      var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
+      if (savedReceivedmessagecolorTheme) {
+        applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
+      }
+      var SavedmessageSentTheme = localStorage.getItem('messageSentTheme');
+      if (SavedmessageSentTheme) {
+        applySentmessagesTheme(SavedmessageSentTheme);
+      }
+      var SavedmessageReceivedTheme = localStorage.getItem('messageReceivedTheme');
+      if (SavedmessageReceivedTheme) {
+        applyReceivedmessagesTheme(SavedmessageReceivedTheme);
+      }
+
+      var messageDivs = document.querySelectorAll('.message');
+      messageDivs.forEach(function(div) {
+        div.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          var clickedClass = e.target.parentNode.className;
+          var clickedId = e.target.parentNode.id;
+          var existingPopups = document.querySelectorAll('.popup');
+          existingPopups.forEach(function(popup) {
+            popup.remove();
+          });
+
+          var clickedClass = e.target.parentNode.className;
+
+
+          var popup = document.createElement('div');
+          popup.className = 'popup';
+          popup.setAttribute('data-chat-id', div.id);
+          popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="edit" href="#">Edit</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
+          var chatId = popup.getAttribute('data-chat-id');
+          // alert(div.id);
+          var messageRect = e.target.getBoundingClientRect();
+          var chatboxRect = chatbox.getBoundingClientRect();
+
+          var popupTop = messageRect.top - chatboxRect.top + messageRect.height / 2 - popup.offsetHeight / 2;
+          var popupLeft;
+          if (clickedClass === 'Sent') {
+            popupLeft = messageRect.left - chatboxRect.left - popup.offsetWidth;
+          } else if (clickedClass === 'received') {
+            popupLeft = messageRect.left - chatboxRect.left + messageRect.width;
           }
-          var savedReceivedmessagecolorTheme = localStorage.getItem('messageReceivedcolor');
-          if (savedReceivedmessagecolorTheme) {
-            applyReceivedmessagesbackgroundTheme(savedReceivedmessagecolorTheme);
-          }
-          var SavedmessageSentTheme = localStorage.getItem('messageSentTheme');
-          if (SavedmessageSentTheme) {
-            applySentmessagesTheme(SavedmessageSentTheme);
-          }
-          var SavedmessageReceivedTheme = localStorage.getItem('messageReceivedTheme');
-          if (SavedmessageReceivedTheme) {
-            applyReceivedmessagesTheme(SavedmessageReceivedTheme);
-          }
+          popup.style.top = popupTop + 'px';
+          popup.style.left = popupLeft + 'px';
+          var deleteBtn = popup.querySelector('.delete');
+          deleteBtn.addEventListener('click', function() {
+            var chatId = popup.getAttribute('data-chat-id');
+            var senderId = message.senderId;
+            var currentUserId = "<?php echo $UserId; ?>";
+            console.log(currentUserId)
+            var isSentMessage = senderId === currentUserId;
 
-          var messageDivs = document.querySelectorAll('.message');
-          messageDivs.forEach(function(div) {
-            div.addEventListener('contextmenu', function(e) {
-              e.preventDefault();
-              var clickedClass = e.target.parentNode.className;
-              var clickedId = e.target.parentNode.id;
-              var existingPopups = document.querySelectorAll('.popup');
-              existingPopups.forEach(function(popup) {
-                popup.remove();
-              });
+            if (isSentMessage = true) {
+              var xhr = new XMLHttpRequest();
+              xhr.open('POST', 'delete_message.php', true);
+              xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-              var clickedClass = e.target.parentNode.className;
+              var formData = 'chatId=' + encodeURIComponent(chatId);
 
+              xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                  console.log('Response:', xhr.responseText);
+                  var response = JSON.parse(xhr.responseText);
+                  var message = response.message;
 
-              var popup = document.createElement('div');
-              popup.className = 'popup';
-              popup.setAttribute('data-chat-id', div.id);
-              popup.innerHTML = '<a class="delete" href="#">Delete</a><a class="reply" href="#">Reply</a><a class="change-theme" href="#">Change Theme</a>';
-              var chatId = popup.getAttribute('data-chat-id');
-              // alert(div.id);
-              var messageRect = e.target.getBoundingClientRect();
-              var chatboxRect = chatbox.getBoundingClientRect();
-
-              var popupTop = messageRect.top - chatboxRect.top + messageRect.height / 2 - popup.offsetHeight / 2;
-              var popupLeft;
-              if (clickedClass === 'Sent') {
-                popupLeft = messageRect.left - chatboxRect.left - popup.offsetWidth;
-              } else if (clickedClass === 'received') {
-                popupLeft = messageRect.left - chatboxRect.left + messageRect.width;
-              }
-              popup.style.top = popupTop + 'px';
-              popup.style.left = popupLeft + 'px';
-              var deleteBtn = popup.querySelector('.delete');
-              deleteBtn.addEventListener('click', function() {
-                var chatId = popup.getAttribute('data-chat-id');
-                var senderId = message.senderId;
-                var currentUserId = "<?php echo $UserId; ?>";
-                console.log(currentUserId)
-                var isSentMessage = senderId === currentUserId;
-
-                if (isSentMessage = true) {
-                  var xhr = new XMLHttpRequest();
-                  xhr.open('POST', 'delete_message.php', true);
-                  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                  var formData = 'chatId=' + encodeURIComponent(chatId);
-
-                  xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                      console.log('Response:', xhr.responseText);
-                      var response = JSON.parse(xhr.responseText);
-                      var message = response.message;
-
-                      var deletedMessage = document.getElementById(chatId);
-                      deletedMessage.innerHTML = 'You deleted this message';
-                      deletedMessage.class = 'message';
-                      deletedMessage.style.color = 'red';
-                      alert(message);
-                      popup.style.display = 'none';
-                    }
-                  };
-
-                  xhr.send(formData);
-                } else {
                   var deletedMessage = document.getElementById(chatId);
-                  deletedMessage.innerHTML = 'You deleted the message';
+                  deletedMessage.innerHTML = 'You deleted this message';
+                  deletedMessage.class = 'message';
                   deletedMessage.style.color = 'red';
-                  localStorage.setItem('deletedReceivedMessage_' + chatId, 'true'); // Save the setting
+                  alert(message);
                   popup.style.display = 'none';
-                }
-              });
-
-
-              var replyBtn = popup.querySelector('.reply');
-              replyBtn.addEventListener('click', function() {
-                // TODO: Implement reply functionality
-                // Show a reply form for the user to enter a reply message
-              });
-
-              var changeThemeBtn = popup.querySelector('.change-theme');
-              changeThemeBtn.addEventListener('click', function() {
-                // Check if change theme options already exist
-                var changeThemeOptions = popup.querySelector('.change-theme-options');
-                if (changeThemeOptions) {
-                  // If change theme options already exist, remove them
-                  changeThemeOptions.remove();
-                } else {
-                  var changeThemeOptions = document.createElement('div');
-                  changeThemeOptions.className = 'change-theme-options';
-                  changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
-                  popup.appendChild(changeThemeOptions);
-
-                  var backgroundBtn = popup.querySelector('.background-gradient');
-                  backgroundBtn.addEventListener('click', function(e) {
-                    var newColor = prompt('Enter a new background gradient:');
-                    if (newColor !== null && newColor.trim() !== '') {
-                      if (clickedClass === 'Sent') {
-                        var sentElements = document.querySelectorAll('.Sent');
-                        sentElements.forEach(function(element) {
-                          element.style.background = newColor;
-                          saveSentmessageTheme(newColor);
-                          applySentmessagesTheme(newColor);
-                        });
-                      } else if (clickedClass === 'received') {
-                        var receivedElements = document.querySelectorAll('.received');
-                        receivedElements.forEach(function(element) {
-                          element.style.background = newColor;
-                          saveReceivedmessageTheme(newColor);
-                          applyReceivedmessagesTheme(newColor);
-                        });
-                      }
-                    }
-                  });
-
-
-
-                  var backgroundcolorBtn = popup.querySelector('.background-color');
-                  backgroundcolorBtn.addEventListener('click', function(e) {
-                    var newColor = prompt('Enter a new background color:');
-                    if (newColor !== null && newColor.trim() !== '') {
-                      if (clickedClass === 'Sent') {
-                        var sentElements = document.querySelectorAll('.Sent');
-                        sentElements.forEach(function(element) {
-                          element.style.backgroundColor = newColor;
-                          saveSentmessagebackgroundTheme(newColor);
-                          applySentmessagesbackgroundTheme(newColor);
-                        });
-                      } else if (clickedClass === 'received') {
-                        var receivedElements = document.querySelectorAll('.received');
-                        receivedElements.forEach(function(element) {
-                          element.style.backgroundColor = newColor;
-                          saveRecievedmessagebackgroundTheme(newColor);
-                          applyReceivedmessagesbackgroundTheme(newColor);
-                        });
-                      }
-                    }
-                  });
-                }
-              });
-              chatbox.appendChild(popup);
-
-              document.addEventListener('click', function(e) {
-                if (popup && !popup.contains(e.target)) {
-                  popup.remove();
-                }
-              });
-            });
-          });
-        }
-
-
-        // calling aspect
-        const hangupButtonpop = document.getElementById('hangup_button_pop');
-        const answerButton = document.getElementById('answer_button');
-        const ringingBox = document.getElementById('ringingBox');
-        var UserId = "<?php echo $UserId ?>";
-        var UserIdx = "<?php echo $UserIdx ?>";
-        var peerConnection;
-        console.log(sessionId);
-        console.log(UserId);
-        console.log(UserIdx);
-        var localStream;
-        var remoteStream;
-        var localVideo = document.getElementById("<?php echo $UserId; ?>");
-        var remoteVideo = document.getElementById("<?php echo $UserIdx; ?>");
-        var hangupButton = document.getElementById('hangup_button');
-        var audioCallButton = document.getElementById('audio_call_button');
-        var videoCallButton = document.getElementById('video_call_button');
-        var callerStatusElement = document.getElementById('status');
-        var chatInterface = document.getElementById('chatbox');
-        var callInterface = document.getElementById('callInterface');
-        var callbtn = document.getElementById('callbtn');
-        var pendingCandidates = [];
-        var ringtone = document.createElement('audio');
-        ringtone.id = "ringtone";
-        ringtone.loop = true;
-        ringtone.src = "ringingtone/ringtone.mp3";
-        ringtone.type = "audio/mpeg";
-        ringtone.autoplay = false;
-        chatInterface.appendChild(ringtone);
-
-        function resetCallUI() {
-          hangupButton.disabled = false;
-          callerStatusElement.textContent = 'Calling...';
-          ringtone.pause();
-          ringtone.currentTime = 0;
-        }
-        callbtn.addEventListener('click', function() {
-          chatInterface.style.display = 'none';
-          callInterface.style.display = 'block';
-          startVideoCall();
-        });
-        audioCallButton.addEventListener('click', toggleAudio);
-        videoCallButton.addEventListener('click', toggleVideo);
-
-        function toggleAudio() {
-          localStream.getAudioTracks().forEach(function(track) {
-            track.enabled = !track.enabled;
-          });
-        }
-
-        function toggleVideo() {
-          localStream.getVideoTracks().forEach(function(track) {
-            track.enabled = !track.enabled;
-          });
-        }
-
-        function startPeerConnection() {
-          if (!peerConnection) {
-            console.error('peerConnection is not initialized');
-            return;
-          }
-
-          var iceCandidates = [];
-
-          peerConnection.addEventListener('icecandidate', event => {
-            console.log('Finding ICE candidate:', event);
-            if (event.candidate) {
-              console.log('ICE candidate found:', event.candidate);
-              iceCandidates.push(event.candidate);
-              sendIceCandidates(iceCandidates);
-            } else {
-              console.log('ICE candidate gathering complete.');
-            }
-          });
-
-          peerConnection.addEventListener('icegatheringstatechange', function() {
-            console.log('ICE gathering state:', peerConnection.iceGatheringState);
-            if (peerConnection.iceGatheringState === 'gathering') {
-              console.log('Gathering ICE candidate gathering:', event);
-            }
-            if (peerConnection.iceGatheringState === 'complete') {
-              console.log('Gathering ICE candidate complete:', event);
-              console.log('ICE gathering complete. All candidates:', iceCandidates);
-              if (iceCandidates.length === 0) {
-                console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
-              } else {
-                sendIceCandidates(iceCandidates);
-              }
-            }
-          });
-
-          peerConnection.addEventListener('iceconnectionstatechange', function() {
-            console.log('ICE connection state:', peerConnection.iceConnectionState);
-            if (peerConnection.iceConnectionState === 'failed') {
-              // Handle ICE connection failure if needed.
-            }
-          });
-
-          peerConnection.addEventListener('datachannel', function(event) {
-            // Handle data channel events if needed.
-          });
-
-          function sendIceCandidates(iceCandidates) {
-            console.log('Sending ICE candidates:', iceCandidates);
-            sendMessage({
-              type: 'candidate',
-              candidates: iceCandidates,
-              callerUserId: UserIdx,
-              callertoUserId: UserId,
-            });
-          }
-        }
-
-        function joinCall(message) {
-          ringtone.pause();
-          chatInterface.style.display = 'none';
-          callInterface.style.display = 'block';
-          callerStatusElement.textContent = 'Joining Call';
-
-          var offer = new RTCSessionDescription(message.offer);
-
-          var retryCount = 0;
-
-          function getUserMediaWithRetry(maxRetries, delay) {
-            return new Promise(function(resolve, reject) {
-              function attempt() {
-                navigator.mediaDevices
-                  .getUserMedia(mediaConstraints)
-                  .then(resolve)
-                  .catch(function(error) {
-                    if (retryCount < maxRetries) {
-                      console.log('Failed to access camera and microphone. Retrying...');
-                      retryCount++;
-
-                      if (retryCount === 7) {
-                        mediaConstraints = {
-                          audio: true,
-                          video: false
-                        };
-                        console.log('Switching to audio-only mode.');
-                      }
-
-                      setTimeout(attempt, delay);
-                    } else {
-                      reject(error);
-                    }
-                  });
-              }
-              attempt();
-            });
-          }
-
-          var mediaConstraints = {
-            audio: true,
-            video: true
-          }; // Initial constraints
-
-          getUserMediaWithRetry(7, 1000)
-            .then(function(stream) {
-              localStream = stream;
-              peerConnection = new RTCPeerConnection();
-              startPeerConnection();
-              stream.getTracks().forEach(function(track) {
-                peerConnection.addTrack(track, stream);
-              });
-              console.log('Local stream added to peer connection');
-
-              peerConnection
-                .setRemoteDescription(offer)
-                .then(function() {
-                  console.log('Remote description set successfully.');
-
-                  if (
-                    peerConnection.signalingState === 'have-remote-offer' ||
-                    peerConnection.signalingState === 'have-local-pranswer'
-                  ) {
-                    return peerConnection.createAnswer();
-                  } else {
-                    throw new Error('Invalid signaling state for creating an answer.');
-                  }
-                })
-                .then(function(answer) {
-                  return peerConnection.setLocalDescription(answer);
-                })
-                .then(function() {
-                  console.log('ICE gathering state:', peerConnection.iceGatheringState);
-                  console.log('Local description set successfully.');
-
-                  var sdpAnswer = peerConnection.localDescription;
-                  console.log('SDP Answer:', sdpAnswer);
-
-                  sendMessage({
-                    type: 'answer',
-                    answer: sdpAnswer,
-                    mediaConstraints: mediaConstraints,
-                    callerUserId: UserIdx,
-                    callertoUserId: UserId,
-                  });
-                })
-                .catch(function(error) {
-                  console.log('Error handling call offer:', error);
-                });
-              localVideo.srcObject = localStream;
-              callerStatusElement.textContent = 'Exchanging Stream';
-
-              peerConnection.ontrack = function(event) {
-                if (event.streams && event.streams[0]) {
-                  console.log('Received remote stream:', event.streams[0]);
-                  remoteVideo.srcObject = event.streams[0];
                 }
               };
 
-              console.log('Sending local stream as remote stream');
-            })
-            .catch(function(error) {
-              console.log('Error accessing camera and microphone:', error);
-            });
-        }
-
-
-
-        function initSignaling() {
-
-          socket.on('message', function(data) {
-            var message = JSON.parse(data);
-            console.log(message);
-
-            if (message.type === 'offer') {
-              handleIncomingOffer(message);
-            } else if (message.type === 'incoming_call') {
-              handleIncomingCall(message);
-            } else if (message.type === 'answer') {
-              handleAnswerMessage(message);
-            } else if (message.type === 'hangup') {
-              handleHangupMessage(message);
-            } else if (message.type === 'candidate') {
-              handleCandidateMessage(message);
-            } else if (message.type === 'notAvailable') {
-              handleNotAvailable(message);
+              xhr.send(formData);
+            } else {
+              var deletedMessage = document.getElementById(chatId);
+              deletedMessage.innerHTML = 'You deleted the message';
+              deletedMessage.style.color = 'red';
+              localStorage.setItem('deletedReceivedMessage_' + chatId, 'true'); // Save the setting
+              popup.style.display = 'none';
             }
           });
-        }
 
-        function startVideoCall() {
-          function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
-            return new Promise(function(resolve, reject) {
-              function attempt() {
-                navigator.mediaDevices.getUserMedia(mediaConstraints)
-                  .then(resolve)
-                  .catch(function(error) {
-                    if (maxRetries > 0) {
-                      console.log('Failed to access camera and microphone. Retrying...');
-                      maxRetries--;
-                      setTimeout(attempt, delay);
-                    } else {
-                      reject(error);
-                    }
-                  });
-              }
-              attempt();
+
+          var replyBtn = popup.querySelector('.reply');
+          replyBtn.addEventListener('click', function() {
+            // TODO: Implement reply functionality
+            // Show a reply form for the user to enter a reply message
+          });
+
+          var editBtn = popup.querySelector('.edit');
+          if (message.message === null) {
+            editBtn.style.display = 'none';
+          } else {
+            editBtn.addEventListener('click', function() {
+
             });
           }
 
-          var mediaConstraints = {
-            video: true,
-            audio: true
-          };
-          var maxRetries = 7;
-          var delay = 1000; // 1 second
+          var changeThemeBtn = popup.querySelector('.change-theme');
+          changeThemeBtn.addEventListener('click', function() {
+            var changeThemeOptions = popup.querySelector('.change-theme-options');
+            if (changeThemeOptions) {
+              changeThemeOptions.remove();
+            } else {
+              var changeThemeOptions = document.createElement('div');
+              changeThemeOptions.className = 'change-theme-options';
+              changeThemeOptions.innerHTML = '<a class="background-gradient" href="#">Change Background</a><a class="background-color" href="#">Change Background Color</a>';
+              popup.appendChild(changeThemeOptions);
 
-          getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
-            .then(function(stream) {
-              localStream = stream;
-              peerConnection = new RTCPeerConnection();
-              startPeerConnection();
-              stream.getTracks().forEach(function(track) {
-                peerConnection.addTrack(track, stream);
+              var backgroundBtn = popup.querySelector('.background-gradient');
+              backgroundBtn.addEventListener('click', function(e) {
+                var newColor = prompt('Enter a new background gradient:');
+                if (newColor !== null && newColor.trim() !== '') {
+                  if (clickedClass === 'Sent') {
+                    var sentElements = document.querySelectorAll('.Sent');
+                    sentElements.forEach(function(element) {
+                      element.style.background = newColor;
+                      saveSentmessageTheme(newColor);
+                      applySentmessagesTheme(newColor);
+                    });
+                  } else if (clickedClass === 'received') {
+                    var receivedElements = document.querySelectorAll('.received');
+                    receivedElements.forEach(function(element) {
+                      element.style.background = newColor;
+                      saveReceivedmessageTheme(newColor);
+                      applyReceivedmessagesTheme(newColor);
+                    });
+                  }
+                }
               });
-              sendCallOffer(mediaConstraints, UserIdx);
 
-              hangupButton.disabled = false;
-              audioCallButton.disabled = false;
-              videoCallButton.disabled = false;
 
-              localVideo.style.display = 'block';
-              remoteVideo.style.display = 'block';
-              localVideo.srcObject = stream;
+
+              var backgroundcolorBtn = popup.querySelector('.background-color');
+              backgroundcolorBtn.addEventListener('click', function(e) {
+                var newColor = prompt('Enter a new background color:');
+                if (newColor !== null && newColor.trim() !== '') {
+                  if (clickedClass === 'Sent') {
+                    var sentElements = document.querySelectorAll('.Sent');
+                    sentElements.forEach(function(element) {
+                      element.style.backgroundColor = newColor;
+                      saveSentmessagebackgroundTheme(newColor);
+                      applySentmessagesbackgroundTheme(newColor);
+                    });
+                  } else if (clickedClass === 'received') {
+                    var receivedElements = document.querySelectorAll('.received');
+                    receivedElements.forEach(function(element) {
+                      element.style.backgroundColor = newColor;
+                      saveRecievedmessagebackgroundTheme(newColor);
+                      applyReceivedmessagesbackgroundTheme(newColor);
+                    });
+                  }
+                }
+              });
+            }
+          });
+          chatbox.appendChild(popup);
+
+          document.addEventListener('click', function(e) {
+            if (popup && !popup.contains(e.target)) {
+              popup.remove();
+            }
+          });
+        });
+      });
+    }
+
+
+    // calling aspect
+    const hangupButtonpop = document.getElementById('hangup_button_pop');
+    const answerButton = document.getElementById('answer_button');
+    const ringingBox = document.getElementById('ringingBox');
+    var UserId = "<?php echo $UserId ?>";
+    var UserIdx = "<?php echo $UserIdx ?>";
+    var peerConnection;
+    console.log(sessionId);
+    console.log(UserId);
+    console.log(UserIdx);
+    var localStream;
+    var remoteStream;
+    var localVideo = document.getElementById("<?php echo $UserId; ?>");
+    var remoteVideo = document.getElementById("<?php echo $UserIdx; ?>");
+    var hangupButton = document.getElementById('hangup_button');
+    var audioCallButton = document.getElementById('audio_call_button');
+    var videoCallButton = document.getElementById('video_call_button');
+    var callerStatusElement = document.getElementById('status');
+    var chatInterface = document.getElementById('chatbox');
+    var callInterface = document.getElementById('callInterface');
+    var callbtn = document.getElementById('callbtn');
+    var pendingCandidates = [];
+    var ringtone = document.createElement('audio');
+    ringtone.id = "ringtone";
+    ringtone.loop = true;
+    ringtone.src = "ringingtone/ringtone.mp3";
+    ringtone.type = "audio/mpeg";
+    ringtone.autoplay = false;
+    chatInterface.appendChild(ringtone);
+
+    function resetCallUI() {
+      hangupButton.disabled = false;
+      callerStatusElement.textContent = 'Calling...';
+      ringtone.pause();
+      ringtone.currentTime = 0;
+      ringingBox.style.display = 'none';
+    }
+    callbtn.addEventListener('click', function() {
+      chatInterface.style.display = 'none';
+      callInterface.style.display = 'block';
+      startVideoCall();
+    });
+    audioCallButton.addEventListener('click', toggleAudio);
+    videoCallButton.addEventListener('click', toggleVideo);
+
+    function toggleAudio() {
+      localStream.getAudioTracks().forEach(function(track) {
+        track.enabled = !track.enabled;
+      });
+    }
+
+    function toggleVideo() {
+      localStream.getVideoTracks().forEach(function(track) {
+        track.enabled = !track.enabled;
+      });
+    }
+
+    function startPeerConnection(peerConnection) {
+      if (!peerConnection) {
+        console.error('peerConnection is not initialized');
+        return;
+      }
+
+      var iceCandidates = [];
+
+      peerConnection.addEventListener('icecandidate', event => {
+        console.log('Finding ICE candidate:', event);
+        if (event.candidate) {
+          console.log('ICE candidate found:', event.candidate);
+          iceCandidates.push(event.candidate);
+          sendIceCandidates(iceCandidates);
+        } else {
+          console.log('ICE candidate gathering complete.');
+        }
+      });
+
+      // peerConnection.addEventListener('icegatheringstatechange', function() {
+      //   console.log('ICE gathering state:', peerConnection.iceGatheringState);
+      //   if (peerConnection.iceGatheringState === 'gathering') {
+      //     console.log('Gathering ICE candidate gathering:', event);
+      //   }
+      //   if (peerConnection.iceGatheringState === 'complete') {
+      //     console.log('Gathering ICE candidate complete:', event);
+      //     console.log('ICE gathering complete. All candidates:', iceCandidates);
+      //     if (iceCandidates.length === 0) {
+      //       console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
+      //     } else {
+      //       sendIceCandidates(iceCandidates);
+      //     }
+      //   }
+      // });
+
+      peerConnection.addEventListener('iceconnectionstatechange', function() {
+        console.log('ICE connection state:', peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === 'failed') {
+          console.log('ICE connection state was failed try again:', peerConnection.iceConnectionState);
+        }
+      });
+
+      peerConnection.addEventListener('datachannel', function(event) {
+        // Handle data channel events if needed.
+      });
+
+      function sendIceCandidates(iceCandidates) {
+        console.log('Sending ICE candidates:', iceCandidates);
+        sendMessage({
+          type: 'candidate',
+          candidates: iceCandidates,
+          callerUserId: UserIdx,
+          callertoUserId: UserId,
+        });
+      }
+    }
+
+    function joinCall(message) {
+      ringtone.pause();
+      chatInterface.style.display = 'none';
+      callInterface.style.display = 'block';
+      callerStatusElement.textContent = 'Joining Call';
+
+      var offer = new RTCSessionDescription(message.offer);
+
+      var retryCount = 0;
+
+      function getUserMediaWithRetry(maxRetries, delay) {
+        return new Promise(function(resolve, reject) {
+          function attempt() {
+            navigator.mediaDevices
+              .getUserMedia(mediaConstraints)
+              .then(resolve)
+              .catch(function(error) {
+                if (retryCount < maxRetries) {
+                  console.log('Failed to access camera and microphone. Retrying...');
+                  retryCount++;
+
+                  if (retryCount === 7) {
+                    mediaConstraints = {
+                      audio: true,
+                      video: false
+                    };
+                    console.log('Switching to audio-only mode.');
+                  }
+
+                  setTimeout(attempt, delay);
+                } else {
+                  reject(error);
+                }
+              });
+          }
+          attempt();
+        });
+      }
+
+      var mediaConstraints = {
+        audio: true,
+        video: true
+      }; // Initial constraints
+
+      getUserMediaWithRetry(7, 1000)
+        .then(function(stream) {
+          localStream = stream;
+          peerConnection = new RTCPeerConnection();
+          startPeerConnection(peerConnection);
+          stream.getTracks().forEach(function(track) {
+            peerConnection.addTrack(track, stream);
+          });
+          console.log('Local stream added to peer connection');
+
+          peerConnection
+            .setRemoteDescription(offer)
+            .then(function() {
+              console.log('Remote description set successfully.');
+
+              if (
+                peerConnection.signalingState === 'have-remote-offer' ||
+                peerConnection.signalingState === 'have-local-pranswer'
+              ) {
+                return peerConnection.createAnswer();
+              } else {
+                throw new Error('Invalid signaling state for creating an answer.');
+              }
+            })
+            .then(function(answer) {
+              return peerConnection.setLocalDescription(answer);
+            })
+            .then(function() {
+              console.log('ICE gathering state:', peerConnection.iceGatheringState);
+              console.log('Local description set successfully.');
+
+              var sdpAnswer = peerConnection.localDescription;
+              console.log('SDP Answer:', sdpAnswer);
+
+              sendMessage({
+                type: 'answer',
+                answer: sdpAnswer,
+                mediaConstraints: mediaConstraints,
+                callerUserId: UserIdx,
+                callertoUserId: UserId,
+              });
             })
             .catch(function(error) {
-              console.log('Error accessing camera and microphone:', error);
+              console.log('Error handling call offer:', error);
             });
+          localVideo.srcObject = localStream;
+          callerStatusElement.textContent = 'Exchanging Stream';
 
-          function sendIncomingCallSignal() {
-            ringtone.play();
-            var message = {
-              type: 'incoming_call',
-              callerUserId: UserId,
-              callertoUserId: UserIdx,
-            };
-            sendMessage(message);
-          }
+          peerConnection.ontrack = function(event) {
+            if (event.streams && event.streams[0]) {
+              console.log('Received remote stream:', event.streams[0]);
+              remoteVideo.srcObject = event.streams[0];
+            }
+          };
 
-          function sendCallOffer(mediaConstraints, UserIdx) {
-            console.log('Call is to be sent to', UserIdx);
-            callerStatusElement.textContent = 'Sending Call Offer';
-            var offerOptions = {
-              offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
-              offerToReceiveVideo: mediaConstraints.video ? 1 : 0
-            };
+          console.log('Sending local stream as remote stream');
+        })
+        .catch(function(error) {
+          console.log('Error accessing camera and microphone:', error);
+        });
+    }
 
-            peerConnection.createOffer(offerOptions)
-              .then(function(offer) {
-                return peerConnection.setLocalDescription(offer);
-              })
-              .then(function() {
-                // console.log('ICE gathering state:', peerConnection.iceGatheringState);
-                var sdpOffer = peerConnection.localDescription;
-                console.log("SDP Offer:", sdpOffer);
 
-                sendMessage({
-                  type: 'offer',
-                  offer: sdpOffer,
-                  mediaConstraints: mediaConstraints,
-                  callerUserId: UserId,
-                  callertoUserId: UserIdx,
-                  sessionId: sessionId
-                });
-                sendIncomingCallSignal();
-                callerStatusElement.textContent = 'Sent Call Offer';
-              })
+
+    function initSignaling() {
+
+      socket.on('message', function(data) {
+        var message = JSON.parse(data);
+        console.log(message);
+
+        if (message.type === 'offer') {
+          handleIncomingOffer(message);
+        } else if (message.type === 'incoming_call') {
+          handleIncomingCall(message);
+        } else if (message.type === 'answer') {
+          handleAnswerMessage(message);
+        } else if (message.type === 'hangup') {
+          handleHangupMessage(message);
+        } else if (message.type === 'candidate') {
+          handleCandidateMessage(message);
+        } else if (message.type === 'notAvailable') {
+          handleNotAvailable(message);
+        }
+      });
+    }
+
+    function startVideoCall() {
+      var mediaConstraints = {
+        video: true,
+        audio: true
+      };
+      var maxRetries = 7;
+      var delay = 1000;
+
+      function getUserMediaWithRetry(mediaConstraints, maxRetries, delay) {
+        return new Promise(function(resolve, reject) {
+          function attempt() {
+            navigator.mediaDevices.getUserMedia(mediaConstraints)
+              .then(resolve)
               .catch(function(error) {
-                console.log('Error creating call offer:', error);
+                if (maxRetries > 0) {
+                  console.log('Failed to access camera and microphone. Retrying...');
+                  maxRetries--;
+                  setTimeout(attempt, delay);
+                } else {
+                  reject(error);
+                }
               });
           }
-        }
+          attempt();
+        });
+      }
 
-        function handleAnswerMessage(message) {
-          var answer = new RTCSessionDescription(message.answer);
-          var UserId = message.callerUserId;
-          console.log(UserId);
+      getUserMediaWithRetry(mediaConstraints, maxRetries, delay)
+        .then(function(stream) {
+          localStream = stream;
+          peerConnection = new RTCPeerConnection();
+          console.log('This is the connection', peerConnection);
+          startPeerConnection(peerConnection);
+          stream.getTracks().forEach(function(track) {
+            peerConnection.addTrack(track, stream);
+          });
+          sendCallOffer(mediaConstraints, UserIdx);
 
+          hangupButton.disabled = false;
+          audioCallButton.disabled = false;
+          videoCallButton.disabled = false;
+
+          localVideo.style.display = 'block';
+          remoteVideo.style.display = 'block';
+          localVideo.srcObject = stream;
+        })
+        .catch(function(error) {
+          console.log('Error accessing camera and microphone:', error);
+        });
+
+      function sendIncomingCallSignal() {
+        ringtone.play();
+        var message = {
+          type: 'incoming_call',
+          callerUserId: UserId,
+          callertoUserId: UserIdx,
+        };
+        sendMessage(message);
+      }
+
+      function sendCallOffer(mediaConstraints, UserIdx) {
+        console.log('Call is to be sent to', UserIdx);
+        callerStatusElement.textContent = 'Sending Call Offer';
+        var offerOptions = {
+          offerToReceiveAudio: mediaConstraints.audio ? 1 : 0,
+          offerToReceiveVideo: mediaConstraints.video ? 1 : 0
+        };
+
+        peerConnection.createOffer(offerOptions)
+          .then(function(offer) {
+            return peerConnection.setLocalDescription(offer);
+          })
+          .then(function() {
+            // console.log('ICE gathering state:', peerConnection.iceGatheringState);
+            var sdpOffer = peerConnection.localDescription;
+            console.log("SDP Offer:", sdpOffer);
+
+            sendMessage({
+              type: 'offer',
+              offer: sdpOffer,
+              mediaConstraints: mediaConstraints,
+              callerUserId: UserId,
+              callertoUserId: UserIdx,
+              sessionId: sessionId
+            });
+            sendIncomingCallSignal();
+            callerStatusElement.textContent = 'Sent Call Offer';
+          })
+          .catch(function(error) {
+            console.log('Error creating call offer:', error);
+          });
+      }
+    }
+
+    function handleAnswerMessage(message) {
+      var answer = new RTCSessionDescription(message.answer);
+      var UserId = message.callerUserId;
+      console.log(UserId);
+
+      if (peerConnection.signalingState === 'have-local-offer') {
+        peerConnection.setRemoteDescription(answer)
+          .then(function() {
+            if (pendingCandidates.length > 0) {
+              pendingCandidates.forEach(function(candidate) {
+                peerConnection.addIceCandidate(candidate)
+                  .catch(function(error) {
+                    console.log('Error handling pending ICE candidate:', error);
+                  });
+              });
+              pendingCandidates = [];
+            }
+          })
+          .catch(function(error) {
+            console.log('Error handling call answer:', error);
+          });
+      } else {
+        peerConnection.addEventListener('signalingstatechange', function() {
           if (peerConnection.signalingState === 'have-local-offer') {
             peerConnection.setRemoteDescription(answer)
               .then(function() {
@@ -1684,655 +1809,649 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
               .catch(function(error) {
                 console.log('Error handling call answer:', error);
               });
-          } else {
-            peerConnection.addEventListener('signalingstatechange', function() {
-              if (peerConnection.signalingState === 'have-local-offer') {
-                peerConnection.setRemoteDescription(answer)
-                  .then(function() {
-                    if (pendingCandidates.length > 0) {
-                      pendingCandidates.forEach(function(candidate) {
-                        peerConnection.addIceCandidate(candidate)
-                          .catch(function(error) {
-                            console.log('Error handling pending ICE candidate:', error);
-                          });
-                      });
-                      pendingCandidates = [];
-                    }
-                  })
-                  .catch(function(error) {
-                    console.log('Error handling call answer:', error);
-                  });
+          }
+        });
+      }
+
+      peerConnection.ontrack = function(event) {
+        if (event.streams && event.streams[0]) {
+          remoteVideo.srcObject = event.streams[0];
+          callerStatusElement.textContent = 'Exchanging Stream';
+          ringtone.pause();
+          console.log('Received remote stream:', event.streams[0]);
+        }
+      };
+
+    }
+
+
+    function handleCandidateMessage(message) {
+      console.log('Received candidate:', message.candidate);
+
+      if (!message.candidate || !Array.isArray(message.candidate) || message.candidate.length === 0) {
+        console.log('Invalid ICE candidate data:', message.candidate);
+        return;
+      }
+
+      var callerUserId = message.callerUserId;
+      console.log('Incoming candidate from:', callerUserId);
+
+      for (var i = 0; i < message.candidate.length; i++) {
+        var rtcCandidate = new RTCIceCandidate(message.candidate[i]);
+        peerConnAdd(rtcCandidate);
+      }
+    }
+
+    function peerConnAdd(rtcCandidate) {
+      if (peerConnection) {
+        peerConnection
+          .addIceCandidate(rtcCandidate)
+          .catch(function(error) {
+            console.log('Error handling ICE candidate:', error);
+          });
+      } else {
+        console.log('peerConnection is not properly initialized.');
+      }
+    }
+
+
+
+    function handleHangupMessage(message) {
+      var callerUserId = message.callerUserId;
+      console.log("Call has been ended from:", callerUserId)
+      hangUpCall();
+      ringtone.pause();
+    }
+
+    function handleNotAvailable(message) {
+      var callertoUserId = message.callertoUserId;
+      console.log("User not available:", callertoUserId)
+      callerStatusElement.textContent = 'User not available';
+      const busyTimeout = 5000;
+      let busyId;
+      busyId = setTimeout(function() {
+        hangUpCall();
+        ringtone.pause();
+      }, busyTimeout);
+    }
+
+    function showRingingBox() {
+      ringingBox.style.display = 'block';
+      playRingtoneOnce();
+    }
+
+    function playRingtoneOnce() {
+      ringtone.play();
+      console.log('ringing tone played');
+    }
+
+    function handleIncomingCall(message) {
+      var callerUserId = message.callerUserId;
+      var callertoUserId = message.callertoUserId;
+      console.log('Incoming call from:', callerUserId);
+
+      showRingingBox();
+    }
+
+    function resetAudio() {
+      ringtone.currentTime = 0;
+    }
+
+    function handleIncomingOffer(message) {
+      var callerUserId = message.callerUserId;
+      console.log('Incoming offer from:', callerUserId);
+      const callTimeout = 30000;
+      let timeoutID;
+      timeoutID = setTimeout(function() {
+        console.log('calltime is over');
+        hangUpCallChatUI();
+        sendMessage({
+          type: 'missed',
+          callerUserId: UserId,
+          callertoUserId: UserIdx,
+        });
+        resetAudio();
+        ringtone.pause();
+      }, callTimeout);
+
+      function handleAnswerButtonClick() {
+        clearTimeout(timeoutID);
+        ringtone.pause();
+        const joinTimeout = 1000;
+        let jointimeId;
+        jointimeId = setTimeout(function() {
+          joinCall(message);
+          resetAudio();
+        }, joinTimeout);
+      }
+
+      hangupButtonpop.addEventListener('click', function() {
+        console.log('hangup button clicked');
+        ringingBox.style.display = 'none';
+        clearTimeout(timeoutID);
+        hangUpCallChatUI();
+        resetAudio();
+        ringtone.pause();
+      });
+      answerButton.addEventListener('click', handleAnswerButtonClick);
+    }
+
+    function sendMessage(message) {
+      console.log('Message to be sent', message);
+      socket.emit('message', JSON.stringify(message));
+    }
+
+    function hangUpCallChatUI() {
+      sendMessage({
+        type: 'hangup',
+        callerUserId: UserId,
+        callertoUserId: UserIdx,
+      });
+      ringingBox.style.display = 'none';
+      ringtone.autoplay = false;
+      ringtone.pause();
+    }
+    hangupButton.addEventListener('click', function() {
+      hangUpCallChatUI();
+      hangUpCall();
+    });
+
+    function hangUpCall() {
+      localStream.getTracks().forEach(function(track) {
+        track.stop();
+      });
+
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+
+      hangupButton.disabled = true;
+      audioCallButton.disabled = false;
+      videoCallButton.disabled = false;
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      callerStatusElement.textContent = 'Call Ended';
+      chatInterface.style.display = "block";
+      callInterface.style.display = "none";
+      resetCallUI();
+    }
+    initSignaling();
+
+
+    //sending message
+    var SendMessageBtn = document.getElementById('send-button');
+
+    SendMessageBtn.addEventListener('click', function() {
+      var MessageToBeSent = $('#message').val() || null;
+      var imageInput = document.querySelector('.image-input');
+      var videoInput = document.getElementById('video');
+
+      var image = null;
+      if (imageInput.files.length > 0) {
+        image = imageInput.files;
+      }
+
+      var video = null;
+      if (videoInput.files.length > 0) {
+        video = videoInput.files;
+      }
+
+      socket.emit('newMessages', {
+        UserId,
+        UserIdx,
+        MessageToBeSent,
+        image,
+        video,
+      });
+      $('#message').val('');
+      $('.image-input').val('');
+      $('#video').val('');
+    });
+
+    socket.on('newMessage', (newMessage) => {
+      console.log('Received data:', newMessage);
+      console.log('UserId:', newMessage.UserId);
+
+      const hasUnreadMessages = newMessage.isRead === 0 && newMessage.senderId === UserIdx;
+
+      if (hasUnreadMessages) {
+        unreadMessageCount++;
+
+        if (unreadMessageCount === 1) {
+          const unreadMessageDiv = document.createElement('div');
+          unreadMessageDiv.className = 'unread-message';
+          unreadMessageDiv.textContent = 'Unread Message';
+          chatbox.appendChild(unreadMessageDiv);
+        } else {
+          const unreadMessageDiv = document.querySelector('.unread-message');
+          unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
+        }
+      }
+      if (newMessage.UserId === UserId) {
+        chatbox.scrollTop = chatbox.scrollHeight;
+      }
+      checkForNewMessages(newMessage);
+      playpauseVoiceNotes();
+    });
+
+    socket.on('ReadStatus', (messageId) => {
+      console.log('Received data:', messageId);
+      var message = document.getElementById(messageId);
+      if (unreadMessageCount > 0) {
+        unreadMessageCount--;
+      }
+
+      if (unreadMessageCount === 0) {
+        var unreadMessageDiv = document.querySelector('.unread-message');
+        if (unreadMessageDiv) {
+          chatbox.removeChild(unreadMessageDiv);
+        }
+      }
+    });
+    document.getElementById('message').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        document.getElementById("send-button").click();
+      }
+    });
+
+
+    $(chatbox).scroll(function() {
+      const distanceFromBottom = $(chatbox)[0].scrollHeight - ($(chatbox).scrollTop() + $(chatbox).outerHeight());
+
+      if (distanceFromBottom > 100) {
+        $('#scrollToBottomBtn').fadeIn();
+      } else {
+        $('#scrollToBottomBtn').fadeOut();
+      }
+    });
+
+    $('#scrollToBottomBtn').click(function() {
+      $(chatbox).animate({
+        scrollTop: $(chatbox)[0].scrollHeight
+      }, 500);
+      return false;
+    });
+
+
+
+    //voice Notes
+    let mediaRecorder;
+    let isRecording = false;
+    let soundVisualizerInterval;
+    let soundVisualizer = document.getElementById('sound-visualizer');
+    var videoBox = document.getElementById('video-box');
+    var loader = document.getElementById('loader');
+    const videoElement = document.getElementById('video-stream');
+    let chunks = [];
+
+
+    function toggleButtons() {
+      var message = document.getElementById('message').value.trim();
+      var voiceButton = document.querySelector('.voice-note');
+      var videoButton = document.querySelector('.video-note');
+      var sendButton = document.getElementById('send-button');
+
+      if (message === '') {
+        voiceButton.style.display = 'inline-block';
+        videoButton.style.display = 'inline-block';
+        sendButton.style.display = 'none';
+      } else {
+        voiceButton.style.display = 'none';
+        videoButton.style.display = 'none';
+        sendButton.style.display = 'inline-block';
+      }
+    }
+    toggleButtons();
+    let startRecordingTime;
+
+    let maxRetries = 7;
+    let retryDelay = 1000;
+
+    function startRecording(type) {
+      if (isRecording) return;
+      isRecording = true;
+      loader.style.display = 'block';
+
+
+      function getMediaStreamWithRetry(retriesLeft, type) {
+        navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: type === 'video'
+          })
+          .then(function(stream) {
+            startRecordingTime = Date.now();
+            if (type === 'voice') {
+              soundVisualizer.style.display = 'block';
+              soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
+              videoBox.style.display = 'none';
+              loader.style.display = 'none';
+            } else if (type === 'video') {
+              loader.style.display = 'none';
+              soundVisualizer.style.display = 'none';
+              videoBox.style.display = 'block';
+            }
+            if (stream.getAudioTracks().length === 0) {
+              console.error('Microphone not providing audio data.');
+              return;
+            }
+
+            if (type === 'video' && stream.getVideoTracks().length === 0) {
+              console.error('No video tracks available.');
+              return;
+            }
+            mediaRecorder = new MediaRecorder(stream, {
+              mimeType: type === 'video' ? 'video/webm' : 'audio/webm'
+            });
+            if (type === 'video') {
+              videoBox.srcObject = stream;
+            }
+            mediaRecorder.addEventListener('dataavailable', event => {
+              console.log('Data available:', event.data);
+              if (event.data.size > 0) {
+                chunks.push(event.data);
               }
             });
-          }
 
-          peerConnection.ontrack = function(event) {
-            if (event.streams && event.streams[0]) {
-              remoteVideo.srcObject = event.streams[0];
-              callerStatusElement.textContent = 'Exchanging Stream';
-              ringtone.pause();
-              console.log('Received remote stream:', event.streams[0]);
-            }
-          };
-
-        }
-
-
-        function handleCandidateMessage(message) {
-          console.log('Received candidate:', message.candidate);
-
-          if (!Array.isArray(message.candidate) || message.candidate.length === 0) {
-            console.log('Invalid ICE candidate data:', message.candidate);
-            return;
-          }
-
-          var callerUserId = message.callerUserId;
-          console.log('Incoming candidate from:', callerUserId);
-
-          for (var i = 0; i < message.candidate.length; i++) {
-            var rtcCandidate = new RTCIceCandidate(message.candidate[i]);
-            peerConnAdd(rtcCandidate);
-          }
-        }
-
-        function peerConnAdd(rtcCandidate) {
-          peerConnection
-            .addIceCandidate(rtcCandidate)
-            .catch(function(error) {
-              console.log('Error handling ICE candidate:', error);
-            });
-        }
-
-
-        function handleHangupMessage(message) {
-          var callerUserId = message.callerUserId;
-          console.log("Call has been ended from:", callerUserId)
-          hangUpCall();
-          ringtone.pause();
-        }
-
-        function handleNotAvailable(message) {
-          var callertoUserId = message.callertoUserId;
-          console.log("User not available:", callertoUserId)
-          callerStatusElement.textContent = 'User not available';
-          const busyTimeout = 5000;
-          let busyId;
-          busyId = setTimeout(function() {
-            hangUpCall();
-            ringtone.pause();
-          }, busyTimeout);
-        }
-
-        function showRingingBox() {
-          ringingBox.style.display = 'block';
-          playRingtoneOnce();
-        }
-
-        function playRingtoneOnce() {
-          ringtone.play();
-          console.log('ringing tone played');
-        }
-
-        function handleIncomingCall(message) {
-          var callerUserId = message.callerUserId;
-          var callertoUserId = message.callertoUserId;
-          console.log('Incoming call from:', callerUserId);
-
-          showRingingBox();
-        }
-
-        function resetAudio() {
-          ringtone.currentTime = 0;
-        }
-
-        function handleIncomingOffer(message) {
-          var callerUserId = message.callerUserId;
-          console.log('Incoming offer from:', callerUserId);
-          const callTimeout = 30000;
-          let timeoutID;
-          timeoutID = setTimeout(function() {
-            console.log('calltime is over');
-            hangUpCallChatUI();
-            resetAudio();
-            ringtone.pause();
-          }, callTimeout);
-
-          function handleAnswerButtonClick() {
-            clearTimeout(timeoutID);
-            ringtone.pause();
-            const joinTimeout = 1000;
-            let jointimeId;
-            jointimeId = setTimeout(function() {
-              joinCall(message);
-              resetAudio();
-            }, joinTimeout);
-          }
-
-          hangupButtonpop.addEventListener('click', function() {
-            console.log('hangup button clicked');
-            ringingBox.style.display = 'none';
-            clearTimeout(timeoutID);
-            hangUpCallChatUI();
-            resetAudio();
-            ringtone.pause();
-          });
-          answerButton.addEventListener('click', handleAnswerButtonClick);
-        }
-
-        function sendMessage(message) {
-          console.log('Message to be sent', message);
-          socket.emit('message', JSON.stringify(message));
-        }
-
-        function hangUpCallChatUI() {
-          sendMessage({
-            type: 'hangup',
-            callerUserId: UserId,
-            callertoUserId: UserIdx,
-          });
-          ringingBox.style.display = 'none';
-          ringtone.autoplay = false;
-          ringtone.pause();
-        }
-        hangupButton.addEventListener('click', function() {
-          hangUpCallChatUI();
-          hangUpCall();
-        });
-
-        function hangUpCall() {
-          localStream.getTracks().forEach(function(track) {
-            track.stop();
-          });
-
-          if (peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-          }
-
-          hangupButton.disabled = true;
-          audioCallButton.disabled = false;
-          videoCallButton.disabled = false;
-          localVideo.srcObject = null;
-          remoteVideo.srcObject = null;
-          callerStatusElement.textContent = 'Call Ended';
-          chatInterface.style.display = "block";
-          callInterface.style.display = "none";
-          resetCallUI();
-        }
-        initSignaling();
-
-
-        //sending message
-        var SendMessageBtn = document.getElementById('send-button');
-
-        SendMessageBtn.addEventListener('click', function() {
-          var MessageToBeSent = $('#message').val() || null;
-          var imageInput = document.querySelector('.image-input');
-          var videoInput = document.getElementById('video');
-
-          var image = null;
-          if (imageInput.files.length > 0) {
-            image = imageInput.files;
-          }
-
-          var video = null;
-          if (videoInput.files.length > 0) {
-            video = videoInput.files;
-          }
-
-          socket.emit('newMessages', {
-            UserId,
-            UserIdx,
-            MessageToBeSent,
-            image,
-            video,
-          });
-          $('#message').val('');
-          $('.image-input').val('');
-          $('#video').val('');
-        });
-
-        socket.on('newMessage', (newMessage) => {
-          console.log('Received data:', newMessage);
-          console.log('UserId:', newMessage.UserId);
-
-          const hasUnreadMessages = newMessage.isRead === 0 && newMessage.senderId === UserIdx;
-
-          if (hasUnreadMessages) {
-            unreadMessageCount++;
-
-            if (unreadMessageCount === 1) {
-              const unreadMessageDiv = document.createElement('div');
-              unreadMessageDiv.className = 'unread-message';
-              unreadMessageDiv.textContent = 'Unread Message';
-              chatbox.appendChild(unreadMessageDiv);
-            } else {
-              const unreadMessageDiv = document.querySelector('.unread-message');
-              unreadMessageDiv.textContent = `Unread Messages (${unreadMessageCount})`;
-            }
-          }
-          if (newMessage.UserId === UserId) {
-            chatbox.scrollTop = chatbox.scrollHeight;
-          }
-          checkForNewMessages(newMessage);
-        });
-
-        socket.on('ReadStatus', (messageId) => {
-          console.log('Received data:', messageId);
-          var message = document.getElementById(messageId);
-          if (unreadMessageCount > 0) {
-            unreadMessageCount--;
-          }
-
-          if (unreadMessageCount === 0) {
-            var unreadMessageDiv = document.querySelector('.unread-message');
-            if (unreadMessageDiv) {
-              chatbox.removeChild(unreadMessageDiv);
-            }
-          }
-        });
-        document.getElementById('message').addEventListener('keydown', function(event) {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            document.getElementById("send-button").click();
-          }
-        });
-
-
-        $(chatbox).scroll(function() {
-          const distanceFromBottom = $(chatbox)[0].scrollHeight - ($(chatbox).scrollTop() + $(chatbox).outerHeight());
-
-          if (distanceFromBottom > 100) {
-            $('#scrollToBottomBtn').fadeIn();
-          } else {
-            $('#scrollToBottomBtn').fadeOut();
-          }
-        });
-
-        $('#scrollToBottomBtn').click(function() {
-          $(chatbox).animate({
-            scrollTop: $(chatbox)[0].scrollHeight
-          }, 500);
-          return false;
-        });
-
-
-
-        //voice Notes
-        let mediaRecorder;
-        let isRecording = false;
-        let soundVisualizerInterval;
-        let soundVisualizer = document.getElementById('sound-visualizer');
-        var videoBox = document.getElementById('video-box');
-        let recordingType = 'voice';
-        let chunks = [];
-
-
-        function toggleButtons() {
-          var message = document.getElementById('message').value.trim();
-          var voiceButton = document.querySelector('.voice-note');
-          var videoButton = document.querySelector('.video-note');
-          var sendButton = document.getElementById('send-button');
-
-          if (message === '') {
-            voiceButton.style.display = 'inline-block';
-            videoButton.style.display = 'inline-block';
-            sendButton.style.display = 'none';
-          } else {
-            voiceButton.style.display = 'none';
-            videoButton.style.display = 'none';
-            sendButton.style.display = 'inline-block';
-          }
-        }
-        toggleButtons();
-        let startRecordingTime;
-
-        let maxRetries = 7;
-        let retryDelay = 1000;
-
-        function startRecording(type) {
-          if (isRecording) return;
-          isRecording = true;
-          startRecordingTime = Date.now();
-
-          if (type === 'voice') {
-            soundVisualizer.style.display = 'block';
-            soundVisualizerInterval = setInterval(updateSoundVisualizer, 100);
-          } else if (type === 'video') {
-            videoBox.style.display = 'block';
-          }
-
-          function getMediaStreamWithRetry(retriesLeft) {
-            navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: type === 'video'
-              })
-              .then(function(stream) {
-                if (stream.getAudioTracks().length === 0) {
-                  console.error('Microphone not providing audio data.');
-                  return;
-                }
-
-                mediaRecorder = new MediaRecorder(stream, {
-                  mimeType: 'audio/webm'
-                });
-
-                mediaRecorder.addEventListener("dataavailable", event => {
-                  console.log("Data available:", event.data);
-                  if (event.data.size > 0) {
-                    chunks.push(event.data);
-                  }
-                });
-
-                mediaRecorder.onstop = async function() {
-                  isRecording = false;
-                  const blob = new Blob(chunks, {
-                    type: mediaRecorder.mimeType
-                  });
-                  console.log('Recording stopped. Blob created:', blob);
-                  const recordingDuration = (Date.now() - startRecordingTime) / 1000;
-
-                  console.log('Recording duration:', recordingDuration.toFixed(2), 'seconds');
-                  if (type === 'voice') {
-                    soundVisualizer.style.display = 'none';
-                    clearInterval(soundVisualizerInterval);
-                  }
-
-                  await submitVoiceNote(blob, UserId, UserIdx);
-
-                  chunks = [];
-                };
-
-                mediaRecorder.start();
-                console.log('Recording started:', type);
-              })
-              .catch(function(error) {
-                if (retriesLeft > 0) {
-                  console.error('Error accessing media devices. Retrying...', error);
-                  setTimeout(function() {
-                    getMediaStreamWithRetry(retriesLeft - 1);
-                  }, retryDelay);
-                } else {
-                  console.error('Failed to access media devices after multiple retries:', error);
-                }
-              });
-          }
-          getMediaStreamWithRetry(maxRetries);
-        }
-
-        function updateSoundVisualizer(loudness) {
-          const spikeContainers = document.querySelectorAll('.boxContainer .box');
-
-          spikeContainers.forEach((spike, index) => {
-            const animation = getAnimationForLoudness(loudness, index);
-            spike.style.animationName = animation;
-          });
-        }
-
-        function getAnimationForLoudness(loudness, index) {
-          if (loudness < 30) return 'quiet';
-          if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
-          const boxContainer = document.getElementById('sound-visualizer');
-          boxContainer.style.display = "flex"
-          return 'loud';
-        }
-
-        function stopRecording(type) {
-          if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-          }
-        };
-
-
-        function cancelRecording() {
-          if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-            isRecording = false;
-            deleteVoiceNote();
-            console.log("To be deleted");
-          }
-          soundVisualizer.style.display = 'none';
-          clearInterval(soundVisualizerInterval);
-        }
-
-        async function deleteVoiceNote() {
-          const formData = new FormData();
-          formData.append('filename', voiceNoteFilename);
-
-          try {
-            const response = await fetch('delete_voice_note.php', {
-              method: 'POST',
-              body: formData
-            });
-            const result = await response.text();
-            console.log('Voice note deleted:', result);
-          } catch (error) {
-            console.error('Error deleting voice note:', error);
-          }
-        }
-
-        function submitRecordedNote() {
-          if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-          }
-          if (isRecording && recordingType) {
-            isRecording = false;
-            if (recordingType === 'voice' && mediaRecorder && mediaRecorder.state === 'inactive') {
-              // submitVoiceNote(blob);
-            } else if (recordingType === 'video') {
-              // Handle video recording
+            mediaRecorder.onstop = async function() {
               isRecording = false;
-              if (recordingType === 'video' && mediaRecorder && mediaRecorder.state === 'inactive') {}
-            }
-            recordingType = null;
-          }
-        }
-
-        async function submitVoiceNote(blob, UserId, UserIdx) {
-          console.log('Blob to be submitted:', blob);
-          const formData = new FormData();
-          formData.append('voicenote', blob);
-          formData.append('recipientId', UserIdx);
-          formData.append('UserId', UserId);
-
-          try {
-            const response = await fetch('http://localhost:8888/sendVoiceNote', {
-              method: 'POST',
-              body: formData
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              console.log('Voice note saved successfully:', result);
-              // checkForNewMessages(result);
-            } else {
-              console.error('Voice note submission failed:', response.statusText);
-            }
-          } catch (error) {
-            console.error('Error saving voice note:', error);
-          }
-        }
-      </script>
-
-      <script>
-        var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
-
-        // Check if the UserId exists
-        if (!UserId) {
-          // UserId not found, redirect to login page
-          window.location.href = "login.php";
-        }
-      </script>
-
-      <script>
-        function insertEmoji(emoji) {
-          var textarea = document.querySelector("#message");
-          textarea.value += emoji;
-        }
-      </script>
-      <script>
-        function toggleEmojiPicker() {
-          var container = document.querySelector(".emoji-table-container");
-          if (container.style.display === "none") {
-            container.style.display = "block";
-          } else {
-            container.style.display = "none";
-          }
-        }
-      </script>
-
-      <script>
-        function previewImage() {
-          var file = document.getElementById('image').files[0];
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var imgModal = document.getElementById('image-modal');
-            var imgPreview = document.getElementById('image-preview');
-            imgPreview.src = e.target.result;
-            imgModal.style.display = "block";
-          }
-          reader.readAsDataURL(file);
-        }
-
-        function previewVideo() {
-          let fileInput = document.querySelector('.video-input');
-          let file = fileInput.files[0];
-          let videoPreview = document.querySelector('#video-preview');
-          let videoModal = document.querySelector('#video-modal');
-          let closeModal = videoModal.querySelector('.close');
-          let reader = new FileReader();
-          reader.addEventListener('load', function() {
-            videoPreview.src = reader.result;
-            videoModal.style.display = 'block';
-          }, false);
-
-          if (file) {
-            reader.readAsDataURL(file);
-          }
-          closeModal.addEventListener('click', function() {
-            videoModal.style.display = 'none';
-            videoPreview.src = '';
-          });
-        }
-      </script>
-      <script>
-        $(document).ready(function() {
-          $("#search").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            if (value === "") {
-              $("#user_table").html("");
-            } else {
-              $("#user_table tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+              const blob = new Blob(chunks, {
+                type: mediaRecorder.mimeType
               });
+              console.log('Recording stopped. Blob created:', blob);
+              const recordingDuration = (Date.now() - startRecordingTime) / 1000;
+              const duration = recordingDuration.toFixed(2);
+              console.log('Recording duration:', duration, 'seconds');
+              await submitMedia(blob, type, UserId, UserIdx);
+              stream.getTracks().forEach(function(track) {
+                track.stop();
+              });
+              chunks = [];
+            };
+
+            mediaRecorder.start();
+            console.log('Recording started:', type);
+          })
+          .catch(function(error) {
+            if (retriesLeft > 0) {
+              console.error('Error accessing media devices. Retrying...', error);
+              setTimeout(function() {
+                getMediaStreamWithRetry(retriesLeft - 1, type);
+              }, retryDelay);
+            } else {
+              soundVisualizer.style.display = 'none';
+              videoBox.style.display = 'none';
+              console.error('Failed to access media devices after multiple retries:', error);
             }
           });
+      }
+      getMediaStreamWithRetry(maxRetries, type);
+    }
+
+    function updateSoundVisualizer(loudness) {
+      const spikeContainers = document.querySelectorAll('.boxContainer .box');
+
+      spikeContainers.forEach((spike, index) => {
+        const animation = getAnimationForLoudness(loudness, index);
+        spike.style.animationName = animation;
+      });
+    }
+
+    function getAnimationForLoudness(loudness, index) {
+      if (loudness < 30) return 'quiet';
+      if (loudness < 70) return index % 2 === 0 ? 'normal' : 'quiet';
+      const boxContainer = document.getElementById('sound-visualizer');
+      boxContainer.style.display = "flex"
+      return 'loud';
+    }
+
+    function stopRecording(type) {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+      }
+    };
+
+
+    function cancelRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        // deleteVoiceNote();
+        console.log("To be deleted");
+      }
+      soundVisualizer.style.display = 'none';
+      videoBox.style.display = 'none';
+      clearInterval(soundVisualizerInterval);
+    }
+
+    async function deleteVoiceNote() {
+      const formData = new FormData();
+      formData.append('filename', voiceNoteFilename);
+
+      try {
+        const response = await fetch('delete_voice_note.php', {
+          method: 'POST',
+          body: formData
         });
-      </script>
-      <script>
-        const searchBox = document.getElementById('search');
-        const resultsDiv = document.getElementById('user_table');
-        searchBox.addEventListener('input', function() {
-          const searchTerm = this.value;
-          if (!searchTerm.trim()) {
-            resultsDiv.innerHTML = '';
-            return;
-          }
-          $("#search").on("keyup", function() {
-            var search_query = $(this).val();
-            $.ajax({
-              url: "searchbackend.php",
-              method: "POST",
-              data: {
-                search_query: search_query
-              },
-              success: function(data) {
-                $("#user_table").html(data);
-              }
-            });
+        const result = await response.text();
+        console.log('Voice note deleted:', result);
+      } catch (error) {
+        console.error('Error deleting voice note:', error);
+      }
+    }
+
+
+    async function submitMedia(blob, type, UserId, UserIdx) {
+
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+      }
+      videoBox.style.display = 'none';
+      soundVisualizer.style.display = 'none';
+      console.log('Blob to be submitted:', blob);
+      const formData = new FormData();
+      formData.append(type === 'video' ? 'video' : 'audio', blob);
+      formData.append('recipientId', UserIdx);
+      formData.append('UserId', UserId);
+
+      try {
+        const response = await fetch(type === 'video' ? 'http://localhost:8888/sendVideoNote' : 'http://localhost:8888/sendVoiceNote', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Media saved successfully:', result);
+        } else {
+          console.error('Media submission failed:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error saving media:', error);
+      }
+    }
+  </script>
+
+  <script>
+    var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
+
+    // Check if the UserId exists
+    if (!UserId) {
+      // UserId not found, redirect to login page
+      window.location.href = "login.php";
+    }
+  </script>
+
+  <script>
+    function insertEmoji(emoji) {
+      var textarea = document.querySelector("#message");
+      textarea.value += emoji;
+    }
+  </script>
+  <script>
+    function toggleEmojiPicker() {
+      var container = document.querySelector(".emoji-table-container");
+      if (container.style.display === "none") {
+        container.style.display = "block";
+      } else {
+        container.style.display = "none";
+      }
+    }
+  </script>
+
+  <script>
+    function previewImage() {
+      var file = document.getElementById('image').files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var imgModal = document.getElementById('image-modal');
+        var imgPreview = document.getElementById('image-preview');
+        imgPreview.src = e.target.result;
+        imgModal.style.display = "block";
+      }
+      reader.readAsDataURL(file);
+    }
+
+    function previewVideo() {
+      let fileInput = document.querySelector('.video-input');
+      let file = fileInput.files[0];
+      let videoPreview = document.querySelector('#video-preview');
+      let videoModal = document.querySelector('#video-modal');
+      let closeModal = videoModal.querySelector('.close');
+      let reader = new FileReader();
+      reader.addEventListener('load', function() {
+        videoPreview.src = reader.result;
+        videoModal.style.display = 'block';
+      }, false);
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+      closeModal.addEventListener('click', function() {
+        videoModal.style.display = 'none';
+        videoPreview.src = '';
+      });
+    }
+  </script>
+  <script>
+    $(document).ready(function() {
+      $("#search").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        if (value === "") {
+          $("#user_table").html("");
+        } else {
+          $("#user_table tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
           });
+        }
+      });
+    });
+  </script>
+  <script>
+    const searchBox = document.getElementById('search');
+    const resultsDiv = document.getElementById('user_table');
+    searchBox.addEventListener('input', function() {
+      const searchTerm = this.value;
+      if (!searchTerm.trim()) {
+        resultsDiv.innerHTML = '';
+        return;
+      }
+      $("#search").on("keyup", function() {
+        var search_query = $(this).val();
+        $.ajax({
+          url: "searchbackend.php",
+          method: "POST",
+          data: {
+            search_query: search_query
+          },
+          success: function(data) {
+            $("#user_table").html(data);
+          }
         });
-      </script>
+      });
+    });
+  </script>
 
 
 
-      <script>
-        var sessionID = "<?php echo $sessionID ?>";
+  <script>
+    var sessionID = "<?php echo $sessionID ?>";
 
-        sessionStorage.setItem('sessionId', sessionID);
-      </script>
+    sessionStorage.setItem('sessionId', sessionID);
+  </script>
 
-      <!-- Modal -->
-      <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <?php
-              include 'db.php';
-              // Get the UserId of the user you are talking to
-              $recipientId = $_GET['UserIdx'];
-              // Fetch the passport image
-              $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
-              $stmt = sqlsrv_query($conn, $sql);
-              if ($stmt === false) {
-                die(print_r(sqlsrv_errors(), true));
-              }
+  <!-- Modal -->
+  <div class="modal fade" id="profilepicturemodal" tabindex="-1" role="dialog" aria-labelledby="profilepicturemodalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <?php
+          include 'db.php';
+          // Get the UserId of the user you are talking to
+          $recipientId = $_GET['UserIdx'];
+          // Fetch the passport image
+          $sql = "SELECT Passport FROM User_Profile WHERE UserId = '$recipientId'";
+          $stmt = sqlsrv_query($conn, $sql);
+          if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+          }
 
-              $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-              $Passport = $row['Passport'];
-              if (empty($Passport)) {
-                $passportImage = "UserPassport/DefaultImage.png";
-              } else {
-                $passportImage = "UserPassport/" . $Passport;
-              }
-              echo '<img id="modalImg" src="' . $passportImage . '">';
+          $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+          $Passport = $row['Passport'];
+          if (empty($Passport)) {
+            $passportImage = "UserPassport/DefaultImage.png";
+          } else {
+            $passportImage = "UserPassport/" . $Passport;
+          }
+          echo '<img id="modalImg" src="' . $passportImage . '">';
 
-              ?>
+          ?>
 
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="preview">
+    <div id="image-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="image-modal-label" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="image-modal-label">Image Preview</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <img id="image-preview" src="#" alt="Image Preview">
           </div>
         </div>
       </div>
-      <div class="preview">
-        <div id="image-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="image-modal-label" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="image-modal-label">Image Preview</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <img id="image-preview" src="#" alt="Image Preview">
-              </div>
-            </div>
+    </div>
+    <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
-        </div>
-        <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <video id="video-preview" src="#"></video>
-              </div>
-            </div>
+          <div class="modal-body">
+            <video id="video-preview" src="#"></video>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 </body>
 
 </html>
