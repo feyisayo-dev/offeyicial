@@ -247,11 +247,11 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                   </table>
                 </div>
               </div>
-              <div class="custom-file">
-                <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()">
+              <div class="custom-file" id="image-custom-file">
+                <input type="file" class="image-input" id="image" name="image" accept="image/*" onchange="previewImage()" multiple>
                 <label class="custom-file-label" for="image"><i class="bi bi-image"></i></label>
               </div>
-              <div class="custom-file">
+              <div class="custom-file" id="video-custom-file">
                 <input type="file" class="video-input" id="video" name="video" accept="video/*" onchange="previewVideo()">
                 <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i></label>
               </div>
@@ -659,6 +659,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         sessionId,
       }
     });
+    let callIdGlobal;
     socket.on('connect', () => {
       console.log('Socket.IO connection established');
       socket.emit('userConnected', UserId);
@@ -753,13 +754,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       try {
         const lastSeenMessageIdFromServer = await getLastMessageIdFromChatHistory();
         console.log('This is the last Id', lastSeenMessageIdFromServer);
+        const chatbox = document.getElementById('chatbox');
 
         if (lastSeenMessageIdFromServer && lastSeenMessageId) {
           const lastSeenMessageIdNum = parseInt(lastSeenMessageId);
           const lastSeenMessageIdFromServerNum = parseInt(lastSeenMessageIdFromServer);
 
           lastSeenMessageId = lastSeenMessageIdFromServer;
-          setChatboxScrollPositionToLastSeen(lastSeenMessageId);
+          if (lastSeenMessageIdFromServer != null) {
+            setChatboxScrollPositionToLastSeen(lastSeenMessageId);
+          } else {
+            chatbox.scrollTop = chatbox.scrollHeight;
+          }
 
         }
 
@@ -833,9 +839,9 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       }
     }
 
-    function playpauseVoiceNotes() {
+    function playpauseVideoNotes() {
       var VideoNotes = document.querySelectorAll('.video_note');
-      console.log('this is the length of the notes', VideoNotes.length);
+      console.log('this is the length of the video notes', VideoNotes.length);
       VideoNotes.forEach(function(VideoNote) {
         var videoElement = VideoNote.querySelector('video');
         videoElement.addEventListener('play', function() {
@@ -875,9 +881,19 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       console.log('this is the status for User', UserIdx, ':', status);
       onlineStats(status);
     });
+    socket.on('missedCall', () => {
+      console.log('There is a missed Call')
+      checkForCalls();
+    });
+    socket.on('callId', () => {
+      console.log('There is a Call', callId)
+      callIdGlobal = callId
+    });
+
     let unreadMessageCount = 0;
 
     socket.on('fetchMessageForEachUser', (data) => {
+      checkForCalls();
       console.log('Received messages for each user:');
       const hasUnreadMessages = data.some((result) => result.isRead === 0 && result.senderId === UserIdx);
 
@@ -899,7 +915,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       data.forEach((result, index) => {
         console.log(`Received result #${index + 1}:`);
         checkForNewMessages(result);
-        playpauseVoiceNotes();
+        playpauseVideoNotes();
       });
     });
 
@@ -966,6 +982,80 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       };
     }
 
+    function updateCallLog(callIdGlobal) {
+      console.log(callIdGlobal);
+      const formData = new FormData();
+      formData.append('UserId', UserId);
+      formData.append('CallId', callIdGlobal);
+      formData.append('UserIdx', UserIdx);
+      try {
+        const response = await fetch('http://localhost:8888/UpdatingCallLogs', {
+          method: 'POST',
+          body: formData
+        });
+        const update = await response.json();
+        console.log('Missed Call:', update);
+      } catch (error) {
+        console.error('Error updating calls logs:', error);
+      }
+    }
+
+    async function checkForCalls() {
+      const formData = new FormData();
+      formData.append('UserId', UserId);
+      formData.append('UserIdx', UserIdx);
+      try {
+        const response = await fetch('http://localhost:8888/checkForCalls', {
+          method: 'POST',
+          body: formData
+        });
+        const missedCall = await response.json();
+        console.log('Missed Call:', missedCall);
+        if (missedCall.callsData) {
+          const calls = missedCall.callsData;
+          for (const call of calls) {
+            console.log('This is the main aray', call, 'while this is the status', call.Status);
+            if (call.Status === '0') {
+              console.log('Missed Call found');
+              var div = document.createElement('div');
+              div.classList.add('received');
+              var timestamp = new Date(call.TimeOfCall);
+              var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              div.innerHTML = '<div class="message-container">' +
+                '<div class="message"><div class = "missedCall" id="missedCall-' + Math.random() + '">' +
+                '<p> Missed call from ' + missedCall.UserName + '</p>' +
+                '</div><div class="timestamp">' + formattedTime + '</div>' + '</div></div></div>';
+
+              // div.innerHTML += '';
+            } else if (call.Status === '1') {
+              console.log('Call found');
+              var div = document.createElement('div');
+              var timestamp = new Date(call.TimeOfCall);
+              var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              div.innerHTML = '<div class="message-container">' +
+                '<div class="message"><div id="Call-' + Math.random() + '">' +
+                '<p>Call from ' + missedCall.UserName + '</p>' +
+                '</div><div class="timestamp">' + formattedTime + '</div>' + '</div></div></div>';
+
+              // div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+            }
+            chatbox.appendChild(div);
+          }
+        } else {
+          console.log('No calls from ', missedCall.UserName)
+        }
+      } catch (error) {
+        console.error('Error checking Missed Call:', error);
+      }
+      console.log('Checking for missed calls');
+    }
+
     function checkForNewMessages(message) {
       var div = document.createElement('div');
       var timestamp = new Date(message.time_sent);
@@ -1007,7 +1097,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
 
       if (message.sent_image) {
-        div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">'+ '<div id="image-' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div></div>';
+        div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message">' + '<div id="image-' + message.chatId + '" class="image"><img src="' + message.sent_image + '"></div></div>';
         var timestamp = new Date(message.time_sent);
         var formattedTime = timestamp.toLocaleTimeString('en-US', {
           hour: '2-digit',
@@ -1031,15 +1121,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         });
         div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
       }
-      if (message.missedCall) {
-        div.innerHTML += '<div class="message-container">' + '<div class="message"><div id="missedCall">' + '<p>' + message.missedCall + '</p>' + '</div></div></div>';
-        var timestamp = new Date(message.time_sent);
-        var formattedTime = timestamp.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
-      }
+
       if (message.voice_notes) {
         div.innerHTML += '<div class="message-container">' + '<div id="' + message.chatId + '" class="message" data-isRead = "' + message.isRead + '">' + '<div id="voiceNote-' + message.chatId + '" class="voiceNote">' + '<audio id="audio-' + message.chatId + '">' + '<source src="' + message.voice_notes + '" type="audio/webm">' + '</audio>' + '<div class="audio-controls-' + message.chatId + ' audio-controls">' + '<div class="controls-' + message.chatId + ' controls">' + '<div class="speed-' + message.chatId + ' speed">' + '<label for="speed-' + message.chatId + '"></label>' + '<span id="speed-label-' + message.chatId + '">1x</span>' + '</div>' + '<button class="play-pause-' + message.chatId + ' play-pause"></button>' + '</div>' + '<div class="timeline-' + message.chatId + ' timeline">' + '<input type="range" class="timeline-slider-' + message.chatId + ' timeline-slider" min="0" value="0">' + '<div class="progress-' + message.chatId + ' progress"></div>' + '</div>' + '<div class="time-' + message.chatId + ' time">' + '<span class="current-time-' + message.chatId + ' current-time">0:00</span>' + '<span class="divider">/</span>' + '<span class="total-time-' + message.chatId + ' total-time">0:00</span>' + '</div>' + '<div class="volume-' + message.chatId + ' volume">' + '<button class="volume-button-' + message.chatId + ' volume-button"></button>' + '<div class="volume-slider-' + message.chatId + ' volume-slider">' + '<div class="volume-percentage-' + message.chatId + ' volume-percentage"></div>' + '</div>' + '</div>' + '</div>' + '</div>' + '</div>';
         const chatId = message.chatId;
@@ -1173,65 +1255,68 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
       }
       if (message.video_notes) {
-        const videoNoteContainer = document.createElement("div");
-        videoNoteContainer.classList.add("message-container");
-        const messageDIV = document.createElement("div");
-        messageDIV.id = message.chatId;
-        messageDIV.classList.add("message");
-        messageDIV.setAttribute("data-isRead", message.isRead);
-        const videoNote = document.createElement("div");
-        videoNote.classList.add("video_note");
-        videoNote.id = message.chatId;
-        const videoElement = document.createElement("video");
-        videoElement.id = "video-note-" + message.chatId;
-        videoElement.src = message.video_notes;
+        div.innerHTML = ` <div class="message-container"> <div id="${message.chatId}" class="message" style="background-color: transparent;" data-isRead="${message.isRead}"> <div class="video_note" id="video_note-${message.chatId}"> <video id="video-note-${message.chatId}" src="${message.video_notes}" autoplay="true"></video> </div> <div class="totalTimeVN"> <div class="current-time" id="current-time-${message.chatId}">0:00</div> <div class="slash">/</div> <div class="total-duration" id="total-${message.chatId}">0:00</div> </div> </div> </div> `;
+        const chatId = message.chatId;
 
-        videoNote.appendChild(videoElement);
+        function waitForElementToExist(elementId, maxAttempts, interval, callback) {
+          let attempts = 0;
+          console.log('Amount of attempts', attempts);
 
-        videoNoteContainer.appendChild(messageDIV);
-        messageDIV.appendChild(videoNote);
-        const totalTime = document.createElement("div");
-        totalTime.classList.add("totalTimeVN");
-        const totalTimeP = document.createElement('p');
-        totalTime.appendChild(totalTimeP);
-        videoNote.appendChild(totalTime);
-        div.appendChild(videoNoteContainer);
+          function checkElement() {
+            const element = document.getElementById(elementId);
+            attempts++;
 
-        videoElement.addEventListener("loadedmetadata", function() {
-          const duration = videoElement.duration;
-          console.log('This is the duration of Vn', duration);
-          let currentTime = 0;
-          const updateInterval = 1000;
-
-          function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
-          }
-
-          setInterval(function() {
-            currentTime += updateInterval / 1000;
-            if (currentTime > duration) {
-              currentTime = duration;
+            if (element) {
+              callback(element);
+            } else if (attempts < maxAttempts) {
+              setTimeout(checkElement, interval);
+            } else {
+              console.error(`Element with ID '${elementId}' not found after ${maxAttempts} attempts.`);
             }
-            totalTime.textContent = formatTime(currentTime) + " / " + formatTime(duration);
-          }, updateInterval);
-        });
-
-        let isPlaying = false;
-
-        videoElement.addEventListener('click', () => {
-          console.log('clicked');
-          if (!isPlaying) {
-            videoElement.play();
-            videoElement.muted = false;
-            console.log('Video started playing');
-          } else {
-            videoElement.pause();
-            console.log('Video paused');
           }
 
-          isPlaying = !isPlaying;
+          checkElement();
+        }
+
+        waitForElementToExist(chatId, 10, 1000, (messageContainer) => {
+          const videoNoteContainer = messageContainer.querySelector(".video_note");
+          if (videoNoteContainer) {
+            const videoElement = document.querySelector("#video-note-" + chatId);
+            const CurentTime = document.querySelector("#current-time-" + chatId);
+            const Total = document.querySelector("#total-" + chatId);
+            videoElement.addEventListener("loadedmetadata", function() {
+              const duration = videoElement.duration;
+              Total.innerHTML = formatTime(duration);
+              console.log('This is the duration of Vn with chatId', message.chatId, 'is', duration);
+            });
+            videoElement.addEventListener("canplaythrough", function() {
+              const duration = videoElement.duration;
+              Total.innerHTML = formatTime(duration);
+            });
+            videoElement.addEventListener('click', () => {
+              if (!videoElement.paused) {
+                videoElement.pause();
+                console.log('Video paused');
+              } else {
+                videoElement.play();
+                videoElement.muted = false;
+                console.log('Video started playing');
+              }
+            });
+
+            function formatTime(seconds) {
+              const minutes = Math.floor(seconds / 60);
+              const secs = Math.floor(seconds % 60);
+              return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+            }
+            console.log(Total.innerHTML);
+
+            videoElement.addEventListener("timeupdate", () => {
+              CurentTime.innerHTML = formatTime(videoElement.currentTime);
+            });
+          } else {
+            console.log("video note container not found");
+          }
         });
 
         var timestamp = new Date(message.time_sent);
@@ -1774,7 +1859,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       var answer = new RTCSessionDescription(message.answer);
       var UserId = message.callerUserId;
       console.log(UserId);
-
+      console.log(callIdGlobal);
+      updateCallLog(callIdGlobal);
       if (peerConnection.signalingState === 'have-local-offer') {
         peerConnection.setRemoteDescription(answer)
           .then(function() {
@@ -1905,12 +1991,13 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       timeoutID = setTimeout(function() {
         console.log('calltime is over');
         hangUpCallChatUI();
+        resetAudio();
         sendMessage({
           type: 'missed',
-          callerUserId: UserId,
-          callertoUserId: UserIdx,
+          callerUserId: UserIdx,
+          callertoUserId: UserId,
+          sessionId: sessionId
         });
-        resetAudio();
         ringtone.pause();
       }, callTimeout);
 
@@ -2032,7 +2119,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         chatbox.scrollTop = chatbox.scrollHeight;
       }
       checkForNewMessages(newMessage);
-      playpauseVoiceNotes();
+      playpauseVideoNotes();
     });
 
     socket.on('ReadStatus', (messageId) => {
@@ -2302,16 +2389,28 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
   <script>
     function previewImage() {
-      var file = document.getElementById('image').files[0];
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var imgModal = document.getElementById('image-modal');
-        var imgPreview = document.getElementById('image-preview');
-        imgPreview.src = e.target.result;
-        imgModal.style.display = "block";
+      var files = document.getElementById('image').files;
+      var previewContainer = $('#previewContainer');
+      previewContainer.empty();
+
+      for (var i = 0; i < files.length; i++) {
+        var reader = new FileReader();
+        reader.onload = (function(file) {
+          return function(e) {
+            var activeClass = (previewContainer.children().length === 0) ? 'active' : '';
+            previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
+          };
+        })(files[i]);
+        reader.readAsDataURL(files[i]);
       }
-      reader.readAsDataURL(file);
+
+      var customFile = document.getElementById('image-custom-file');
+      customFile.dataset.bsToggle = 'modal';
+      customFile.dataset.bsTarget = '#image-modal';
+      customFile.click();
     }
+
+
 
     function previewVideo() {
       let fileInput = document.querySelector('.video-input');
@@ -2427,30 +2526,45 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           <div class="modal-header">
             <h5 class="modal-title" id="image-modal-label">Image Preview</h5>
             <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+              <img src="icons/close.png">
             </button>
           </div>
           <div class="modal-body">
-            <img id="image-preview" src="#" alt="Image Preview">
+            <div id="carousel" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner" id="previewContainer"></div>
+              <a class="carousel-control-prev" href="#carousel" role="button" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" id="modalicon" aria-hidden="true"></span>
+                <span class="sr-only"></span>
+              </a>
+              <a class="carousel-control-next" href="#carousel" role="button" data-bs-slide="next">
+                <span class="carousel-control-next-icon" id="modalicon" aria-hidden="true"></span>
+                <span class="sr-only"></span>
+              </a>
+            </div>
           </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="okay" class="btn btn-secondary" data-bs-dismiss="modal">Okay</button>
+          <button type="button" id="dismiss" class="btn btn-secondary ml-auto" data-bs-dismiss="modal">Dismiss</button>
         </div>
       </div>
     </div>
-    <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <video id="video-preview" src="#"></video>
-          </div>
+  </div>
+  <div id="video-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="video-modal-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="video-modal-label">Video Preview</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <video id="video-preview" src="#"></video>
         </div>
       </div>
     </div>
+  </div>
   </div>
 </body>
 

@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Test ICE Candidates</title>
-  </head>
-  <body>
-    <video id="localVideo" autoplay muted></video>
-    <script>
-      async function testIceCandidates() {
-        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        const localVideo = document.getElementById('localVideo');
+<head>
+  <title>Test ICE Candidates</title>
+</head>
 
-        // Set up a local video stream (you can adjust constraints as needed)
-        const mediaConstraints = { audio: true, video: true };
+<body>
+  <video id="localVideo" autoplay muted></video>
+  <script>
+    (async () => {
+      // const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+      const localVideo = document.getElementById('localVideo');
+      const mediaConstraints = { audio: true, video: true };
+
+      try {
         const localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
         localVideo.srcObject = localStream;
 
-        // Create an RTCPeerConnection with the given configuration
         const peerConnection = new RTCPeerConnection();
-
-        // Log ICE candidates when they are generated
+        console.log(peerConnection);
         peerConnection.addEventListener('icecandidate', (event) => {
-            console.log('ICE Candidate gathering.');
-            if (event.candidate) {
-            console.log('ICE Candidate:', event.candidate.candidate);
+          console.log('ICE Candidate gathering.');
+          if (event.candidate) {
+            const EC = event.candidate;
+            console.log('ICE Candidate:', EC.candidate);
           } else {
             console.log('ICE Candidate gathering complete.');
           }
         });
 
-        // Add tracks from the local stream to the RTCPeerConnection
         localStream.getTracks().forEach((track) => {
           peerConnection.addTrack(track, localStream);
         });
+      } catch (error) {
+        console.error('Error accessing media devices:', error);
       }
+    })();
 
-      testIceCandidates();
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>

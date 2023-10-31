@@ -135,7 +135,7 @@ io.on("connection", (socket) => {
     } else if (parsedMessage.type === "candidate") {
       hangupOutgoingcandidate(parsedMessage);
     } else if (parsedMessage.type === "missed") {
-      handleMissedCalls(parsedMessage);
+      handleMissedCall(parsedMessage);
     } else {
       if (parsedMessage.error) {
         console.log("Error:", parsedMessage.error);
@@ -293,9 +293,11 @@ function handleIncomingCall(message) {
   }
 }
 
-function handleIncomingOffer(message) {
+async function handleIncomingOffer(message) {
+  const date_posted = await datePosted();
   console.log("Offer message received:", message);
   const recipientConnection = getRecipientConnection(message.callerUserId);
+  const callId = await generateCallId(message.callerUserId);
   if (recipientConnection) {
     const signalingMessage = {
       type: "offer",
@@ -306,6 +308,16 @@ function handleIncomingOffer(message) {
       sessionId: message.sessionId,
     };
     recipientConnection.emit("message", JSON.stringify(signalingMessage));
+    const storeCallLogA = await storeCallLogs(
+      message.callerUserId,
+      message.callertoUserId,
+      callId,
+      0,
+      null,
+      null,
+      null,
+      date_posted
+    );
     console.log("Offer message sent to UserB:", message.callerUserId);
   } else {
     console.log("UserB connection not found:", message.callerUserId);
@@ -316,21 +328,67 @@ function handleIncomingOffer(message) {
       callertoUserId: message.callertoUserId,
       sessionId: message.sessionId,
     };
+    const storeCallLogB = await storeCallLogs(
+      message.callerUserId,
+      message.callertoUserId,
+      callId,
+      0,
+      null,
+      null,
+      null,
+      date_posted
+    );
     sameConnection.emit("message", JSON.stringify(signalingMessage));
   }
 }
 
-async function handleMissedCalls(message) {
-  console.log("Missed Call from:", message.callerUserId);
-  const UserProfile = await getUserProfileData(message.callerUserId);
-  const UserName = UserProfile.Surname + "" + UserProfile.FirstName;
-  const signalingMessage = {
-    missedCall: "Missed call from" + UserName,
-    UserId: message.callerUserId,
-    UserIdx: message.callertoUserId,
-    sessionId: message.sessionId,
-  };
-  io.emit("newMessage", signalingMessage);
+async function storeCallLogs(
+  UserId,
+  UserIdx,
+  callId,
+  status,
+  startTime,
+  EndTime,
+  duration,
+  date_posted
+) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT * FROM call_log WHERE UserId = '${UserId}' AND recipientId = '${UserIdx}' AND CallId = '${callId}'`;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      const insertQuery = `INSERT INTO call_log ([UserId]
+        ,[recipientId]
+        ,[CallId]
+        ,[Status]
+        ,[StartTime]
+        ,[EndTime]
+        ,[Duration]
+        ,[TimeOfCall]) VALUES ('${UserId}', '${UserIdx}', '${callId}', '${status}', '${startTime}','${EndTime}','${duration}','${date_posted}')`;
+      await request.query(insertQuery);
+      await pool.close();
+      return true;
+    } else {
+      const updateQuery = `UPDATE call_log SET Status = '${status}', StartTime = '${startTime}' WHERE CallId = '${callId}'`;
+      await request.query(updateQuery);
+      await pool.close();
+      return true;
+    }
+  } catch (error) {
+    console.error(
+      "Error inserting/removing data into/from the database:",
+      error
+    );
+    return false;
+  }
+}
+
+async function generateCallId(UserId) {
+  const callId = "C" + Date.now() + Math.random();
+  return callId;
 }
 
 function hangupIncomingCall(message) {
@@ -345,6 +403,23 @@ function hangupIncomingCall(message) {
     };
     userAConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("Hangup message sent to UserA:", message.callertoUserId);
+  } else {
+    console.log("UserA connection not found:", message.callertoUserId);
+  }
+}
+
+function handleMissedCall(message) {
+  console.log("Missed message received:", message);
+
+  const User = getUserConnection(message.callertoUserId);
+  if (User) {
+    const signalingMessage = {
+      type: "missed",
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+    };
+    User.emit("missedCall", JSON.stringify(signalingMessage));
+    console.log("Missed message sent to UserA:", message.callertoUserId);
   } else {
     console.log("UserA connection not found:", message.callertoUserId);
   }
@@ -564,6 +639,71 @@ app.post("/changeAudio", (req, res) => {
   }
 });
 
+app.post("/checkForCalls", async (req, res) => {
+  console.log("Received a POST request to /checkForCalls");
+
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+
+  const UserId = req.body.UserId;
+  const UserIdx = req.body.UserIdx;
+
+  try {
+    const callsResult = await checkForCalls(UserId, UserIdx);
+    res.json(callsResult);
+  } catch (error) {
+    console.error("Error checking calls:", error);
+    res.status(500).json({ error: "Error checking calls" });
+  }
+});
+
+async function checkForCalls(UserId, UserIdx) {
+  console.log("Call from:", UserIdx);
+  const UserProfile = await getUserProfileData(UserIdx);
+  const UserName = UserProfile.Surname + " " + UserProfile.First_Name;
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+
+    const request = new sql.Request(poolConnection);
+    console.log("checking");
+
+    const result = await request.query(
+      `SELECT * FROM call_log WHERE UserId = '${UserIdx}' AND recipientId = '${UserId}'`
+    );
+
+    const callsData = result.recordset.map((record) => ({
+      UserIdx: record.UserId,
+      UserId: record.recipientId,
+      CallId: record.CallId,
+      Status: record.Status,
+      StartTime: record.StartTime,
+      EndTime: record.EndTime,
+      Duration: record.Duration,
+      TimeOfCall: record.TimeOfCall,
+    }));
+
+    console.log("Retrieved call data:", callsData);
+    const array = {
+      UserName: UserName,
+      callsData: callsData,
+    };
+
+    return array;
+  } catch (error) {
+    console.error("Error fetching call data:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
 app.post("/upload", (req, res) => {
   console.log("Received a POST request to /upload");
 
@@ -618,19 +758,11 @@ app.post("/upload", (req, res) => {
 });
 
 async function fetchReelsData() {
-  let poolConnection; // Declare a variable to hold the connection
-
+  let poolConnection;
   try {
-    // Get a connection from the pool
     poolConnection = await pool.connect();
-
-    // Create a new SQL request using the acquired connection
     const request = new sql.Request(poolConnection);
-
-    // Execute a query to select all records from the "reels" table
     const result = await request.query("SELECT * FROM reels");
-
-    // Map the database results to the desired format (array of objects)
     const reelsData = result.recordset.map((record) => ({
       UserId: record.UserId,
       reelId: record.reelId,
@@ -644,7 +776,6 @@ async function fetchReelsData() {
       date_posted: record.date_posted,
     }));
 
-    // Log the retrieved data
     console.log("Retrieved reels data:", reelsData);
 
     return reelsData;
@@ -652,7 +783,6 @@ async function fetchReelsData() {
     console.error("Error fetching reels data:", error);
     throw error;
   } finally {
-    // Release the acquired connection back to the pool
     if (poolConnection) {
       poolConnection.release();
     }
@@ -1401,7 +1531,8 @@ async function overwrite(voiceNotePath, chatId, UserId, UserIdx, format) {
       type = ".mp3";
       location = "voiceNote/";
     }
-    const trimmedVideo = location + chatId + Date.now() + UserId + UserIdx + type;
+    const trimmedVideo =
+      location + chatId + Date.now() + UserId + UserIdx + type;
     const inputFormat = voiceNotePath.split(".").pop().toLowerCase();
     console.log("Trimming video...");
     console.log(inputFormat);
@@ -1701,6 +1832,16 @@ async function MessageIsRead(messageId, UserIdx) {
     }
   }
 }
+
+app.post("/UpdatingCallLogs", async (req, res) => {
+  const { UserId, CallId, UserIdx } = req.body;
+
+  async function UpdatingCallLogs() {
+    const time = await datePosted();
+
+    const actionResult = await storeCallLogs(UserId, UserIdx, CallId, 1, time, null, null, null);
+  }
+});
 
 // Start the server
 const port = 8888;

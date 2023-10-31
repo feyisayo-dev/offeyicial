@@ -476,10 +476,13 @@ button[type="submit"] {
 
 .video_note video {
     display: flex;
+    z-index: 9999;
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
+    border-radius: 50%;
 }
-.totalTimeVN{
+
+.totalTimeVN {
     font-family: 'Modern-Age';
     font-size: 12px;
     display: flex;
@@ -1255,20 +1258,46 @@ svg text {
     cursor: pointer;
 }
 
-.Sent .timestamp {
-    float: right;
+.timestamp {
     font-size: 0.75rem;
     color: #999;
     text-align: right;
     margin-top: 0.2rem;
 }
 
+.Sent .timestamp {
+    float: right;
+}
+
 .received .timestamp {
     float: left;
-    font-size: 0.75rem;
-    color: #999;
-    text-align: left;
-    margin-top: 0.2rem;
+}
+
+.missedCall {
+    font-size: 20px;
+    font-family: 'Modern-Age';
+    background: linear-gradient(to right, black 50%, white 50%);
+    background-size: 200% 100%;
+    background-position: right bottom;
+    transition: all .5s ease-out;
+    display: block;
+}
+
+.button:hover {
+    background-position: left bottom;
+}
+
+.missedCall p {
+    color: red;
+    text-align: center;
+    font-size: 16px;
+    line-height: 30px;
+    transition: all .6s ease-out;
+    display: block;
+}
+
+.missedCall p:hover {
+    color: black;
 }
 
 .date {
@@ -1578,6 +1607,64 @@ svg text {
     border: none;
     border-radius: 50%;
     right: 20px;
+}
+
+.modal-footer,
+.modal-header {
+    border: none;
+}
+
+.carousel-item img {
+    width: 400px;
+    height: 400px;
+}
+
+#modalicon {
+    background-color: rgb(49, 210, 213);
+}
+
+#modalicon:hover {
+    background-color: darkturquoise;
+}
+
+#okay,
+#dismiss {
+    border-radius: 10px;
+    border: none;
+    color: #f0f0f0;
+    display: flex;
+}
+
+#okay {
+    background-color: rgb(49, 210, 213);
+    float: right;
+}
+
+#okay:hover {
+    background-color: darkturquoise;
+}
+
+#dismiss {
+    background-color: rgb(224, 39, 39);
+    float: left;
+}
+
+#dismiss:hover {
+    background-color: red;
+}
+
+.close {
+    background: transparent;
+    border: none;
+}
+
+.close:hover {
+    transform: scaleX(1.10);
+}
+
+.close img {
+    width: 30px;
+    height: 30px;
 }
 
 @media(max-width=900px) {}
