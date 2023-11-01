@@ -372,8 +372,13 @@ async function storeCallLogs(
       await pool.close();
       return true;
     } else {
-      const updateQuery = `UPDATE call_log SET Status = '${status}', StartTime = '${startTime}' WHERE CallId = '${callId}'`;
-      await request.query(updateQuery);
+      if (checkResult.recordset[0].Status === '1') {
+        const updateQuery = `UPDATE call_log SET EndTime = '${EndTime}', Duration = '${duration}' WHERE CallId = '${callId}'`;
+        await request.query(updateQuery);
+      } else {
+        const updateQuery = `UPDATE call_log SET Status = '${status}', StartTime = '${startTime}' WHERE CallId = '${callId}'`;
+        await request.query(updateQuery);
+      }
       await pool.close();
       return true;
     }
