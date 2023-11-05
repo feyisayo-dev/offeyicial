@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Check if user is logged in
 
 if (isset($_SESSION['UserId'])) {
   $profileOwnerId = $_GET['UserId'];
@@ -14,13 +13,13 @@ if (isset($_SESSION['UserId'])) {
   $stmt = sqlsrv_prepare($conn, "SELECT [UserId], [Surname], [First_Name], [gender], [email], [Password], [phone], [dob], [countryId], [stateId], [Passport], [bio] FROM User_Profile WHERE UserId = ?", array(&$profileOwnerId));
 
   if (!$stmt) {
-    die(print_r(sqlsrv_errors(), true)); 
+    die(print_r(sqlsrv_errors(), true));
   }
 
   $FetchStatement = sqlsrv_execute($stmt);
 
   if ($FetchStatement === false) {
-    die(print_r(sqlsrv_errors(), true)); 
+    die(print_r(sqlsrv_errors(), true));
   }
 
   $record = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
@@ -56,7 +55,6 @@ if (isset($_SESSION['UserId'])) {
   }
 
 
-  // Get the count of followers and following for the profile owner and recipient
   $sql = "SELECT COUNT(*) as num_followers FROM follows WHERE UserId = ?";
   $params = array($profileOwnerId);
   $stmt = sqlsrv_query($conn, $sql, $params);
@@ -68,7 +66,6 @@ if (isset($_SESSION['UserId'])) {
   $stmt = sqlsrv_query($conn, $sql, $params);
   $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
   $following = $row['num_following'];
-  // Display the profile information
 
   $sql = "SELECT * FROM follows WHERE UserId = ? AND recipientId = ?";
   $params = array($profileOwnerId, $UserId);
@@ -90,13 +87,12 @@ if (isset($_SESSION['UserId'])) {
     echo '<script src="js/popper.min.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
-    <script src="js/owl.carousel.min.js"></script>
+   
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/sweetalert2@10.js"></script>
-    <link rel="stylesheet" href="css/owl.theme.default.min.css">
 ';
-    echo '<script src="country-states.js"></script>';
+    echo '<script src="country-states.js"></script>
+';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
@@ -133,9 +129,7 @@ if (isset($_SESSION['UserId'])) {
     </div>
 </nav>';
 
-    // Display all information
     echo '<div class="container-fluid profile-section">';
-    echo '<br><br><br>';
     echo '<div class="row">';
     echo '<div class="col-md-4 profile-pic">';
     echo '<img src="' . $GetPassport . '" class="button" alt="Profile Picture">';
@@ -206,7 +200,6 @@ if (isset($_SESSION['UserId'])) {
     echo '<div class="footer">';
 
 
-    // Retrieve all the chats of the current user
     $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
@@ -263,8 +256,6 @@ if (isset($_SESSION['UserId'])) {
 </div>';
 
     echo '</div>';
-    // If $isProfileOwner is false, only display some of the information
-    // ...
   } else {
     echo '<title>Profile ~ ' . $Surname . ' ' . $First_Name . '</title>
     <link rel="stylesheet" href="css/all.min.css" />
@@ -278,9 +269,8 @@ if (isset($_SESSION['UserId'])) {
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
-    <link rel="stylesheet" href="css/owl.theme.default.min.css">
-    <script src="js/sweetalert2@10.js"></script>';
+    <script src="js/sweetalert2@10.js"></script>
+';
     echo '<link rel="stylesheet" href="profile.css">';
     echo '<script src="country-states.js"></script>';
     echo '<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -318,9 +308,7 @@ if (isset($_SESSION['UserId'])) {
     </div>
 </nav>';
 
-    // Display all information
     echo '<div class="container-fluid profile-section">';
-    echo '<br><br><br>';
     echo '<div class="row">';
     echo '<div class="col-md-4 profile-pic">';
     echo '<img src="' . $GetPassport . '" class="button" alt="Profile Picture">';
@@ -346,7 +334,7 @@ if (isset($_SESSION['UserId'])) {
     echo '</div>';
     echo '</div>';
 
-    echo '</div>'; // close profile-info div
+    echo '</div>';
 
     echo '<div class="col-md-4">
     <div class="row">
@@ -467,230 +455,7 @@ if (isset($_SESSION['UserId'])) {
   </div>
   </div>
 </div>';
-  echo '<script src="js/jquery.min.js"></script>';
-  echo '<script>
-//Script to load
-// user country code for selected option
-let user_country_code = "$countryId";
-
-(function () {
-
-    let country_list = country_and_states["country"];
-    let states_list = country_and_states["states"];
-
-    // creating country name drop-down
-    let option = "";
-    option += "<option>select country</option>";
-    for (let country_code in country_list) {
-        // set selected option user country
-        let selected = (country_code == user_country_code) ? " selected" : "";
-        option += "<option value=\"" + country_code + "\"" + selected + ">" + country_list[country_code] + "</option>";
-    }
-    document.getElementById("countryId").innerHTML = option;
-
-    // creating states name drop-down
-    let text_box = "<input type=\"text\" class=\"input-text\" id=\"state\">";
-    let state_code_id = document.getElementById("stateId");
-
-    function create_states_dropdown() {
-        // get selected country code
-        let country_code = document.getElementById("countryId").value;
-        let states = states_list[country_code];
-        // invalid country code or no states add textbox
-        if (!states) {
-            state_code_id.innerHTML = text_box;
-            return;
-        }
-        let option = "";
-        if (states.length > 0) {
-            option = "<select id=\"state\">\n";
-            for (let i = 0; i < states.length; i++) {
-                option += "<option value=\"" + states[i].code + "\">" + states[i].name + "</option>";
-            }
-            option += "</select>";
-        } else {
-            // create input textbox if no states
-            option = text_box
-        }
-        state_code_id.innerHTML = option;
-    }
-
-    // country select change event
-    const country_select = document.getElementById("countryId");
-    country_select.addEventListener("change", create_states_dropdown);
-
-    create_states_dropdown();
-})();
-// end of Country and State loading
-</script>';
-
-
-
-  echo '<script>
-$(".custom-file-input").on("change", function() {
-  var fileName = $(this).val().split("////").pop();
-  $(this).siblings(".custom-file-upload").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
-});
-
-</script>
-';
-  echo '<script>
-function saveBio() {
-  var bio = document.getElementById("bioTextArea").value;
-  var UserId = "' . $_GET["UserId"] . '";
-
-  // Do something with the bio, e.g. send it to the server using AJAX
-  if (bio != "") {
-    $.ajax({
-      url: "SubmitUserForm.php",
-      type: "POST",
-      async: false,
-      data: {
-        "addbio": 1,
-        "bio": bio,
-        "UserId": UserId,
-
-      },
-      success: function (data) {
-        alert(data)
-        $("#bioTextArea").val("");
-        // Reload the frame with class "col-md-8 profile-info"
-        $(".col-md-4.profile-info").load(location.href + " .col-md-4.profile-info>*","");
-      }
-    });
-  } else {
-    alert("Field Missing");
-  }
-  console.log(bio);
-  // Close the modal
-  $("#setBioModal").modal("hide");
-}
-</script>';
-  echo '<script>
-function editpro() {
-    var UserId = "' . $_GET["UserId"] . '";
-
-    var Surname = $("#Surname").val();
-    var First_Name = $("#First_Name").val();
-    var email = $("#email").val();
-    var phone = $("#phone").val();
-    var gender = $("#gender").val();
-    var dob = $("#dob").val();
-    var country = $("#countryId").val();
-    var state = $("#stateId").val();
-
-    if (Surname === "" || First_Name === "" || email === "" || phone === "" || gender === "" || dob === "" || country === "" || state === "") {
-        alert("Please fill in all the required fields.");
-        return false;
-    }
-
-    $.ajax({
-        url: "SubmitUserForm.php", 
-        type: "POST",
-        data: {
-            edit: 1,
-            UserId: UserId,
-            Surname: Surname,
-            First_Name: First_Name,
-            email: email,
-            phone: phone,
-            gender: gender,
-            dob: dob,
-            country: country,
-            state: state
-        },
-        success: function(data) {
-            alert(data);
-            location.reload();
-        },
-        error: function(xhr, status, error) {
-            // handle error response here
-            alert(data);
-        }
-    });
-}
-</script>';
-
-  echo ' <script>
-$(document).ready(function(){
-  $("#search").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    if (value === "") {
-      // Clear the table if the search box is empty
-      $("#user_table").html("");
-    } else {
-      // Run the search function if the search box is not empty
-      $("#user_table tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
-    }
-  });
-});
-
-</script>';
-  echo '<script>
-$(document).ready(function() {
-  const searchBox = $("#search");
-  const resultsDiv = $("#user_table");
-
-  searchBox.on("input", function() {
-    const searchTerm = this.value.trim();
-
-    // Clear the results if the search box is empty
-    if (!searchTerm) {
-      resultsDiv.html("");
-      return;
-    }
-
-    // Send a request to the server to get the search results
-    $.ajax({
-      url: "searchbackend.php",
-      method: "POST",
-      data: { search_query: searchTerm },
-      success: function(data) {
-        // Update the table with the returned results
-        resultsDiv.html(data);
-      }
-    });
-  });
-});
-</script>';
-  echo '<script>
-$(document).ready(function() {
-    var profileOwnerId = "' . $profileOwnerId . '";
-    var recipientId = "' . $UserId . '";
-    var followBtn = $("#followBtn");
-
-    $(".follow").click(function() {
-        // alert("Button is working!");
-        $.ajax({
-            url: "follow.php",
-            type: "POST",
-            data: {
-                follow: 1,
-                unfollow: 1,
-                profileOwnerId: profileOwnerId,
-                recipientId: recipientId
-            },
-            success: function(response) {
-                alert(response);
-
-                if (response == "followed") {
-                    followBtn.removeClass("btn-primary").addClass("btn-secondary").text("Unfollow");
-                } else if (response == "unfollowed") {
-                    followBtn.removeClass("btn-secondary").addClass("btn-primary").text("Follow");
-                }
-                        
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log(errorThrown);
-            }
-        });
-    });
-});
-</script>';
 } else {
-  // User is not logged in, redirect to the login page
   header('Location: login.php');
   exit;
 }
@@ -734,7 +499,6 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
 
     $smc = sqlsrv_query($conn, $sql);
 
-    //give information if the data is successful or not.
 
     if ($smc === false) {
       echo " <font color='black'><em> data not successfully upload</em></font><br/>";
@@ -761,18 +525,171 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
 }
 
 ?>
+<script src="js/jquery.min.js"></script>
 <script>
   var userId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
-  // Check if the UserId exists
   if (!userId) {
-    // UserId not found, redirect to login page
     window.location.href = "login.php";
   }
 </script>
 <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
-<script src="js/owl.carousel.min.js"></script>
+<script>
+  var body = document.querySelector(".profile-section");
+  var theme = document.createElement("div");
+  theme.classList.add("theme-btn-section");
+  body.appendChild(theme);
+</script>
+<script src="./scripttologin.js"></script>
+<script>
+  let user_country_code = "<?php echo $countryId ?>";
 
+  (function() {
+
+    let country_list = country_and_states["country"];
+    let states_list = country_and_states["states"];
+
+    let option = "";
+    option += "<option>select country</option>";
+    for (let country_code in country_list) {
+      let selected = (country_code == user_country_code) ? " selected" : "";
+      option += "<option value=\"" + country_code + "\"" + selected + ">" + country_list[country_code] + "</option>";
+    }
+    document.getElementById("countryId").innerHTML = option;
+
+    let text_box = "<input type=\"text\" class=\"input-text\" id=\"state\">";
+    let state_code_id = document.getElementById("stateId");
+
+    function create_states_dropdown() {
+      let country_code = document.getElementById("countryId").value;
+      let states = states_list[country_code];
+      if (!states) {
+        state_code_id.innerHTML = text_box;
+        return;
+      }
+      let option = "";
+      if (states.length > 0) {
+        option = "<select id=\"state\">\n";
+        for (let i = 0; i < states.length; i++) {
+          option += "<option value=\"" + states[i].code + "\">" + states[i].name + "</option>";
+        }
+        option += "</select>";
+      } else {
+        option = text_box
+      }
+      state_code_id.innerHTML = option;
+    }
+
+    const country_select = document.getElementById("countryId");
+    country_select.addEventListener("change", create_states_dropdown);
+
+    create_states_dropdown();
+  })();
+</script>
+<script>
+  $(".custom-file-input").on("change", function() {
+    var fileName = $(this).val().split("////").pop();
+    $(this).siblings(".custom-file-upload").html("<i class=\"bi bi-check-circle-fill\"></i> " + fileName);
+  });
+</script>
+<script>
+  function saveBio() {
+    var bio = document.getElementById("bioTextArea").value;
+    var UserId = "<?php echo $_GET["UserId"] ?>";
+
+    if (bio != "") {
+      $.ajax({
+        url: "SubmitUserForm.php",
+        type: "POST",
+        async: false,
+        data: {
+          "addbio": 1,
+          "bio": bio,
+          "UserId": UserId,
+
+        },
+        success: function(data) {
+          alert(data)
+          $("#bioTextArea").val("");
+          $(".col-md-4.profile-info").load(location.href + " .col-md-4.profile-info>*", "");
+        }
+      });
+    } else {
+      alert("Field Missing");
+    }
+    console.log(bio);
+    $("#setBioModal").modal("hide");
+  }
+</script>
+<script>
+  function editpro() {
+    var UserId = "<?php echo $_GET["UserId"] ?>";
+
+    var Surname = $("#Surname").val();
+    var First_Name = $("#First_Name").val();
+    var email = $("#email").val();
+    var phone = $("#phone").val();
+    var gender = $("#gender").val();
+    var dob = $("#dob").val();
+    var country = $("#countryId").val();
+    var state = $("#stateId").val();
+
+    if (Surname === "" || First_Name === "" || email === "" || phone === "" || gender === "" || dob === "" || country === "" || state === "") {
+      alert("Please fill in all the required fields.");
+      return false;
+    }
+
+    $.ajax({
+      url: "SubmitUserForm.php",
+      type: "POST",
+      data: {
+        edit: 1,
+        UserId: UserId,
+        Surname: Surname,
+        First_Name: First_Name,
+        email: email,
+        phone: phone,
+        gender: gender,
+        dob: dob,
+        country: country,
+        state: state
+      },
+      success: function(data) {
+        alert(data);
+        location.reload();
+      },
+      error: function(xhr, status, error) {
+        alert(data);
+      }
+    });
+  }
+</script>
+<script>
+  $(document).ready(function() {
+    const searchBox = $("#search");
+    const resultsDiv = $("#user_table");
+
+    searchBox.on("input", function() {
+      const searchTerm = this.value.trim();
+
+      if (!searchTerm) {
+        resultsDiv.html("");
+        return;
+      }
+
+      $.ajax({
+        url: "searchbackend.php",
+        method: "POST",
+        data: {
+          search_query: searchTerm
+        },
+        success: function(data) {
+          resultsDiv.html(data);
+        }
+      });
+    });
+  });
+</script>
 <script>
   var UserId = "<?php echo $_SESSION['UserId']; ?>";
   var socketUrl = 'ws://localhost:8888';
@@ -1077,7 +994,6 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
       postItem.appendChild(videoContainer);
       postMediaDiv.appendChild(postItem);
 
-      // Create the Previous and Next buttons
       var previousButton = document.createElement('button');
       previousButton.className = 'previous-button';
       previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
@@ -1109,25 +1025,21 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
 
       nextButton.addEventListener('click', function() {
         if (currentIndex < postItems.length - 1) {
-          postItems[currentIndex].style.display = 'none'; // Hide the current post item
-          currentIndex++; // Increment the current index
-          postItems[currentIndex].style.display = 'block'; // Show the next post item
+          postItems[currentIndex].style.display = 'none';
+          currentIndex++; 
+          postItems[currentIndex].style.display = 'block';
           postItems[currentIndex].scrollIntoView({
             behavior: 'smooth'
-          }); // Scroll to the next post item
+          });
         }
       });
     }
 
-    // Hide all media elements except the first one
     var mediaItems = postMediaDiv.getElementsByClassName('post-item');
     console.log(mediaItems.length);
     for (var i = 1; i < mediaItems.length; i++) {
       mediaItems[i].style.display = 'none';
     }
-
-    // Append the post media div before the post content
-    // newsFeedPostDiv.insertBefore(postMediaDiv, postContentDiv);
 
     var postContentDiv = document.createElement('div');
     postContentDiv.className = 'post-content';
@@ -1177,7 +1089,6 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
 
     postTitleDiv.appendChild(postTitleH2);
     postDiv.appendChild(postTitleDiv);
-    // Append the post media div to the post div
     postDiv.appendChild(postMediaDiv);
     postDiv.appendChild(postContentDiv);
     postDiv.appendChild(postDateDiv);
@@ -1207,13 +1118,11 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
       myVideo.currentTime -= 10;
     }
 
-    // <i class="bi bi-fast-forward"></i>
     function fastForward(postId) {
       const myVideo = document.getElementById("myVideo-" + postId);
       myVideo.currentTime += 10;
     }
 
-    // Set volume
     function setVolume(postId) {
       var video = document.getElementById('myVideo-' + postId);
       var volumeRange = document.getElementById('volumeRange-' + postId);
@@ -1252,7 +1161,6 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
       currentTimeDisplay.innerHTML = formatTime(video.currentTime);
     }
 
-    // Function to format time in MM:SS format
     function formatTime(time) {
       var minutes = Math.floor(time / 60);
       var seconds = Math.floor(time % 60);
@@ -1302,22 +1210,14 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
       };
     }
   }
-  $('.owl-carousel').owlCarousel({
-    items: 1,
-    loop: true,
-    nav: true,
-    dots: false,
-    navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
-  })
+  // $('.owl-carousel').owlCarousel({
+  //   items: 1,
+  //   loop: true,
+  //   nav: true,
+  //   dots: false,
+  //   navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
+  // })
 
-  // Add event listener to the "Post" button
-  var postButton = document.getElementById('postButton');
-  postButton.addEventListener('click', function() {
-    // Code to handle posting a new post
-    // ...
-
-    // After posting, reload the news feed
-  });
 
   function updateLikeCount(postId, likeCount) {
     console.log('Updating Like count for', postId);
@@ -1336,4 +1236,52 @@ alert(\"Sorry, only JPG,PNG & PDF files are allowed.\");
     }
 
   }
+</script>
+<script>
+  $(document).ready(function() {
+    var profileOwnerId = "<?php echo $profileOwnerId ?>";
+    var recipientId = "<?php echo $UserId ?>";
+    var followBtn = $("#followBtn");
+
+    $(".follow").click(function() {
+      // alert("Button is working!");
+      $.ajax({
+        url: "follow.php",
+        type: "POST",
+        data: {
+          follow: 1,
+          unfollow: 1,
+          profileOwnerId: profileOwnerId,
+          recipientId: recipientId
+        },
+        success: function(response) {
+          alert(response);
+
+          if (response == "followed") {
+            followBtn.removeClass("btn-primary").addClass("btn-secondary").text("Unfollow");
+          } else if (response == "unfollowed") {
+            followBtn.removeClass("btn-secondary").addClass("btn-primary").text("Follow");
+          }
+
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.log(errorThrown);
+        }
+      });
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $("#search").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      if (value === "") {
+        $("#user_table").html("");
+      } else {
+        $("#user_table tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      }
+    });
+  });
 </script>

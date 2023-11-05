@@ -9,7 +9,6 @@
   <video id="localVideo" autoplay muted></video>
   <script>
     (async () => {
-      // const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
       const localVideo = document.getElementById('localVideo');
       const mediaConstraints = { audio: true, video: true };
 
@@ -18,17 +17,37 @@
         localVideo.srcObject = localStream;
 
         const peerConnection = new RTCPeerConnection();
-        console.log(peerConnection);
-        peerConnection.addEventListener('icecandidate', (event) => {
-          console.log('ICE Candidate gathering.');
-          if (event.candidate) {
-            const EC = event.candidate;
-            console.log('ICE Candidate:', EC.candidate);
-          } else {
-            console.log('ICE Candidate gathering complete.');
-          }
-        });
-
+        if (!peerConnection) {
+          console.error('peerConnection is not initialized');
+          return;
+        } else {
+          console.log(peerConnection);
+          console.log('ICE gathering state:', peerConnection.iceGatheringState);
+          peerConnection.addEventListener('icecandidate', (event) => {
+            console.log('ICE Candidate gathering.');
+            if (event.candidate) {
+              const EC = event.candidate;
+              console.log('ICE Candidate:', EC.candidate);
+            } else {
+              console.log('ICE Candidate gathering complete.');
+            }
+          });
+          peerConnection.addEventListener('icegatheringstatechange', function () {
+            console.log('ICE gathering state:', peerConnection.iceGatheringState);
+            if (peerConnection.iceGatheringState === 'gathering') {
+              console.log('Gathering ICE candidate gathering:', event.candidate);
+            }
+            if (peerConnection.iceGatheringState === 'complete') {
+              console.log('Gathering ICE candidate complete:', event.candidate);
+              console.log('ICE gathering complete. All candidates:', event.candidate);
+              if (event.candidate.length === 0) {
+                console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
+              } else {
+                console.log(event.candidate);
+              }
+            }
+          });
+        }
         localStream.getTracks().forEach((track) => {
           peerConnection.addTrack(track, localStream);
         });

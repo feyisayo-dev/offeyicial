@@ -660,16 +660,29 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       }
     });
     let callIdGlobal;
+    let attemptsForChats = 0;
     socket.on('connect', () => {
       console.log('Socket.IO connection established');
       socket.emit('userConnected', UserId);
-      socket.emit('fetchMessageForEachUser', {
-        UserId,
-        UserIdx
-      });
-      fetchLastSeenMessageId();
-      fetchUserProfileData(UserIdx);
-      fetchPoeple(UserId);
+      if (attemptsForChats === 0) {
+        socket.emit('fetchMessageForEachUser', {
+          UserId,
+          UserIdx
+        });
+        fetchLastSeenMessageId();
+        fetchUserProfileData(UserIdx);
+        fetchPoeple(UserId);
+        attemptsForChats++;
+      } else {
+        console.log('Reconnected');
+      }
+      var offlineMessages = JSON.parse(localStorage.getItem('offlineMessages'));
+      if (offlineMessages && offlineMessages.length > 0) {
+        offlineMessages.forEach(function(message) {
+          socket.emit('newMessages', message);
+        });
+        localStorage.removeItem('offlineMessages');
+      }
     });
 
     socket.on('disconnect', () => {
@@ -885,10 +898,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       console.log('There is a missed Call')
       checkForCalls();
     });
-    socket.on('callId', () => {
-      console.log('There is a Call', callId)
-      callIdGlobal = callId
-    });
 
     let unreadMessageCount = 0;
 
@@ -982,7 +991,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       };
     }
 
-    function updateCallLog(callIdGlobal) {
+    async function updateCallLog(callIdGlobal) {
       console.log(callIdGlobal);
       const formData = new FormData();
       formData.append('UserId', UserId);
@@ -1757,6 +1766,8 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           handleCandidateMessage(message);
         } else if (message.type === 'notAvailable') {
           handleNotAvailable(message);
+        } else if (message.type === 'callId') {
+          handleCallId(message);
         }
       });
     }
@@ -1852,6 +1863,14 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           .catch(function(error) {
             console.log('Error creating call offer:', error);
           });
+      }
+    }
+    async function handleCallId(message) {
+      var callId = message.callId;
+      if (callId) {
+        callIdGlobal = callId;
+      } else {
+        console.log('No callid in the call package');
       }
     }
 
@@ -2047,7 +2066,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       localStream.getTracks().forEach(function(track) {
         track.stop();
       });
-
+      updateCallLog(callIdGlobal);
       if (peerConnection) {
         peerConnection.close();
         peerConnection = null;
@@ -2066,7 +2085,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
     initSignaling();
 
 
-    //sending message
     var SendMessageBtn = document.getElementById('send-button');
 
     SendMessageBtn.addEventListener('click', function() {
@@ -2084,13 +2102,26 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         video = videoInput.files;
       }
 
-      socket.emit('newMessages', {
-        UserId,
-        UserIdx,
-        MessageToBeSent,
-        image,
-        video,
-      });
+      if (socket.connected) {
+        socket.emit('newMessages', {
+          UserId,
+          UserIdx,
+          MessageToBeSent,
+          image,
+          video,
+        });
+      } else {
+        var offlineMessages = localStorage.getItem('offlineMessages') || [];
+        offlineMessages.push({
+          UserId,
+          UserIdx,
+          MessageToBeSent,
+          image,
+          video,
+        });
+        localStorage.setItem('offlineMessages', JSON.stringify(offlineMessages));
+      }
+
       $('#message').val('');
       $('.image-input').val('');
       $('#video').val('');

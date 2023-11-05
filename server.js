@@ -34,7 +34,6 @@ const io = new Server(server, {
   },
 });
 
-// Create a WebSocket server
 const webSocketServer = new WebSocket({
   httpServer: server,
 });
@@ -50,10 +49,8 @@ const config = {
   },
 };
 
-// Create a connection pool
 const pool = new sql.ConnectionPool(config);
 
-// Connect to the database
 pool
   .connect()
   .then(() => {
@@ -63,7 +60,6 @@ pool
     console.error("Error connecting to MSSQL database:", err);
   });
 
-// Handle root route
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
@@ -96,10 +92,15 @@ io.on("connection", (socket) => {
   } else {
     io.emit("userStatus", { UserIdx, status: "offline" });
   }
-
-  console.log(`Client connected with UserId: ${UserId}`);
-  console.log(`Client connected with SessionId: ${sessionId}`);
-  console.log(`Client connected with UserIdx: ${UserIdx}`);
+  if (UserId) {
+    console.log(`Client connected with UserId: ${UserId}`);
+    if (UserIdx) {
+      console.log(`Client connected with UserIdx: ${UserIdx}`);
+      if (sessionId) {
+        console.log(`Client connected with SessionId: ${sessionId}`);
+      }
+    }
+  }
 
   socket.UserId = UserId;
   socket.UserIdx = UserIdx;
@@ -297,6 +298,7 @@ async function handleIncomingOffer(message) {
   const date_posted = await datePosted();
   console.log("Offer message received:", message);
   const recipientConnection = getRecipientConnection(message.callerUserId);
+  const User = getUserConnection(message.callerUserId);
   const callId = await generateCallId(message.callerUserId);
   if (recipientConnection) {
     const signalingMessage = {
@@ -318,6 +320,14 @@ async function handleIncomingOffer(message) {
       null,
       date_posted
     );
+    const callIdPackage = {
+      type: "callId",
+      callId: callId,
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+      sessionId: message.sessionId,
+    };
+    User.emit("message", JSON.stringify(callIdPackage));
     console.log("Offer message sent to UserB:", message.callerUserId);
   } else {
     console.log("UserB connection not found:", message.callerUserId);
@@ -372,7 +382,7 @@ async function storeCallLogs(
       await pool.close();
       return true;
     } else {
-      if (checkResult.recordset[0].Status === '1') {
+      if (checkResult.recordset[0].Status === "1") {
         const updateQuery = `UPDATE call_log SET EndTime = '${EndTime}', Duration = '${duration}' WHERE CallId = '${callId}'`;
         await request.query(updateQuery);
       } else {
@@ -719,34 +729,27 @@ app.post("/upload", (req, res) => {
     "Origin, X-Requested-With, Content-Type, Accept"
   );
 
-  // Check if a file was uploaded
   if (!req.files.Video) {
     console.log("No file uploaded.");
     return res.status(400).send("No file uploaded.");
   }
 
-  // Access the uploaded file
   const videoBlob = req.files.Video.data;
   console.log("Received video buffer:", videoBlob);
 
-  // Generate a unique file name
   const videoFileName = "reel_" + Date.now() + ".mp4";
   console.log("Generated file name:", videoFileName);
 
-  // Define the directory where the video will be saved
   const videoDirectory = "reels";
 
-  // Create the directory if it doesn't exist
   if (!fs.existsSync(videoDirectory)) {
     fs.mkdirSync(videoDirectory);
     console.log("Created directory:", videoDirectory);
   }
 
-  // Define the full path to save the video
   const videoFilePath = path.join(__dirname, videoDirectory, videoFileName);
   console.log("Saving video to:", videoFilePath);
 
-  // Write the video data to the file
   fs.writeFile(videoFilePath, videoBlob, (err) => {
     if (err) {
       console.error("Error saving the video:", err);
@@ -1150,7 +1153,6 @@ async function fetchPostForEachUser(UserId) {
         content: record.content,
         timeAgo: getTimeAgo(timeDifference),
         likes: likes,
-        isRead: isRead,
       };
     });
 
@@ -1240,26 +1242,23 @@ async function insertOrRemoveLike(UserId, reelId) {
     const pool = await sql.connect(config);
     const request = new sql.Request(pool);
 
-    // Check if the record exists
     const checkQuery = `SELECT * FROM reelsLike WHERE UserId = '${UserId}' AND reelId = '${reelId}'`;
     const checkResult = await request.query(checkQuery);
 
     if (checkResult.recordset.length === 0) {
-      // The record does not exist, so insert it
       const insertQuery = `INSERT INTO reelsLike (UserId, reelId) VALUES ('${UserId}', '${reelId}')`;
       await request.query(insertQuery);
       console.log("Inserted UserId:", UserId);
       console.log("Inserted reelId:", reelId);
       await pool.close();
-      return true; // Indicate success (inserted)
+      return true;
     } else {
-      // The record exists, so remove it
       const removeQuery = `DELETE FROM reelsLike WHERE UserId = '${UserId}' AND reelId = '${reelId}'`;
       await request.query(removeQuery);
       console.log("Removed UserId:", UserId);
       console.log("Removed reelId:", reelId);
       await pool.close();
-      return true; // Indicate success (removed)
+      return true;
     }
   } catch (error) {
     console.error(
@@ -1704,7 +1703,7 @@ async function getUserProfileData(UserId) {
     const pool = await sql.connect(config);
     const request = new sql.Request(pool);
 
-    const query = ` select Surname, First_Name, Passport FROM User_Profile WHERE UserId =  '${UserId}' `;
+    const query = ` select * FROM User_Profile WHERE UserId =  '${UserId}' `;
 
     const result = await request.query(query);
     await pool.close();
@@ -1735,6 +1734,25 @@ app.get("/getPeople/:UserId", async (req, res) => {
     res.status(500).json({ error: "User data not found" });
   }
 });
+
+app.get("/fetchFollow/:UserId", async (req, res) => {
+  const { UserId } = req.params;
+  var maxRetries = 3;
+  var retryDelay = 2000;
+  try {
+    const userFollow = await getFollowData(UserId, maxRetries, retryDelay);
+    console.log("This is the profile data", userFollow);
+    if (userFollow) {
+      res.json(userFollow);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    console.error("User follow / follwing not found:", error);
+    res.status(500).json({ error: "User follow / follwing not found" });
+  }
+});
+
 
 async function getUser(UserId, maxRetries, delay) {
   let retries = 0;
@@ -1772,6 +1790,42 @@ async function getUser(UserId, maxRetries, delay) {
     }
   }
 }
+
+async function getFollowData(UserId, maxRetries, delay) {
+  let retries = 0;
+  while (retries <= maxRetries) {
+    try {
+      const pool = await sql.connect(config);
+      const request = new sql.Request(pool);
+
+      const queryForFollowers = `SELECT UserId FROM follows WHERE recipientId = @UserId`;
+      const queryForFollowing = `SELECT recipientId FROM follows WHERE UserId = @UserId`;
+      request.input("UserId", sql.VarChar, UserId);
+
+      const resultForFollowers = await request.query(queryForFollowers);
+      const resultForFollowing = await request.query(queryForFollowing);
+
+      await pool.close();
+
+      const followData = {
+        followers: resultForFollowers.recordset,
+        following: resultForFollowing.recordset,
+      };
+
+      return followData;
+    } catch (error) {
+      retries++;
+      if (retries <= maxRetries) {
+        console.log(`Retry ${retries}: Error fetching user data - ${error}`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        console.error(`Failed after ${retries} retries: ${error}`);
+        throw error;
+      }
+    }
+  }
+}
+
 
 async function getLastMessageId(UserId, UserIdx) {
   try {
@@ -1844,8 +1898,18 @@ app.post("/UpdatingCallLogs", async (req, res) => {
   async function UpdatingCallLogs() {
     const time = await datePosted();
 
-    const actionResult = await storeCallLogs(UserId, UserIdx, CallId, 1, time, null, null, null);
+    const actionResult = await storeCallLogs(
+      UserId,
+      UserIdx,
+      CallId,
+      1,
+      time,
+      null,
+      null,
+      null
+    );
   }
+  UpdatingCallLogs();
 });
 
 // Start the server
