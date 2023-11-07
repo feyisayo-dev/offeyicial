@@ -1,19 +1,18 @@
 <?php
+session_start();
 if(isset($_POST['follow'])){
     require('db.php');
-    $profileOwnerId = $_POST['profileOwnerId'];
-    $recipientId = $_POST['recipientId'];
+    $UserId = $_SESSION['UserId'];
+    $recipientId = $_POST['profileOwnerId'];
 
-    // Check if the user has already followed the recipient
     $sql = "SELECT * FROM follows WHERE UserId = ? AND recipientId = ?";
-    $params = array($profileOwnerId, $recipientId);
+    $params = array($UserId, $recipientId);
     $stmt = sqlsrv_query($conn, $sql, $params);
     $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 
     if($row) {
-        // User has already followed the recipient, so unfollow them
         $sql = "DELETE FROM follows WHERE UserId = ? AND recipientId = ?";
-        $params = array($profileOwnerId, $recipientId);
+        $params = array($UserId, $recipientId);
         $stmt = sqlsrv_query($conn, $sql, $params);
 
         if($stmt === false) {
@@ -22,9 +21,8 @@ if(isset($_POST['follow'])){
             echo "unfollowed";
         }
     } else {
-        // User has not followed the recipient, so follow them
         $sql = "INSERT INTO follows (UserId, recipientId) VALUES (?, ?)";
-        $params = array($profileOwnerId, $recipientId);
+        $params = array($UserId, $recipientId);
         $stmt = sqlsrv_query($conn, $sql, $params);
 
         if($stmt === false) {

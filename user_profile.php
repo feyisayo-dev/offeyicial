@@ -358,7 +358,37 @@ $profileOwnerId = $_GET['UserId'];
                         bio = 'No bio set yet';
                     }
                     Userbio.textContent = 'Bio: ' + bio;
+                    var followBtn = document.getElementById('followBtn');
 
+                    followBtn.addEventListener('click', function() {
+                        alert("Button is working!");
+                        $.ajax({
+                            url: "follow.php",
+                            type: "POST",
+                            data: {
+                                follow: 1,
+                                unfollow: 1,
+                                profileOwnerId: profileOwnerId
+                            },
+                            success: function(response) {
+                                alert(response);
+
+                                if (response == "followed") {
+                                    followButton.textContent = 'Unfollow';
+                                    followButton.classList.add('following');
+                                    followButton.classList.remove('unfollow');
+                                } else if (response == "unfollowed") {
+                                    followButton.textContent = 'Follow';
+                                    followButton.classList.add('unfollow');
+                                    followButton.classList.remove('following');
+                                }
+
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                console.log(errorThrown);
+                            }
+                        });
+                    });
                     return;
                 } else {
                     throw new Error('Error fetching user profile data');
@@ -444,7 +474,7 @@ $profileOwnerId = $_GET['UserId'];
 
     async function fetchFollowing(profileOwnerId) {
         try {
-            const response = await fetch(`http://localhost:8888/fetchFollow/${UserId}`);
+            const response = await fetch(`http://localhost:8888/fetchFollow/${profileOwnerId}`);
             if (response.ok) {
                 const userFollow = await response.json();
                 console.log('This are the users data', userFollow);
@@ -455,7 +485,9 @@ $profileOwnerId = $_GET['UserId'];
                 followingDiv.innerHTML = followingCount;
                 followerDiv.innerHTML = followersCount;
 
-                const isFollowing = followers.includes(UserId);
+                const isFollowing = followers.some(follower => follower.UserId === UserId);
+                console.log('This is the followers tab', followers, 'and status', isFollowing);
+
 
                 const followButton = document.getElementById('followBtn');
 
@@ -475,14 +507,12 @@ $profileOwnerId = $_GET['UserId'];
                 var overlay = document.createElement('div');
                 overlay.classList.add('overlay');
                 overlay.classList.add('hidden');
-                if (box.style.display === 'flex') {
-                    window.onclick = function(event) {
-                        if (event.target === overlay) {
-                            console.log('Clicked on the box');
-                            box.style.display = "none";
-                            overlay.style.display = "none";
-                            box.innerHTML = '';
-                        }
+                window.onclick = function(event) {
+                    if (event.target === overlay) {
+                        console.log('Clicked on the box');
+                        box.style.display = "none";
+                        overlay.style.display = "none";
+                        box.innerHTML = '';
                     }
                 }
                 var profile = document.querySelector('.profile-section');
@@ -501,6 +531,7 @@ $profileOwnerId = $_GET['UserId'];
                     box.appendChild(close);
                     close.addEventListener('click', function() {
                         box.style.display = 'none';
+                        overlay.style.display = "none";
                     });
                     box.appendChild(title);
                     if (followersCount === 0) {
@@ -530,7 +561,7 @@ $profileOwnerId = $_GET['UserId'];
 
                                     var boxUserName = document.createElement('a');
                                     boxUserName.classList.add('nameUser');
-                                    boxUserName.textContent = `${userProfileData.Surname} ${userProfileData.FirstName}`;
+                                    boxUserName.textContent = `${userProfileData.Surname} ${userProfileData.First_Name}`;
                                     boxUserName.href = 'user_profile.php?UserId=' + userProfileData.UserId;
 
                                     userBox.appendChild(boxUserImg);
@@ -559,6 +590,7 @@ $profileOwnerId = $_GET['UserId'];
                     box.appendChild(close);
                     close.addEventListener('click', function() {
                         box.style.display = 'none';
+                        overlay.style.display = "none";
                     });
                     box.appendChild(title);
                     if (followingCount === 0) {
@@ -1258,42 +1290,6 @@ $profileOwnerId = $_GET['UserId'];
         }
 
     }
-
-    $(document).ready(function() {
-        var recipientId = "<?php echo $UserId ?>";
-        var followBtn = $("#followBtn");
-
-        $(".follow").click(function() {
-            alert("Button is working!");
-            $.ajax({
-                url: "follow.php",
-                type: "POST",
-                data: {
-                    follow: 1,
-                    unfollow: 1,
-                    profileOwnerId: profileOwnerId,
-                    recipientId: recipientId
-                },
-                success: function(response) {
-                    alert(response);
-
-                    if (response == "followed") {
-                        followButton.textContent = 'Unfollow';
-                        followButton.classList.add('following');
-                        followButton.classList.remove('unfollow');
-                    } else if (response == "unfollowed") {
-                        followButton.textContent = 'Follow';
-                        followButton.classList.add('unfollow');
-                        followButton.classList.remove('following');
-                    }
-
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.log(errorThrown);
-                }
-            });
-        });
-    });
 
     $(document).ready(function() {
         $("#search").on("keyup", function() {
