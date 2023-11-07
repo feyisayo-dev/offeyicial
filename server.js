@@ -1816,7 +1816,7 @@ async function getFollowData(UserId, maxRetries, delay) {
     } catch (error) {
       retries++;
       if (retries <= maxRetries) {
-        console.log(`Retry ${retries}: Error fetching user data - ${error}`);
+        console.log(`Retry ${retries}: Error fetching user data follows - ${error}`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         console.error(`Failed after ${retries} retries: ${error}`);

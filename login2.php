@@ -68,19 +68,6 @@ $profileOwnerId = $_GET['UserId'];
     <div class="container-fluid profile-section">
         <div class="row">
             <div class="col-md-4 profile-pic">
-                <img class="button img_profile" alt="Profile Picture">
-                <P>Enhance your online persona</P>
-                <form action="" method="POST" enctype="multipart/form-data">
-                    <label for="upload1" class="custom-file-upload">
-                        <i class="fa fa-cloud-upload"></i> Choose Image
-                    </label>
-                    <input type="file" class="custom-file-input" name="Fileupload" id="upload1" required />
-                    <button type="submit" name="button" id="button">
-                        <i class="bi bi-cloud-arrow-up"></i>
-                    </button>
-
-                </form>
-
                 <hr>
             </div>
             <div class="col-md-4 profile-info">
@@ -120,7 +107,7 @@ $profileOwnerId = $_GET['UserId'];
 
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-12 p">
                     <h3 class="text-center text-uppercase text-success">Posts</h3>
                     <div id="posts" class="posts">
                     </div>
@@ -278,11 +265,21 @@ $profileOwnerId = $_GET['UserId'];
         console.log('Socket.IO connection established');
 
         if (attempts === 0) {
-            fetchUserProfileData(profileOwnerId);
-            fetchPoeple(profileOwnerId);
+            var variable = document.querySelector('.var');
+            var profileDiv = document.querySelector('.profile-pic');
+            if (profileOwnerId != UserId) {
+                profileDiv.innerHTML = '<img class="button img_profile" alt="Profile Picture">';
+                variable.innerHTML = '<div class="col-md-5"> <button id="followBtn" class="follow">Follow</button></div>' + '<div class="col-md-5"> <button class="message" onclick="location.href=\'chat.php?UserIdx=' + profileOwnerId + '\'"> <i class="bi bi-chat-fill"></i></button></div>';
+            } else {
+                variable.innerHTML = '<div class="col-md-4"> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">Set Bio</button> </div> <div class="col-md-4"> <button type="button" style="background-color:red;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editprofile">Edit profile</button> </div>';
+                profileDiv.innerHTML = ` <img class="button img_profile" alt="Profile Picture"> <p>Enhance your online persona</p> <form action="" method="POST" enctype="multipart/form-data"> <label for="upload1" class="custom-file-upload"> <i class="fa fa-cloud-upload"></i> Choose Image </label> <input type="file" class="custom-file-input" name="Fileupload" id="upload1" required /> <button type="submit" name="button" id="button"> <i class="bi bi-cloud-arrow-up"></i> </button> </form> `;
+            }
             fetchFollowing(profileOwnerId);
+            fetchUserProfileData(profileOwnerId, 3, 1000);
+            fetchPoeple(profileOwnerId);
+            fetchTitle(profileOwnerId);
             const formData = new FormData();
-            formData.append('UserId', UserId);
+            formData.append('UserId', profileOwnerId);
             fetch('http://localhost:8888/fetchPostForEachUser', {
                     method: 'POST',
                     body: formData,
@@ -294,9 +291,19 @@ $profileOwnerId = $_GET['UserId'];
                     return response.json();
                 })
                 .then((result) => {
-                    result.forEach((post) => {
-                        loadNewsFeed(post);
-                    });
+                    if (result && result.length > 0) {
+                        result.forEach((post) => {
+                            loadNewsFeed(post);
+                        });
+                    } else {
+                        console.log('No post by User');
+                        var col = document.querySelector('.p');
+                        var NoPost = document.createElement('div');
+                        NoPost.classList.add('noPost');
+                        NoPost.innerHTML = '<p>No post made by User</p>';
+                        col.append(NoPost);
+                    }
+
                 })
                 .catch((error) => {
                     console.error(error);
@@ -311,49 +318,64 @@ $profileOwnerId = $_GET['UserId'];
 
 
 
-    var UserPic = document.querySelector('.img_profile');
-    var UserEmail = document.querySelector('.p_email');
-    var UserPhone = document.querySelector('.p_phone');
-    var UserGender = document.querySelector('.p_gender');
-    var UserDob = document.querySelector('.p_dob');
-    var UserCountryId = document.querySelector('.p_countryId');
-    var Userbio = document.querySelector('.p_getbio');
-    var surName = document.querySelector('.surName');
-    var firstName = document.querySelector('.firstName');
-    async function fetchUserProfileData(profileOwnerId) {
-        try {
-            const response = await fetch(`http://localhost:8888/getUserProfile/${profileOwnerId}`);
-            if (response.ok) {
-                const userProfileData = await response.json();
-                if (userProfileData.Passport != null) {
-                    var passDef = 'UserPassport/' + userProfileData.Passport;
-                } else {
-                    passDef = 'UserPassport/DefaultImage.png'
-                }
-                UserPic.src = passDef;
-                surName.textContent = userProfileData.Surname;
-                firstName.textContent = userProfileData.First_Name;
-                UserEmail.textContent = 'Email: ' + userProfileData.email;
-                UserPhone.textContent = 'Phone: ' + userProfileData.phone;
-                UserGender.textContent = 'Gender: ' + userProfileData.gender;
-                UserDob.textContent = 'DOB: ' + userProfileData.dob;
-                UserCountryId.textContent = 'CountryId: ' + userProfileData.countryId + userProfileData.stateId;
-                var bio = ''
-                if (userProfileData.bio) {
-                    bio = userProfileData.bio;
-                } else {
-                    bio = 'No bio set yet';
-                }
-                Userbio.textContent = 'Bio: ' + bio;
 
-            } else {
-                throw new Error('Error fetching user profile data');
+    async function fetchUserProfileData(UserId, maxRetries, delay) {
+        let retries = 0;
+
+        while (retries <= maxRetries) {
+            try {
+                const response = await fetch(`http://localhost:8888/getUserProfile/${UserId}`);
+
+                if (response.ok) {
+                    const userProfileData = await response.json();
+                    if (userProfileData.Passport != null) {
+                        var passDef = 'UserPassport/' + userProfileData.Passport;
+                    } else {
+                        passDef = 'UserPassport/DefaultImage.png';
+                    }
+                    var UserPic = document.querySelector('.img_profile');
+                    var UserEmail = document.querySelector('.p_email');
+                    var UserPhone = document.querySelector('.p_phone');
+                    var UserGender = document.querySelector('.p_gender');
+                    var UserDob = document.querySelector('.p_dob');
+                    var UserCountryId = document.querySelector('.p_countryId');
+                    var Userbio = document.querySelector('.p_getbio');
+                    var surName = document.querySelector('.surName');
+                    var firstName = document.querySelector('.firstName');
+
+                    UserPic.src = passDef;
+                    surName.textContent = userProfileData.Surname;
+                    firstName.textContent = userProfileData.First_Name;
+                    UserEmail.textContent = 'Email: ' + userProfileData.email;
+                    UserPhone.textContent = 'Phone: ' + userProfileData.phone;
+                    UserGender.textContent = 'Gender: ' + userProfileData.gender;
+                    UserDob.textContent = 'DOB: ' + userProfileData.dob;
+                    UserCountryId.textContent = 'CountryId: ' + userProfileData.countryId + userProfileData.stateId;
+                    var bio = '';
+                    if (userProfileData.bio) {
+                        bio = userProfileData.bio;
+                    } else {
+                        bio = 'No bio set yet';
+                    }
+                    Userbio.textContent = 'Bio: ' + bio;
+
+                    return;
+                } else {
+                    throw new Error('Error fetching user profile data');
+                }
+            } catch (error) {
+                retries++;
+                if (retries <= maxRetries) {
+                    console.log(`Retry ${retries}: Error fetching user profile data - ${error}`);
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                } else {
+                    console.error(`Failed after ${retries} retries: ${error}`);
+                    return null;
+                }
             }
-        } catch (error) {
-            console.error(error);
-            return null;
         }
     }
+
 
     var passport = document.querySelector('.passport');
     var passportModal = passport.querySelector('a');
@@ -395,11 +417,30 @@ $profileOwnerId = $_GET['UserId'];
             console.error('Error:', error);
         }
     }
+    async function fetchTitle(UserId) {
+        try {
+            const response = await fetch(`http://localhost:8888/getPeople/${UserId}`);
+            if (response.ok) {
+                const userData = await response.json();
+                console.log('This are the users data', userData);
+                if (userData) {
+                    userData.forEach((result) => {
+                        var title = document.querySelector("title")
+                        title.innerHTML = 'Profile -- ' + result.Surname + ' ' + result.FirstName;
+                    });
+                }
+            } else {
+                throw new Error('Error fetching user data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
     const followBox = document.querySelector('.fol')
     const followerBox = document.querySelector('.folw')
     const followingDiv = document.querySelector('.isFollowing');
     const followerDiv = document.querySelector('.following');
-    var variable = document.querySelector('.var');
+
 
     async function fetchFollowing(profileOwnerId) {
         try {
@@ -414,11 +455,6 @@ $profileOwnerId = $_GET['UserId'];
                 followingDiv.innerHTML = followingCount;
                 followerDiv.innerHTML = followersCount;
 
-                if (profileOwnerId != UserId) {
-                    variable.innerHTML = '<div class="col-md-5"> <button id="followBtn" class="follow">Follow</button></div>' + '<div class="col-md-5"> <button class="message" onclick="location.href=chat.php?UserIdx=' + profileOwnerId + '"><i class="bi bi-chat-fill"></i></button></div>';
-                } else {
-                    variable.innerHTML = '<div class="col-md-4"> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setBioModal">Set Bio</button> </div> <div class="col-md-4"> <button type="button" style="background-color:red;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editprofile">Edit profile</button> </div>';
-                }
                 const isFollowing = followers.includes(UserId);
 
                 const followButton = document.getElementById('followBtn');
@@ -439,13 +475,14 @@ $profileOwnerId = $_GET['UserId'];
                 var overlay = document.createElement('div');
                 overlay.classList.add('overlay');
                 overlay.classList.add('hidden');
-                window.onclick = function(event) {
-                    console.log('Clicked on', event.target);
-                    if (event.target === overlay) {
-                        console.log('Clicked on the box');
-                        box.style.display = "none";
-                        overlay.style.display = "none";
-                        box.innerHTML = '';
+                if (box.style.display === 'block') {
+                    window.onclick = function(event) {
+                        if (event.target === overlay) {
+                            console.log('Clicked on the box');
+                            box.style.display = "none";
+                            overlay.style.display = "none";
+                            box.innerHTML = '';
+                        }
                     }
                 }
                 var profile = document.querySelector('.profile-section');
@@ -527,7 +564,7 @@ $profileOwnerId = $_GET['UserId'];
                     if (followingCount === 0) {
                         var nullx = document.createElement('div');
                         nullx.classList.add('nullx');
-                        nullx.innerHTML = '<p>No followers yet<p><p>Try following people</p>';
+                        nullx.innerHTML = '<p>No followers yet<p><p>See more people</p>';
                         box.appendChild(nullx);
                     } else {
                         following.forEach(async (follow) => {
@@ -828,9 +865,6 @@ $profileOwnerId = $_GET['UserId'];
         var authorNameP = document.createElement('p');
         authorNameP.className = 'post-author';
         authorNameP.innerHTML = '<strong>' + data.surname + ' ' + data.firstName + '</strong>';
-
-        var title = document.querySelector("title")
-        title.innerHTML = 'Profile -- ' + data.surname + ' ' + data.firstName;
 
         authorLink.appendChild(authorNameP);
         postHeaderDiv.appendChild(userPassportImg);
@@ -1230,7 +1264,7 @@ $profileOwnerId = $_GET['UserId'];
         var followBtn = $("#followBtn");
 
         $(".follow").click(function() {
-            // alert("Button is working!");
+            alert("Button is working!");
             $.ajax({
                 url: "follow.php",
                 type: "POST",
@@ -1244,9 +1278,13 @@ $profileOwnerId = $_GET['UserId'];
                     alert(response);
 
                     if (response == "followed") {
-                        followBtn.removeClass("btn-primary").addClass("btn-secondary").text("Unfollow");
+                        followButton.textContent = 'Unfollow';
+                        followButton.classList.add('following');
+                        followButton.classList.remove('unfollow');
                     } else if (response == "unfollowed") {
-                        followBtn.removeClass("btn-secondary").addClass("btn-primary").text("Follow");
+                        followButton.textContent = 'Follow';
+                        followButton.classList.add('unfollow');
+                        followButton.classList.remove('following');
                     }
 
                 },

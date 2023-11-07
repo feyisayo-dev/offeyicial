@@ -644,6 +644,9 @@ button[data-bs-target="#sidebar"]:hover {
   padding: 15px;
   background-color: var(--background);
   color: var(--color);
+  padding: 0.5rem;
+  box-shadow: 0 0 2px 2px var(--primary-color);
+  border-radius: 10px;
 }
 
 .offcanvas-title {
@@ -858,7 +861,7 @@ nav .logo {
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  color: var(--primaryColor);
+  color: var(--primary-color);
   background-color: transparent;
   cursor: pointer;
   text-align: center;
@@ -866,6 +869,13 @@ nav .logo {
 
 .message i {
   font-size: 24px;
+}
+.message:hover{
+  color: var(--color);
+  transform: scale(1.2);
+  box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.2);
+  animation: wobble 0.3s ease-in;
+  -webkit-animation: wobble 0.3s ease-in;
 }
 
 .custom-file-upload {
@@ -1262,13 +1272,16 @@ input[type="file"] {
 .like.likeing:hover {
   background-color: transparent;
   border: none;
-  color: var(--primary-color);
+  color: var(--color);
 }
 
 .like-count {
   color: var(--primary-color);
 }
 
+.like-count:hover {
+  color: var(--color);
+}
 .share-button {
   display: inline-flex;
   align-items: center;
@@ -1301,12 +1314,6 @@ input[type="file"] {
   margin-right: 5px;
 }
 
-/* Chat sidebar */
-.offcanvas-header {
-  padding: 0.5rem;
-  background-color: #f0f2f5;
-  border-bottom: 1px solid #dddfe2;
-}
 
 .offcanvas-title {
   margin-bottom: 0;
@@ -1551,7 +1558,7 @@ input:focus {
   background-color: var(--color);
   border: 1px solid var(--background);
   border-radius: 5px;
-  color: var(--primaryColor);
+  color: var(--primary-color);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -1570,7 +1577,7 @@ input:focus {
   align-items: center;
   margin-bottom: 10px;
   padding: 10px;
-  background: var(--primaryColor);
+  background: var(--primary-color);
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -1613,4 +1620,11 @@ input:focus {
 
 .hidden {
   display: none;
+}
+
+.noPost{
+  font-size: 40px;
+  font-family: 'Modern-Age';
+  color: var(--color);
+  text-align: center;
 }
