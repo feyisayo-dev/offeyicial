@@ -1717,6 +1717,50 @@ async function getUserProfileData(UserId) {
     throw error;
   }
 }
+
+app.post("/followUser", async (req, res) => {
+  const { UserId, profileOwnerId } = req.body;
+
+  try {
+    const response = await followProfileOwner(UserId, profileOwnerId);
+    if (response) {
+      res.json(response);
+    } else {
+      res.status(404).json({ error: "User profile not found" });
+    }
+  } catch (error) {
+    console.error("Error following/unfollowing User:", error);
+    res.status(500).json({ error: "Error following/unfollowing User" });
+  }
+});
+
+async function followProfileOwner(UserId, profileOwnerId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = "SELECT * FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
+    request.input("UserId", sql.VarChar, UserId);
+    request.input("profileOwnerId", sql.VarChar, profileOwnerId);
+
+    const result = await request.query(checkQuery);
+
+    if (result.recordset.length === 0) {
+      const followQuery = "INSERT INTO follows (UserId, recipientId) VALUES (@UserId, @profileOwnerId)";
+      const followQueryResult = await request.query(followQuery);
+      await pool.close();
+      return 'followed';
+    } else {
+      const deleteQuery = "DELETE FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
+      const deleteQueryResult = await request.query(deleteQuery);
+      await pool.close();
+      return 'unfollowed';
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
 app.get("/getPeople/:UserId", async (req, res) => {
   const { UserId } = req.params;
   var maxRetries = 3;

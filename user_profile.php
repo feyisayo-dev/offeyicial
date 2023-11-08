@@ -361,33 +361,7 @@ $profileOwnerId = $_GET['UserId'];
                     var followBtn = document.getElementById('followBtn');
 
                     followBtn.addEventListener('click', function() {
-                        alert("Button is working!");
-                        $.ajax({
-                            url: "follow.php",
-                            type: "POST",
-                            data: {
-                                follow: 1,
-                                unfollow: 1,
-                                profileOwnerId: profileOwnerId
-                            },
-                            success: function(response) {
-                                alert(response);
-
-                                if (response == "followed") {
-                                    followButton.textContent = 'Unfollow';
-                                    followButton.classList.add('following');
-                                    followButton.classList.remove('unfollow');
-                                } else if (response == "unfollowed") {
-                                    followButton.textContent = 'Follow';
-                                    followButton.classList.add('unfollow');
-                                    followButton.classList.remove('following');
-                                }
-
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                console.log(errorThrown);
-                            }
-                        });
+                        followUser();
                     });
                     return;
                 } else {
@@ -406,7 +380,35 @@ $profileOwnerId = $_GET['UserId'];
         }
     }
 
-
+    async function followUser() {
+        const formData = new FormData();
+        formData.append('UserId', UserId);
+        formData.append('profileOwnerId', profileOwnerId);
+        fetch('http://localhost:8888/followUser', {
+                method: 'POST',
+                body: formData,
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Error following User');
+                }
+                return response.json();
+            })
+            .then((result) => {
+                if (result == "followed") {
+                    followButton.textContent = 'Unfollow';
+                    followButton.classList.add('following');
+                    followButton.classList.remove('unfollow');
+                } else if (result == "unfollowed") {
+                    followButton.textContent = 'Follow';
+                    followButton.classList.add('unfollow');
+                    followButton.classList.remove('following');
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
     var passport = document.querySelector('.passport');
     var passportModal = passport.querySelector('a');
     var passportModalImg = passportModal.querySelector('img');
