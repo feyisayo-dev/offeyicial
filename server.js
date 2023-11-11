@@ -22,9 +22,16 @@ app.use(cors());
 // Enable parsing of JSON bodies
 app.use(bodyParser.json());
 app.use(fileUpload());
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 
+const upload = multer({ storage: storage });
 // Create an HTTP server
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -404,6 +411,11 @@ async function storeCallLogs(
 async function generateCallId(UserId) {
   const callId = "C" + Date.now() + Math.random();
   return callId;
+}
+
+async function generatePostId(UserId) {
+  const postId = "P" + Date.now() + Math.random() + UserId;
+  return postId;
 }
 
 function hangupIncomingCall(message) {
@@ -1683,10 +1695,22 @@ app.post("/sendVideoNote", async (req, res) => {
 });
 
 app.get("/getUserProfile/:UserId", async (req, res) => {
-  const { UserId } = req.params;
+  let User;
+  const { UserId, profile } = req.params;
+
+  if (UserId) {
+    User = UserId;
+  } else if (profile) {
+    User = profile;
+  } else {
+    res.status(400).json({
+      error: "Invalid request, provide either UserId or profile",
+    });
+    return;
+  }
 
   try {
-    const userProfileData = await getUserProfileData(UserId);
+    const userProfileData = await getUserProfileData(User);
     if (userProfileData) {
       res.json(userProfileData);
     } else {
@@ -1739,23 +1763,33 @@ async function followProfileOwner(UserId, profileOwnerId) {
     const pool = await sql.connect(config);
     const request = new sql.Request(pool);
 
-    const checkQuery = "SELECT * FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
+    const checkQuery =
+      "SELECT * FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
     request.input("UserId", sql.VarChar, UserId);
     request.input("profileOwnerId", sql.VarChar, profileOwnerId);
 
     const result = await request.query(checkQuery);
-
+    let action;
     if (result.recordset.length === 0) {
-      const followQuery = "INSERT INTO follows (UserId, recipientId) VALUES (@UserId, @profileOwnerId)";
+      const followQuery =
+        "INSERT INTO follows (UserId, recipientId) VALUES (@UserId, @profileOwnerId)";
       const followQueryResult = await request.query(followQuery);
-      await pool.close();
-      return 'followed';
+      action = "followed";
     } else {
-      const deleteQuery = "DELETE FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
+      const deleteQuery =
+        "DELETE FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
       const deleteQueryResult = await request.query(deleteQuery);
-      await pool.close();
-      return 'unfollowed';
+      action = "unfollowed";
     }
+    const CountQuery =
+      "SELECT * FROM follows WHERE recipientId = @profileOwnerId";
+    const countQ = await request.query(CountQuery);
+    const newFollowerCount = countQ.recordset.length;
+    io.emit("followerCountUpdate", { profileOwnerId, newFollowerCount });
+
+    await pool.close();
+
+    return action;
   } catch (error) {
     throw error;
   }
@@ -1796,7 +1830,6 @@ app.get("/fetchFollow/:UserId", async (req, res) => {
     res.status(500).json({ error: "User follow / follwing not found" });
   }
 });
-
 
 async function getUser(UserId, maxRetries, delay) {
   let retries = 0;
@@ -1860,7 +1893,9 @@ async function getFollowData(UserId, maxRetries, delay) {
     } catch (error) {
       retries++;
       if (retries <= maxRetries) {
-        console.log(`Retry ${retries}: Error fetching user data follows - ${error}`);
+        console.log(
+          `Retry ${retries}: Error fetching user data follows - ${error}`
+        );
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         console.error(`Failed after ${retries} retries: ${error}`);
@@ -1869,7 +1904,6 @@ async function getFollowData(UserId, maxRetries, delay) {
     }
   }
 }
-
 
 async function getLastMessageId(UserId, UserIdx) {
   try {
@@ -1955,6 +1989,81 @@ app.post("/UpdatingCallLogs", async (req, res) => {
   }
   UpdatingCallLogs();
 });
+
+async function sendPost(
+  UserId,
+  postId,
+  title,
+  content,
+  images,
+  videos,
+  date_posted
+) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const query = `INSERT INTO posts (UserId, PostId, title, content, image, video, date_posted)
+    VALUES (@UserId, @PostId, @title, @content, @images, @videos, @date_posted)`;
+    request.input("UserId", sql.VarChar, UserId);
+    request.input("postId", sql.VarChar, postId);
+    request.input("title", sql.VarChar, title);
+    request.input("content", sql.VarChar, content);
+    request.input("images", sql.VarChar, images);
+    request.input("videos", sql.VarChar, videos);
+    request.input("date_posted", sql.VarChar, date_posted);
+
+    const res = await request.query(query);
+
+    return {
+      UserId,
+      postId,
+      images,
+      videos,
+      title,
+      content,
+    };
+  } catch (error) {
+    console.error("Error uploading post to database:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
+app.post(
+  "/submitPost",
+  upload.fields([{ name: "image" }, { name: "video" }]),
+  async (req, res) => {
+    const UserId = req.body.UserId;
+    const title = req.body.title;
+    const content = req.body.content;
+    const images = req.files.image || [];
+    const videos = req.files.video || [];
+    const date_posted = await datePosted();
+    const postId = await generatePostId(UserId);
+
+    try {
+      const SentVN = await sendPost(
+        UserId,
+        postId,
+        title,
+        content,
+        images,
+        videos,
+        date_posted
+      );
+      io.emit("newPost", SentVN);
+      res.status(200).json(SentVN);
+    } catch (error) {
+      console.error("Error sending VN:", error);
+      res.status(500).json({ error: "Error sending VN" });
+    }
+  }
+);
 
 // Start the server
 const port = 8888;

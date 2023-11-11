@@ -236,6 +236,10 @@ $UserId = $_SESSION['UserId'];
       transform: scaleX(1.05);
       color: green;
     }
+
+    .carousel {
+      text-align: center;
+    }
   </style>
 </head>
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -291,8 +295,7 @@ $UserId = $_SESSION['UserId'];
 </body>
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<!-- name of the files -->
-<!-- Modal for displaying images or videos -->
+
 <div class="modal" id="previewModal">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -303,11 +306,11 @@ $UserId = $_SESSION['UserId'];
       <div class="modal-body">
         <div id="carousel" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-inner" id="previewContainer"></div>
-          <a class="carousel-control-prev" href="#carousel" role="button" data-bs-slide="prev">
+          <a class="carousel-control-prev modalicon" href="#carousel" role="button" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" id="modalicon" aria-hidden="true"></span>
             <span class="sr-only"></span>
           </a>
-          <a class="carousel-control-next" href="#carousel" role="button" data-bs-slide="next">
+          <a class="carousel-control-next modalicon" href="#carousel" role="button" data-bs-slide="next">
             <span class="carousel-control-next-icon" id="modalicon" aria-hidden="true"></span>
             <span class="sr-only"></span>
           </a>
@@ -315,7 +318,7 @@ $UserId = $_SESSION['UserId'];
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary btn-sm accept">Accept</button>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm cancel" data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>
@@ -324,17 +327,68 @@ $UserId = $_SESSION['UserId'];
 <script src="js/jquery.min.js"></script>
 <script src="js/popper.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="node_modules/socket.io-client/dist/socket.io.js"></script>
 <script>
+  var UserId = "<?php echo $_SESSION['UserId']; ?>";
+  var socketUrl = 'http://localhost:8888';
+  const socket = io(socketUrl, {
+    query: {
+      UserId,
+    }
+  });
+  let attemptForConnect = 0;
+  socket.on('connect', () => {
+    console.log('Socket.IO connection established');
+    socket.emit('userConnected', UserId);
+    if (attemptForConnect === 0) {
+      attemptForConnect++;
+    } else {
+      console.log('Reconnected');
+    }
+    var offlinePosts = JSON.parse(localStorage.getItem('offlinePosts'));
+    if (offlinePosts && offlinePosts.length > 0) {
+      offlinePosts.forEach(function(post) {
+        fetch('http://localhost:8888/submitPost', {
+            method: 'POST',
+            body: form_data,
+          })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Error submitting post');
+            }
+            return response.json();
+          })
+          .then((result) => {
+            if (result) {
+              alert('post submitted successfully');
+            } else {
+              console.log(null);
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+      localStorage.removeItem('offlinePosts');
+    }
+  });
+
+  socket.on('disconnect', () => {
+    socket.emit('userDisconnected', UserId);
+  });
+
   $(document).ready(function() {
     $('.custom-file-input').on('change', function() {
       var files = this.files;
       var fileType = this.accept.split('/')[0];
       var previewContainer = $('#previewContainer');
+      var modalicon = document.querySelectorAll('.modalicon');
+      modalicon.style.display = 'block';
       previewContainer.empty();
 
-      // Check if the file type is image or video
       if (fileType === 'image') {
-        $.each(files, function(index, file) {
+        if(files && files.length > 1){
+          $.each(files, function(index, file) {
           var reader = new FileReader();
           reader.onload = function(e) {
             var activeClass = (index === 0) ? 'active' : '';
@@ -342,6 +396,18 @@ $UserId = $_SESSION['UserId'];
           };
           reader.readAsDataURL(file);
         });
+        }else{
+          $.each(files, function(index, file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var activeClass = (index === 0) ? 'active' : '';
+            modalicon.style.display = 'none';
+            previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
+          };
+          reader.readAsDataURL(file);
+        });
+        }
+        
       } else if (fileType === 'video') {
         $.each(files, function(index, file) {
           var videoURL = URL.createObjectURL(file);
@@ -350,20 +416,39 @@ $UserId = $_SESSION['UserId'];
         });
       }
 
-      // Set the data type attribute for the Accept button
       $('.accept').data('type', fileType);
+      $('.cancel').data('type', fileType);
 
-      // Update the label with file names
       var label = $(this).siblings('.custom-file-label');
       var fileNames = [];
-      $.each(files, function(index, file) {
-        fileNames.push(file.name);
-      });
-      label.html(fileNames.join('<br>'));
 
-      // Show the modal
+      if (files && files.length > 0) {
+        $.each(files, function(index, file) {
+          fileNames.push(file.name);
+        });
+        label.html(fileNames.join('<br>'));
+      } else {
+        if (fileType === 'video') {
+          label.html('<i class="bi bi-camera-video"></i> Choose Video');
+        } else {
+          label.html('<i class="bi bi-image"></i> Choose image');
+        }
+      }
+
       $('#previewModal').modal('show');
     });
+    $('.cancel').click(function() {
+    var fileType = $(this).data('type');
+    var label = $(this).closest('.custom-file').find('.custom-file-label');
+
+    if (fileType === 'video') {
+        $('#video').val(null);
+        label.html('<i class="bi bi-camera-video"></i> Choose Video');
+    } else {
+        $('#image').val(null);
+        label.html('<i class="bi bi-image"></i> Choose image');
+    }
+});
 
     $('.accept').click(function() {
       var fileType = $(this).data('type');
@@ -384,7 +469,6 @@ $UserId = $_SESSION['UserId'];
 
         alert('Selected Files: ' + fileNames.join(', '));
 
-        // Clear the modal content and hide the modal
         $('#previewContainer').empty();
         $('#previewModal').modal('hide');
 
@@ -393,9 +477,8 @@ $UserId = $_SESSION['UserId'];
       }
     });
   });
-</script>
-<!-- uploading a post  -->
-<script>
+
+
   $(document).ready(function() {
     $('.submit').click(function() {
       var title = $('#title').val();
@@ -403,7 +486,6 @@ $UserId = $_SESSION['UserId'];
       var imageFiles = $('#image').prop('files');
       var videoFiles = $('#video').prop('files');
 
-      // Check if title or content is empty
       if (title === '' || content === '') {
         alert('Title and content are required.');
         return;
@@ -412,46 +494,76 @@ $UserId = $_SESSION['UserId'];
       var form_data = new FormData();
       form_data.append('title', title);
       form_data.append('content', content);
+      form_data.append('UserId', UserId);
 
-      // Append image files to FormData
+
       $.each(imageFiles, function(index, file) {
         form_data.append('image[]', file);
       });
 
-      // Append video files to FormData
       $.each(videoFiles, function(index, file) {
         form_data.append('video[]', file);
       });
+      const formDataArray = Array.from(form_data.entries());
 
-      $.ajax({
-        url: 'addpost.php', // point to server-side PHP script 
-        dataType: 'text', // what to expect back from the PHP script
-        cache: false,
-        contentType: false,
-        processData: false,
-        data: form_data,
-        type: 'post',
-        success: function(response) {
-          if (response === "success") {
-            console.log("Post added successfully");
-            alert("Post added successfully");
-            alert(response);
-            window.location.href = "index.php";
-          } else {
-            console.log("Error adding post: " + response);
-            alert("Error adding post: " + response);
-            $('#title').val('');
-            $('#content').val('');
-            $('#image').val('');
-            $('#video').val('');
-          }
-        }
-      });
+      alert(JSON.stringify(formDataArray, null, 2));
+
+      if (socket.connected) {
+        fetch('http://localhost:8888/submitPost', {
+            method: 'POST',
+            body: form_data,
+          })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Error submitting post');
+            }
+            return response.json();
+          })
+          .then((result) => {
+            if (result) {
+              alert('post submitted successfully');
+            } else {
+              console.log(null);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        var offlinePosts = localStorage.getItem('offlinePosts') || [];
+        offlinePosts.push({
+          form_data
+        });
+        localStorage.setItem('offlinePosts', JSON.stringify(offlinePosts));
+      }
+
+      //     $.ajax({
+      //       url: 'addpost.php',
+      //       dataType: 'text',
+      //       cache: false,
+      //       contentType: false,
+      //       processData: false,
+      //       data: form_data,
+      //       type: 'post',
+      //       success: function(response) {
+      //         if (response === "success") {
+      //           console.log("Post added successfully");
+      //           alert("Post added successfully");
+      //           alert(response);
+      //           window.location.href = "index.php";
+      //         } else {
+      //           console.log("Error adding post: " + response);
+      //           alert("Error adding post: " + response);
+      //           $('#title').val('');
+      //           $('#content').val('');
+      //           $('#image').val('');
+      //           $('#video').val('');
+      //         }
+      //       }
+      //     });
     });
   });
-</script>
 
-<script>
   $(document).ready(function() {
     $("#search").on("keyup", function() {
       var value = $(this).val().toLowerCase();
@@ -460,22 +572,18 @@ $UserId = $_SESSION['UserId'];
       });
     });
   });
-</script>
-<!-- script for searching -->
-<script>
+
   const searchBox = document.getElementById('search');
   const resultsDiv = document.getElementById('user_table');
 
   searchBox.addEventListener('input', function() {
     const searchTerm = this.value;
 
-    // Clear the results if the search box is empty
     if (!searchTerm.trim()) {
       resultsDiv.innerHTML = '';
       return;
     }
 
-    // Your search function here
     $("#search").on("keyup", function() {
       var search_query = $(this).val();
       $.ajax({
@@ -485,7 +593,6 @@ $UserId = $_SESSION['UserId'];
           search_query: search_query
         },
         success: function(data) {
-          // Update the table with the returned results
           $("#user_table").html(data);
         }
       });

@@ -7,7 +7,6 @@ include('db.php');
 $UserId = $_SESSION['UserId'];
 
 if (isset($_POST['title'])) {
-    // Generate the post ID
     $sql = "SELECT COUNT(PostId) FROM posts";
     $stmt = sqlsrv_query($conn, $sql);
 
@@ -34,10 +33,9 @@ if (isset($_POST['title'])) {
     $datetime = new DateTime();
     $date_posted = $datetime->format('Y-m-d H:i:s');
 
-    $imagePaths = array(); // Array to store the file paths of images
-    $videoPaths = array(); // Array to store the file paths of videos
+    $imagePaths = array();
+    $videoPaths = array();
 
-    // Handle image uploads
     if (isset($_FILES['image']) && is_array($_FILES['image']['name'])) {
         $imageFiles = $_FILES['image'];
 
@@ -47,7 +45,6 @@ if (isset($_POST['title'])) {
             $media_size = $imageFiles['size'][$key];
             $media_error = $imageFiles['error'][$key];
 
-            // Handle image upload
             if ($media_error === 0) {
                 if ($media_size <= 2097152) {
                     $media_name_new = uniqid('', true) . '.' . pathinfo($media_name, PATHINFO_EXTENSION);

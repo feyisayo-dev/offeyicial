@@ -252,13 +252,17 @@ $profileOwnerId = $_GET['UserId'];
 <script>
     var UserId = '<?php echo $UserId ?>';
     var profileOwnerId = "<?php echo $profileOwnerId ?>";
+    console.log('This is the UserId', UserId, 'while this is the profileOwnerId', profileOwnerId);
     var socketUrl = 'ws://localhost:8888';
     const socket = io(socketUrl, {
         query: {
             UserId
         }
     });
-
+    const followBox = document.querySelector('.fol')
+    const followerBox = document.querySelector('.folw')
+    const followingDiv = document.querySelector('.isFollowing');
+    const followerDiv = document.querySelector('.following');
     let attempts = 0;
 
     socket.on('connect', () => {
@@ -267,7 +271,7 @@ $profileOwnerId = $_GET['UserId'];
         if (attempts === 0) {
             var variable = document.querySelector('.var');
             var profileDiv = document.querySelector('.profile-pic');
-            if (profileOwnerId != UserId) {
+            if (profileOwnerId !== UserId) {
                 profileDiv.innerHTML = '<img class="button img_profile" alt="Profile Picture">';
                 variable.innerHTML = '<div class="col-md-5"> <button id="followBtn" class="follow">Follow</button></div>' + '<div class="col-md-5"> <button class="message" onclick="location.href=\'chat.php?UserIdx=' + profileOwnerId + '\'"> <i class="bi bi-chat-fill"></i></button></div>';
             } else {
@@ -314,17 +318,18 @@ $profileOwnerId = $_GET['UserId'];
         }
     });
 
-
-
-
-
-
-    async function fetchUserProfileData(UserId, maxRetries, delay) {
+    socket.on('followerCountUpdate', ({
+        profileOwnerId,
+        newFollowerCount
+    }) => {
+        followerDiv.innerHTML = newFollowerCount;
+    });
+    async function fetchUserProfileData(profileOwnerId, maxRetries, delay) {
         let retries = 0;
 
         while (retries <= maxRetries) {
             try {
-                const response = await fetch(`http://localhost:8888/getUserProfile/${UserId}`);
+                const response = await fetch(`http://localhost:8888/getUserProfile/${profileOwnerId}`);
 
                 if (response.ok) {
                     const userProfileData = await response.json();
@@ -358,11 +363,14 @@ $profileOwnerId = $_GET['UserId'];
                         bio = 'No bio set yet';
                     }
                     Userbio.textContent = 'Bio: ' + bio;
-                    var followBtn = document.getElementById('followBtn');
+                    if (profileOwnerId !== UserId) {
+                        var followBtn = document.getElementById('followBtn');
 
-                    followBtn.addEventListener('click', function() {
-                        followUser();
-                    });
+                        followBtn.addEventListener('click', function() {
+                            alert("buton");
+                            followUser(followBtn);
+                        });
+                    }
                     return;
                 } else {
                     throw new Error('Error fetching user profile data');
@@ -380,7 +388,7 @@ $profileOwnerId = $_GET['UserId'];
         }
     }
 
-    async function followUser() {
+    async function followUser(followBtn) {
         const formData = new FormData();
         formData.append('UserId', UserId);
         formData.append('profileOwnerId', profileOwnerId);
@@ -396,14 +404,15 @@ $profileOwnerId = $_GET['UserId'];
             })
             .then((result) => {
                 if (result == "followed") {
-                    followButton.textContent = 'Unfollow';
-                    followButton.classList.add('following');
-                    followButton.classList.remove('unfollow');
+                    followBtn.textContent = 'Unfollow';
+                    followBtn.classList.add('following');
+                    followBtn.classList.remove('unfollow');
                 } else if (result == "unfollowed") {
-                    followButton.textContent = 'Follow';
-                    followButton.classList.add('unfollow');
-                    followButton.classList.remove('following');
+                    followBtn.textContent = 'Follow';
+                    followBtn.classList.add('unfollow');
+                    followBtn.classList.remove('following');
                 }
+                // fetchFollowing(profileOwnerId);
             })
             .catch((error) => {
                 console.error(error);
@@ -468,10 +477,7 @@ $profileOwnerId = $_GET['UserId'];
             console.error('Error:', error);
         }
     }
-    const followBox = document.querySelector('.fol')
-    const followerBox = document.querySelector('.folw')
-    const followingDiv = document.querySelector('.isFollowing');
-    const followerDiv = document.querySelector('.following');
+
 
 
     async function fetchFollowing(profileOwnerId) {
@@ -486,23 +492,20 @@ $profileOwnerId = $_GET['UserId'];
                 const followersCount = followers.length;
                 followingDiv.innerHTML = followingCount;
                 followerDiv.innerHTML = followersCount;
-
-                const isFollowing = followers.some(follower => follower.UserId === UserId);
-                console.log('This is the followers tab', followers, 'and status', isFollowing);
-
-
-                const followButton = document.getElementById('followBtn');
-
-                if (isFollowing) {
-                    followButton.textContent = 'Unfollow';
-                    followButton.classList.add('following');
-                    followButton.classList.remove('unfollow');
-                } else {
-                    followButton.textContent = 'Follow';
-                    followButton.classList.add('unfollow');
-                    followButton.classList.remove('following');
+                if (profileOwnerId !== UserId) {
+                    const isFollowing = followers.some(follower => follower.UserId === UserId);
+                    console.log('This is the followers tab', followers, 'and status', isFollowing);
+                    const followButton = document.getElementById('followBtn');
+                    if (isFollowing) {
+                        followButton.textContent = 'Unfollow';
+                        followButton.classList.add('following');
+                        followButton.classList.remove('unfollow');
+                    } else {
+                        followButton.textContent = 'Follow';
+                        followButton.classList.add('unfollow');
+                        followButton.classList.remove('following');
+                    }
                 }
-
                 var box = document.createElement('div');
                 box.classList.add('followingBox');
 
@@ -601,8 +604,9 @@ $profileOwnerId = $_GET['UserId'];
                         nullx.innerHTML = '<p>No followers yet<p><p>See more people</p>';
                         box.appendChild(nullx);
                     } else {
-                        following.forEach(async (follow) => {
-                            var User = follow.UserId;
+                        following.forEach(async (followings) => {
+                            var User = followings.recipientId;
+                            console.log('This is the user,', User, 'also this is follwoing,', following);
                             try {
                                 const response = await fetch(`http://localhost:8888/getUserProfile/${User}`);
                                 if (response.ok) {
@@ -622,7 +626,7 @@ $profileOwnerId = $_GET['UserId'];
 
                                     var boxUserName = document.createElement('a');
                                     boxUserName.classList.add('nameUser');
-                                    boxUserName.textContent = `${userProfileData.Surname} ${userProfileData.FirstName}`;
+                                    boxUserName.textContent = `${userProfileData.Surname} ${userProfileData.First_Name}`;
                                     boxUserName.href = 'user_profile.php?UserId=' + userProfileData.UserId;
 
                                     userBox.appendChild(boxUserImg);
@@ -793,7 +797,6 @@ $profileOwnerId = $_GET['UserId'];
 
     function likepost(postId) {
         var post = document.getElementById(postId);
-        var UserId = "<?php echo $_SESSION['UserId']; ?>";
         var likeBtn = post.querySelector('.like');
         var likeCountSpan = likeBtn.querySelector('.like-count');
         var likeCount = parseInt(likeCountSpan.textContent);
@@ -1305,4 +1308,10 @@ $profileOwnerId = $_GET['UserId'];
             }
         });
     });
+    var logOut = document.getElementById('logout');
+    var uplOad = document.getElementById('upload');
+    var inDex = document.getElementById('index');
+    logOut.href = 'logout.php';
+    uplOad.href = 'upload.php?UserId=', UserId;
+    inDex.href = 'index.php?UserId=', UserId;
 </script>

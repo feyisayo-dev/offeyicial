@@ -153,6 +153,7 @@ $UserId = $_SESSION["UserId"];
 
     socket.on('connect', () => {
       console.log('Socket.IO connection established');
+      socket.emit('fetchReels', UserId);
     });
 
     socket.on('reels', (data) => {

@@ -1644,66 +1644,36 @@ if (sqlsrv_execute($stmt)) {
         </div>
       </div>
     </div>
-    <?php
+    <div class="foot">
+      <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+        <i class="bi bi-chat"></i>
+      </button>
 
-    // Retrieve all the chats of the current user
-    $sql = "SELECT DISTINCT recipientId FROM chats WHERE UserId = '$UserId' OR recipientId= '$UserId'";
-    $stmt = sqlsrv_query($conn, $sql);
-    if ($stmt === false) {
-      die(print_r(sqlsrv_errors(), true));
-    }
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+          <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="list-unstyled">
+            <li>
+              <div class="passport">
+                <a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">
+                  <img>
+                </a>
+              </div>
+              <div class="name">
+                <span>
+                  <a></a>
+                </span>
+              </div>
+            </li>
 
-    // Display the chats in a list on the sidebar
-    echo '<!-- Button to open the sidebar -->
-<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-<i class="bi bi-chat"></i> Chats
-</button>
+          </ul>
+        </div>
+      </div>
 
-<!-- Sidebar -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
-<div class="offcanvas-header">
-<h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
-<button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-</div>
-<div class="offcanvas-body">
-<ul class="list-unstyled">';
-
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-      $recipientId = $row['recipientId'];
-
-      // Get the name of the recipient
-      $sql2 = "SELECT Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$recipientId'";
-
-      $stmt2 = sqlsrv_query($conn, $sql2);
-      if ($stmt2 === false) {
-        die(print_r(sqlsrv_errors(), true));
-      }
-
-      $row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
-      $recipientName = $row2['Surname'] . ' ' . $row2['First_Name'];
-      $Passport = $row2['Passport'];
-      if (empty($Passport)) {
-        $passportImage = "UserPassport/DefaultImage.png";
-      } else {
-        $passportImage = "UserPassport/" . $Passport;
-      }
-
-      // Display the recipient name and passport image in the list
-      echo '<li>';
-      echo '<div class="passport">';
-      echo '<a>';
-      echo '<img src="' . $passportImage . '" alt="' . $recipientName . '">';
-      echo '</a>';
-      echo '</div>';
-      echo '<div class="name"><span><a href="chat.php?UserIdx=' . $recipientId . '">' . $recipientName . '</a></span></div>';
-      echo '</li>';
-    }
-
-    echo '</ul>
-</div>
-</div>';
-
-    ?>
+    </div>
   </div>
   <div class="modal fade" id="searchfor" tabindex="-1" role="dialog" aria-labelledby="searchforLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -1728,7 +1698,6 @@ if (sqlsrv_execute($stmt)) {
     </div>
   </div>
 
-  <!-- //images modal -->
   <div class="modal fade" id="imagesmodal" tabindex="-1" role="dialog" aria-labelledby="searchforLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -1756,7 +1725,6 @@ if (sqlsrv_execute($stmt)) {
   </div>
 
 
-  <!-- //videos modal -->
   <div class="modal fade" id="videosmodal" tabindex="-1" role="dialog" aria-labelledby="searchforLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -1838,9 +1806,18 @@ if (sqlsrv_execute($stmt)) {
         UserId
       }
     });
+    let attemptsForPost = 0;
 
     socket.on('connect', () => {
       console.log('Socket.IO connection established');
+
+      if (attemptsForPost === 0) {
+        socket.emit('fetchPosts', UserId);
+        fetchPoeple(UserId);
+        attemptsForPost++;
+      } else {
+        console.log('Reconnected');
+      }
     });
 
     socket.on('posts', (data) => {
@@ -1878,6 +1855,47 @@ if (sqlsrv_execute($stmt)) {
       });
     });
 
+    var passport = document.querySelector('.passport');
+    var passportModal = passport.querySelector('a');
+    var passportModalImg = passportModal.querySelector('img');
+
+    var NameOfP = document.querySelector('.name');
+    var NameOfPSpan = NameOfP.querySelector('span');
+    var NameOfPSpanA = NameOfPSpan.querySelector('a');
+
+    async function fetchPoeple(UserId) {
+      try {
+        const response = await fetch(`http://localhost:8888/getPeople/${UserId}`);
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('This are the users data', userData);
+          if (userData) {
+            userData.forEach((result) => {
+              if (result.Passport != null) {
+                var passUser = 'UserPassport/' + result.Passport;
+              } else {
+                passUser = 'UserPassport/DefaultImage.png';
+              }
+
+              passportModalImg.src = passUser;
+              passportModalImg.alt = result.UserId;
+              NameOfPSpanA.textContent = `${result.Surname} ${result.FirstName}`;
+              NameOfPSpanA.href = 'chat.php?UserId=', result.UserId;
+            });
+          } else {
+            passUser = 'UserPassport/DefaultImage.png';
+            passportModalImg.src = passUser;
+            passportModalImg.alt = 'New User';
+            NameOfPSpanA.textContent = `Talk to new people`;
+          }
+
+        } else {
+          throw new Error('Error fetching user data');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
 
     function likepost(postId) {
       var post = document.getElementById(postId);
@@ -2053,7 +2071,6 @@ if (sqlsrv_execute($stmt)) {
       var postMediaDiv = document.createElement('div');
       postMediaDiv.className = 'post-media';
 
-      // Check if the post has an image
       if (data.image !== null && data.image !== '') {
         var postItem = document.createElement('div');
         postItem.className = 'post-item';
@@ -2064,7 +2081,6 @@ if (sqlsrv_execute($stmt)) {
         postMediaDiv.appendChild(postItem);
       }
 
-      // Check if the post has a video
       if (data.video !== null && data.video !== '') {
         var postItem = document.createElement('div');
         postItem.className = 'post-item';
@@ -2079,7 +2095,6 @@ if (sqlsrv_execute($stmt)) {
         source.type = 'video/mp4';
         video.appendChild(source);
         videoContainer.appendChild(video);
-        // videoContainer.innerHTML += 'Your browser does not support the video tag.';
         var videoControls = document.createElement('div');
         videoControls.className = 'video-controls';
         var rewindButton = document.createElement('button');
@@ -2147,7 +2162,6 @@ if (sqlsrv_execute($stmt)) {
         postItem.appendChild(videoContainer);
         postMediaDiv.appendChild(postItem);
 
-        // Create the Previous and Next buttons
         var previousButton = document.createElement('button');
         previousButton.className = 'previous-button';
         previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
@@ -2179,25 +2193,21 @@ if (sqlsrv_execute($stmt)) {
 
         nextButton.addEventListener('click', function() {
           if (currentIndex < postItems.length - 1) {
-            postItems[currentIndex].style.display = 'none'; // Hide the current post item
-            currentIndex++; // Increment the current index
-            postItems[currentIndex].style.display = 'block'; // Show the next post item
+            postItems[currentIndex].style.display = 'none';
+            currentIndex++;
+            postItems[currentIndex].style.display = 'block';
             postItems[currentIndex].scrollIntoView({
               behavior: 'smooth'
-            }); // Scroll to the next post item
+            });
           }
         });
       }
 
-      // Hide all media elements except the first one
       var mediaItems = postMediaDiv.getElementsByClassName('post-item');
       console.log(mediaItems.length);
       for (var i = 1; i < mediaItems.length; i++) {
         mediaItems[i].style.display = 'none';
       }
-
-      // Append the post media div before the post content
-      // newsFeedPostDiv.insertBefore(postMediaDiv, postContentDiv);
 
       var postContentDiv = document.createElement('div');
       postContentDiv.className = 'post-content';
@@ -2247,7 +2257,6 @@ if (sqlsrv_execute($stmt)) {
 
       postTitleDiv.appendChild(postTitleH2);
       postDiv.appendChild(postTitleDiv);
-      // Append the post media div to the post div
       postDiv.appendChild(postMediaDiv);
       postDiv.appendChild(postContentDiv);
       postDiv.appendChild(postDateDiv);
@@ -2277,18 +2286,15 @@ if (sqlsrv_execute($stmt)) {
         myVideo.currentTime -= 10;
       }
 
-      // <i class="bi bi-fast-forward"></i>
       function fastForward(postId) {
         const myVideo = document.getElementById("myVideo-" + postId);
         myVideo.currentTime += 10;
       }
 
-      // Set volume
       function setVolume(postId) {
         var video = document.getElementById('myVideo-' + postId);
         var volumeRange = document.getElementById('volumeRange-' + postId);
 
-        // Set the volume of the video
         video.volume = volumeRange.value;
       }
 
@@ -2323,7 +2329,6 @@ if (sqlsrv_execute($stmt)) {
         currentTimeDisplay.innerHTML = formatTime(video.currentTime);
       }
 
-      // Function to format time in MM:SS format
       function formatTime(time) {
         var minutes = Math.floor(time / 60);
         var seconds = Math.floor(time % 60);
@@ -2381,7 +2386,6 @@ if (sqlsrv_execute($stmt)) {
       navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
     })
 
-    // Add event listener to the "Post" button
     var postButton = document.getElementById('postButton');
     postButton.addEventListener('click', function() {
       // Code to handle posting a new post
@@ -2796,7 +2800,6 @@ if (sqlsrv_execute($stmt)) {
 
 <script>
   $(document).ready(function() {
-    // Add event listener to "other reason" checkbox
     $('#other-reason').on('change', function() {
       if ($(this).is(':checked')) {
         $('#other-reason-textbox').show();
@@ -2805,7 +2808,6 @@ if (sqlsrv_execute($stmt)) {
       }
     });
 
-    // Add event listener to all checkboxes
     $(".blockuser").on('change', function() {
       if ($(this).is(':checked')) {
         alert($(this).siblings('label').text());
@@ -2815,7 +2817,6 @@ if (sqlsrv_execute($stmt)) {
 
 
   function blockUser() {
-    // Get the values of all the form elements
     const checkboxes = document.querySelectorAll('.blockuser');
     const checkedCheckboxes = [];
     checkboxes.forEach((checkbox) => {
@@ -2831,7 +2832,6 @@ if (sqlsrv_execute($stmt)) {
 
     const recipientId = $(event.target).data('recipient-id');
     alert(recipientId);
-    // Get the selected reasons for blocking the user
     const pornographicContent = $('#blockUserModal-' + recipientId + ' #pornographic-content').is(':checked');
     const notAFanOfPosts = $('#blockUserModal-' + recipientId + ' #not-a-fan-of-posts').is(':checked');
     const bloodyContent = $('#blockUserModal-' + recipientId + ' #bloody-content').is(':checked');
@@ -2867,7 +2867,6 @@ if (sqlsrv_execute($stmt)) {
 </script>
 <script>
   $(document).ready(function() {
-    // Add event listener to "other reason" checkbox
     $('#other-reason-posts').on('change', function() {
       if ($(this).is(':checked')) {
         $('#other-reason-textbox-posts').show();
@@ -2876,7 +2875,6 @@ if (sqlsrv_execute($stmt)) {
       }
     });
 
-    // Add event listener to all checkboxes
     $(".blockpost").on('change', function() {
       if ($(this).is(':checked')) {
         alert($(this).siblings('label').text());
@@ -2890,7 +2888,6 @@ if (sqlsrv_execute($stmt)) {
   // });
 
   function blockPosts() {
-    // Get the values of all the form elements
     const checkboxes = document.querySelectorAll('.blockpost');
     const checkedCheckboxes = [];
     checkboxes.forEach((checkbox) => {
@@ -2905,7 +2902,6 @@ if (sqlsrv_execute($stmt)) {
     }
 
     const postId = $(event.target).closest('.modal').data('postid');
-    // Retrieve the post ID from the hidden input field
     alert(postId);
     const pornographicContentPosts = $('#blockTypeofPostModal-' + postId + ' #pornographic-content-posts').is(':checked');
     alert(pornographicContentPosts);
@@ -2919,7 +2915,6 @@ if (sqlsrv_execute($stmt)) {
     alert(otherReasonCheckboxPosts);
     const otherReasonTextPosts = $('#blockTypeofPostModal-' + postId + ' #other-reason-text-posts').val();
 
-    // Assuming you want to submit the form data to a server endpoint using JavaScript fetch API:
     const form = new FormData();
     form.append("postId", postId);
     form.append("pornographicContentPosts", pornographicContentPosts);
@@ -2937,12 +2932,10 @@ if (sqlsrv_execute($stmt)) {
       processData: false,
       contentType: false,
       success: function(response) {
-        // confirm what is being said in the console
         console.log(response);
         if (response == "success") {
           console.log(response);
           alert("Post type blocked successfully.");
-          // alert checked checkbox
           alert(checkedCheckboxes);
           $('#blockTypeofPostModal-' + postId).modal('hide');
         }
