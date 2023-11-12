@@ -2034,36 +2034,50 @@ async function sendPost(
   }
 }
 
-app.post(
-  "/submitPost",
-  upload.fields([{ name: "image" }, { name: "video" }]),
-  async (req, res) => {
-    const UserId = req.body.UserId;
-    const title = req.body.title;
-    const content = req.body.content;
-    const images = req.files.image || [];
-    const videos = req.files.video || [];
-    const date_posted = await datePosted();
-    const postId = await generatePostId(UserId);
+async function processFiles(files, folder) {
+  const buffers = [];
 
-    try {
-      const SentVN = await sendPost(
-        UserId,
-        postId,
-        title,
-        content,
-        images,
-        videos,
-        date_posted
-      );
-      io.emit("newPost", SentVN);
-      res.status(200).json(SentVN);
-    } catch (error) {
-      console.error("Error sending VN:", error);
-      res.status(500).json({ error: "Error sending VN" });
-    }
+  for (const file of files) {
+    const filePath = `${folder}${Date.now()}_${file.name}`;
+    await fs.rename(file.path, filePath);
+    
+    const buffer = await fs.readFile(filePath);
+    buffers.push(buffer);
   }
-);
+
+  return filePath;
+}
+
+app.post("/submitPost", async (req, res) => {
+  const UserId = req.body.UserId;
+  const title = req.body.title;
+  const content = req.body.content;
+  const images = req.files.image || [];
+  const videos = req.files.video || [];
+  const date_posted = await datePosted();
+  const postId = await generatePostId(UserId);
+  const UploadFolder = "uploads";
+  
+  const imageBuffers = await processFiles(images, UploadFolder);
+  const videoBuffers = await processFiles(videos, UploadFolder);
+
+  try {
+    const SentVN = await sendPost(
+      UserId,
+      postId,
+      title,
+      content,
+      imageBuffers,
+      videoBuffers,
+      date_posted
+    );
+    io.emit("newPost", SentVN);
+    res.status(200).json(SentVN);
+  } catch (error) {
+    console.error("Error sending VN:", error);
+    res.status(500).json({ error: "Error sending VN" });
+  }
+});
 
 // Start the server
 const port = 8888;

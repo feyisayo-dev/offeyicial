@@ -283,11 +283,11 @@ $UserId = $_SESSION['UserId'];
     </div>
     <div class="custom-file">
       <input type="file" class="custom-file-input" id="image" name="image" accept="image/*" multiple>
-      <label class="custom-file-label" for="image"><i class="bi bi-image"></i> Choose Images</label>
+      <label class="custom-file-label image-label" for="image"><i class="bi bi-image"></i> Choose Images</label>
     </div>
     <div class="custom-file">
       <input type="file" class="custom-file-input" id="video" name="video" accept="video/*" multiple>
-      <label class="custom-file-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
+      <label class="custom-file-label video-label" for="video"><i class="bi bi-camera-video"></i> Choose Video</label>
     </div>
     <input type="submit" value="Add Post" class="submit">
     <input class="profile" value="Back to profile" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'">
@@ -306,11 +306,11 @@ $UserId = $_SESSION['UserId'];
       <div class="modal-body">
         <div id="carousel" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-inner" id="previewContainer"></div>
-          <a class="carousel-control-prev modalicon" href="#carousel" role="button" data-bs-slide="prev">
+          <a class="carousel-control-prev modalicon1" href="#carousel" role="button" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" id="modalicon" aria-hidden="true"></span>
             <span class="sr-only"></span>
           </a>
-          <a class="carousel-control-next modalicon" href="#carousel" role="button" data-bs-slide="next">
+          <a class="carousel-control-next modalicon2" href="#carousel" role="button" data-bs-slide="next">
             <span class="carousel-control-next-icon" id="modalicon" aria-hidden="true"></span>
             <span class="sr-only"></span>
           </a>
@@ -382,32 +382,35 @@ $UserId = $_SESSION['UserId'];
       var files = this.files;
       var fileType = this.accept.split('/')[0];
       var previewContainer = $('#previewContainer');
-      var modalicon = document.querySelectorAll('.modalicon');
-      modalicon.style.display = 'block';
+      var modalicon1 = document.querySelector('.modalicon1');
+      var modalicon2 = document.querySelector('.modalicon2');
+      modalicon1.style.display = 'flex';
+      modalicon2.style.display = 'flex';
       previewContainer.empty();
 
       if (fileType === 'image') {
-        if(files && files.length > 1){
+        if (files && files.length > 1) {
           $.each(files, function(index, file) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var activeClass = (index === 0) ? 'active' : '';
-            previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
-          };
-          reader.readAsDataURL(file);
-        });
-        }else{
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              var activeClass = (index === 0) ? 'active' : '';
+              previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
+            };
+            reader.readAsDataURL(file);
+          });
+        } else {
           $.each(files, function(index, file) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var activeClass = (index === 0) ? 'active' : '';
-            modalicon.style.display = 'none';
-            previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
-          };
-          reader.readAsDataURL(file);
-        });
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              var activeClass = (index === 0) ? 'active' : '';
+              modalicon1.style.display = 'none';
+              modalicon2.style.display = 'none';
+              previewContainer.append('<div class="carousel-item ' + activeClass + '"><img src="' + e.target.result + '" class="img-fluid"></div>');
+            };
+            reader.readAsDataURL(file);
+          });
         }
-        
+
       } else if (fileType === 'video') {
         $.each(files, function(index, file) {
           var videoURL = URL.createObjectURL(file);
@@ -438,17 +441,22 @@ $UserId = $_SESSION['UserId'];
       $('#previewModal').modal('show');
     });
     $('.cancel').click(function() {
-    var fileType = $(this).data('type');
-    var label = $(this).closest('.custom-file').find('.custom-file-label');
+      var fileType = $(this).data('type');
+      console.log('File Type:', fileType);
 
-    if (fileType === 'video') {
+      if (fileType === 'video') {
         $('#video').val(null);
-        label.html('<i class="bi bi-camera-video"></i> Choose Video');
-    } else {
-        $('#image').val(null);
-        label.html('<i class="bi bi-image"></i> Choose image');
-    }
-});
+        var label = document.querySelector('.video-label');
+        label.innerHTML = '<i class="bi bi-camera-video"></i> Choose Video';
+      } else {
+        if (fileType === 'image') {
+          $('#image').val(null);
+          var label = document.querySelector('.image-label');
+          label.innerHTML = '<i class="bi bi-image"></i> Choose image';
+        }
+      }
+      console.log('File label:', label);
+    });
 
     $('.accept').click(function() {
       var fileType = $(this).data('type');
