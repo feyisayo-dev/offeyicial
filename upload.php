@@ -350,7 +350,7 @@ $UserId = $_SESSION['UserId'];
       offlinePosts.forEach(function(post) {
         fetch('http://localhost:8888/submitPost', {
             method: 'POST',
-            body: form_data,
+            body: post,
           })
           .then((response) => {
             if (!response.ok) {
@@ -491,8 +491,18 @@ $UserId = $_SESSION['UserId'];
     $('.submit').click(function() {
       var title = $('#title').val();
       var content = $('#content').val();
-      var imageFiles = $('#image').prop('files');
-      var videoFiles = $('#video').prop('files');
+      var imageInput = document.getElementById('image');
+      var videoInput = document.getElementById('video');
+
+      var image = null;
+      if (imageInput.files.length > 0) {
+        image = imageInput.files;
+      }
+
+      var video = null;
+      if (videoInput.files.length > 0) {
+        video = videoInput.files;
+      }
 
       if (title === '' || content === '') {
         alert('Title and content are required.');
@@ -505,12 +515,12 @@ $UserId = $_SESSION['UserId'];
       form_data.append('UserId', UserId);
 
 
-      $.each(imageFiles, function(index, file) {
-        form_data.append('image[]', file);
+      $.each(image, function(index, file) {
+        form_data.append('image', file);
       });
 
-      $.each(videoFiles, function(index, file) {
-        form_data.append('video[]', file);
+      $.each(video, function(index, file) {
+        form_data.append('video', file);
       });
       const formDataArray = Array.from(form_data.entries());
 

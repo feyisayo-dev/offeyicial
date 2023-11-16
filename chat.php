@@ -221,6 +221,38 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
                       <td onclick="insertEmoji('&#x1F611;')">😑</td>
                     </tr>
                     <tr>
+                      <td onclick="insertEmoji('&#x1F620;')">😠</td>
+                      <td onclick="insertEmoji('&#x1F621;')">😡</td>
+                      <td onclick="insertEmoji('&#x1F622;')">😢</td>
+                      <td onclick="insertEmoji('&#x1F623;')">😣</td>
+                      <td onclick="insertEmoji('&#x1F624;')">😤</td>
+                      <td onclick="insertEmoji('&#x1F625;')">😥</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F626;')">😦</td>
+                      <td onclick="insertEmoji('&#x1F627;')">😧</td>
+                      <td onclick="insertEmoji('&#x1F628;')">😨</td>
+                      <td onclick="insertEmoji('&#x1F629;')">😩</td>
+                      <td onclick="insertEmoji('&#x1F630;')">😰</td>
+                      <td onclick="insertEmoji('&#x1F631;')">😱</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F632;')">😲</td>
+                      <td onclick="insertEmoji('&#x1F633;')">😳</td>
+                      <td onclick="insertEmoji('&#x1F634;')">😴</td>
+                      <td onclick="insertEmoji('&#x1F635;')">😵</td>
+                      <td onclick="insertEmoji('&#x1F636;')">😶</td>
+                      <td onclick="insertEmoji('&#x1F637;')">😷</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F638;')">😸</td>
+                      <td onclick="insertEmoji('&#x1F639;')">😹</td>
+                      <td onclick="insertEmoji('&#x1F640;')">😰</td>
+                      <td onclick="insertEmoji('&#x1F641;')">😱</td>
+                      <td onclick="insertEmoji('&#x1F642;')">😲</td>
+                      <td onclick="insertEmoji('&#x1F643;')">😳</td>
+                    </tr>
+                    <tr>
                       <td onclick="insertEmoji('&#x1F60A;')">😊</td>
                       <td onclick="insertEmoji('&#x1F60B;')">😋</td>
                       <td onclick="insertEmoji('&#x1F60C;')">😌</td>

@@ -20,6 +20,7 @@
     "socket.io-client": "^4.7.2",
     "stream": "^0.0.2",
     "sweetalert2": "^10.16.11",
+    "util": "^0.12.5",
     "websocket": "^1.0.34"
   },
   "devDependencies": {

@@ -519,10 +519,6 @@ if (sqlsrv_execute($stmt)) {
       width: 100% !important;
     }
 
-    .owl-carousel .owl-stage-outer {
-      height: 200px;
-    }
-
     .like:hover {
       border: 1px solid #dddfe2;
       transform: scaleX(1.05);
@@ -1579,7 +1575,6 @@ if (sqlsrv_execute($stmt)) {
         </div>
 
         <div id="newsFeed">
-          <!-- Posts will be dynamically loaded here -->
         </div>
         <button id="scrollToTopBtn"><i class="bi bi-arrow-up"></i></button>
       </div>
@@ -1602,6 +1597,38 @@ if (sqlsrv_execute($stmt)) {
                     <td onclick="insertEmoji('&#x1F605;')">😅</td>
                   </tr>
                   <tr>
+                    <td onclick="insertEmoji('&#x1F620;')">😠</td>
+                    <td onclick="insertEmoji('&#x1F621;')">😡</td>
+                    <td onclick="insertEmoji('&#x1F622;')">😢</td>
+                    <td onclick="insertEmoji('&#x1F623;')">😣</td>
+                    <td onclick="insertEmoji('&#x1F624;')">😤</td>
+                    <td onclick="insertEmoji('&#x1F625;')">😥</td>
+                  </tr>
+                  <tr>
+                    <td onclick="insertEmoji('&#x1F626;')">😦</td>
+                    <td onclick="insertEmoji('&#x1F627;')">😧</td>
+                    <td onclick="insertEmoji('&#x1F628;')">😨</td>
+                    <td onclick="insertEmoji('&#x1F629;')">😩</td>
+                    <td onclick="insertEmoji('&#x1F630;')">😰</td>
+                    <td onclick="insertEmoji('&#x1F631;')">😱</td>
+                  </tr>
+                  <tr>
+                    <td onclick="insertEmoji('&#x1F632;')">😲</td>
+                    <td onclick="insertEmoji('&#x1F633;')">😳</td>
+                    <td onclick="insertEmoji('&#x1F634;')">😴</td>
+                    <td onclick="insertEmoji('&#x1F635;')">😵</td>
+                    <td onclick="insertEmoji('&#x1F636;')">😶</td>
+                    <td onclick="insertEmoji('&#x1F637;')">😷</td>
+                  </tr>
+                  <tr>
+                    <td onclick="insertEmoji('&#x1F638;')">😸</td>
+                    <td onclick="insertEmoji('&#x1F639;')">😹</td>
+                    <td onclick="insertEmoji('&#x1F640;')">😰</td>
+                    <td onclick="insertEmoji('&#x1F641;')">😱</td>
+                    <td onclick="insertEmoji('&#x1F642;')">😲</td>
+                    <td onclick="insertEmoji('&#x1F643;')">😳</td>
+                  </tr>
+                  <tr>
                     <td onclick="insertEmoji('&#x1F606;')">😆</td>
                     <td onclick="insertEmoji('&#x1F607;')">😇</td>
                     <td onclick="insertEmoji('&#x1F608;')">😈</td>
@@ -1609,7 +1636,6 @@ if (sqlsrv_execute($stmt)) {
                     <td onclick="insertEmoji('&#x1F610;')">😐</td>
                     <td onclick="insertEmoji('&#x1F611;')">😑</td>
                   </tr>
-                  <!-- Add more rows and columns for additional emojis -->
                   <tr>
                     <td onclick="insertEmoji('&#x1F60A;')">😊</td>
                     <td onclick="insertEmoji('&#x1F60B;')">😋</td>
@@ -1810,7 +1836,7 @@ if (sqlsrv_execute($stmt)) {
 
     socket.on('connect', () => {
       console.log('Socket.IO connection established');
-
+      console.log('attempts', attemptsForPost);
       if (attemptsForPost === 0) {
         socket.emit('fetchPosts', UserId);
         fetchPoeple(UserId);
@@ -1833,9 +1859,11 @@ if (sqlsrv_execute($stmt)) {
         console.log('title:', transformedData.title);
         console.log('content:', transformedData.content);
         console.log('timeAgo:', transformedData.timeAgo);
+        console.log('datePosted:', transformedData.datePosted);
         console.log('likes:', transformedData.likes);
 
         loadNewsFeed(transformedData);
+        pauseandplayOtherVideo();
       });
     });
     var likeCounts = {};
@@ -1895,6 +1923,50 @@ if (sqlsrv_execute($stmt)) {
       } catch (error) {
         console.error('Error:', error);
       }
+    }
+
+    function pauseandplayOtherVideo() {
+      var VideoNotes = document.querySelectorAll('.post-video');
+      console.log('this is the length of the video notes', VideoNotes.length);
+      VideoNotes.forEach(function(VideoNote) {
+        var videoElement = VideoNote.querySelector('video');
+        videoElement.addEventListener('play', function() {
+          console.log('Video started playing');
+          VideoNotes.forEach(function(otherContainer) {
+            if (otherContainer !== VideoNote) {
+              var otherVideo = otherContainer.querySelector('video');
+              if (!otherVideo.paused) {
+                otherVideo.pause();
+                console.log('Paused other video');
+              }
+            }
+          });
+        });
+      });
+    }
+
+    function autoplayVid() {
+      postItems = document.querySelectorAll('.post-item');
+      postItems.forEach(function(postItem) {
+        var postVideos = postItem.querySelectorAll('.post-video');
+        postVideos.forEach(function(postVideo) {
+          videoElement = postVideo.querySelector('video');
+          videoControls = postVideo.querySelector('.video-controls');
+          videoCtlBtn = videoControls.querySelector('.play');
+          var span = videoCtlBtn.querySelector('span');
+          if (videoElement) {
+            if (postItem.style.display === 'block') {
+              console.log('in position' + postItem.id);
+              videoElement.play();
+              span.innerHTML = "<i class='bi bi-pause-circle-fill'></i>";
+            } else {
+              console.log('out of position' + postItem.id);
+              videoElement.pause();
+              span.innerHTML = "<i class='bi bi-play'></i>";
+            }
+          }
+        });
+      })
     }
 
     function likepost(postId) {
@@ -2071,137 +2143,192 @@ if (sqlsrv_execute($stmt)) {
       var postMediaDiv = document.createElement('div');
       postMediaDiv.className = 'post-media';
 
-      if (data.image !== null && data.image !== '') {
-        var postItem = document.createElement('div');
-        postItem.className = 'post-item';
-        var image = document.createElement('img');
-        image.className = 'post-image';
-        image.src = data.image;
-        postItem.appendChild(image);
-        postMediaDiv.appendChild(postItem);
+      if (data.image && data.image.length > 0) {
+        data.image.forEach(function(imagePath) {
+          var postItem = document.createElement('div');
+          postItem.className = 'post-item';
+
+          var image = document.createElement('img');
+          image.className = 'post-image';
+          image.src = imagePath;
+
+          postItem.appendChild(image);
+          postMediaDiv.appendChild(postItem);
+        });
       }
 
+
       if (data.video !== null && data.video !== '') {
-        var postItem = document.createElement('div');
-        postItem.className = 'post-item';
-        var videoContainer = document.createElement('div');
-        videoContainer.className = 'post-video';
-        var video = document.createElement('video');
-        video.setAttribute('data-my-Video-id', data.postId);
-        video.id = 'myVideo-' + data.postId;
-        video.className = 'w-100';
-        var source = document.createElement('source');
-        source.src = data.video;
-        source.type = 'video/mp4';
-        video.appendChild(source);
-        videoContainer.appendChild(video);
-        var videoControls = document.createElement('div');
-        videoControls.className = 'video-controls';
-        var rewindButton = document.createElement('button');
-        rewindButton.id = 'rewindButton-' + data.postId;
-        rewindButton.onclick = function() {
-          rewind(data.postId);
-        };
-        rewindButton.innerHTML = '<i class="bi bi-rewind"></i>';
-        videoControls.appendChild(rewindButton);
-        var playPauseButton = document.createElement('button');
-        playPauseButton.onclick = function() {
-          togglePlayPause(data.postId);
-        };
-        playPauseButton.innerHTML = '<span id="playPauseButton-' + data.postId + '"><i class="bi bi-play"></i></span>';
-        videoControls.appendChild(playPauseButton);
-        var fastForwardButton = document.createElement('button');
-        fastForwardButton.id = 'fastForwardButton-' + data.postId;
-        fastForwardButton.onclick = function() {
-          fastForward(data.postId);
-        };
-        fastForwardButton.innerHTML = '<i class="bi bi-fast-forward"></i>';
-        videoControls.appendChild(fastForwardButton);
-        var volumeControl = document.createElement('div');
-        volumeControl.className = 'volume-control';
-        var volumeRange = document.createElement('input');
-        volumeRange.type = 'range';
-        volumeRange.id = 'volumeRange-' + data.postId;
-        volumeRange.min = '0';
-        volumeRange.max = '1';
-        volumeRange.step = '0.01';
-        volumeRange.value = '1';
-        volumeRange.onchange = function() {
-          setVolume(data.postId);
-        };
-        volumeControl.appendChild(volumeRange);
-        videoControls.appendChild(volumeControl);
-        var timeControl = document.createElement('div');
-        timeControl.className = 'time-control';
-        var timeRange = document.createElement('input');
-        timeRange.type = 'range';
-        timeRange.id = 'timeRange-' + data.postId;
-        timeRange.min = '0';
-        timeRange.step = '0.01';
-        timeRange.value = '0';
-        timeRange.onchange = function() {
-          setCurrentTime(data.postId);
-        };
-        timeControl.appendChild(timeRange);
-        var timeDisplay = document.createElement('div');
-        timeDisplay.className = 'time-display';
-        var currentTimeDisplay = document.createElement('div');
-        currentTimeDisplay.className = 'currentTimeDisplay';
-        currentTimeDisplay.id = 'currentTimeDisplay-' + data.postId;
-        currentTimeDisplay.innerHTML = '0:00';
-        timeDisplay.appendChild(currentTimeDisplay);
-        timeDisplay.innerHTML += '<div class="slash">/</div>';
-        var durationDisplay = document.createElement('div');
-        durationDisplay.className = 'durationDisplay';
-        durationDisplay.id = 'durationDisplay-' + data.postId;
-        durationDisplay.innerHTML = '0:00';
-        timeDisplay.appendChild(durationDisplay);
-        timeControl.appendChild(timeDisplay);
-        videoControls.appendChild(timeControl);
-        videoContainer.appendChild(videoControls);
-        postItem.appendChild(videoContainer);
-        postMediaDiv.appendChild(postItem);
+        data.video.forEach(function(videoPath, index) {
+          var newId = data.postId + '-' + index;
+          var postItem = document.createElement('div');
+          postItem.className = 'post-item';
+          postItem.id = 'post-item' + newId;
 
-        var previousButton = document.createElement('button');
-        previousButton.className = 'previous-button';
-        previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
+          var videoContainer = document.createElement('div');
+          videoContainer.className = 'post-video';
+          var video = document.createElement('video');
+          video.setAttribute('data-my-Video-id', newId);
+          video.id = 'myVideo-' + newId;
+          video.className = 'w-100';
 
-        var nextButton = document.createElement('button');
-        nextButton.className = 'next-button';
-        nextButton.innerHTML = '<i class="bi bi-arrow-right"></i>';
+          var source = document.createElement('source');
+          source.src = videoPath;
+          source.type = 'video/mp4';
 
-        var button = document.createElement('div');
-        button.className = 'button';
+          video.appendChild(source);
+          videoContainer.appendChild(video);
 
-        button.appendChild(previousButton);
-        button.appendChild(nextButton);
-        postMediaDiv.appendChild(button);
+          var videoControls = document.createElement('div');
+          videoControls.className = 'video-controls';
 
-        var postItems = postMediaDiv.getElementsByClassName('post-item');
-        var currentIndex = 0;
+          var rewindButton = document.createElement('button');
+          rewindButton.id = 'rewindButton-' + newId;
+          rewindButton.onclick = function() {
+            rewind(newId);
+          };
+          rewindButton.innerHTML = '<i class="bi bi-rewind"></i>';
+          videoControls.appendChild(rewindButton);
+          var playPauseButton = document.createElement('button');
+          playPauseButton.classList.add('play');
+          playPauseButton.onclick = function() {
+            togglePlayPause(newId);
+          };
+          playPauseButton.innerHTML = '<span class="playPauseButton" id="playPauseButton-' + newId + '"><i class="bi bi-play"></i></span>';
+          videoControls.appendChild(playPauseButton);
+          var fastForwardButton = document.createElement('button');
+          fastForwardButton.id = 'fastForwardButton-' + newId;
+          fastForwardButton.onclick = function() {
+            fastForward(newId);
+          };
+          fastForwardButton.innerHTML = '<i class="bi bi-fast-forward"></i>';
+          videoControls.appendChild(fastForwardButton);
+          var volumeControl = document.createElement('div');
+          volumeControl.className = 'volume-control';
+          var volumeRange = document.createElement('input');
+          volumeRange.type = 'range';
+          volumeRange.id = 'volumeRange-' + newId;
+          volumeRange.min = '0';
+          volumeRange.max = '1';
+          volumeRange.step = '0.01';
+          volumeRange.value = '1';
+          volumeRange.onchange = function() {
+            setVolume(newId);
+          };
+          volumeControl.appendChild(volumeRange);
+          videoControls.appendChild(volumeControl);
+          var timeControl = document.createElement('div');
+          timeControl.className = 'time-control';
+          var timeRange = document.createElement('input');
+          timeRange.type = 'range';
+          timeRange.id = 'timeRange-' + newId;
+          timeRange.min = '0';
+          timeRange.step = '0.01';
+          timeRange.value = '0';
+          timeRange.onchange = function() {
+            setCurrentTime(newId);
+          };
+          timeControl.appendChild(timeRange);
+          var timeDisplay = document.createElement('div');
+          timeDisplay.className = 'time-display';
+          var currentTimeDisplay = document.createElement('div');
+          currentTimeDisplay.className = 'currentTimeDisplay';
+          currentTimeDisplay.id = 'currentTimeDisplay-' + newId;
+          currentTimeDisplay.innerHTML = '0:00';
+          timeDisplay.appendChild(currentTimeDisplay);
+          timeDisplay.innerHTML += '<div class="slash">/</div>';
+          var durationDisplay = document.createElement('div');
+          durationDisplay.className = 'durationDisplay';
+          durationDisplay.id = 'durationDisplay-' + newId;
+          durationDisplay.innerHTML = '0:00';
 
-        previousButton.addEventListener('click', function() {
+          video.addEventListener('loadedmetadata', function() {
+            console.log("Video loaded", video.duration)
+            durationDisplay.innerHTML = formatTime(video.duration);
+          });
+
+          video.addEventListener('timeupdate', function() {
+            handleTimeUpdate(newId);
+          });
+
+          timeRange.oninput = function() {
+            var newTime = video.duration * (timeRange.value / 100);
+            video.currentTime = newTime;
+            currentTimeDisplay.innerHTML = formatTime(newTime);
+          };
+          timeDisplay.appendChild(durationDisplay);
+          timeControl.appendChild(timeDisplay);
+          videoControls.appendChild(timeControl);
+
+          videoContainer.appendChild(videoControls);
+          postItem.appendChild(videoContainer);
+          postMediaDiv.appendChild(postItem);
+        });
+      }
+      var previousButton = document.createElement('button');
+      previousButton.className = 'previous-button';
+      previousButton.innerHTML = '<i class="bi bi-arrow-left"></i>';
+
+      var nextButton = document.createElement('button');
+      nextButton.className = 'next-button';
+      nextButton.innerHTML = '<i class="bi bi-arrow-right"></i>';
+
+      var button = document.createElement('div');
+      button.className = 'button';
+
+      button.appendChild(previousButton);
+      button.appendChild(nextButton);
+      postMediaDiv.appendChild(button);
+
+      var postItems = postMediaDiv.getElementsByClassName('post-item');
+      var currentIndex = 0;
+      postMediaDiv.addEventListener('keydown', function(event) {
+        console.log('clicked');
+        if (event.key === 'ArrowLeft') {
           if (currentIndex > 0) {
             postItems[currentIndex].style.display = 'none';
             currentIndex--;
             postItems[currentIndex].style.display = 'block';
+            autoplayVid();
             postItems[currentIndex].scrollIntoView({
               behavior: 'smooth'
             });
           }
-        });
-
-        nextButton.addEventListener('click', function() {
+        } else if (event.key === 'ArrowRight') {
           if (currentIndex < postItems.length - 1) {
             postItems[currentIndex].style.display = 'none';
             currentIndex++;
             postItems[currentIndex].style.display = 'block';
+            autoplayVid();
             postItems[currentIndex].scrollIntoView({
               behavior: 'smooth'
             });
           }
-        });
-      }
+        }
+      });
+      previousButton.addEventListener('click', function() {
+        if (currentIndex > 0) {
+          postItems[currentIndex].style.display = 'none';
+          currentIndex--;
+          postItems[currentIndex].style.display = 'block';
+          autoplayVid();
+          postItems[currentIndex].scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      });
+
+      nextButton.addEventListener('click', function() {
+        if (currentIndex < postItems.length - 1) {
+          postItems[currentIndex].style.display = 'none';
+          currentIndex++;
+          postItems[currentIndex].style.display = 'block';
+          autoplayVid();
+          postItems[currentIndex].scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      });
 
       var mediaItems = postMediaDiv.getElementsByClassName('post-item');
       console.log(mediaItems.length);
@@ -2340,10 +2467,10 @@ if (sqlsrv_execute($stmt)) {
       }
 
 
-      function handleTimeUpdate(postId) {
-        var video = document.getElementById('myVideo-' + postId);
-        var timeRange = document.getElementById('timeRange-' + postId);
-        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
+      function handleTimeUpdate(newId) {
+        var video = document.getElementById('myVideo-' + newId);
+        var timeRange = document.getElementById('timeRange-' + newId);
+        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + newId);
 
         var currentTime = video.currentTime;
         var duration = video.duration;
@@ -2354,37 +2481,7 @@ if (sqlsrv_execute($stmt)) {
         currentTimeDisplay.innerHTML = formatTime(currentTime);
       }
 
-      var videos = document.getElementsByTagName('video');
-
-      for (var i = 0; i < videos.length; i++) {
-        var video = videos[i];
-        var postId = data.postId;
-        var timeRange = document.getElementById('timeRange-' + postId);
-        var durationDisplay = document.getElementById('durationDisplay-' + postId);
-        var currentTimeDisplay = document.getElementById('currentTimeDisplay-' + postId);
-
-        video.addEventListener('loadedmetadata', function() {
-          durationDisplay.innerHTML = formatTime(video.duration);
-        });
-
-        video.addEventListener('timeupdate', function() {
-          handleTimeUpdate(postId);
-        });
-
-        timeRange.oninput = function() {
-          var newTime = video.duration * (timeRange.value / 100);
-          video.currentTime = newTime;
-          currentTimeDisplay.innerHTML = formatTime(newTime);
-        };
-      }
     }
-    $('.owl-carousel').owlCarousel({
-      items: 1,
-      loop: true,
-      nav: true,
-      dots: false,
-      navText: ['<i class="bi bi-chevron-left"></i>', '<i class="bi bi-chevron-right"></i>']
-    })
 
     var postButton = document.getElementById('postButton');
     postButton.addEventListener('click', function() {
@@ -2453,17 +2550,7 @@ if (sqlsrv_execute($stmt)) {
     parent.classList.toggle("open");
   });
 </script>
-<script>
-  $(document).ready(function() {
-    $(".owl-carousel").owlCarousel({
-      items: 1,
-      loop: true,
-      nav: true,
-      dots: false
-      // You can customize other options according to your needs
-    });
-  });
-</script>
+
 <script>
   var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 

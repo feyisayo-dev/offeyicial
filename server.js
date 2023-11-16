@@ -9,17 +9,18 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 const cors = require("cors");
 const fs = require("fs");
 const { createWriteStream } = require("fs");
+const fsPromises = require("fs").promises;
 const { PassThrough } = require("stream");
 const path = require("path");
 const multer = require("multer");
 const { Server } = require("socket.io");
 const sql = require("mssql");
-// Create an Express app
 const app = express();
 const { Readable } = require("stream");
-// Enable CORS for all routes
+const util = require("util");
+const readFile = util.promisify(fs.readFile);
+const writeFile = util.promisify(fs.writeFile);
 app.use(cors());
-// Enable parsing of JSON bodies
 app.use(bodyParser.json());
 app.use(fileUpload());
 const storage = multer.diskStorage({
@@ -415,7 +416,9 @@ async function generateCallId(UserId) {
 
 async function generatePostId(UserId) {
   const postId = "P" + Date.now() + Math.random() + UserId;
-  return postId;
+  const numericPart = parseFloat(postId.replace(/[^\d.]/g, ""));
+  const roundedId = "P" + Math.ceil(numericPart);
+  return roundedId;
 }
 
 function hangupIncomingCall(message) {
@@ -592,19 +595,15 @@ app.post("/changeAudio", (req, res) => {
   const audioFilePath = path.join(__dirname, audioFolderPath, audioFile);
 
   if (fs.existsSync(audioFilePath)) {
-    // The audio file exists, you can now use it for further processing
     console.log("Audio file found:", audioFilePath);
 
-    // Read the audio file and save it with a new name
     fs.readFile(audioFilePath, (err, audioData) => {
       if (err) {
         console.error("Error reading audio file:", err);
       } else {
-        // Save the audio data with a new name
         const tempMusicPath = "tempMusicTracks" + Date.now() + ".mp3";
         fs.writeFileSync(tempMusicPath, audioData);
 
-        // Now, proceed with processing the video and overlaying the audio
         processVideoWithAudio(videoFile, tempMusicPath);
       }
     });
@@ -616,21 +615,17 @@ app.post("/changeAudio", (req, res) => {
   function processVideoWithAudio(videoFile, audioPath) {
     console.log("Processing video with audio...");
 
-    // Define the paths for temporary video and output video
     const tempVideoPath = "tempVideo" + Date.now() + ".mp4";
     const outputVideoPath = "trimmed_video" + Date.now() + ".ismv";
 
-    // Save the video data to a temporary file
     fs.writeFileSync(tempVideoPath, videoFile.data);
 
-    // Check the video file format
     const inputFormat = videoFile.name.split(".").pop().toLowerCase();
     if (!videoFile.mimetype.startsWith("video/")) {
       console.log("Invalid video file format.");
       return res.status(400).send("Invalid video file format.");
     }
 
-    // Use FFmpeg to overlay the audio onto the video
     ffmpeg()
       .input(tempVideoPath)
       .input(audioPath)
@@ -639,10 +634,8 @@ app.post("/changeAudio", (req, res) => {
       .on("end", () => {
         console.log("Video audio overlay completed.");
 
-        // Read the edited audio and send it as a response
         const editedAudio = fs.readFileSync(outputVideoPath);
 
-        // Delete temporary files
         fs.unlinkSync(tempVideoPath);
         fs.unlinkSync(audioPath);
 
@@ -918,30 +911,52 @@ async function fetchPostsData() {
       "SELECT User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted, COUNT(likes.PostId) AS num_likes, MAX(CASE WHEN likes.UserId = posts.UserId THEN 1 ELSE 0 END) AS is_liking FROM posts JOIN User_Profile ON User_Profile.UserId = posts.UserId LEFT JOIN likes ON likes.PostId = posts.PostId GROUP BY User_Profile.Surname, User_Profile.First_Name, User_Profile.Passport, posts.UserId, posts.PostId, posts.title, posts.content, posts.image, posts.video, posts.date_posted ORDER BY posts.date_posted DESC"
     );
 
-    const transformedData = result.recordset.map((record) => {
-      const datePosted = new Date(record.date_posted);
-      const postId = record.PostId;
-      const likes = record.num_likes;
-      const currentDateTime = new Date();
-      const datePostedDateTime = new Date(datePosted);
-      const timeDifference = currentDateTime - datePostedDateTime;
-      const passport = record.Passport || "DefaultImage.png";
-      const getPassport = `UserPassport/${passport}`;
+    const transformedData = await Promise.all(
+      result.recordset.map(async (record) => {
+        const datePosted = new Date(record.date_posted);
+        const postId = record.PostId;
+        const likes = record.num_likes;
+        const currentDateTime = new Date();
+        const datePostedDateTime = new Date(datePosted);
+        const timeDifference = currentDateTime - datePostedDateTime;
+        const passport = record.Passport || "DefaultImage.png";
+        const getPassport = `UserPassport/${passport}`;
 
-      return {
-        surname: record.Surname,
-        firstName: record.First_Name,
-        UserId: record.UserId,
-        passport: getPassport,
-        postId: postId,
-        image: record.image,
-        video: record.video,
-        title: record.title,
-        content: record.content,
-        timeAgo: getTimeAgo(timeDifference),
-        likes: likes,
-      };
-    });
+        async function readFolderContents(folder, recordField) {
+          try {
+            const files = await fsPromises.readdir(folder);
+            console.log(files,'.....',folder);
+            return files.map((file) => `${recordField}/${file}`);
+          } catch (error) {
+            console.error(`Error reading folder ${folder}:`, error);
+            return [];
+          }
+        }
+
+        const imageFolder = `${record.image}`;
+        const videoFolder = `${record.video}`;
+
+        const [imageFiles, videoFiles] = await Promise.all([
+          readFolderContents(imageFolder, record.image),
+          readFolderContents(videoFolder, record.video),
+        ]);
+        console.log(imageFiles, videoFiles, "....", imageFolder, videoFolder);
+        return {
+          surname: record.Surname,
+          firstName: record.First_Name,
+          UserId: record.UserId,
+          passport: getPassport,
+          postId: postId,
+          image: imageFiles,
+          video: videoFiles,
+          title: record.title,
+          datePosted: new Date(record.date_posted),
+          content: record.content,
+          timeAgo: getTimeAgo(timeDifference),
+          likes: likes,
+        };
+      })
+    );
 
     console.log("Retrieved post data:", transformedData);
 
@@ -980,15 +995,15 @@ async function insertChatMessage(
       VALUES (@UserId, @recipientId, @message, @sentImage, @sentVideo, @chatId, @UserId, @date_posted, @voiceNote, @videoNote, '${isRead}')
     `;
 
-    request.input("UserId", sql.VarChar, UserId);
-    request.input("recipientId", sql.VarChar, recipientId);
-    request.input("message", sql.VarChar, message);
-    request.input("sentImage", sql.VarChar, sentImage);
-    request.input("sentVideo", sql.VarChar, sentVideo);
-    request.input("chatId", sql.VarChar, chatId);
-    request.input("date_posted", sql.VarChar, date_posted);
-    request.input("voiceNote", sql.VarChar, voiceNote);
-    request.input("videoNote", sql.VarChar, videoNote);
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
+    request.input("recipientId", sql.VarChar(sql.MAX), recipientId);
+    request.input("message", sql.VarChar(sql.MAX), message);
+    request.input("sentImage", sql.VarChar(sql.MAX), sentImage);
+    request.input("sentVideo", sql.VarChar(sql.MAX), sentVideo);
+    request.input("chatId", sql.VarChar(sql.MAX), chatId);
+    request.input("date_posted", sql.VarChar(sql.MAX), date_posted);
+    request.input("voiceNote", sql.VarChar(sql.MAX), voiceNote);
+    request.input("videoNote", sql.VarChar(sql.MAX), videoNote);
 
     const res = await request.query(query);
     const Newmessage = {
@@ -1105,7 +1120,7 @@ async function fetchPostForEachUser(UserId) {
     poolConnection = await pool.connect();
 
     const request = new sql.Request(poolConnection);
-    request.input("UserId", sql.VarChar, UserId);
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
     const result = await request.query(`
     SELECT
       User_Profile.Surname,
@@ -1188,8 +1203,8 @@ async function fetchMessageForEachUser(UserId, UserIdx) {
     poolConnection = await pool.connect();
 
     const request = new sql.Request(poolConnection);
-    request.input("UserId", sql.VarChar, UserId);
-    request.input("UserIdx", sql.VarChar, UserIdx);
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
+    request.input("UserIdx", sql.VarChar(sql.MAX), UserIdx);
     const result = await request.query(
       ` SELECT * FROM chats WHERE (UserId = @UserId AND recipientId = @UserIdx) OR (UserId = @UserIdx AND recipientId = @UserId) ORDER BY time_sent ASC; `
     );
@@ -1765,8 +1780,8 @@ async function followProfileOwner(UserId, profileOwnerId) {
 
     const checkQuery =
       "SELECT * FROM follows WHERE UserId = @UserId AND recipientId = @profileOwnerId";
-    request.input("UserId", sql.VarChar, UserId);
-    request.input("profileOwnerId", sql.VarChar, profileOwnerId);
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
+    request.input("profileOwnerId", sql.VarChar(sql.MAX), profileOwnerId);
 
     const result = await request.query(checkQuery);
     let action;
@@ -1839,7 +1854,7 @@ async function getUser(UserId, maxRetries, delay) {
       const request = new sql.Request(pool);
 
       const query = `SELECT DISTINCT up.UserId, up.Surname, up.First_Name, up.Passport FROM user_profile up JOIN chats c ON up.UserId = c.UserId OR up.UserId = c.recipientId WHERE up.UserId = @UserId OR c.recipientId = @UserId;`;
-      request.input("UserId", sql.VarChar, UserId);
+      request.input("UserId", sql.VarChar(sql.MAX), UserId);
       const result = await request.query(query);
       await pool.close();
 
@@ -1877,7 +1892,7 @@ async function getFollowData(UserId, maxRetries, delay) {
 
       const queryForFollowers = `SELECT UserId FROM follows WHERE recipientId = @UserId`;
       const queryForFollowing = `SELECT recipientId FROM follows WHERE UserId = @UserId`;
-      request.input("UserId", sql.VarChar, UserId);
+      request.input("UserId", sql.VarChar(sql.MAX), UserId);
 
       const resultForFollowers = await request.query(queryForFollowers);
       const resultForFollowing = await request.query(queryForFollowing);
@@ -1949,8 +1964,8 @@ async function MessageIsRead(messageId, UserIdx) {
     poolConnection = await pool.connect();
     const request = new sql.Request(poolConnection);
     const query = `UPDATE chats SET isRead = 1 WHERE chatId = @chatId AND senderId = @UserIdx AND isRead = 0;`;
-    request.input("chatId", sql.VarChar, messageId);
-    request.input("UserIdx", sql.VarChar, UserIdx);
+    request.input("chatId", sql.VarChar(sql.MAX), messageId);
+    request.input("UserIdx", sql.VarChar(sql.MAX), UserIdx);
 
     const res = await request.query(query);
 
@@ -1999,30 +2014,66 @@ async function sendPost(
   videos,
   date_posted
 ) {
+  console.log(
+    "This is the recieved data",
+    UserId,
+    "postId",
+    postId,
+    "title",
+    title,
+    "content",
+    content,
+    "images",
+    images,
+    "videos",
+    videos,
+    "date_posted",
+    date_posted
+  );
   let poolConnection;
 
   try {
     poolConnection = await pool.connect();
     const request = new sql.Request(poolConnection);
-    const query = `INSERT INTO posts (UserId, PostId, title, content, image, video, date_posted)
-    VALUES (@UserId, @PostId, @title, @content, @images, @videos, @date_posted)`;
-    request.input("UserId", sql.VarChar, UserId);
-    request.input("postId", sql.VarChar, postId);
-    request.input("title", sql.VarChar, title);
-    request.input("content", sql.VarChar, content);
-    request.input("images", sql.VarChar, images);
-    request.input("videos", sql.VarChar, videos);
-    request.input("date_posted", sql.VarChar, date_posted);
 
-    const res = await request.query(query);
+    const postQuery = `
+      INSERT INTO posts (UserId, PostId, title, content, image, video, date_posted)
+      VALUES (@UserId, @PostId, @title, @content, @images, @videos, @date_posted)
+    `;
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
+    request.input("PostId", sql.VarChar(sql.MAX), postId);
+    request.input("title", sql.VarChar(sql.MAX), title);
+    request.input("images", sql.VarChar(sql.MAX), images);
+    request.input("videos", sql.VarChar(sql.MAX), videos);
+    request.input("content", sql.VarChar(sql.MAX), content);
+    request.input("date_posted", sql.VarChar(sql.MAX), date_posted);
+    await request.query(postQuery);
+
+    // for (const imagePath of images) {
+    //   const mediaQuery = `
+    //     INSERT INTO posts (UserId, PostId, image, date_posted)
+    //     VALUES (@UserId, @PostId, @media_path, @date_posted)
+    //   `;
+    //   request.input("media_path", sql.VarChar(sql.MAX), imagePath);
+    //   await request.query(mediaQuery);
+    // }
+
+    // for (const videoPath of videos) {
+    //   const mediaQuery = `
+    //     INSERT INTO posts (UserId, PostId, video, date_posted)
+    //     VALUES (@UserId, @PostId, @media_path, @date_posted)
+    //   `;
+    //   request.input("media_path", sql.VarChar(sql.MAX), videoPath);
+    //   await request.query(mediaQuery);
+    // }
 
     return {
       UserId,
       postId,
-      images,
-      videos,
       title,
       content,
+      images,
+      videos,
     };
   } catch (error) {
     console.error("Error uploading post to database:", error);
@@ -2035,31 +2086,97 @@ async function sendPost(
 }
 
 async function processFiles(files, folder) {
-  const buffers = [];
+  const paths = [];
 
   for (const file of files) {
-    const filePath = `${folder}${Date.now()}_${file.name}`;
-    await fs.rename(file.path, filePath);
-    
-    const buffer = await fs.readFile(filePath);
-    buffers.push(buffer);
+    await fsPromises.rename(file.path, folder);
+    paths.push(filePath);
   }
 
-  return filePath;
+  return paths;
 }
 
 app.post("/submitPost", async (req, res) => {
   const UserId = req.body.UserId;
   const title = req.body.title;
   const content = req.body.content;
-  const images = req.files.image || [];
-  const videos = req.files.video || [];
+  const images = Array.isArray(req.files.image)
+    ? req.files.image
+    : [req.files.image];
+
+  const videos = Array.isArray(req.files.video)
+    ? req.files.video
+    : [req.files.video];
   const date_posted = await datePosted();
   const postId = await generatePostId(UserId);
   const UploadFolder = "uploads";
-  
-  const imageBuffers = await processFiles(images, UploadFolder);
-  const videoBuffers = await processFiles(videos, UploadFolder);
+  console.log(images.length, videos.length);
+  console.log("Images:");
+  console.log(
+    images.map((file, index) => ({ index, name: file.name, data: file.data }))
+  );
+
+  console.log("Videos:");
+  console.log(
+    videos.map((file, index) => ({ index, name: file.name, data: file.data }))
+  );
+
+  async function store(media, files) {
+    if (!files || files.length === 0) {
+      return null;
+    }
+
+    const UploadFolder = "uploads";
+    const filePaths = [];
+    const timestamp = Date.now();
+    const tempFolder = `${UploadFolder}/tempfolder${UserId}${media}${timestamp}`;
+
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
+      try {
+        await fsPromises.mkdir(tempFolder, { recursive: true });
+
+        let filePath;
+        if (media === "images") {
+          filePath = `${tempFolder}/tempImage_${index}_${timestamp}.png`;
+        } else {
+          filePath = `${tempFolder}/tempVideo_${index}_${timestamp}.mp4`;
+        }
+
+        console.log(
+          "This is the file path:",
+          filePath,
+          "and this is the data for each media:",
+          file.data
+        );
+
+        await fsPromises.writeFile(filePath, file.data);
+        filePaths.push(filePath);
+      } catch (error) {
+        console.error("Error creating tempFolder:", error);
+      }
+    }
+
+    return tempFolder;
+  }
+
+  // await writeFile(images, tempImages);
+
+  // await writeFile(videos, tempVideos);
+
+  const imageBuffers = await store("images", images);
+  const videoBuffers = await store("videos", videos);
+
+  console.log(
+    "data to be sent",
+    UserId,
+    postId,
+    title,
+    content,
+    imageBuffers,
+    videoBuffers,
+    date_posted
+  );
 
   try {
     const SentVN = await sendPost(
