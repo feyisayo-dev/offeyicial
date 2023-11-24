@@ -17,6 +17,7 @@ session_start();
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
     <link href="css/reg.css" rel="stylesheet">
+    <link href="css/intlTelInput.css" rel="stylesheet">
 </head>
 
 <body>
@@ -203,7 +204,7 @@ session_start();
 <script src="country-states.js"></script>
 <script src="./scripttologin.js"></script>
 <script src="js/popper.min.js"></script>
-<!-- Bootstrap core JavaScript -->
+<script src="js/intlTelInput-jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script>
     let user_country_code = "NG";
@@ -336,7 +337,7 @@ session_start();
 
 <script>
     $('#phone').on('keyup', function() {
-        $(this).val($(this).val().replace(/[^0-9]/g, ''));
+        // $(this).val($(this).val().replace(/[^0-9]/g, ''));
     });
     $("#phone").intlTelInput({
         initialCountry: "in",
