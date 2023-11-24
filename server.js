@@ -925,7 +925,7 @@ async function fetchPostsData() {
         async function readFolderContents(folder, recordField) {
           try {
             const files = await fsPromises.readdir(folder);
-            console.log(files,'.....',folder);
+            console.log(files, ".....", folder);
             return files.map((file) => `${recordField}/${file}`);
           } catch (error) {
             console.error(`Error reading folder ${folder}:`, error);
@@ -2160,10 +2160,6 @@ app.post("/submitPost", async (req, res) => {
     return tempFolder;
   }
 
-  // await writeFile(images, tempImages);
-
-  // await writeFile(videos, tempVideos);
-
   const imageBuffers = await store("images", images);
   const videoBuffers = await store("videos", videos);
 
@@ -2193,6 +2189,45 @@ app.post("/submitPost", async (req, res) => {
   } catch (error) {
     console.error("Error sending VN:", error);
     res.status(500).json({ error: "Error sending VN" });
+  }
+});
+
+app.post("/BlockTypeOfPost", async (req, res) => {
+  const UserId = req.body.UserId;
+  const checkedBoxes = req.body.checkedBoxes;
+  const postId = req.body.postId;
+  const otherReason = req.body.otherReason;
+
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT UserId FROM User_prefer_post WHERE UserId = ${UserId} AND PostId = ${PostId}`;
+    const checkResult = await request.query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      const insertQuery = `INSERT INTO User_prefer_post (UserId,
+        Pornographic,
+        Bloody,
+        Racism,
+        Flashy,
+        Other,
+        PostId) VALUES (${UserId}, ${Pornographic}, ${Bloody}, ${Racism}, ${Flashy}, ${otherReason}, ${postId})`;
+      await request.query(insertQuery);
+      await pool.close();
+      return true;
+    } else {
+      const updateQuery = `UPDATE User_prefer_post SET Pornographic = ${Pornographic}, Bloody = ${Bloody}, Racism = ${Racism}, Flashy = ${Flashy}, Other = ${otherReason} WHERE UserId = ${UserId} AND PostId = ${postId}`;
+      await request.query(updateQuery);
+      await pool.close();
+      return true;
+    }
+  } catch (error) {
+    console.error(
+      "Error inserting/removing data into/from the database:",
+      error
+    );
+    return false;
   }
 });
 

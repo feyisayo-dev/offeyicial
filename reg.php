@@ -338,6 +338,11 @@ session_start();
     $('#phone').on('keyup', function() {
         $(this).val($(this).val().replace(/[^0-9]/g, ''));
     });
+    $("#phone").intlTelInput({
+        initialCountry: "in",
+        separateDialCode: true,
+        utilsScript: "js/utils.js"
+    });
 </script>
 <script>
     var Surname = document.getElementById('Surname').value;
