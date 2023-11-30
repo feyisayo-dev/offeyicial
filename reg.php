@@ -337,7 +337,7 @@ session_start();
 
 <script>
     $('#phone').on('keyup', function() {
-        // $(this).val($(this).val().replace(/[^0-9]/g, ''));
+        $(this).val($(this).val().replace(/[^0-9]/g, ''));
     });
     $("#phone").intlTelInput({
         initialCountry: "in",

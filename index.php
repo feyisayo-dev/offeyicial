@@ -46,6 +46,7 @@ if (sqlsrv_execute($stmt)) {
 </head>
 
 <body>
+<div class="theme-btn-container"></div>
   <div class="row">
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
       <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
@@ -119,7 +120,6 @@ if (sqlsrv_execute($stmt)) {
     </nav>
 
     <div class="container">
-
       <div class="news-feed-container">
         <div class="Activity">
           <h2>Rizz</h2>
@@ -146,6 +146,7 @@ if (sqlsrv_execute($stmt)) {
       <div class="open-sidebar" id="open-sidebar">
         <div id="user_table" class="user-table"></div>
         <div class="comments-sidebar" id="commentSidebar">
+        <div class="suggested" id="suggestedSidebar">
           <div class="comment-input">
             <div class="emoji-picker">
               <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
@@ -229,7 +230,7 @@ if (sqlsrv_execute($stmt)) {
               </div>
             </div>
             <textarea class="form-control" name="commentText" placeholder="Type your comment" id="commentInput" rows="3"></textarea>
-            <button type="button" class="btn btn-primary" onclick="submitComment()">Comment</button>
+            <button type="button" class="btn btn-primary submitCommentBtn">Comment</button>
           </div>
           <div class="comments"></div>
         </div>
@@ -341,6 +342,7 @@ if (sqlsrv_execute($stmt)) {
       </div>
     </div>
   </div>
+  <script src="scripttologin.js"></script>
   <script src="js/jquery.min.js"></script>
   <script src="js/owl.carousel.min.js"></script>
   <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
@@ -408,6 +410,7 @@ if (sqlsrv_execute($stmt)) {
         console.log('Reconnected');
       }
     });
+
 
     socket.on('posts', (data) => {
       data.forEach((transformedData, index) => {
@@ -615,7 +618,7 @@ if (sqlsrv_execute($stmt)) {
         });
     }
 
-    function boxb(box, overlay, postId) {
+    function boxb(box, overlay, postId, reason, recipientId) {
       console.log('yes');
       box.innerHTML = '';
       overlay.style.display = 'block';
@@ -631,7 +634,7 @@ if (sqlsrv_execute($stmt)) {
 
       var boxTitle = document.createElement('div');
       boxTitle.classList.add('boxtitle');
-      boxTitle.innerHTML = 'Reason(s) for blocking type of post';
+      boxTitle.innerHTML = reason;
       var boxBody = document.createElement('div');
       boxBody.classList.add('boxBody');
 
@@ -698,6 +701,8 @@ if (sqlsrv_execute($stmt)) {
       var SubmitBtn = document.createElement('button');
       SubmitBtn.classList.add('SubmitBtnBox');
       SubmitBtn.dataset.postid = postId;
+      SubmitBtn.dataset.recipientid = recipientId;
+      SubmitBtn.dataset.reason = reason;
       SubmitBtn.id = 'SubBtn-' + postId;
       SubmitBtn.innerHTML = 'Submit';
 
@@ -727,6 +732,8 @@ if (sqlsrv_execute($stmt)) {
 
     $(document).on('click', '.SubmitBtnBox', function() {
       var postId = $(this).data('postid');
+      var recipientId = $(this).data('recipientid');
+      var reason = $(this).data('reason');
       var checkedBoxes = [];
       var inputs = document.querySelectorAll('input[type="checkbox"]:checked');
       for (var i = 0; i < inputs.length; i++) {
@@ -736,33 +743,106 @@ if (sqlsrv_execute($stmt)) {
       var otherReason = document.getElementById('otherReasons').value;
       const form = new FormData();
       form.append('postId', postId);
-      form.append('checkedBoxes', checkedBoxes);
+      form.append('recipientId', recipientId);
+      form.append('checkedBoxes', checkedBoxes.join(','));
       form.append('otherReason', otherReason);
       form.append('UserId', UserId);
+      if (reason === 'Reason(s) for blocking type of post') {
+        fetch('http://localhost:8888/BlockTypeOfPost', {
+            method: 'POST',
+            body: form,
+          })
+          .then((response) => {
+            console.log('This is ' + response);
+            if (!response.ok) {
+              throw new Error('error blocking this type of post');
+            }
+            return response.json();
+          })
+          .then((result) => {
+            console.log(result);
+            if (result === true) {
+              Swal.fire({
+                title: 'Post Blocked Successfully',
+                html: 'We would take Note of your preferences',
+                showCancelButton: false,
+                showCloseButton: true,
+                focusConfirm: false,
+                confirmButtonText: 'Okay',
+              })
+              var post = document.getElementById(postId);
+              var box = document.querySelector('.box');
+              var overlay = document.querySelector('.overlay');
+              box.style.display = 'none';
+              overlay.style.display = 'none';
+              post.innerHTML = 'Post has been blocked';
+              $(post).css({
+                'border-radius': '10px',
+                'color': 'red',
+                'display': 'flex',
+                'justify-content': 'center',
+              });
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      } else {
+        fetch('http://localhost:8888/BlockUser', {
+            method: 'POST',
+            body: form,
+          })
+          .then((response) => {
+            console.log('This is ' + response);
+            if (!response.ok) {
+              throw new Error('error blocking User');
+            }
+            return response.json();
+          })
+          .then((result) => {
+            console.log(result);
+            if (result === true) {
+              Swal.fire({
+                title: 'User Successfully',
+                html: 'We would take Note of your preferences',
+                showCancelButton: false,
+                showCloseButton: true,
+                focusConfirm: false,
+                confirmButtonText: 'Okay',
+              })
+              var post = document.getElementById(postId);
+              var section = document.getElementById('sec' + postId);
+              var newsFeed = document.getElementById('newsFeed');
+              var box = document.querySelector('.box');
+              var overlay = document.querySelector('.overlay');
+              box.style.display = 'none';
+              overlay.style.display = 'none';
+              post.innerHTML = 'User been blocked';
+              const unappendTimeout = 5000;
+              let timeoutID;
+              timeoutID = setTimeout(function() {
+                newsFeed.removeChild(section);
+              }, unappendTimeout);
 
-      fetch('http://localhost:8888/BlockTypeOfPost', {
-          method: 'POST',
-          body: form,
-        })
-        .then((response) => {
-          console.log(response);
-          if (!response.ok) {
-            throw new Error('error blocking this type of post');
-          }
-          return response.json();
-        })
-        .then((result) => {
-          console.log(result);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+              $(post).css({
+                'border-radius': '10px',
+                'color': 'red',
+                'display': 'flex',
+                'justify-content': 'center',
+              });
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
     });
 
     function loadNewsFeed(data) {
       var newsFeed = document.getElementById('newsFeed');
 
       var postElement = document.createElement('section');
+      postElement.id = 'sec' + data.postId;
       var postDiv = document.createElement('div');
       postDiv.className = 'post';
       postDiv.id = data.postId;
@@ -810,6 +890,7 @@ if (sqlsrv_execute($stmt)) {
       blockUserButton.className = 'btn btn-primary blockUser';
       blockUserButton.id = 'blockUser-' + data.UserId;
       blockUserButton.dataset.recipientid = data.UserId;
+      blockUserButton.dataset.postid = data.postId;
 
       blockUserButton.innerHTML = 'Block User';
 
@@ -832,6 +913,7 @@ if (sqlsrv_execute($stmt)) {
       var blockButtonButton = document.createElement('button');
       blockButtonButton.type = 'button';
       blockButtonButton.className = 'btn btn-primary blockButton';
+      blockUserButton.dataset.recipientid = data.UserId;
       blockButtonButton.id = 'blockButton-' + data.postId;
       blockButtonButton.dataset.postid = data.postId;
       var box = document.createElement('div');
@@ -1249,32 +1331,41 @@ if (sqlsrv_execute($stmt)) {
     // })
     $(document).on('click', '.blockButton', function() {
       var postId = $(this).data('postid');
+      var recipientId = $(this).data('recipientid');
       var box = document.querySelector('.box');
       var overlay = document.querySelector('.overlay');
-      boxb(box, overlay, postId);
+      var reason = 'Reason(s) for blocking type of post';
+      boxb(box, overlay, postId, reason, recipientId);
     });
 
+    $(document).on('click', '.blockUser', function() {
+      var postId = $(this).data('postid');
+      var recipientId = $(this).data('recipientid');
+      var box = document.querySelector('.box');
+      var overlay = document.querySelector('.overlay');
+      var reason = 'Reason(s) for blocking User';
+      boxb(box, overlay, postId, reason, recipientId);
+    });
 
+    $(document).on('click', '.comment-button', function() {
+      console.log('clicked');
+      // var commentsSidebar = document.getElementById('commentSidebar');
+      var submitCommentBtn = document.querySelector('.submitCommentBtn');
+      user_table.style.display = 'none';
+      var postId = $(this).data('postid');
+      var commentsSidebar = $('#commentSidebar');
+      submitCommentBtn.dataset.postid = postId;
 
-    $(document).ready(function() {
-      $('.comment-button').click(function() {
-        console.log('clicked');
-        // var commentsSidebar = document.getElementById('commentsSidebar');
-        user_table.style.display = 'none';
-        var postId = $(this).data('postid');
-        var commentsSidebar = $('#commentSidebar');
-
-        $.ajax({
-          type: "POST",
-          url: "getCommentBox.php",
-          data: {
-            postId: postId
-          },
-          success: function(response) {
-            commentsSidebar.find('.comments').html(response);
-            commentsSidebar.show();
-          }
-        });
+      $.ajax({
+        type: "POST",
+        url: "getCommentBox.php",
+        data: {
+          postId: postId
+        },
+        success: function(response) {
+          commentsSidebar.find('.comments').html(response);
+          commentsSidebar.show();
+        }
       });
     });
   </script>
@@ -1419,11 +1510,10 @@ if (sqlsrv_execute($stmt)) {
       container.style.display = "none";
     }
   }
-
-  function submitComment() {
+  $(document).on('click', '.submitCommentBtn', function() {
     var comment = $("#commentInput").val();
     var UserId = "<?php echo $UserId ?>";
-    var postId = $("#postId").val();
+    var postId = $(this).data('postid');
 
     if (comment != "") {
       $.ajax({
@@ -1439,13 +1529,24 @@ if (sqlsrv_execute($stmt)) {
         success: function(data) {
           alert(data)
           $("#commentInput").val("");
+          var commentsSidebar = $('#commentSidebar');
+          $.ajax({
+            type: "POST",
+            url: "getCommentBox.php",
+            data: {
+              postId: postId
+            },
+            success: function(response) {
+              commentsSidebar.find('.comments').html(response);
+              commentsSidebar.show();
+            }
+          });
         }
       });
     } else {
       alert("Field Missing");
     }
-
-  }
+  });
 </script>
 
 <script>
@@ -1481,7 +1582,7 @@ if (sqlsrv_execute($stmt)) {
   $(document).ready(function() {
     $("#search").on("keyup", function() {
       // alert('yes');
-      var commentsSidebar = document.getElementById('commentsSidebar');
+      var commentsSidebar = document.getElementById('commentSidebar');
       var user_table = document.getElementById('user_table');
       commentsSidebar.style.display = 'none';
       var value = $(this).val().toLowerCase();
@@ -1540,7 +1641,35 @@ if (sqlsrv_execute($stmt)) {
   function toggleSidebar() {
     const maxWidth = 950;
     const posts = document.getElementById('newsFeed');
-    const sidebar = document.querySelector('.sidebar');
+    const container = document.querySelector('.container');
+    const sidebar = document.createElement('div');
+    sidebar.innerHTML = `
+        <ul class="sidebar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="home.php"><i class="bi bi-house-door-fill"></i></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='user_profile.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-person"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='reel.php?UserId=<?php echo $UserId ?>'"><i class="bi bi-camera-reels"></i></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='upload.php?UserId=<?php echo $UserId ?>"><i class="bi bi-plus-square"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="notificationLink" href="#"><i class="bi bi-bell-fill"></i></a>
+            <div id="notificationBox">
+              <!-- Content of the notification box goes here -->
+              <!-- You can customize the content as per your requirements -->
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="location.href='logoutmodal.php'"><i class="bi bi-box-arrow-right"></i></a>
+          </li>
+        </ul>
+        `;
+    container.appendChild(sidebar);
     const Activity = document.querySelector('.Activity');
     const navbar = document.querySelector('.navbar');
     const addpost = document.querySelector('.addpost');
@@ -1549,14 +1678,6 @@ if (sqlsrv_execute($stmt)) {
     function handleResize() {
       const windowWidth = window.innerWidth;
       if (windowWidth <= maxWidth) {
-        sidebar.style.display = 'none';
-        navbar.style.display = 'block';
-        posts.style.marginLeft = '40px';
-        addpost.style.marginTop = '20px';
-        addpost.style.marginLeft = '50px';
-        Activity.style.marginLeft = '50px';
-        Activity.style.marginTop = '80px';
-      } else {
         sidebar.style.display = 'block';
         navbar.style.display = 'none';
         posts.style.marginLeft = '280px';
@@ -1565,6 +1686,14 @@ if (sqlsrv_execute($stmt)) {
         Activity.style.marginLeft = '280px';
         Activity.style.marginTop = '80px';
         navbarCollapse.classList.remove('show');
+      } else {
+        sidebar.style.display = 'none';
+        navbar.style.display = 'flex';
+        posts.style.marginLeft = '40px';
+        addpost.style.marginTop = '20px';
+        addpost.style.marginLeft = '50px';
+        Activity.style.marginLeft = '50px';
+        Activity.style.marginTop = '80px';
       }
     }
     handleResize();
@@ -1589,153 +1718,11 @@ if (sqlsrv_execute($stmt)) {
       return false;
     });
   });
-
-  $(document).ready(function() {
-    $('#other-reason').on('change', function() {
-      if ($(this).is(':checked')) {
-        $('#other-reason-textbox').show();
-      } else {
-        $('#other-reason-textbox').hide();
-      }
-    });
-
-    $(".blockuser").on('change', function() {
-      if ($(this).is(':checked')) {
-        alert($(this).siblings('label').text());
-      }
-    });
-  });
-
-
-  function blockUser() {
-    const checkboxes = document.querySelectorAll('.blockuser');
-    const checkedCheckboxes = [];
-    checkboxes.forEach((checkbox) => {
-      if (checkbox.checked) {
-        checkedCheckboxes.push(checkbox.id);
-      }
-    });
-    if (checkedCheckboxes.length > 0) {
-      alert('Checked checkboxes: ' + checkedCheckboxes.join(', '));
-    } else {
-      alert('Please select at least one checkbox.');
-    }
-
-    const recipientId = $(event.target).data('recipient-id');
-    alert(recipientId);
-    const pornographicContent = $('#blockUserModal-' + recipientId + ' #pornographic-content').is(':checked');
-    const notAFanOfPosts = $('#blockUserModal-' + recipientId + ' #not-a-fan-of-posts').is(':checked');
-    const bloodyContent = $('#blockUserModal-' + recipientId + ' #bloody-content').is(':checked');
-    const flashyContent = $('#blockUserModal-' + recipientId + ' #flashy-content').is(':checked');
-    const otherReasonCheckbox = $('#blockUserModal-' + recipientId + ' #other-reason').is(':checked');
-    const otherReasonTextbox = $('#blockTypeofPostModal-' + recipientId + ' #other-reason-textbox').val();
-
-    const form = new FormData();
-    form.append("recipientId", recipientId);
-    form.append("pornographicContent", pornographicContent);
-    form.append("notAFanOfPosts", notAFanOfPosts);
-    form.append("bloodyContent", bloodyContent);
-    form.append("flashyContent", flashyContent);
-    form.append("otherReason", otherReasonCheckbox);
-    form.append("otherReasonText", otherReasonTextbox);
-
-    $.ajax({
-      url: 'blockuser.php',
-      type: 'POST',
-      data: form,
-      processData: false,
-      contentType: false,
-      success: function(response) {
-        console.log(response);
-        alert("User blocked successfully.");
-      },
-      error: function(error) {
-        console.error(error);
-        alert("An error occurred while blocking the user. Please try again later.");
-      }
-    });
-  }
-
-  $(document).ready(function() {
-    $('#other-reason-posts').on('change', function() {
-      if ($(this).is(':checked')) {
-        $('#other-reason-textbox-posts').show();
-      } else {
-        $('#other-reason-textbox-posts').hide();
-      }
-    });
-
-    $(".blockpost").on('change', function() {
-      if ($(this).is(':checked')) {
-        alert($(this).siblings('label').text());
-      }
-    });
-  });
   //  check UserId of the post before modal
   // $(document).on('click', '.blockButton', function() {
   //   var postId = $(this).data('postid');
   //   alert(postId);
   // });
-
-  function blockPosts() {
-    const checkboxes = document.querySelectorAll('.blockpost');
-    const checkedCheckboxes = [];
-    checkboxes.forEach((checkbox) => {
-      if (checkbox.checked) {
-        checkedCheckboxes.push(checkbox.id);
-      }
-    });
-    if (checkedCheckboxes.length > 0) {
-      alert('Checked checkboxes: ' + checkedCheckboxes.join(', '));
-    } else {
-      alert('Please select at least one checkbox.');
-    }
-
-    const postId = $(event.target).closest('.modal').data('postid');
-    alert(postId);
-    const pornographicContentPosts = $('#blockTypeofPostModal-' + postId + ' #pornographic-content-posts').is(':checked');
-    alert(pornographicContentPosts);
-    const racistPosts = $('#blockTypeofPostModal-' + postId + ' #racist-posts').is(':checked');
-    alert(racistPosts);
-    const bloodyContentPosts = $('#blockTypeofPostModal-' + postId + ' #bloody-content-posts').is(':checked');
-    alert(bloodyContentPosts);
-    const flashyContentPosts = $('#blockTypeofPostModal-' + postId + ' #flashy-content-posts').is(':checked');
-    alert(flashyContentPosts);
-    const otherReasonCheckboxPosts = $('#blockTypeofPostModal-' + postId + ' #other-reason-posts').is(':checked');
-    alert(otherReasonCheckboxPosts);
-    const otherReasonTextPosts = $('#blockTypeofPostModal-' + postId + ' #other-reason-text-posts').val();
-
-    const form = new FormData();
-    form.append("postId", postId);
-    form.append("pornographicContentPosts", pornographicContentPosts);
-    form.append("racistPosts", racistPosts);
-    form.append("bloodyContentPosts", bloodyContentPosts);
-    form.append("flashyContentPosts", flashyContentPosts);
-    form.append("otherReasonCheckboxPosts", otherReasonCheckboxPosts);
-    form.append("otherReasonTextPosts", otherReasonTextPosts);
-    form.append("checkedCheckboxes", checkedCheckboxes);
-
-    $.ajax({
-      url: 'blockpost.php',
-      type: 'POST',
-      data: form,
-      processData: false,
-      contentType: false,
-      success: function(response) {
-        console.log(response);
-        if (response == "success") {
-          console.log(response);
-          alert("Post type blocked successfully.");
-          alert(checkedCheckboxes);
-          $('#blockTypeofPostModal-' + postId).modal('hide');
-        }
-      },
-      error: function(response) {
-        console.error(response);
-        alert("An error occurred while blocking the type of post. Please try again later.");
-      }
-    });
-  }
 </script>
 
 </html>

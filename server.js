@@ -1309,6 +1309,9 @@ async function insertOrRemoveLikefromPost(UserId, postId) {
       await request.query(insertQuery);
       console.log("Inserted UserId:", UserId);
       console.log("Inserted postId:", postId);
+      const selectQuery = `SELECT COUNT(UserId) FROM likes WHERE postId = '${postId}'`;
+      const selectResult = await request.query(selectQuery);
+      io.emit("LikeCount", selectResult);
       await pool.close();
       return "liked";
     } else {
@@ -1316,6 +1319,9 @@ async function insertOrRemoveLikefromPost(UserId, postId) {
       await request.query(removeQuery);
       console.log("Removed UserId:", UserId);
       console.log("Removed postId:", postId);
+      const selectQuery = `SELECT COUNT(UserId) FROM likes WHERE postId = '${postId}'`;
+      const selectResult = await request.query(selectQuery);
+      io.emit("LikeCount", selectResult);
       await pool.close();
       return "unlike";
     }
@@ -2192,33 +2198,33 @@ app.post("/submitPost", async (req, res) => {
   }
 });
 
-app.post("/BlockTypeOfPost", async (req, res) => {
-  const UserId = req.body.UserId;
-  const checkedBoxes = req.body.checkedBoxes;
-  const postId = req.body.postId;
-  const otherReason = req.body.otherReason;
-
+async function BlockTypeOfPost(UserId, postId, checkedBoxes, otherReason) {
   try {
     const pool = await sql.connect(config);
     const request = new sql.Request(pool);
 
-    const checkQuery = `SELECT UserId FROM User_prefer_post WHERE UserId = ${UserId} AND PostId = ${PostId}`;
-    const checkResult = await request.query(checkQuery);
+    const checkQuery = `SELECT * FROM Users_prefer_post WHERE UserId = @UserId AND PostId = @postId`;
+    const checkResult = await request
+      .input("UserId", sql.VarChar, UserId)
+      .input("postId", sql.VarChar, postId)
+      .query(checkQuery);
 
     if (checkResult.recordset.length === 0) {
-      const insertQuery = `INSERT INTO User_prefer_post (UserId,
-        Pornographic,
-        Bloody,
-        Racism,
-        Flashy,
-        Other,
-        PostId) VALUES (${UserId}, ${Pornographic}, ${Bloody}, ${Racism}, ${Flashy}, ${otherReason}, ${postId})`;
-      await request.query(insertQuery);
+      const insertQuery = `INSERT INTO Users_prefer_post (UserId, Reasons, Other, PostId) VALUES (@UserId, @checkedBoxes, @otherReason, @postId)`;
+      await request
+        .input("checkedBoxes", sql.VarChar, checkedBoxes)
+        .input("otherReason", sql.VarChar, otherReason)
+        .query(insertQuery);
+
       await pool.close();
       return true;
     } else {
-      const updateQuery = `UPDATE User_prefer_post SET Pornographic = ${Pornographic}, Bloody = ${Bloody}, Racism = ${Racism}, Flashy = ${Flashy}, Other = ${otherReason} WHERE UserId = ${UserId} AND PostId = ${postId}`;
-      await request.query(updateQuery);
+      const updateQuery = `UPDATE Users_prefer_post SET Reasons = @checkedBoxes, Other = @otherReason WHERE UserId = @UserId AND PostId = @postId`;
+      await request
+        .input("checkedBoxes", sql.VarChar, checkedBoxes)
+        .input("otherReason", sql.VarChar, otherReason)
+        .query(updateQuery);
+
       await pool.close();
       return true;
     }
@@ -2228,6 +2234,91 @@ app.post("/BlockTypeOfPost", async (req, res) => {
       error
     );
     return false;
+  }
+}
+
+async function BlockUser(
+  UserId,
+  recipientId,
+  checkedBoxes,
+  otherReason
+) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT * FROM User_prefer_user WHERE UserId = @UserId AND RecipientId = @recipientId`;
+    const checkResult = await request
+      .input("UserId", sql.VarChar, UserId)
+      .input("recipientId", sql.VarChar, recipientId)
+      .query(checkQuery);
+
+    if (checkResult.recordset.length === 0) {
+      const insertQuery = `INSERT INTO User_prefer_user (UserId, Reasons, Others, RecipientId) VALUES (@UserId, @checkedBoxes, @otherReason, @recipientId)`;
+      await request
+        .input("checkedBoxes", sql.VarChar, checkedBoxes)
+        .input("otherReason", sql.VarChar, otherReason)
+        .query(insertQuery);
+
+      await pool.close();
+      return true;
+    } else {
+      const updateQuery = `UPDATE User_prefer_user SET Reasons = @checkedBoxes, Others = @otherReason WHERE UserId = @UserId AND RecipientId = @recipientId`;
+      await request
+        .input("checkedBoxes", sql.VarChar, checkedBoxes)
+        .input("otherReason", sql.VarChar, otherReason)
+        .query(updateQuery);
+
+      await pool.close();
+      return true;
+    }
+  } catch (error) {
+    console.error(
+      "Error inserting/removing data into/from the database:",
+      error
+    );
+    return false;
+  }
+}
+
+app.post("/BlockTypeOfPost", async (req, res) => {
+  const UserId = req.body.UserId;
+  const checkedBoxes = req.body.checkedBoxes;
+  const postId = req.body.postId;
+  const otherReason = req.body.otherReason;
+
+  const success = await BlockTypeOfPost(
+    UserId,
+    postId,
+    checkedBoxes,
+    otherReason
+  );
+  if (success) {
+    console.log("This is my response" + success);
+    res.json(success);
+  } else {
+    console.log("ERR");
+  }
+});
+
+app.post("/BlockUser", async (req, res) => {
+  const UserId = req.body.UserId;
+  const recipientId = req.body.recipientId;
+  const checkedBoxes = req.body.checkedBoxes;
+  const postId = req.body.postId;
+  const otherReason = req.body.otherReason;
+
+  const success = await BlockUser(
+    UserId,
+    recipientId,
+    checkedBoxes,
+    otherReason
+  );
+  if (success) {
+    console.log("This is my response" + success);
+    res.json(success);
+  } else {
+    console.log("ERR");
   }
 });
 
