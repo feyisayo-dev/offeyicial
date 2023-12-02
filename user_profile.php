@@ -53,12 +53,11 @@ $profileOwnerId = $_GET['UserId'];
                         <input class="searchtext" type="text" id="search" placeholder="Search for names.." title="Type in a name">
                         <div id="user_table">
                         </div>
+                    </div>
                 </li>
-
                 <li class="nav-item">
                     <a class="nav-link" href="home.php#contact"><i class="bi bi-telephone"></i>Contact us</a>
                 </li>
-
                 <li class="nav-item">
                     <a class="nav-link" id="logout"><i class="bi bi-box-arrow-right"></i>Logout</a>
                 </li>
@@ -87,7 +86,6 @@ $profileOwnerId = $_GET['UserId'];
                 <p class="p_countryId"></p>
                 <p class="p_getbio"></p>
                 <div class="row var">
-
                 </div>
 
             </div>
@@ -1315,3 +1313,4 @@ $profileOwnerId = $_GET['UserId'];
     uplOad.href = 'upload.php?UserId=', UserId;
     inDex.href = 'index.php?UserId=', UserId;
 </script>
+</html>

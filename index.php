@@ -46,7 +46,7 @@ if (sqlsrv_execute($stmt)) {
 </head>
 
 <body>
-<div class="theme-btn-container"></div>
+  <div class="theme-btn-container"></div>
   <div class="row">
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
       <div class="logo me-auto"><img src="img/offeyicial.png" alt="logo" class="img-fluid"><span class="text-success"> Offeyicial </span></div>
@@ -146,125 +146,126 @@ if (sqlsrv_execute($stmt)) {
       <div class="open-sidebar" id="open-sidebar">
         <div id="user_table" class="user-table"></div>
         <div class="comments-sidebar" id="commentSidebar">
-        <div class="suggested" id="suggestedSidebar">
-          <div class="comment-input">
-            <div class="emoji-picker">
-              <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
-                <i class="fas fa-smile"></i>
-              </button>
-              <div class="emoji-table-container" style="display:none">
-                <table>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F600;')">😀</td>
-                    <td onclick="insertEmoji('&#x1F601;')">😁</td>
-                    <td onclick="insertEmoji('&#x1F602;')">😂</td>
-                    <td onclick="insertEmoji('&#x1F603;')">😃</td>
-                    <td onclick="insertEmoji('&#x1F604;')">😄</td>
-                    <td onclick="insertEmoji('&#x1F605;')">😅</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F620;')">😠</td>
-                    <td onclick="insertEmoji('&#x1F621;')">😡</td>
-                    <td onclick="insertEmoji('&#x1F622;')">😢</td>
-                    <td onclick="insertEmoji('&#x1F623;')">😣</td>
-                    <td onclick="insertEmoji('&#x1F624;')">😤</td>
-                    <td onclick="insertEmoji('&#x1F625;')">😥</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F626;')">😦</td>
-                    <td onclick="insertEmoji('&#x1F627;')">😧</td>
-                    <td onclick="insertEmoji('&#x1F628;')">😨</td>
-                    <td onclick="insertEmoji('&#x1F629;')">😩</td>
-                    <td onclick="insertEmoji('&#x1F630;')">😰</td>
-                    <td onclick="insertEmoji('&#x1F631;')">😱</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F632;')">😲</td>
-                    <td onclick="insertEmoji('&#x1F633;')">😳</td>
-                    <td onclick="insertEmoji('&#x1F634;')">😴</td>
-                    <td onclick="insertEmoji('&#x1F635;')">😵</td>
-                    <td onclick="insertEmoji('&#x1F636;')">😶</td>
-                    <td onclick="insertEmoji('&#x1F637;')">😷</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F638;')">😸</td>
-                    <td onclick="insertEmoji('&#x1F639;')">😹</td>
-                    <td onclick="insertEmoji('&#x1F640;')">😰</td>
-                    <td onclick="insertEmoji('&#x1F641;')">😱</td>
-                    <td onclick="insertEmoji('&#x1F642;')">😲</td>
-                    <td onclick="insertEmoji('&#x1F643;')">😳</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F606;')">😆</td>
-                    <td onclick="insertEmoji('&#x1F607;')">😇</td>
-                    <td onclick="insertEmoji('&#x1F608;')">😈</td>
-                    <td onclick="insertEmoji('&#x1F609;')">😉</td>
-                    <td onclick="insertEmoji('&#x1F610;')">😐</td>
-                    <td onclick="insertEmoji('&#x1F611;')">😑</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F60A;')">😊</td>
-                    <td onclick="insertEmoji('&#x1F60B;')">😋</td>
-                    <td onclick="insertEmoji('&#x1F60C;')">😌</td>
-                    <td onclick="insertEmoji('&#x1F60D;')">😍</td>
-                    <td onclick="insertEmoji('&#x1F60E;')">😎</td>
-                    <td onclick="insertEmoji('&#x1F60F;')">😏</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F612;')">😒</td>
-                    <td onclick="insertEmoji('&#x1F613;')">😓</td>
-                    <td onclick="insertEmoji('&#x1F616;')">😖</td>
-                    <td onclick="insertEmoji('&#x1F615;')">😕</td>
-                    <td onclick="insertEmoji('&#x1F617;')">😗</td>
-                    <td onclick="insertEmoji('&#x1F618;')">😘</td>
-                  </tr>
-                  <tr>
-                    <td onclick="insertEmoji('&#x1F619;')">😙</td>
-                    <td onclick="insertEmoji('&#x1F61A;')">😚</td>
-                    <td onclick="insertEmoji('&#x1F61B;')">😛</td>
-                    <td onclick="insertEmoji('&#x1F61C;')">😜</td>
-                    <td onclick="insertEmoji('&#x1F61D;')">😝</td>
-                    <td onclick="insertEmoji('&#x1F61E;')">😞</td>
-                  </tr>
-                </table>
+          <div class="suggested" id="suggestedSidebar">
+            <div class="comment-input">
+              <div class="emoji-picker">
+                <button type="button" class="btn btn-primary emoji" onclick="toggleEmojiPicker()">
+                  <i class="fas fa-smile"></i>
+                </button>
+                <div class="emoji-table-container" style="display:none">
+                  <table>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F600;')">😀</td>
+                      <td onclick="insertEmoji('&#x1F601;')">😁</td>
+                      <td onclick="insertEmoji('&#x1F602;')">😂</td>
+                      <td onclick="insertEmoji('&#x1F603;')">😃</td>
+                      <td onclick="insertEmoji('&#x1F604;')">😄</td>
+                      <td onclick="insertEmoji('&#x1F605;')">😅</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F620;')">😠</td>
+                      <td onclick="insertEmoji('&#x1F621;')">😡</td>
+                      <td onclick="insertEmoji('&#x1F622;')">😢</td>
+                      <td onclick="insertEmoji('&#x1F623;')">😣</td>
+                      <td onclick="insertEmoji('&#x1F624;')">😤</td>
+                      <td onclick="insertEmoji('&#x1F625;')">😥</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F626;')">😦</td>
+                      <td onclick="insertEmoji('&#x1F627;')">😧</td>
+                      <td onclick="insertEmoji('&#x1F628;')">😨</td>
+                      <td onclick="insertEmoji('&#x1F629;')">😩</td>
+                      <td onclick="insertEmoji('&#x1F630;')">😰</td>
+                      <td onclick="insertEmoji('&#x1F631;')">😱</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F632;')">😲</td>
+                      <td onclick="insertEmoji('&#x1F633;')">😳</td>
+                      <td onclick="insertEmoji('&#x1F634;')">😴</td>
+                      <td onclick="insertEmoji('&#x1F635;')">😵</td>
+                      <td onclick="insertEmoji('&#x1F636;')">😶</td>
+                      <td onclick="insertEmoji('&#x1F637;')">😷</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F638;')">😸</td>
+                      <td onclick="insertEmoji('&#x1F639;')">😹</td>
+                      <td onclick="insertEmoji('&#x1F640;')">😰</td>
+                      <td onclick="insertEmoji('&#x1F641;')">😱</td>
+                      <td onclick="insertEmoji('&#x1F642;')">😲</td>
+                      <td onclick="insertEmoji('&#x1F643;')">😳</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F606;')">😆</td>
+                      <td onclick="insertEmoji('&#x1F607;')">😇</td>
+                      <td onclick="insertEmoji('&#x1F608;')">😈</td>
+                      <td onclick="insertEmoji('&#x1F609;')">😉</td>
+                      <td onclick="insertEmoji('&#x1F610;')">😐</td>
+                      <td onclick="insertEmoji('&#x1F611;')">😑</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F60A;')">😊</td>
+                      <td onclick="insertEmoji('&#x1F60B;')">😋</td>
+                      <td onclick="insertEmoji('&#x1F60C;')">😌</td>
+                      <td onclick="insertEmoji('&#x1F60D;')">😍</td>
+                      <td onclick="insertEmoji('&#x1F60E;')">😎</td>
+                      <td onclick="insertEmoji('&#x1F60F;')">😏</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F612;')">😒</td>
+                      <td onclick="insertEmoji('&#x1F613;')">😓</td>
+                      <td onclick="insertEmoji('&#x1F616;')">😖</td>
+                      <td onclick="insertEmoji('&#x1F615;')">😕</td>
+                      <td onclick="insertEmoji('&#x1F617;')">😗</td>
+                      <td onclick="insertEmoji('&#x1F618;')">😘</td>
+                    </tr>
+                    <tr>
+                      <td onclick="insertEmoji('&#x1F619;')">😙</td>
+                      <td onclick="insertEmoji('&#x1F61A;')">😚</td>
+                      <td onclick="insertEmoji('&#x1F61B;')">😛</td>
+                      <td onclick="insertEmoji('&#x1F61C;')">😜</td>
+                      <td onclick="insertEmoji('&#x1F61D;')">😝</td>
+                      <td onclick="insertEmoji('&#x1F61E;')">😞</td>
+                    </tr>
+                  </table>
+                </div>
               </div>
+              <textarea class="form-control" name="commentText" placeholder="Type your comment" id="commentInput" rows="3"></textarea>
+              <button type="button" class="btn btn-primary submitCommentBtn">Comment</button>
             </div>
-            <textarea class="form-control" name="commentText" placeholder="Type your comment" id="commentInput" rows="3"></textarea>
-            <button type="button" class="btn btn-primary submitCommentBtn">Comment</button>
+            <div class="comments"></div>
           </div>
-          <div class="comments"></div>
         </div>
       </div>
-    </div>
-    <div class="foot">
-      <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-        <i class="bi bi-chat"></i>
-      </button>
+      <div class="foot">
+        <button id="sidebar-toggle" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+          <i class="bi bi-chat"></i>
+        </button>
 
-      <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
-          <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-          <ul class="list-unstyled">
-            <li>
-              <div class="passport">
-                <a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">
-                  <img>
-                </a>
-              </div>
-              <div class="name">
-                <span>
-                  <a></a>
-                </span>
-              </div>
-            </li>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="sidebarLabel">Chats</h5>
+            <button type="button" class="btn-close text-reset close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <ul class="list-unstyled">
+              <li>
+                <div class="passport">
+                  <a data-bs-toggle="modal" data-bs-target="#profilepicturemodal">
+                    <img>
+                  </a>
+                </div>
+                <div class="name">
+                  <span>
+                    <a></a>
+                  </span>
+                </div>
+              </li>
 
-          </ul>
+            </ul>
+          </div>
         </div>
+
       </div>
-
     </div>
   </div>
   <div class="modal fade" id="searchfor" tabindex="-1" role="dialog" aria-labelledby="searchforLabel" aria-hidden="true">
