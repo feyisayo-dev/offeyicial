@@ -20,6 +20,8 @@ const { Readable } = require("stream");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
+const { exec } = require("child_process");
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(fileUpload());
@@ -2237,12 +2239,7 @@ async function BlockTypeOfPost(UserId, postId, checkedBoxes, otherReason) {
   }
 }
 
-async function BlockUser(
-  UserId,
-  recipientId,
-  checkedBoxes,
-  otherReason
-) {
+async function BlockUser(UserId, recipientId, checkedBoxes, otherReason) {
   try {
     const pool = await sql.connect(config);
     const request = new sql.Request(pool);
@@ -2321,8 +2318,233 @@ app.post("/BlockUser", async (req, res) => {
     console.log("ERR");
   }
 });
+async function updateHeatMap(UserId, latitude, longitude) {
+  console.log(UserId, latitude, longitude);
+  return "sucess";
+}
+const locationData = [];
 
-// Start the server
+app.post("/locationHeatMap", async (req, res) => {
+  const UserId = req.body.UserId;
+  const latitude = req.body.latitude;
+  const longitude = req.body.longitude;
+
+  locationData.push({ UserId, latitude, longitude });
+
+  const success = await updateHeatMap(UserId, latitude, longitude);
+  if (success) {
+    console.log("Heat map has been updated" + success);
+    res.json(success);
+  } else {
+    console.log("ERR");
+  }
+});
+
+app.post("/regConfirm", async (req, res) => {
+  const UserId = req.body.UserId;
+
+  const success = await confirmUser(UserId);
+  if (success === "yes") {
+    console.log(success + ", User has details");
+    res.json(success);
+  } else {
+    if (success === "no") {
+      console.log(success + ", User doesnt have details");
+      res.json(success);
+    } else {
+      console.log("ERR");
+    }
+  }
+});
+
+async function confirmUser(UserId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = "SELECT * FROM transfer WHERE UserId = @UserId";
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
+
+    const result = await request.query(checkQuery);
+    let action;
+    if (result.recordset.length === 0) {
+      action = "no";
+    } else {
+      action = "yes";
+    }
+    await pool.close();
+    return action;
+  } catch (error) {
+    throw error;
+  }
+}
+function substituteText(inputText) {
+  const charMap = {
+    a: "z",
+    b: "y",
+    c: "x",
+    d: "w",
+    e: "v",
+    f: "u",
+    g: "t",
+    h: "s",
+    i: "r",
+    j: "q",
+    k: "p",
+    l: "o",
+    m: "n",
+    n: "m",
+    o: "l",
+    p: "k",
+    q: "j",
+    r: "i",
+    s: "h",
+    t: "g",
+    u: "f",
+    v: "e",
+    w: "d",
+    x: "c",
+    y: "b",
+    z: "a",
+    1: "9",
+    2: "8",
+    3: "7",
+    4: "6",
+    5: "5",
+    6: "4",
+    7: "3",
+    8: "2",
+    9: "1",
+    0: "0",
+    "@": "#",
+    "#": "@",
+    $: "%",
+    "%": "$",
+    "&": "*",
+    "*": "&",
+    "!": "?",
+    "?": "!",
+  };
+
+  const substitutedText = inputText
+    .toLowerCase()
+    .split("")
+    .map((char) => charMap[char] || char)
+    .join("");
+
+  return substitutedText;
+}
+
+app.post("/newDetails", async (req, res) => {
+  const UserId = req.body.UserId;
+  const Passkey = req.body.passkey;
+  const Username = req.body.username;
+  const PassKeyUpdate = await substituteText(Passkey);
+  const UserNameUpdate = await substituteText(Username);
+  console.log("New updates:", PassKeyUpdate, UserNameUpdate);
+
+  const success = await submitNewDetails(UserId, PassKeyUpdate, UserNameUpdate);
+  if (success) {
+    res.json(success);
+  } else {
+    console.log("ERR");
+  }
+});
+
+async function submitNewDetails(UserId, passkey, username) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const inputQuery =
+      "INSERT INTO transfer(Username, passkey, UserId) VALUES (@Username, @passkey, @UserId)";
+    request.input("UserId", sql.VarChar(sql.MAX), UserId);
+    request.input("passkey", sql.VarChar(sql.MAX), passkey);
+    request.input("Username", sql.VarChar(sql.MAX), username);
+    await request.query(inputQuery);
+
+    await pool.close();
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getUserName(UserId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT Username FROM transfer WHERE UserId = @UserId`;
+    const checkResult = await request
+      .input("UserId", sql.VarChar, UserId)
+      .query(checkQuery);
+    const result = checkResult.recordset[0];
+    return result.Username;
+  } catch (error) {
+    console.error("Error getting details from database:", error);
+    return false;
+  }
+}
+
+async function getUserPassKey(UserId) {
+  try {
+    const pool = await sql.connect(config);
+    const request = new sql.Request(pool);
+
+    const checkQuery = `SELECT passkey FROM transfer WHERE UserId = @UserId`;
+    const checkResult = await request
+      .input("UserId", sql.VarChar, UserId)
+      .query(checkQuery);
+    const result = checkResult.recordset[0];
+    return result.passkey;
+  } catch (error) {
+    console.error("Error getting details from database:", error);
+    return false;
+  }
+}
+
+app.post("/sendFile", async (req, res) => {
+  try {
+    const UserId = req.body.UserId;
+    const Username = await getUserName(UserId);
+    const Passkey = await getUserPassKey(UserId);
+    console.log(Username, Passkey);
+    const PassKeyUpdate = await substituteText(Passkey);
+    const UserNameUpdate = await substituteText(Username);
+
+    exec(
+      `netsh wlan set hostednetwork ssid=${UserNameUpdate} key=${PassKeyUpdate} keyUsage=persistent`,
+      (err, stdout, stderr) => {
+        if (err) {
+          console.error(`Error setting up WLAN: ${err.message}`);
+          res.status(500).json({ error: "Error setting up WLAN" });
+          return;
+        }
+
+        exec("netsh wlan start hostednetwork", (err, stdout, stderr) => {
+          if (err) {
+            console.error(`Error starting hosted network: ${err.message}`);
+            console.error("Command stdout:", stdout);
+            console.error("Command stderr:", stderr);
+            res.status(500).json({ error: "Error starting hosted network" });
+            return;
+          }
+
+          console.log("Command stdout:", stdout);
+          console.log("Command stderr:", stderr);
+
+          console.log("Hosted network started successfully");
+          res.status(200).json({ success: true });
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 const port = 8888;
 server.listen(port, () => {
   console.log(`WebSocket server is listening on port ${port}`);

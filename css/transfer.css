@@ -149,6 +149,7 @@ header {
     top: 40%;
     left: 20px;
 }
+
 .pic4 {
     position: absolute;
     z-index: 99;
@@ -211,6 +212,7 @@ header {
 .btn img {
     width: 40px;
     height: 40px;
+    color: white;
 }
 
 .btn:hover {
@@ -224,7 +226,8 @@ header {
     position: absolute;
     bottom: 10px;
 }
-.how-to-use a{
+
+.how-to-use a {
     color: black;
     text-decoration: none;
 }
@@ -356,15 +359,18 @@ header {
     }
 
 }
-.BoxHeader{
+
+.BoxHeader {
     font-family: Springlake;
     text-align: center;
     line-height: 3px;
     color: rgba(101, 0, 94, 1);
 }
-#AnimationBox{
+
+#AnimationBox {
     display: none;
     bottom: 0;
+    flex-direction: column;
     border-radius: 10px;
     box-shadow: 0 0 2px 2px rgba(101, 0, 94, 1);
     justify-content: center;
@@ -373,16 +379,77 @@ header {
     animation: ease-in 3s;
     height: 50%;
     width: 100%;
-    z-index: 999;
+    z-index: 9999;
 }
-.closeBtn{
+
+.closeBtn {
     position: fixed;
     right: 0;
+    top: 50%;
 }
-.closeBtn:hover{
+
+.closeBtn:hover {
     transform: scale(1.05);
 }
-.BoxHeaderText:hover{
+
+.BoxHeaderText:hover {
     color: rgba(60, 132, 206, 1);
     transform: scale(1.1);
+}
+
+.overlay,
+.over {
+    position: fixed;
+    display: none;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 999;
+}
+
+.RegBodyBody {
+    position: fixed;
+    z-index: 9999;
+    inset: 40%;
+    background-color: white;
+    color: black;
+    padding: 10px;
+    border-radius: 10px;
+    width: 300px;
+    height: 200px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.regbodyUsername {
+    display: block;
+    padding: 10px;
+}
+
+.regbodyUsername input {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 2px 2px rgba(101, 0, 94, 1);
+    width: 100%;
+}
+
+.SubmitForReg {
+    border: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Modern-Age';
 }

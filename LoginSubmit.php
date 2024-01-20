@@ -6,7 +6,6 @@ if (isset($_POST['Login'])) {
     $email = $_POST['email'];
     $password = $_POST['psw'];
 
-    // Verify the user
     $sql = "SELECT UserId, Password FROM User_Profile WHERE email = ?";
     $params = array($email);
     $stmt = sqlsrv_query($conn, $sql, $params);
@@ -17,28 +16,21 @@ if (isset($_POST['Login'])) {
         $hashed_password = $row['Password'];
 
         if (password_verify($password, $hashed_password)) {
-            // Login successful
             $_SESSION['UserId'] = $UserId;
-            echo $UserId; // Return the UserId as a simple string
+            echo $UserId;
             exit();
         } else {
-            // Invalid email or password
-            echo 'failed'; // Return a simple string indicating login failure
+            echo 'failed';
         }
     } else {
-        // Invalid email or password
-        echo 'failed'; // Return a simple string indicating login failure
+        echo 'failed';
     }
 
     $_SESSION['loggedin'] = true;
 }
 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    // The user is logged in
 } else {
-    // The user is not logged in
-      // Redirect to login page
-  header("Location: login.php");
-  exit();
+    header("Location: login.php");
+    exit();
 }
-?>

@@ -34,7 +34,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         <div class="login-container">
             <div class="circle circle-one"></div>
             <div class="form-container">
-                <!-- <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png" alt="illustration" class="illustration" /> -->
                 <h1 class="opacity">LOGIN</h1>
                 <div class="form-to-submit">
                     <input id="email" type="text" placeholder="EMAIL" />

@@ -16,7 +16,7 @@ if (isset($_POST['Submit'])) {
 			$num = 1;
 		}
 		$num_padded = sprintf("%05d", $num);
-		$num_padded; // return 04
+		$num_padded;
 	}
 
 	$RegDate = date("M-d-Y");
@@ -36,7 +36,6 @@ if (isset($_POST['Submit'])) {
 	$stateId = ($_POST['stateId']);
 
 
-	// Check if email already exists
 	$email_exists_query = "SELECT COUNT(*) AS count FROM User_Profile WHERE email = '$email'";
 	$email_exists_result = sqlsrv_query($conn, $email_exists_query);
 	if ($email_exists_result === false) {
@@ -62,9 +61,6 @@ if (isset($_POST['Submit'])) {
 
 
 		$smc = sqlsrv_query($conn, $sql);
-
-		//give information if the data is successful or not.
-
 		if ($smc === false) {
 			$error_message = array("error" => "data not successfully upload");
 			echo json_encode($error_message);
