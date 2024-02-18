@@ -1634,22 +1634,6 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         }
       });
 
-      // peerConnection.addEventListener('icegatheringstatechange', function() {
-      //   console.log('ICE gathering state:', peerConnection.iceGatheringState);
-      //   if (peerConnection.iceGatheringState === 'gathering') {
-      //     console.log('Gathering ICE candidate gathering:', event);
-      //   }
-      //   if (peerConnection.iceGatheringState === 'complete') {
-      //     console.log('Gathering ICE candidate complete:', event);
-      //     console.log('ICE gathering complete. All candidates:', iceCandidates);
-      //     if (iceCandidates.length === 0) {
-      //       console.log('No ICE candidates were found. Check your media constraints and network connectivity.');
-      //     } else {
-      //       sendIceCandidates(iceCandidates);
-      //     }
-      //   }
-      // });
-
       peerConnection.addEventListener('iceconnectionstatechange', function() {
         console.log('ICE connection state:', peerConnection.iceConnectionState);
         if (peerConnection.iceConnectionState === 'failed') {
@@ -1720,6 +1704,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         .then(function(stream) {
           localStream = stream;
           peerConnection = new RTCPeerConnection();
+          console.log('This is the connection', peerConnection);
           startPeerConnection(peerConnection);
           stream.getTracks().forEach(function(track) {
             peerConnection.addTrack(track, stream);
@@ -1766,12 +1751,12 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
           peerConnection.ontrack = function(event) {
             if (event.streams && event.streams[0]) {
-              console.log('Received remote stream:', event.streams[0]);
+              console.log('Received remote stream:', event.streams[0], 'and', event.streams);
               remoteVideo.srcObject = event.streams[0];
             }
           };
 
-          console.log('Sending local stream as remote stream');
+          console.log('Sending local stream as remote stream', localStream);
         })
         .catch(function(error) {
           console.log('Error accessing camera and microphone:', error);

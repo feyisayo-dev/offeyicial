@@ -155,6 +155,23 @@ io.on("connection", (socket) => {
       socket.emit("message", parsedMessage);
     }
   });
+  socket.on("transfer", (message) => {
+    const parsedMessage = JSON.parse(message);
+    console.log("this is the transfer message type", parsedMessage.type);
+    if (parsedMessage.type === "offer") {
+      handleTransferOffer(parsedMessage);
+    } else if (parsedMessage.type === "answer") {
+      handleTransferAnswer(parsedMessage);
+    } else if (parsedMessage.type === "candidate") {
+      handleTransferCandidate(parsedMessage);
+    }else {
+      if (parsedMessage.error) {
+        console.log("Error:", parsedMessage.error);
+        return;
+      }
+      socket.emit("transfer", parsedMessage);
+    }
+  });
   socket.on("typing", (data) => {
     socket.broadcast.emit("typing", data);
   });
@@ -296,7 +313,6 @@ function handleIncomingCall(message) {
       callerUserId: message.callerUserId,
       callertoUserId: message.callertoUserId,
     };
-    // Emit an event to the recipient's socket
     recipientConnection.emit("message", JSON.stringify(signalingMessage));
     console.log("Incoming message sent to UserB:", message.callerUserId);
   } else {
@@ -361,6 +377,32 @@ async function handleIncomingOffer(message) {
     sameConnection.emit("message", JSON.stringify(signalingMessage));
   }
 }
+
+async function handleTransferOffer(message) {
+  console.log("Offer message received:", message);
+  console.log("Offer message going to:", message.callertoUserId);
+  const recipientConnection = getUserConnection(message.callertoUserId);
+  if (recipientConnection) {
+    const signalingMessage = {
+      type: "offer",
+      offer: message.offer,
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+    };
+    recipientConnection.emit("transfer", JSON.stringify(signalingMessage));
+    console.log("Offer message sent to UserB:", message.callertoUserId);
+  } else {
+    console.log("UserB connection not found:", message.callertoUserId);
+    const sameConnection = getUserConnection(message.callerUserId);
+    const signalingMessage = {
+      type: "notAvailable",
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+    };
+    sameConnection.emit("transfer", JSON.stringify(signalingMessage));
+  }
+}
+
 
 async function storeCallLogs(
   UserId,
@@ -476,6 +518,25 @@ function handleOutgoingAnswer(message) {
   }
 }
 
+function handleTransferAnswer(message) {
+  console.log("Answer message received:", message);
+
+  const userAConnection = getUserConnection(message.callerUserId);
+  if (userAConnection) {
+    const signalingMessage = {
+      type: "answer",
+      answer: message.answer,
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+    };
+    userAConnection.emit("transfer", JSON.stringify(signalingMessage));
+    console.log("Answer message sent to UserA:", message.callerUserId);
+  } else {
+    console.log("UserA connection not found:", message.callerUserId);
+  }
+}
+
+
 function hangupOutgoingcandidate(message) {
   console.log("candidate message received:", message);
   console.log("candidate message received:", message.callertoUserId);
@@ -494,6 +555,28 @@ function hangupOutgoingcandidate(message) {
     console.log("UserA connection not found:", message.callertoUserId);
   }
 }
+
+
+function handleTransferCandidate(message) {
+  console.log("candidate message received:", message.candidates);
+  console.log("candidate message received from:", message.callerUserId);
+  console.log("candidate message to be sent to:", message.callertoUserId);
+
+  const userAConnection = getUserConnection(message.callertoUserId);
+  if (userAConnection) {
+    const signalingMessage = {
+      type: "candidate",
+      candidate: message.candidates,
+      callerUserId: message.callerUserId,
+      callertoUserId: message.callertoUserId,
+    };
+    userAConnection.emit("transfer", JSON.stringify(signalingMessage));
+    console.log("candidate message sent to UserB:", message.callertoUserId);
+  } else {
+    console.log("UserB connection not found:", message.callertoUserId);
+  }
+}
+
 
 function getRecipientConnection(UserIdx) {
   return userConnections[UserIdx] || null;
@@ -2507,43 +2590,60 @@ async function getUserPassKey(UserId) {
 app.post("/sendFile", async (req, res) => {
   try {
     const UserId = req.body.UserId;
+    const compass = req.body.compass;
     const Username = await getUserName(UserId);
     const Passkey = await getUserPassKey(UserId);
     console.log(Username, Passkey);
     const PassKeyUpdate = await substituteText(Passkey);
     const UserNameUpdate = await substituteText(Username);
 
-    exec(
-      `netsh wlan set hostednetwork ssid=${UserNameUpdate} key=${PassKeyUpdate} keyUsage=persistent`,
-      (err, stdout, stderr) => {
-        if (err) {
-          console.error(`Error setting up WLAN: ${err.message}`);
-          res.status(500).json({ error: "Error setting up WLAN" });
-          return;
-        }
-
-        exec("netsh wlan start hostednetwork", (err, stdout, stderr) => {
-          if (err) {
-            console.error(`Error starting hosted network: ${err.message}`);
-            console.error("Command stdout:", stdout);
-            console.error("Command stderr:", stderr);
-            res.status(500).json({ error: "Error starting hosted network" });
-            return;
-          }
-
-          console.log("Command stdout:", stdout);
-          console.log("Command stderr:", stderr);
-
-          console.log("Hosted network started successfully");
-          res.status(200).json({ success: true });
-        });
-      }
-    );
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+function cmdpmt(){
+  exec(
+    `netsh wlan set hostednetwork ssid=${UserNameUpdate} key=${PassKeyUpdate} keyUsage=persistent`,
+    (err, stdout, stderr) => {
+      if (err) {
+        console.error(`Error setting up WLAN: ${err.message}`);
+        res.status(500).json({ error: "Error setting up WLAN" });
+        return;
+      }
+
+      const adminUsername = require("os").userInfo().username;
+      console.log(adminUsername);
+      const adminPassword = compass; 
+
+      const command = 'netsh wlan start hostednetwork';    
+      let runAsAdminCommand;
+      if(adminPassword!= ""){
+         runAsAdminCommand = `echo ${adminPassword} |runas /user:${adminUsername} "${command}"`;
+      }else{
+        runAsAdminCommand = `echo. |runas /user:${adminUsername} "${command}"`;
+
+      }
+      
+      exec(runAsAdminCommand, (err, stdout, stderr) => {
+          if (err) {
+              console.error(`Error starting hosted network: ${err.message}`);
+              console.error('Command stdout:', stdout);
+              console.error('Command stderr:', stderr);
+              res.status(500).json({ error: 'Error starting hosted network' });
+              return;
+          }
+
+        console.log("Command stdout:", stdout);
+        console.log("Command stderr:", stderr);
+
+        console.log("Hosted network started successfully");
+        res.status(200).json({ success: true });
+      });
+    }
+  );
+}
 
 const port = 8888;
 server.listen(port, () => {
