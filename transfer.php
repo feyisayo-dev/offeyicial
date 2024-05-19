@@ -109,6 +109,7 @@ function getaddress($lat, $lng)
                 </div>
                 <div class="SendTheFileBody">
                     <p class="SendTheFilep">Select the file to be sent</p>
+                    <input type="file" class="fileChosen">
                     <button id="SendTheFile">Submit</button>
                 </div>
                 <div class="closeBtn">
@@ -129,6 +130,7 @@ function getaddress($lat, $lng)
     </script>
     <script>
         var UserId = "<?php echo $_SESSION['UserId']; ?>";
+        var mainbody = document.querySelector('.mainbody');
         var socketUrl = 'http://localhost:8888';
         const socket = io(socketUrl, {
             query: {
@@ -144,7 +146,7 @@ function getaddress($lat, $lng)
                 .then(response => response.json())
                 .then(address => {
                     console.log('This is the address id ' + address.place_id);
-                    console.log(address.address.road);
+                    // console.log(address.address.road);
                 })
                 .catch(error => {
                     console.log(error);
@@ -227,7 +229,6 @@ function getaddress($lat, $lng)
                         console.log(result);
                     } else {
                         console.log('You are not registered');
-                        var mainbody = document.querySelector('.mainbody');
                         var bodyOfReg = document.createElement('div');
                         bodyOfReg.classList.add('RegBody');
                         var RegBodyTitle = document.createElement('div');
@@ -326,6 +327,7 @@ function getaddress($lat, $lng)
 
             dataChannel.addEventListener('open', () => {
                 console.log('Data channel opened');
+                SendTheFileBody.style.display = 'flex';
             });
 
             dataChannel.addEventListener('message', (event) => {
@@ -334,7 +336,120 @@ function getaddress($lat, $lng)
 
             dataChannel.addEventListener('close', () => {
                 console.log('Data channel closed');
+
             });
+
+            dataChannel.addEventListener('error', (errorEvent) => {
+                const error = errorEvent.error;
+                console.log('error', error);
+            });
+
+            peerConnection.ondatachannel = (event) => {
+                let receiveChannel = event.channel;
+                console.log('Receive Channel Callback');
+                receiveChannel = event.channel;
+                receiveChannel.binaryType = 'arraybuffer';
+                let receiveBuffer = [];
+                let receivedSize = 0;
+                let received;
+                let element;
+
+                receiveChannel.onmessage = (event) => {
+                    console.log(`Received Message ${event.data.byteLength}`);
+                    let data = event.data;
+                    // let fileType;
+                    if (data instanceof ArrayBuffer) {
+                        console.log('pushing');
+                        receiveBuffer.push(event.data);
+                        receivedSize += event.data.byteLength;
+                        console.log(receivedSize);
+                    } else if (data === 'end') {
+                        console.log('all files collected');
+                        received = new Blob(receiveBuffer);
+                        receiveBuffer = [];
+
+                        console.log('Received data:', data);
+
+                    } else if (data === 'video') {
+                        element = document.createElement('video');
+                        element.src = URL.createObjectURL(received);
+                        element.controls = true;
+                        var box = document.createElement('div');
+                        box.classList.add('fileBox');
+                        mainbody.appendChild(box);
+                        box.appendChild(element);
+                    } else if (data === 'audio') {
+                        element = document.createElement('audio');
+                        element.src = URL.createObjectURL(received);
+                        element.controls = true;
+                        var box = document.createElement('div');
+                        box.classList.add('fileBox');
+                        mainbody.appendChild(box);
+                        box.appendChild(element);
+                    } else if (data === 'image') {
+                        element = document.createElement('img');
+                        element.src = URL.createObjectURL(received);
+                        var box = document.createElement('div');
+                        box.classList.add('fileBox');
+                        mainbody.appendChild(box);
+                        box.appendChild(element);
+                    } else if (data === 'text') {
+                        element = document.createElement('a');
+                        element.href = URL.createObjectURL(received);
+                        element.download = 'received_file';
+                        element.textContent = 'Download file';
+                        var box = document.createElement('div');
+                        box.classList.add('fileBox');
+                        mainbody.appendChild(box);
+                        box.appendChild(element);
+                    }
+
+
+
+
+                };
+
+
+                // function concatenateArrayBuffers(arrayBuffers) {
+                //     let totalLength = 0;
+                //     let buffers = [];
+                //     console.log('This is the array buffer', arrayBuffers);
+                //     arrayBuffers.forEach(buffer => {
+                //         if (buffer instanceof ArrayBuffer || ArrayBuffer.isView(buffer)) {
+                //             console.log('This is the arrayBuffer');
+                //             totalLength += buffer.byteLength;
+                //             buffers.push(buffer);
+                //         } else if (buffer instanceof Blob) {
+                //             console.log('This is the blob');
+                //             let reader = new FileReaderSync();
+                //             let arrayBuffer = reader.readAsArrayBuffer(buffer);
+                //             totalLength += arrayBuffer.byteLength;
+                //             buffers.push(arrayBuffer);
+                //         } else {
+                //             console.error('Unsupported buffer type:', buffer);
+                //         }
+                //     });
+
+                //     let concatenatedArrayBuffer = new Uint8Array(totalLength);
+                //     let offset = 0;
+
+                //     buffers.forEach(buffer => {
+                //         let uint8Array = new Uint8Array(buffer);
+                //         concatenatedArrayBuffer.set(uint8Array, offset);
+                //         offset += uint8Array.length;
+                //     });
+
+                //     return concatenatedArrayBuffer.buffer;
+                // }
+
+                receiveChannel.onopen = () => {
+                    console.log("Data channel opened");
+                };
+
+                receiveChannel.onclose = () => {
+                    console.log("Data channel closed");
+                };
+            };
 
             peerConnection.addEventListener('icecandidate', (event) => {
                 console.log('ice candidate seen', event.candidate);
@@ -343,6 +458,13 @@ function getaddress($lat, $lng)
                     sendIceCandidate(event.candidate, UserIdx);
                 }
             });
+            peerConnection.addEventListener('iceconnectionstatechange', function() {
+                console.log('ICE connection state:', peerConnection.iceConnectionState);
+                if (peerConnection.iceConnectionState === 'failed') {
+                    console.log('ICE connection state was failed try again:', peerConnection.iceConnectionState);
+                }
+            });
+            console.log('This is the data channel', dataChannel);
         }
 
         function sendIceCandidate(iceCandidates, UserIdx) {
@@ -410,8 +532,6 @@ function getaddress($lat, $lng)
             var answer = new RTCSessionDescription(message.answer);
             peerConnection.setRemoteDescription(answer);
             loading.style.display = 'none';
-            console.log(dataChannel);
-            SendTheFileBody.style.display = 'flex';
         }
 
 
@@ -436,13 +556,80 @@ function getaddress($lat, $lng)
             console.log("User not available:", callertoUserId)
         }
 
-        function sendData(data) {
+        let totalChunks;
+
+        function chunkFile(file, chunkSize) {
+            console.log('This is the file size', file.size);
+            totalChunks = Math.ceil(file.size / chunkSize);
+            console.log(`Total chunks to send: ${totalChunks}`);
+
+            const chunks = [];
+            let offset = 0;
+            const slice = file.slice || file.webkitSlice;
+            while (offset < file.size) {
+                const chunk = slice.call(file, offset, offset + chunkSize);
+                chunks.push(chunk);
+                offset += chunkSize;
+            }
+
+            return chunks;
+        }
+
+        function sendData(file) {
+            // const chunkSize = 1024 * 50;
+            // const chunks = chunkFile(fileData, chunkSize);
+            // const totalChunks = chunks.length;
+            // const file = fileInput.files[0];
+            console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
+
             if (dataChannel.readyState === 'open') {
-                dataChannel.send(data);
+                const chunkSize = 16384;
+                fileReader = new FileReader();
+                let offset = 0;
+                fileReader.addEventListener('error', error => console.error('Error reading file:', error));
+                fileReader.addEventListener('abort', event => console.log('File reading aborted:', event));
+                fileReader.addEventListener('load', e => {
+                    console.log('FileRead.onload ', e);
+                    dataChannel.send(e.target.result);
+                    offset += e.target.result.byteLength;
+                    console.log('this is offset', offset, 'this is the file size', file.size);
+                    if (offset < file.size) {
+                        readSlice(offset);
+                    }
+                    if (offset === file.size) {
+                        console.log('ended');
+                        dataChannel.send('end');
+                        var fileType = file.type;
+                        if (fileType.startsWith('video/')) {
+                            console.log('video');
+                            dataChannel.send('video');
+                        } else if (fileType.startsWith('audio/')) {
+                            console.log('audio');
+                            dataChannel.send('audio');
+                        } else if (fileType.startsWith('image/')) {
+                            console.log('image');
+                            dataChannel.send('image');
+                        } else {
+                            console.log('text');
+                            dataChannel.send('text');
+                        }
+                    }
+
+                });
+                const readSlice = o => {
+                    console.log('readSlice ', o);
+                    const slice = file.slice(offset, o + chunkSize);
+                    fileReader.readAsArrayBuffer(slice);
+                };
+                readSlice(0);
+
+
             } else {
                 console.warn('Data channel is not open. Cannot send data.');
             }
         }
+
+
 
         function closeConnection() {
             if (peerConnection) {
@@ -490,17 +677,22 @@ function getaddress($lat, $lng)
             animationBox.style.display = 'flex';
         })
         SendTheFile.addEventListener('click', function() {
-            sendData(fileContent);
-        })
+            let fileInput = document.querySelector(".fileChosen");
+            let file = fileInput.files[0];
+            sendData(file);
+        });
+
         closeBtn.addEventListener('click', function() {
             animationBox.style.display = 'none';
             overlay.style.display = 'none';
             loading.style.display = 'none';
+            SendTheFileBody.style.display = 'none';
             compassBody.style.display = 'flex';
         })
         overlay.addEventListener('click', function() {
             overlay.style.display = 'none';
             animationBox.style.display = 'none';
+            SendTheFileBody.style.display = 'none';
             loading.style.display = 'none';
             compassBody.style.display = 'flex';
         })

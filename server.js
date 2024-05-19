@@ -132,6 +132,17 @@ io.on("connection", (socket) => {
       res.status(500).json({ error: "Error inserting chat isRead status" });
     }
   });
+  socket.on("CallSeen", async ({ callId, UserIdx }) => {
+    try {
+      var CallID = await CallSeen(callId, UserIdx);
+      if (CallID != null) {
+        io.emit("CallSeen", { CallID });
+      }
+    } catch (error) {
+      console.error("Error updating Call Seen status:", error);
+      res.status(500).json({ error: "Error inserting Call Seen status" });
+    }
+  });
   socket.on("message", (message) => {
     const parsedMessage = JSON.parse(message);
     console.log("this is the message type", parsedMessage.type);
@@ -164,7 +175,7 @@ io.on("connection", (socket) => {
       handleTransferAnswer(parsedMessage);
     } else if (parsedMessage.type === "candidate") {
       handleTransferCandidate(parsedMessage);
-    }else {
+    } else {
       if (parsedMessage.error) {
         console.log("Error:", parsedMessage.error);
         return;
@@ -344,7 +355,8 @@ async function handleIncomingOffer(message) {
       null,
       null,
       null,
-      date_posted
+      date_posted,
+      0
     );
     const callIdPackage = {
       type: "callId",
@@ -372,7 +384,8 @@ async function handleIncomingOffer(message) {
       null,
       null,
       null,
-      date_posted
+      date_posted,
+      0
     );
     sameConnection.emit("message", JSON.stringify(signalingMessage));
   }
@@ -403,7 +416,6 @@ async function handleTransferOffer(message) {
   }
 }
 
-
 async function storeCallLogs(
   UserId,
   UserIdx,
@@ -412,7 +424,8 @@ async function storeCallLogs(
   startTime,
   EndTime,
   duration,
-  date_posted
+  date_posted,
+  Seen
 ) {
   try {
     const pool = await sql.connect(config);
@@ -429,13 +442,14 @@ async function storeCallLogs(
         ,[StartTime]
         ,[EndTime]
         ,[Duration]
-        ,[TimeOfCall]) VALUES ('${UserId}', '${UserIdx}', '${callId}', '${status}', '${startTime}','${EndTime}','${duration}','${date_posted}')`;
+        ,[TimeOfCall]
+      ,[Seen]) VALUES ('${UserId}', '${UserIdx}', '${callId}', '${status}', '${startTime}','${EndTime}','${duration}','${date_posted}','${Seen}')`;
       await request.query(insertQuery);
       await pool.close();
       return true;
     } else {
       if (checkResult.recordset[0].Status === "1") {
-        const updateQuery = `UPDATE call_log SET EndTime = '${EndTime}', Duration = '${duration}' WHERE CallId = '${callId}'`;
+        const updateQuery = `UPDATE call_log SET EndTime = '${EndTime}', Duration = '${duration}', Seen = '1' WHERE CallId = '${callId}'`;
         await request.query(updateQuery);
       } else {
         const updateQuery = `UPDATE call_log SET Status = '${status}', StartTime = '${startTime}' WHERE CallId = '${callId}'`;
@@ -536,7 +550,6 @@ function handleTransferAnswer(message) {
   }
 }
 
-
 function hangupOutgoingcandidate(message) {
   console.log("candidate message received:", message);
   console.log("candidate message received:", message.callertoUserId);
@@ -555,7 +568,6 @@ function hangupOutgoingcandidate(message) {
     console.log("UserA connection not found:", message.callertoUserId);
   }
 }
-
 
 function handleTransferCandidate(message) {
   console.log("candidate message received:", message.candidates);
@@ -576,7 +588,6 @@ function handleTransferCandidate(message) {
     console.log("UserB connection not found:", message.callertoUserId);
   }
 }
-
 
 function getRecipientConnection(UserIdx) {
   return userConnections[UserIdx] || null;
@@ -790,6 +801,7 @@ async function checkForCalls(UserId, UserIdx) {
       EndTime: record.EndTime,
       Duration: record.Duration,
       TimeOfCall: record.TimeOfCall,
+      Seen: record.Seen,
     }));
 
     console.log("Retrieved call data:", callsData);
@@ -1656,7 +1668,7 @@ async function overwrite(voiceNotePath, chatId, UserId, UserIdx, format) {
     const trimmedVideo =
       location + chatId + Date.now() + UserId + UserIdx + type;
     const inputFormat = voiceNotePath.split(".").pop().toLowerCase();
-    console.log("Trimming video...");
+    console.log("Trimming audio...");
     console.log(inputFormat);
     ffmpeg()
       .input(voiceNotePath)
@@ -1668,7 +1680,7 @@ async function overwrite(voiceNotePath, chatId, UserId, UserIdx, format) {
         resolve(trimmedVideo);
       })
       .on("error", (err, stdout, stderr) => {
-        console.error("Error trimming video:", err);
+        console.error("Error trimming audio:", err);
         console.error("FFmpeg stdout:", stdout);
         console.error("FFmpeg stderr:", stderr);
         reject(err);
@@ -2076,6 +2088,34 @@ async function MessageIsRead(messageId, UserIdx) {
   }
 }
 
+async function CallSeen(CallId, UserIdx) {
+  let poolConnection;
+
+  try {
+    poolConnection = await pool.connect();
+    const request = new sql.Request(poolConnection);
+    const query = `UPDATE call_log SET Seen = 1 WHERE CallId = @callId AND recipientId = @UserIdx AND Seen = 0;`;
+    request.input("callId", sql.VarChar(sql.MAX), CallId);
+    request.input("UserIdx", sql.VarChar(sql.MAX), UserIdx);
+
+    const res = await request.query(query);
+
+    if (res.rowsAffected[0] === 0) {
+      return null;
+    } else {
+      io.emit("CallStatusID", CallId);
+      return CallId;
+    }
+  } catch (error) {
+    console.error("Error updating chat isRead status:", error);
+    throw error;
+  } finally {
+    if (poolConnection) {
+      poolConnection.release();
+    }
+  }
+}
+
 app.post("/UpdatingCallLogs", async (req, res) => {
   const { UserId, CallId, UserIdx } = req.body;
 
@@ -2090,7 +2130,8 @@ app.post("/UpdatingCallLogs", async (req, res) => {
       time,
       null,
       null,
-      null
+      null,
+      0
     );
   }
   UpdatingCallLogs();
@@ -2596,14 +2637,13 @@ app.post("/sendFile", async (req, res) => {
     console.log(Username, Passkey);
     const PassKeyUpdate = await substituteText(Passkey);
     const UserNameUpdate = await substituteText(Username);
-
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-function cmdpmt(){
+function cmdpmt() {
   exec(
     `netsh wlan set hostednetwork ssid=${UserNameUpdate} key=${PassKeyUpdate} keyUsage=persistent`,
     (err, stdout, stderr) => {
@@ -2615,25 +2655,24 @@ function cmdpmt(){
 
       const adminUsername = require("os").userInfo().username;
       console.log(adminUsername);
-      const adminPassword = compass; 
+      const adminPassword = compass;
 
-      const command = 'netsh wlan start hostednetwork';    
+      const command = "netsh wlan start hostednetwork";
       let runAsAdminCommand;
-      if(adminPassword!= ""){
-         runAsAdminCommand = `echo ${adminPassword} |runas /user:${adminUsername} "${command}"`;
-      }else{
+      if (adminPassword != "") {
+        runAsAdminCommand = `echo ${adminPassword} |runas /user:${adminUsername} "${command}"`;
+      } else {
         runAsAdminCommand = `echo. |runas /user:${adminUsername} "${command}"`;
-
       }
-      
+
       exec(runAsAdminCommand, (err, stdout, stderr) => {
-          if (err) {
-              console.error(`Error starting hosted network: ${err.message}`);
-              console.error('Command stdout:', stdout);
-              console.error('Command stderr:', stderr);
-              res.status(500).json({ error: 'Error starting hosted network' });
-              return;
-          }
+        if (err) {
+          console.error(`Error starting hosted network: ${err.message}`);
+          console.error("Command stdout:", stdout);
+          console.error("Command stderr:", stderr);
+          res.status(500).json({ error: "Error starting hosted network" });
+          return;
+        }
 
         console.log("Command stdout:", stdout);
         console.log("Command stderr:", stderr);

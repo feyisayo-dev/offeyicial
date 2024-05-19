@@ -2,64 +2,68 @@
 session_start();
 include 'db.php';
 $UserId = $_SESSION['UserId'];
-$UserIdx = $_GET['UserIdx'];
-$sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$UserIdx'";
-$stmt = sqlsrv_prepare($conn, $sql);
-if (sqlsrv_execute($stmt)) {
-  while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-    $recipientSurname = $row['Surname'];
-    $recipientFirstName = $row['First_Name'];
-    $Passport = $row['Passport'];
-    if (empty($Passport)) {
-      $recipientPassport = "UserPassport/DefaultImage.png";
-    } else {
-      $recipientPassport = "UserPassport/" . $Passport;
+if (isset($_GET['UserIdx'])) {
+  $UserIdx = $_GET['UserIdx'];
+
+  $sql = "select Surname, First_Name, Passport FROM User_Profile WHERE UserId = '$UserIdx'";
+  $stmt = sqlsrv_prepare($conn, $sql);
+  if (sqlsrv_execute($stmt)) {
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+      $recipientSurname = $row['Surname'];
+      $recipientFirstName = $row['First_Name'];
+      $Passport = $row['Passport'];
+      if (empty($Passport)) {
+        $recipientPassport = "UserPassport/DefaultImage.png";
+      } else {
+        $recipientPassport = "UserPassport/" . $Passport;
+      }
     }
   }
-}
 
-function generateSessionID($length = 10)
-{
-  $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  $sessionID = '';
+  function generateSessionID($length = 10)
+  {
+    $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $sessionID = '';
 
-  $charCount = strlen($characters);
-  for ($i = 0; $i < $length; $i++) {
-    $sessionID .= $characters[rand(0, $charCount - 1)];
+    $charCount = strlen($characters);
+    for ($i = 0; $i < $length; $i++) {
+      $sessionID .= $characters[rand(0, $charCount - 1)];
+    }
+
+    return $sessionID;
   }
 
-  return $sessionID;
-}
+  $tsql = "SELECT sessionID FROM sessionID WHERE (UserId = '$UserId' AND UserIdx = '$UserIdx') OR (UserId = '$UserIdx' AND UserIdx = '$UserId')";
+  $getResults = sqlsrv_query($conn, $tsql);
 
-include('db.php');
+  if ($getResults === false) {
+    die(json_encode(array("status" => "error", "message" => "Error querying the database.")));
+  }
 
+  if (sqlsrv_has_rows($getResults)) {
+    $row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC);
+    $sessionID = $row['sessionID'];
+  } else {
+    $sessionID = generateSessionID();
 
-$UserId = $_SESSION['UserId'];
-$UserIdx = $_GET['UserIdx'];
+    $tsql = "INSERT INTO sessionID (sessionID, UserId, UserIdx) VALUES ('$sessionID', '$UserId', '$UserIdx')";
+    $insertResult = sqlsrv_query($conn, $tsql);
 
-$tsql = "SELECT sessionID FROM sessionID WHERE (UserId = '$UserId' AND UserIdx = '$UserIdx') OR (UserId = '$UserIdx' AND UserIdx = '$UserId')";
-$getResults = sqlsrv_query($conn, $tsql);
+    if ($insertResult === false) {
+      die(json_encode(array("status" => "error", "message" => "Error storing session ID in the database.")));
+    }
+  }
 
-if ($getResults === false) {
-  die(json_encode(array("status" => "error", "message" => "Error querying the database.")));
-}
-
-if (sqlsrv_has_rows($getResults)) {
-  $row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC);
-  $sessionID = $row['sessionID'];
+  sqlsrv_free_stmt($getResults);
+  sqlsrv_close($conn);
+} elseif (isset($_GET['groupId'])) {
+  $groupId = $_GET['groupId'];
+  header("Location: group.php?groupId=$groupId");
+  exit;
 } else {
-  $sessionID = generateSessionID();
-
-  $tsql = "INSERT INTO sessionID (sessionID, UserId, UserIdx) VALUES ('$sessionID', '$UserId', '$UserIdx')";
-  $insertResult = sqlsrv_query($conn, $tsql);
-
-  if ($insertResult === false) {
-    die(json_encode(array("status" => "error", "message" => "Error storing session ID in the database.")));
-  }
+  echo "Neither UserIdx nor groupId is provided.";
+  exit();
 }
-
-sqlsrv_free_stmt($getResults);
-sqlsrv_close($conn);
 ?>
 
 
@@ -75,15 +79,22 @@ if (sqlsrv_execute($rstmt)) {
     $First_Name = $row['First_Name'];
   }
 }
-// Check if the UserId exists
-$recipientId = $_GET['UserIdx'];
-$sql = "SELECT * FROM User_Profile WHERE UserId = ?";
-$params = array($recipientId);
-$stmt = sqlsrv_query($conn, $sql, $params);
-if ($stmt === false || !sqlsrv_has_rows($stmt)) {
-  header("Location: error404.php");
+if (isset($_GET['UserIdx'])) {
+  $recipientId = $_GET['UserIdx'];
+  $sql = "SELECT * FROM User_Profile WHERE UserId = ?";
+  $params = array($recipientId);
+  $stmt = sqlsrv_query($conn, $sql, $params);
+  if ($stmt === false || !sqlsrv_has_rows($stmt)) {
+    header("Location: error404.php");
+    exit();
+  }
+} elseif (isset($_GET['groupId'])) {
+  $groupId = $_GET['groupId'];
+} else {
+  echo "Neither UserIdx nor groupId is provided.";
   exit();
 }
+
 
 ?>
 
@@ -102,11 +113,13 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
   <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="css/remixicon/remixicon.css" rel="stylesheet">
   <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
-  <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/chat.css" rel="stylesheet">
   <script src="js/popper.min.js"></script>
   <!-- Bootstrap core JavaScript -->
   <script src="js/twemoji.min.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+  <script src="js/bootstrap.min.js"></script>
 
 </head>
 
@@ -118,14 +131,10 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
       <div class="profile">
         <?php
-        // session_start();
-
-        // Connect to the database
         include 'db.php';
 
         $UserId = $_SESSION['UserId'];
 
-        // Get the surname and first name of the user with the UserId from the database
         $sql = "select Surname, First_Name FROM User_Profile WHERE UserId = '$UserId'";
         $stmt = sqlsrv_prepare($conn, $sql);
         if (sqlsrv_execute($stmt)) {
@@ -348,6 +357,11 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
 
             </ul>
           </div>
+          <div id="createGroupIcon">
+            <button class="CreateGp" type="button" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+              <i class="fas fa-pen"></i>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -433,9 +447,33 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       </div>
     </div>
   </div>
-  <script src="js/jquery.min.js"></script>
-  <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
-  <script src="js/bootstrap.min.js"></script>
+  <div class="modal fade" id="createGroupModal" tabindex="-1" role="dialog" aria-labelledby="createGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createGroupModalLabel">
+            <legend>Group Information</legend>
+          </h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="grp 1">
+            <input type="text" class="form-control" id="GroupName" placeholder="Group Name">
+          </div>
+          <div class="grp 2">
+            <input type="text" class="form-control" id="searchUser" placeholder="Search by UserId, Surname, or First Name">
+          </div>
+          <div id="searchResults"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary closeGrp" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-secondary SubmitGrp" data-bs-dismiss="modal">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- <script></script> -->
 
 
@@ -449,6 +487,18 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
   </script>
 
   <script>
+    document.getElementById('searchUser').addEventListener('input', function() {
+      var searchValue = this.value.trim();
+      fetch('search_users.php?search=' + encodeURIComponent(searchValue))
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('searchResults').innerHTML = data;
+        })
+        .catch(error => {
+          console.error('Error fetching search results:', error);
+        });
+    });
+  </script>
 
   </script>
 
@@ -1041,6 +1091,23 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
       }
     }
 
+    function markCallsAsRead() {
+      const calls = document.querySelectorAll('.call');
+      const chatbox = document.getElementById('chatbox');
+
+      calls.forEach((message) => {
+        const rect = message.getBoundingClientRect();
+
+        if (rect.top >= 0 && rect.bottom <= chatbox.clientHeight && rect.height / message.clientHeight >= 0.5) {
+          const callId = calls.id;
+          socket.emit('CallSeen', {
+            callId,
+            UserIdx
+          });
+        }
+      });
+    }
+
     async function checkForCalls() {
       const formData = new FormData();
       formData.append('UserId', UserId);
@@ -1056,35 +1123,35 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
           const calls = missedCall.callsData;
           for (const call of calls) {
             console.log('This is the main aray', call, 'while this is the status', call.Status);
-            if (call.Status === '0') {
-              console.log('Missed Call found');
-              var div = document.createElement('div');
-              div.classList.add('received');
-              var timestamp = new Date(call.TimeOfCall);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML = '<div class="message-container">' +
-                '<div class="message"><div class = "missedCall" id="missedCall-' + Math.random() + '">' +
-                '<p> Missed call from ' + missedCall.UserName + '</p>' +
-                '</div><div class="timestamp">' + formattedTime + '</div>' + '</div></div></div>';
+            if (call.Seen = '0') {
+              if (call.Status === '0') {
+                console.log('Missed Call found');
+                var div = document.createElement('div');
+                div.classList.add('received');
+                var timestamp = new Date(call.TimeOfCall);
+                var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+                div.innerHTML = '<div class="message-container">' +
+                  '<div class="message"><div class = "missedCall call" id="missedCall-' + Math.random() + '">' +
+                  '<p> Missed call from ' + missedCall.UserName + '</p>' +
+                  '</div><div class="timestamp">' + formattedTime + '</div>' + '</div></div></div>';
 
-              // div.innerHTML += '';
-            } else if (call.Status === '1') {
-              console.log('Call found');
-              var div = document.createElement('div');
-              var timestamp = new Date(call.TimeOfCall);
-              var formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-              div.innerHTML = '<div class="message-container">' +
-                '<div class="message"><div id="Call-' + Math.random() + '">' +
-                '<p>Call from ' + missedCall.UserName + '</p>' +
-                '</div><div class="timestamp">' + formattedTime + '</div>' + '</div></div></div>';
+              } else if (call.Status === '1') {
+                console.log('Call found');
+                var div = document.createElement('div');
+                var timestamp = new Date(call.TimeOfCall);
+                var formattedTime = timestamp.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+                div.innerHTML = '<div class="message-container">' +
+                  '<div class="message"><div class="AnsweredCall call" id="Call-' + Math.random() + '">' +
+                  '<p>Call from ' + missedCall.UserName + '</p>' +
+                  '</div><div class="timestamp">' + formattedTime + '</div>' + '</div></div></div>';
 
-              // div.innerHTML += '<div class="timestamp">' + formattedTime + '</div>' + '</div>';
+              }
             }
             chatbox.appendChild(div);
           }
@@ -1095,6 +1162,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
         console.error('Error checking Missed Call:', error);
       }
       console.log('Checking for missed calls');
+      markCallsAsRead();
     }
 
     function checkForNewMessages(message) {
@@ -2411,9 +2479,7 @@ if ($stmt === false || !sqlsrv_has_rows($stmt)) {
   <script>
     var UserId = "<?php echo isset($_SESSION['UserId']) ? $_SESSION['UserId'] : '' ?>";
 
-    // Check if the UserId exists
     if (!UserId) {
-      // UserId not found, redirect to login page
       window.location.href = "login.php";
     }
   </script>

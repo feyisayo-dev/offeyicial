@@ -482,3 +482,29 @@ header {
     font-family: 'Modern-Age';
     font-size: 24px;
 }
+.fileBox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%; /* Adjust the width as needed */
+    height: auto; /* Adjust the height as needed */
+    border: 2px solid #000;
+    background-color: rgba(101, 0, 94, 1);
+    z-index: 9999;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fileBox video,
+.fileBox audio {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.fileBox img {
+    max-width: 100%;
+    max-height: 100%;
+}

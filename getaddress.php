@@ -21,7 +21,7 @@ function getaddress($lat, $lng)
         'longitude' => $addressData['lon'],
         'display_name' => $addressData['display_name'],
         'address' => [
-            'road' => $addressData['address']['road'], 
+            // 'road' => $addressData['address']['road'], 
             'village' => $addressData['address']['village'],
             'state' => $addressData['address']['state'],
             'ISO3166-2-lvl4' => $addressData['address']['ISO3166-2-lvl4'],
