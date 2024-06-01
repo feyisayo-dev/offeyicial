@@ -85,6 +85,19 @@ img {
     color: var(--color-white);
 }
 
+.dropdown-item:hover{
+    background-color: transparent;
+    background: var(--color-light);
+    border-radius: 10%;
+}
+.dropdown-menu{
+    border-radius: 10%;
+}
+.dropdown-item button{
+    width: 100%;
+    box-shadow: 2px 2px var(--color-light);
+}
+
 .text-bold {
     font-weight: 500;
 }

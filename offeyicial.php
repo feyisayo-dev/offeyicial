@@ -30,12 +30,12 @@ if (sqlsrv_execute($stmt)) {
     <link href="css/aos.css" rel="stylesheet">
     <link href="css/boxicons/css/boxicons.min.css" rel="stylesheet">
     <link href="css/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/remixicon/remixicon.css" rel="stylesheet">
     <link href="css/swiper/swiper-bundle.min.css" rel="stylesheet">
     <script src="js/popper.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="css/all.min.css" />
-    <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font/bootstrap-icons.css">
     <link rel="icon" href="img/offeyicial.png" type="image/jpeg" sizes="32x32" />
     <script src="js/slim.min.js"></script>
@@ -568,10 +568,10 @@ if (sqlsrv_execute($stmt)) {
             threeDotsDiv.className = 'dropdown';
 
             var editSpan = document.createElement('button');
-            editSpan.className = 'edit btn btn-link dropdown-toggle';
+            editSpan.className = 'edit btn btn-link';
             editSpan.type = 'button';
             editSpan.id = 'dropdownMenuButton' + result.postId;
-            editSpan.setAttribute('data-toggle', 'dropdown');
+            editSpan.dataset.bsToggle = 'dropdown';
             editSpan.setAttribute('aria-haspopup', 'true');
             editSpan.setAttribute('aria-expanded', 'false');
             editSpan.innerHTML = '<i class="uil uil-ellipsis-h"></i>';
