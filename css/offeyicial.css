@@ -43,8 +43,11 @@ body {
     color: var(--color-dark);
     background: var(--color-light);
     overflow-x: hidden;
+    text-decoration: none !important;
 }
-
+a{
+    text-decoration: none !important;
+}
 /* =============== General Style ============== */
 .container {
     width: 80%;
@@ -99,7 +102,9 @@ nav {
     top: 0;
     z-index: 10;
 }
-
+a, h1, h2, h3, h4, h5{
+    font-size: 16px;
+}
 nav .container {
     display: flex;
     align-items: center;
@@ -315,32 +320,32 @@ main .container .left .profile {
 }
 
 .middle .stories .story:nth-child(1) {
-    background: url("./images/story-1.jpg")
+    background: url("../images/story-1.jpg")
     no-repeat center center/cover;
 }
 
 .middle .stories .story:nth-child(2) {
-    background: url("./images/story-2.jpg")
+    background: url("../images/story-2.jpg")
     no-repeat center center/cover;
 }
 
 .middle .stories .story:nth-child(3) {
-    background: url("./images/story-3.jpg")
+    background: url("../images/story-3.jpg")
     no-repeat center center/cover;
 }
 
 .middle .stories .story:nth-child(4) {
-    background: url("./images/story-4.jpg")
+    background: url("../images/story-4.jpg")
     no-repeat center center/cover;
 }
 
 .middle .stories .story:nth-child(5) {
-    background: url("./images/story-5.jpg")
+    background: url("../images/story-5.jpg")
     no-repeat center center/cover;
 }
 
 .middle .stories .story:nth-child(6) {
-    background: url("./images/story-6.jpg")
+    background: url("../images/story-6.jpg")
     no-repeat center center/cover;
 }
 
@@ -779,4 +784,11 @@ MEDIA QUERIES FOR SMALL TABLETS AND MOBILE PHONES
     .customize-theme .card {
         width: 80vw; 
     }
+}
+#threedots {
+    display: flex;
+    justify-content: flex-end;
+    text-decoration: none;
+    align-items: right;
+    margin-left: auto;
 }

@@ -15,7 +15,7 @@
     "mssql": "^10.0.1",
     "multer": "^1.4.5-lts.1",
     "node-gpsd": "^0.3.4",
-    "nodemon": "^3.0.3",
+    "nodemon": "^3.1.2",
     "path": "^0.12.7",
     "simplewebrtc": "^1.19.1",
     "socket.io": "^4.7.2",
